@@ -1701,13 +1701,13 @@
 }
 
 @media screen {
-  .app-shell { grid-template-columns: 260px minmax(0, 1fr); }
+  .app-shell { grid-template-columns: 240px minmax(0, 1fr); }
   .app-shell {
     background: radial-gradient(circle at 88% 8%, rgb(255 216 194 / 34%), transparent 28%), linear-gradient(135deg, #d6e2e6 0%, #f9f6ee 72%);
   }
 
   .app-aside {
-    width: 260px;
+    width: 240px;
     padding: 28px 18px;
     border: 1px solid rgb(4 29 61 / 10%);
     border-radius: 0 24px 24px 0;
@@ -1729,10 +1729,13 @@
   .aside-user { color: #517dab; }
 
   .app-topbar {
+    min-height: 56px;
+    height: 56px;
     border-bottom-color: rgb(4 29 61 / 10%);
     background: rgb(249 246 238 / 76%);
     backdrop-filter: blur(12px);
   }
+  /* p3ux topbar */
 
   .app-main { max-width: 1280px; padding: 36px 40px 72px; }
   .screen-header,

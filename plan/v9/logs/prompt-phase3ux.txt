@@ -1,0 +1,17 @@
+VidhyaSaathy v9 — PHASE 3 UX REDO ONLY (shell). Do NOT touch landing/ or theme tokens. Do NOT start games or phase 4/5 yet.
+
+READ: plan/v9/HARD_RULES.md, plan/v9/PHASE3_UX_HARD.md, plan/v9/inspo/WORKSPACE_INSPO.md §§0–3 (map Scholar Indigo rules onto existing navy/cream/gold tokens; never new hex).
+
+FIX every PHASE3_UX_HARD item:
+1. Student home: welcome banner real height (cloud not clipped); stat values centered; Continue learning real card or honest empty; proper segmented control (aria/keyboard/pressed).
+2. My subjects: fix "Could not load this chapter" API/client; error REPLACES skeletons (never overlaps).
+3. Study sessions: fix "request could not be completed"; subject cards padded, min-height, readable.
+4. Notifications: fix API error; spacing so error not glued to banner.
+5. Settings: header ≤72px; time inputs readable; proper switch/segmented.
+6. Privacy: body max-width ~65ch / 640px; side nav spacing.
+7. Align rosterPreview.ts CSV preview with API (name,rollNumber,phone).
+8. Shell: 240px sidebar + 56px cream topbar for signed-in roles; flat in-app buttons; 4 states on every async surface.
+
+Keep Patrick Hand + tokens #041D3D #193E69 #28517C #517DAB #F9F6EE #D6E2E6. Minimal diffs. Reply with changed files only.
+
+When done, write plan/v9/logs/phase3ux-done.txt listing files changed. Do NOT commit, typecheck, or run vitest (executor will).

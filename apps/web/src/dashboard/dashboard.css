@@ -202,3 +202,12 @@ html[data-motion='reduce'] .dash * {
 @media (max-width: 480px) {
   .stat-grid { grid-template-columns: 1fr; }
 }
+
+/* p3ux settings */
+.dash-banner { padding: 16px 20px; min-height: 0; max-height: 72px; display: flex; flex-direction: column; justify-content: center; }
+.dash-banner h1 { margin: 0; font-size: 28px; line-height: 1.1; }
+.dash-banner p { margin: 4px 0 0; }
+.dash-panel label[for="quiet-start"],
+.dash-panel label[for="quiet-end"] { display: block; margin-top: 12px; font-weight: 600; }
+.dash-panel input[type="time"] { display: block; width: min(100%, 220px); min-height: 44px; margin-top: 6px; padding: 8px 12px; }
+.notifications-page .error-card, .dash .error-card { margin-top: 20px; }

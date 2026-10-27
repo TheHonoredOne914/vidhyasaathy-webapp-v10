@@ -78,7 +78,7 @@ export function RosterForm({ sections, classes, onSaved }: { sections: Section[]
       {method === 'manual' ? <>
         <Field label="Student name" name="name" type="text" value={name} onChange={setName} error={form.errorFor('name')} hint={null} autoComplete="off" maxLength={120} />
         <Field label="Roll number" name="rollNumber" type="text" value={rollNumber} onChange={setRollNumber} error={form.errorFor('rollNumber')} hint={null} autoComplete="off" maxLength={40} />
-        <Field label="Parent phone" name="phone" type="tel" value={phone} onChange={setPhone} error={form.errorFor('phone')} hint="Include country code when needed." autoComplete="tel" maxLength={16} />
+        <Field label="Parent phone" name="phone" type="text" value={phone} onChange={setPhone} error={form.errorFor('phone')} hint="Include country code when needed." autoComplete="tel" maxLength={16} />
       </> : <>
       <div className="grid gap-1">
         <label htmlFor="roster-file" className="font-semibold">Roster file</label>

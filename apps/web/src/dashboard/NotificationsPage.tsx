@@ -31,7 +31,7 @@ export function NotificationsPage() {
   }
 
   return (
-    <section className="dash">
+    <section className="dash notifications-page">
       <header className="dash-banner">
         <h1>Notifications</h1>
         <p>In-app delivery is sent. Email and WhatsApp stay failed until a channel is configured.</p>

@@ -776,3 +776,10 @@
     color: #000;
   }
 }
+
+/* p3ux privacy */
+.vs-privacy-article p { max-width: 65ch; }
+.vs-privacy-layout { gap: 32px; }
+@media (min-width: 900px) {
+  .vs-privacy-layout { grid-template-columns: 220px minmax(0, 1fr); column-gap: 40px; }
+}

@@ -57,7 +57,7 @@ export function ChapterPage() {
   if (parts.some((part) => part.denied)) return <AccessDenied />;
   const failed = parts.find((part) => part.status === 'error' && !part.data);
   if (failed) {
-    return <ErrorState title="Could not load this chapter" message={failed.message ?? 'Try again.'} onRetry={() => { parts.forEach((part) => { part.reload(); }); }} />;
+    return <div className="error-card"><ErrorState title="Could not load this chapter" message={failed.message ?? 'Try again.'} onRetry={() => { parts.forEach((part) => { part.reload(); }); }} /></div>;
   }
   if (!chapter.data || !concepts.data || !notes.data || !sessions.data) {
     return <LessonFrame kicker="Chapter" title="Chapter"><Skeleton /></LessonFrame>;

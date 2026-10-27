@@ -7,12 +7,13 @@ import { StaleNote } from '../ui/StaleNote';
 
 export function RemoteBlock<T>({ remote, title, children }: { remote: Remote<T>; title: string; children: (data: T) => ReactNode }) {
   if (remote.denied) return <AccessDenied />;
+  const hardError = remote.status === 'error' && !remote.data;
   return (
     <>
-      <StaleNote stale={remote.stale} updatedAt={remote.updatedAt} message={remote.message} />
+      <StaleNote stale={remote.stale && !hardError} updatedAt={remote.updatedAt} message={hardError ? null : remote.message} />
       {remote.status === 'loading' && !remote.data ? <Skeleton /> : remote.data
         ? children(remote.data)
-        : <ErrorState title={title} message={remote.message ?? 'Try again.'} onRetry={remote.reload} />}
+        : <div className="error-card"><ErrorState title={title} message={remote.message ?? 'Try again.'} onRetry={remote.reload} /></div>}
     </>
   );
 }

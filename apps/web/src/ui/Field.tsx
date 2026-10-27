@@ -24,7 +24,7 @@ export function Field({
 }: {
   label: string;
   name: string;
-  type: 'text' | 'email' | 'password' | 'date';
+  type: 'text' | 'email' | 'password' | 'date' | 'tel';
   value: string;
   onChange: (value: string) => void;
   error: string | null;
@@ -81,3 +81,4 @@ export function Field({
     </div>
   );
 }
+
