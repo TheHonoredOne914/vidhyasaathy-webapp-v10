@@ -1,7 +1,7 @@
 export type GameModule = { [key: string]: unknown };
 
 export const GAME_REGISTRY = [
-  { id: 'demo', title: 'The Atom’s Smallest Orbit', detail: 'Predict, tap, slide, order, and match through a guided science scene.' },
+  { id: 'demo', title: "The Atom's Smallest Orbit", detail: 'Predict, tap, slide, order, and match through a guided science scene.' },
   { id: 'atom', title: 'Atom Builder', detail: 'Build atoms and explore charges, shells, and atomicity.' },
   { id: 'cell', title: 'Cell Gatekeeper', detail: 'Sort the parts of a cell and protect what belongs inside.' },
   { id: 'matter', title: 'Matter Mixer', detail: 'Explore changes of state with quick checkpoints.' },
@@ -28,7 +28,13 @@ const gameLoaders: Record<string, () => Promise<GameModule>> = {
   poly: async () => import('../poly'),
 };
 
+const NAMED_KEYS = ['game', 'default', 'matterGame', 'demoGame', 'atomGame', 'newtonGame', 'energyGame', 'motionGame', 'soundGame', 'floatGame', 'graphsGame', 'polyGame', 'cellGame'] as const;
+
 export async function loadGame(id: string) {
   const module = await gameLoaders[id]?.();
-  return module && 'game' in module ? (module.game as import('./types').GameDef) : module && 'default' in module ? (module.default as import('./types').GameDef) : module && 'matterGame' in module ? (module.matterGame as import('./types').GameDef) : module && 'demoGame' in module ? (module.demoGame as import('./types').GameDef) : module && 'atomGame' in module ? (module.atomGame as import('./types').GameDef) : null;
+  if (!module) return null;
+  for (const key of NAMED_KEYS) {
+    if (key in module && module[key]) return module[key] as import('./types').GameDef;
+  }
+  return null;
 }

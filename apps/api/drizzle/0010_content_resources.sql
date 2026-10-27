@@ -38,6 +38,8 @@ CREATE TABLE recording_segment (
 --> statement-breakpoint
 CREATE INDEX recording_segment_concept_idx ON recording_segment(school_id, concept_id);
 --> statement-breakpoint
+DROP TRIGGER IF EXISTS dashboard_parent_link_delete;
+--> statement-breakpoint
 CREATE TABLE notification_new (
   id TEXT PRIMARY KEY, school_id TEXT NOT NULL, profile_id TEXT NOT NULL, announcement_id TEXT, dedupe_key TEXT NOT NULL UNIQUE,
   kind TEXT NOT NULL CHECK(kind IN ('announcement','parent_summary','content_publish')), title TEXT NOT NULL, body TEXT NOT NULL, href TEXT NOT NULL,
@@ -56,3 +58,9 @@ ALTER TABLE notification_new RENAME TO notification;
 CREATE INDEX notification_inbox_idx ON notification(school_id, profile_id, created_at);
 --> statement-breakpoint
 CREATE INDEX notification_queue_idx ON notification(status, deliver_after);
+--> statement-breakpoint
+CREATE TRIGGER dashboard_parent_link_delete AFTER DELETE ON parent_link BEGIN
+  DELETE FROM notification WHERE school_id = OLD.school_id AND profile_id = OLD.parent_profile_id
+    AND kind = 'parent_summary' AND dedupe_key LIKE 'parent:' || OLD.parent_profile_id || ':' || OLD.student_profile_id || ':%';
+  UPDATE dashboard_job SET dirty = 1 WHERE school_id = OLD.school_id;
+END;
