@@ -1,0 +1,76 @@
+.practice-games,
+.vs-profile-chooser {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.practice-games a,
+.vs-auth-page .vs-profile-chooser button {
+  display: flex;
+  width: 100%;
+  min-height: 64px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px 16px;
+  border: 2px solid var(--vs-midnight, #041d3d);
+  border-radius: 8px;
+  background: var(--vs-ivory, #f9f6ee);
+  color: var(--vs-midnight, #041d3d);
+  font: 20px/1.5 var(--vs-font);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.practice-games a span,
+.vs-profile-chooser button span {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.practice-clock {
+  margin: 0 0 12px;
+  color: #ffb38a;
+  font-size: 22px;
+  line-height: 1.5;
+}
+
+.streak-days {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.streak-days li {
+  padding: 8px 0;
+  border-top: 1px solid var(--vs-divider, #dce7f1);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.streak-card h2 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.practice-note {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .practice-games {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .practice-games li:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}

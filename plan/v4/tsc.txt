@@ -1,0 +1,17 @@
+﻿apps/web/src/games/graphs/validators.ts(20,63): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ board: string; desk: string; door: string; }'.
+  No index signature with a parameter of type 'string' was found on type '{ board: string; desk: string; door: string; }'.
+apps/web/src/games/newton/art/CricketArt.tsx(35,12): error TS2322: Type 'string' is not assignable to type 'number'.
+apps/web/src/games/newton/art/CricketArt.tsx(35,21): error TS2322: Type 'string' is not assignable to type 'number'.
+apps/web/src/games/newton/art/CricketArt.tsx(35,46): error TS2322: Type 'string' is not assignable to type 'number'.
+apps/web/src/games/newton/art/CricketArt.tsx(41,12): error TS2322: Type 'string' is not assignable to type 'number'.
+apps/web/src/games/newton/art/CricketArt.tsx(41,21): error TS2322: Type 'string' is not assignable to type 'number'.
+apps/web/src/games/newton/art/CricketArt.tsx(41,30): error TS2322: Type 'string' is not assignable to type 'number'.
+apps/web/src/games/newton/art/CricketArt.tsx(41,39): error TS2322: Type 'string' is not assignable to type 'number'.
+apps/web/src/games/newton/art/CricketArt.tsx(70,29): error TS2322: Type 'string' is not assignable to type 'number'.
+apps/web/src/games/newton/art/CricketArt.tsx(70,55): error TS2322: Type 'string' is not assignable to type 'number'.
+apps/web/src/games/newton/art/CricketArt.tsx(71,29): error TS2322: Type 'string' is not assignable to type 'number'.
+apps/web/src/games/newton/art/CricketArt.tsx(71,55): error TS2322: Type 'string' is not assignable to type 'number'.
+apps/web/src/games/poly/art/PolyArt.tsx(8,30): error TS6133: 'state' is declared but its value is never read.
+apps/web/src/games/poly/art/PolyArt.tsx(9,30): error TS6133: 'state' is declared but its value is never read.
+apps/web/src/games/sound/art/SoundArt.tsx(52,65): error TS2322: Type '{ children: Element[]; xmlns: string; style: { color: "#F9F6EE"; fontFamily: "Patrick Hand, cursive"; fontSize: number; background: string; borderRadius: number; padding: number; }; }' is not assignable to type 'DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>'.
+  Property 'xmlns' does not exist on type 'DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>'.

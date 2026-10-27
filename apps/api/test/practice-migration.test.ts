@@ -1,0 +1,45 @@
+import { randomUUID } from 'node:crypto';
+import { resolve } from 'node:path';
+import Sqlite from 'better-sqlite3';
+import { drizzle } from 'drizzle-orm/better-sqlite3';
+import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
+import { readMigrationFiles } from 'drizzle-orm/migrator';
+import { expect, it } from 'vitest';
+import { seedDemo, DEMO_SCHOOL_ID } from '../src/db/demo.ts';
+import * as schema from '../src/db/schema.ts';
+import { PASSWORD, PIN } from './helpers.ts';
+
+it('upgrades populated P6 attempts, preserving FKs, events, uniqueness and dashboard triggers', async () => {
+  const sqlite = new Sqlite(':memory:');
+  try {
+    sqlite.pragma('foreign_keys = ON');
+    const migrationsFolder = resolve(import.meta.dirname, '../drizzle');
+    sqlite.exec('CREATE TABLE __drizzle_migrations (id INTEGER PRIMARY KEY, hash TEXT NOT NULL, created_at NUMERIC)');
+    for (const migration of readMigrationFiles({ migrationsFolder }).slice(0, 9)) {
+      for (const statement of migration.sql) sqlite.exec(statement);
+      sqlite.prepare('INSERT INTO __drizzle_migrations (hash, created_at) VALUES (?, ?)').run(migration.hash, migration.folderMillis);
+    }
+    const db = drizzle(sqlite, { schema });
+    await seedDemo(db, { password: PASSWORD, pin: PIN }, 1);
+    const profileId = db.select().from(schema.profiles).all().find((row) => row.role === 'student')!.id;
+    const assignmentId = db.select().from(schema.assignments).get()!.id;
+    const fracChapter = db.select().from(schema.chapters).all().find((row) => row.title === 'Fractions')!;
+    const item = db.select().from(schema.items).all().find((row) => row.position === 0 && row.chapterId === fracChapter.id)!;
+    const row = db.insert(schema.attempts).values({ id: randomUUID(), clientEventId: randomUUID(), schoolId: DEMO_SCHOOL_ID,
+      profileId, assignmentId, itemId: item.id, conceptId: item.conceptId, answer: 'Yes', correct: true, needsReview: false,
+      timeMs: 1, clientTs: 1, serverTs: 1, updatedAt: 1 }).returning().get()!;
+    migrate(db, { migrationsFolder }); migrate(db, { migrationsFolder });
+    expect(db.select().from(schema.attempts).get()).toEqual(row);
+    expect(() => db.insert(schema.attempts).values({ ...row, id: randomUUID(), clientEventId: randomUUID() }).run()).toThrow();
+    sqlite.exec('UPDATE dashboard_job SET dirty = 0');
+    const optional = { ...row, id: randomUUID(), clientEventId: randomUUID(), assignmentId: null };
+    db.insert(schema.attempts).values(optional).run();
+    db.insert(schema.attempts).values({ ...optional, id: randomUUID(), clientEventId: randomUUID() }).run();
+    expect(sqlite.prepare('SELECT dirty FROM dashboard_job').get()).toEqual({ dirty: 1 });
+    expect(() => db.insert(schema.attempts).values({ ...optional, id: randomUUID() }).run()).toThrow();
+    expect(() => db.insert(schema.attempts).values({ ...optional, id: randomUUID(), clientEventId: randomUUID(), profileId: randomUUID() }).run()).toThrow();
+    expect(sqlite.pragma('foreign_key_check')).toEqual([]);
+    expect(sqlite.prepare("SELECT name FROM sqlite_master WHERE type = 'trigger' AND tbl_name = 'attempt'").all()).toHaveLength(3);
+  } finally { sqlite.close(); }
+});
+

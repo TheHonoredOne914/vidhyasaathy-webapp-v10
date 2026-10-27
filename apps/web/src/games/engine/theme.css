@@ -1,0 +1,217 @@
+.iv-game {
+  --iv-midnight: #041d3d;
+  --iv-deep: #193e69;
+  --iv-cool: #517dab;
+  --iv-ice: #d6e2e6;
+  --iv-peach: #ffd9c2;
+  min-height: 100vh;
+  padding: 24px;
+  color: var(--iv-ice);
+  background: radial-gradient(circle at 50% 0%, var(--iv-deep), var(--iv-midnight) 72%);
+  font-family: 'Patrick Hand', cursive;
+  font-size: 18px;
+}
+
+.iv-game button,
+.iv-game input {
+  font: inherit;
+}
+
+.iv-game button {
+  min-height: 44px;
+  border: 1px solid var(--iv-cool);
+  border-radius: 8px;
+  padding: 8px 14px;
+  color: var(--iv-ice);
+  background: var(--iv-deep);
+  cursor: pointer;
+}
+
+.iv-game button:hover:not(:disabled),
+.iv-game button:focus-visible,
+.iv-game input:focus-visible {
+  outline: 2px solid var(--iv-peach);
+  outline-offset: 2px;
+}
+
+.iv-game button:disabled { cursor: not-allowed; opacity: .55; }
+.iv-header, .iv-controls, .iv-checkpoint, .iv-recap { max-width: 960px; margin: 0 auto 16px; }
+.iv-header { display: flex; justify-content: space-between; gap: 16px; align-items: start; }
+.iv-header h1 { margin: 0; color: var(--iv-ice); font-size: 30px; line-height: 1.1; font-weight: 400; }
+.iv-chapter-caption { margin: 0 0 4px; color: var(--iv-peach); font-size: 14px; letter-spacing: .08em; }
+.iv-header p, .iv-progress { color: var(--iv-ice); opacity: .85; }
+.iv-stage { position: relative; max-width: 960px; min-height: 360px; margin: 0 auto 16px; border: 1px solid var(--iv-cool); border-radius: 10px; overflow: hidden; background: var(--iv-midnight); }
+.iv-stage > svg { display: block; width: 100%; height: 360px; }
+.iv-stage svg path, .iv-stage svg line, .iv-stage svg circle { stroke-linecap: round; stroke-linejoin: round; }
+.iv-scene-heading { max-width: 960px; margin: 0 auto 8px; display: flex; justify-content: space-between; gap: 16px; }
+.iv-scene-heading p { margin: 0; }
+.iv-actions, .iv-choices, .iv-chapters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.iv-controls { display: grid; gap: 12px; }
+.iv-slider { display: grid; gap: 4px; }
+.iv-slider input { accent-color: var(--iv-peach); }
+.iv-chapters button { min-width: 44px; display: inline-flex; gap: 6px; align-items: center; justify-content: center; }
+.iv-chapter-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--iv-cool); }
+.iv-saathy { max-width: 960px; margin: 0 auto 16px; display: flex; gap: 12px; align-items: center; }
+.iv-cloud { flex: 0 0 124px; width: 124px; height: 96px; }
+.iv-cloud-body { fill: var(--iv-ice); stroke: var(--iv-cool); stroke-width: 3; }
+.iv-cloud path:not(.iv-cloud-body) { fill: none; stroke: var(--iv-midnight); stroke-width: 3; }
+.iv-bubble { flex: 1; text-align: left; color: var(--iv-midnight) !important; background: var(--iv-ice) !important; border-color: var(--iv-peach) !important; }
+.iv-typing-space { color: transparent; }
+.iv-checkpoint, .iv-recap { padding: 16px; border: 1px solid var(--iv-cool); border-radius: 10px; background: rgba(4, 29, 61, .75); }
+.iv-checkpoint fieldset { border: 0; padding: 0; }
+.iv-checkpoint legend { margin-bottom: 12px; font-size: 22px; }
+.iv-choice { display: flex; gap: 8px; min-height: 44px; align-items: center; padding: 8px; }
+.iv-choice input { accent-color: var(--iv-peach); }
+.iv-order { padding-left: 24px; }
+.iv-order li { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+.iv-order li span { min-width: 120px; }
+.iv-actions { margin-top: 12px; }
+.iv-rewards { text-align: right; }
+.iv-rewards p { margin: 0; }
+.iv-sparkles { width: 180px; height: 48px; stroke: var(--iv-peach); fill: none; stroke-width: 3; }
+.iv-focus { position: absolute; inset: 0; pointer-events: none; }
+.iv-focus p { margin: 12px; padding: 8px; width: fit-content; color: var(--iv-midnight); background: var(--iv-peach); }
+.iv-focus-target { position: absolute; transform: translate(-50%, -50%); width: 52px; height: 52px; padding: 4px; pointer-events: auto; background: transparent !important; }
+.iv-focus-target svg { width: 100%; height: 100%; stroke: var(--iv-peach); fill: none; stroke-width: 3; }
+.iv-error { max-width: 960px; margin: 0 auto; }
+.iv-stage, .iv-side-panel { max-width: none; }
+.iv-stage { grid-area: stage; min-height: 440px; }
+.iv-side-panel { grid-area: side; padding: 20px; border: 1px solid var(--iv-cool); border-radius: 18px; background: rgba(25,62,105,.72); }
+.iv-game[aria-label*="interactive"] { max-width: 1240px; margin: 0 auto; }
+.iv-game[aria-label*="interactive"] > .iv-stage + .iv-side-panel { display: block; }
+.iv-side-panel { color: var(--iv-ice); }
+.iv-panel-kicker { margin: 0 0 6px; color: var(--iv-ice); font-size: 14px; letter-spacing: .12em; }
+.iv-side-panel h4 { margin: 0 0 20px; font-size: 25px; line-height: 1.15; }
+.iv-meter-label { margin: 10px 0 5px; color: var(--iv-ice); }
+.iv-meter { height: 10px; border-radius: 999px; background: rgba(214,226,230,.25); overflow: hidden; }
+.iv-meter span { display: block; height: 100%; border-radius: inherit; background: var(--iv-peach); transition: width .42s cubic-bezier(.2,.8,.2,1); }
+.iv-concept { margin-top: 22px; padding: 14px; border-radius: 14px; color: var(--iv-midnight); background: var(--iv-ice); }
+.iv-concept p:last-child { margin-bottom: 0; }
+.iv-quiz-question { border: 0; padding: 10px 0; }
+.iv-quiz-question legend { font-size: 19px; }
+.iv-footer { display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; margin: 18px auto 0; color: var(--iv-ice); opacity: .9; }
+.iv-game[aria-label*="interactive"] { display: grid; grid-template-columns: minmax(0, 65fr) minmax(280px, 35fr); gap: 18px; align-items: start; }
+.iv-game[aria-label*="interactive"] > .iv-header,
+.iv-game[aria-label*="interactive"] > .iv-scene-heading,
+.iv-game[aria-label*="interactive"] > .iv-checkpoint,
+.iv-game[aria-label*="interactive"] > .iv-controls,
+.iv-game[aria-label*="interactive"] > .iv-footer,
+.iv-game[aria-label*="interactive"] > .iv-progress,
+.iv-game[aria-label*="interactive"] > button { grid-column: 1 / -1; }
+.iv-game[aria-label*="interactive"] > .iv-stage { grid-column: 1; margin-right: 0; min-height: 420px; aspect-ratio: 16 / 10; }
+.iv-game[aria-label*="interactive"] > .iv-stage > svg { width: 100%; height: 100%; object-fit: contain; }
+.iv-game[aria-label*="interactive"] > .iv-stage > .cell-art { aspect-ratio: 960 / 420; }
+.iv-game[aria-label*="interactive"] > .iv-stage + .iv-side-panel { grid-column: 2; margin: 0; width: auto; position: static; }
+.iv-game[aria-label*="interactive"] > .iv-controls { grid-column: 1; margin: 0; width: auto; }
+.iv-game[aria-label*="interactive"] > .iv-controls { grid-row: 4; }
+.iv-game[aria-label*="interactive"] > .iv-checkpoint,
+.iv-game[aria-label*="interactive"] > button { grid-row: auto; }
+.iv-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.iv-controls .iv-slider { flex: 1 1 220px; min-width: 180px; }
+.iv-side-panel { display: flex; flex-direction: column; min-height: 420px; }
+.iv-side-panel .iv-saathy-row { margin-top: auto; }
+.iv-side-panel .iv-saathy { margin: 16px 0 0; align-items: center; }
+.iv-side-panel .iv-cloud { flex-basis: 76px; width: 76px; height: 60px; }
+.iv-side-panel .iv-bubble { min-width: 0; overflow-wrap: anywhere; }
+.iv-concept .iv-panel-kicker { color: var(--iv-midnight); }
+
+@media (max-width: 600px) {
+  .iv-game { padding: 16px; }
+  .iv-header { display: block; }
+  .iv-header h1 { font-size: 26px; }
+  .iv-stage, .iv-stage > svg { min-height: 260px; height: 260px; }
+  .iv-game[aria-label*="interactive"] > .iv-stage { margin-right: 0; }
+  .iv-game[aria-label*="interactive"] > .iv-stage + .iv-side-panel { margin: 0 0 16px; width: auto; }
+  .iv-side-panel { min-height: 0; }
+  .iv-saathy { align-items: start; }
+  .iv-cloud { flex-basis: 92px; width: 92px; height: 72px; }
+}
+
+@media (max-width: 900px) {
+  .iv-game[aria-label*="interactive"] { grid-template-columns: 1fr; }
+  .iv-game[aria-label*="interactive"] > .iv-stage,
+  .iv-game[aria-label*="interactive"] > .iv-stage + .iv-side-panel { grid-column: 1; }
+}
+
+/* Final interactive layout pass: the scene owns the left column and the task owns the right. */
+.iv-game[aria-label*="interactive"] {
+  grid-template-columns: minmax(0, 65fr) minmax(280px, 35fr);
+  column-gap: 24px;
+  row-gap: 18px;
+}
+.iv-game[aria-label*="interactive"] > .iv-header,
+.iv-game[aria-label*="interactive"] > .iv-scene-heading {
+  margin-bottom: 0;
+}
+.iv-header h1 {
+  background: transparent;
+  color: var(--iv-ice);
+  font-family: 'Patrick Hand', cursive;
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 1.1;
+}
+.iv-stage {
+  display: grid;
+  min-height: 420px;
+  aspect-ratio: 16 / 10;
+  margin: 0;
+  place-items: center;
+  background: linear-gradient(145deg, #193e69 0%, #041d3d 100%);
+}
+.iv-game[aria-label*="interactive"] > .iv-stage > svg,
+.iv-game[aria-label*="interactive"] > .iv-stage > .cell-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  aspect-ratio: 16 / 10;
+  object-fit: fill;
+}
+.iv-game[aria-label*="interactive"] > .iv-controls {
+  align-self: start;
+  width: auto;
+  margin: 0;
+}
+.iv-side-panel {
+  min-height: 420px;
+  padding: 22px;
+  border-radius: 18px;
+  background: rgb(25 62 105 / 78%);
+}
+.iv-side-panel .iv-saathy-row { margin-top: auto; }
+.iv-side-panel .iv-saathy {
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 14px;
+}
+.iv-side-panel .iv-cloud {
+  flex: 0 0 72px;
+  width: 72px;
+  height: 56px;
+  object-fit: contain;
+}
+.iv-side-panel .iv-bubble {
+  min-width: 0;
+  max-width: none;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+@media (max-width: 900px) {
+  .iv-game[aria-label*="interactive"] { grid-template-columns: 1fr; }
+  .iv-game[aria-label*="interactive"] > .iv-stage,
+  .iv-game[aria-label*="interactive"] > .iv-side-panel,
+  .iv-game[aria-label*="interactive"] > .iv-controls { grid-column: 1; }
+  .iv-game[aria-label*="interactive"] > .iv-stage { min-height: 0; }
+  .iv-side-panel { min-height: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iv-game *, .iv-game *::before, .iv-game *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}
+
+/* Keep the game title readable on the dark canvas and give the scene room. */
+.iv-header { padding: 6px 0 12px; background: transparent; text-align: left; }
+.iv-header h1 { margin: 0; color: #f9f6ee; font-family: 'Patrick Hand', cursive; font-size: 30px; font-weight: 400; line-height: 1.1; text-align: left; }
+.iv-chapter-caption { margin: 0 0 3px; color: #d6e2e6; font-size: 14px; }
+.iv-game[aria-label*="interactive"] { min-height: auto; grid-template-columns: minmax(0, 66fr) minmax(260px, 34fr); }

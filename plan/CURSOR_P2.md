@@ -1,0 +1,4 @@
+# CURSOR P2: School setup UI (read plan/AGENT_RULES.md, plan/PHASES.md P2). Own only apps/web/** and e2e/**.
+Consume new contracts in packages/contracts (school DTOs) and routes in apps/api/src/routes/{school,invitations,roster}.ts.
+Build: 8-step admin setup wizard (school details, academic year, classes, sections, subjects, teachers invite, roster CSV import with preview + per-row errors, review); admin home showing real setup state; class/section/subject screens; accept-invite page; printable claim-code sheet (print CSS); onboarding screens. Real API calls only, no fake data, empty states written plainly. Keep existing tokens/brand (Manrope, ocean blues, ivory). No gradients, glass, bento, emoji icons.
+Playwright: set trace 'retain-on-failure'. e2e: wizard -> invite teacher -> accept -> teacher sees only own class; bad CSV rows shown. Update screenshots in e2e/screenshots incl. wizard and claim sheet.

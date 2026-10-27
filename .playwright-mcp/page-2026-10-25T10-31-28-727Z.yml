@@ -1,0 +1,87 @@
+- generic [ref=e2]:
+  - link "Skip to content" [ref=e3] [cursor=pointer]:
+    - /url: "#content"
+  - generic [ref=e254]:
+    - banner [ref=e255]:
+      - link "VidhyaSaathy home" [ref=e256] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e257]:
+          - strong [ref=e258]: VidhyaSaathy
+          - generic [ref=e259]: Learning, with you
+      - navigation "Primary" [ref=e260]:
+        - link "Back to home" [ref=e261] [cursor=pointer]:
+          - /url: /
+    - main [ref=e264]:
+      - generic [ref=e265]:
+        - generic [ref=e266]:
+          - generic [ref=e267]: Your school, beyond the classroom
+          - heading "Welcome back!" [level=1] [ref=e271]
+          - paragraph [ref=e272]: Same dreams. Bigger possibilities.Sign in to continue your learning journey.
+        - status [ref=e273]: The network request failed. Check your connection and try again.
+        - generic [ref=e274]:
+          - generic [ref=e275]:
+            - heading "Sign in as" [level=2] [ref=e276]
+            - paragraph [ref=e277]: A space that feels like yours.
+          - group "Choose your role" [ref=e278]:
+            - button "Student" [ref=e279] [cursor=pointer]:
+              - strong [ref=e283]: Student
+              - generic [ref=e284]: Learn, practice and grow
+            - button "Teacher" [pressed] [ref=e288] [cursor=pointer]:
+              - strong [ref=e292]: Teacher
+              - generic [ref=e293]: Create, guide and inspire
+            - button "School Admin" [ref=e297] [cursor=pointer]:
+              - strong [ref=e303]: School Admin
+              - generic [ref=e304]: Connect, manage and empower
+          - generic [ref=e308]: Teacher sign in
+          - generic [ref=e310]:
+            - generic [ref=e311]:
+              - generic [ref=e312]: Email
+              - textbox "Email" [ref=e314]:
+                - /placeholder: Enter your school email
+            - generic [ref=e315]:
+              - generic [ref=e316]: Password
+              - generic [ref=e317]:
+                - textbox "Password" [ref=e318]:
+                  - /placeholder: Enter your password
+                - button "Show characters" [ref=e319] [cursor=pointer]
+            - generic [ref=e323]:
+              - generic [ref=e324] [cursor=pointer]:
+                - checkbox "Remember me" [ref=e325]
+                - text: Remember me
+              - link "Forgot password?" [ref=e326] [cursor=pointer]:
+                - /url: /recover
+            - button "Sign in" [ref=e327] [cursor=pointer]
+          - paragraph [ref=e330]:
+            - text: New to VidhyaSaathy?
+            - link "Register a school" [ref=e331] [cursor=pointer]:
+              - /url: /register-school
+        - paragraph [ref=e334]: A parent? Use your email and password in the staff sign-in form.
+      - complementary "Learning with Saathy" [ref=e335]:
+        - img "Saathy, the cloud mascot, learning at a desk beside a window" [ref=e336]
+        - paragraph [ref=e337]: Better Learning,Brighter Futures
+        - generic [ref=e340]:
+          - list [ref=e341]:
+            - listitem [ref=e342]:
+              - generic [ref=e346]:
+                - strong [ref=e347]: School-connected learning
+                - paragraph [ref=e348]: Your classes, subjects and learning.All in one familiar place.
+            - listitem [ref=e349]:
+              - generic [ref=e354]:
+                - strong [ref=e355]: Room to learn. Space to grow.
+                - paragraph [ref=e356]: Small steps today.More possibilities tomorrow.
+          - list "The learning journey" [ref=e357]:
+            - listitem [ref=e358]:
+              - generic [ref=e359]: "01"
+              - text: Learn
+            - listitem [ref=e360]:
+              - generic [ref=e361]: "02"
+              - text: Practice
+            - listitem [ref=e362]:
+              - generic [ref=e363]: "03"
+              - text: Grow
+    - contentinfo [ref=e364]:
+      - generic [ref=e365]:
+        - generic [ref=e366]: Secure & private
+        - generic [ref=e370]: Built for schools
+      - link "Privacy policy" [ref=e376] [cursor=pointer]:
+        - /url: /privacy

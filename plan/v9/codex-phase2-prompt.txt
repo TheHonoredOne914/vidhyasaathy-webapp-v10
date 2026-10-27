@@ -1,0 +1,7 @@
+﻿Read plan/v9/HARD_RULES.md + DECISIONS.md. Implement plan/v9/PHASE2.md only.
+OWN these paths (do not touch others): apps/api/src/routes/{roster,school,flow,invitations}.ts; apps/api/src/school/**; apps/web/src/routes/admin/**; apps/web/src/setup/**; apps/api/drizzle/0009_*.sql; packages/contracts (admin/roster/school schemas only).
+If schema needed: additive migration 0009 only + append tables/columns in schema.ts; append journal entry idx 9.
+Wire new routes in apps/api/src/app.ts with minimal edit (import+register only).
+Do NOT touch: auth-v9, landing, theme, content.ts, content-files, learning-sessions, dashboard notifications, demo.ts, StudentAccess/TeacherAccess/OtpAccess.
+Reuse existing Wizard/RosterForm/claim sheet — make steps persist for real; CSV strict-by-default; claim codes + distribution sheet; mid-year add; curriculum chapter/concept CRUD; admin summary counts; parent multi-child.
+No typecheck/vitest/commit. Reply changed files only.

@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Sign in · VidhyaSaathy</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="hero.css"><link rel="stylesheet" href="paper.css"><link rel="stylesheet" href="auth.css"><link rel="stylesheet" href="fx.css"></head><body>
+<nav><a class="brand" href="#"><img src="logo-mark.png" alt=""><span>VidhyaSaathy</span></a>
+<div class="links"><a href="landing.html#day">How it works</a><a href="#">For parents</a><a href="#">Safety</a></div>
+<a class="reg" href="register.html">Register your school</a></nav>
+<main class="auth"><div class="left">
+<p class="kicker">sign in</p><h2>Welcome back.</h2><p class="lead" style="font-size:22px">Pick your divider, then write in your details.</p>
+<div class="book"><div class="tabs" role="tablist">
+<button class="tab" role="tab" aria-selected="true" data-p="st">Student</button><button class="tab" role="tab" aria-selected="false" data-p="te">Teacher</button><button class="tab" role="tab" aria-selected="false" data-p="ad">School admin</button></div>
+<div class="pg">
+<form class="panel on" id="st"><h3>Student</h3><p class="hint">Your codes are on the claim sheet from your school.</p>
+<div class="row2"><label class="fld"><span>School code</span><input placeholder="e.g. DPS-NOI" autocomplete="off"></label><label class="fld"><span>Class code</span><input placeholder="e.g. 9A-SCI"></label></div>
+<label class="fld"><span>Your PIN</span><input type="password" inputmode="numeric" placeholder="4 digits"><small>sharing a phone? each of you has your own PIN.</small></label>
+<button class="btn" type="button">Open my notebook</button>
+<p class="aside-a">first time? <a href="#">claim your account</a> with the code on your sheet.</p></form>
+<form class="panel" id="te"><h3>Teacher</h3><p class="hint">Use the email your school invited.</p>
+<label class="fld"><span>Email</span><input type="email" placeholder="name@school.edu.in"></label>
+<label class="fld"><span>Password</span><input type="password"></label>
+<button class="btn" type="button">Sign in</button><p class="aside-a"><a href="#">forgot password?</a></p></form>
+<form class="panel" id="ad"><h3>School admin</h3><p class="hint">For the person who set up your school.</p>
+<label class="fld"><span>Email</span><input type="email"></label><label class="fld"><span>Password</span><input type="password"></label>
+<button class="btn" type="button">Sign in</button><p class="aside-a">new school? <a href="register.html">register here</a></p></form>
+</div></div></div>
+<div class="night"><div class="frame"></div><svg class="lamp" viewBox="0 0 110 120" fill="none" stroke="#FFB38A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 112 L86 112 M54 112 L46 70 L74 40 M64 30 C 70 14, 96 14, 104 32 Z"/><path d="M90 46 l2 8 M78 48 l-3 8" opacity=".7"/></svg>
+  <svg class="star" style="left:30%;top:18%" viewBox="0 0 14 14"><path d="M7 1 L7.4 12.6 M1.2 7.2 L12.8 6.6" stroke="#FFF8EE" stroke-width="2" stroke-linecap="round"/></svg>
+  <svg class="star" style="left:62%;top:44%" viewBox="0 0 14 14"><path d="M7 1 L7 13 M1 7 L13 7.4 M3 3 L11 11" stroke="#FFF8EE" stroke-width="2" stroke-linecap="round"/></svg>
+  <svg class="star" style="left:86%;top:56%;transform:scale(.7)" viewBox="0 0 14 14"><path d="M7 1 L7.3 13 M1 7.3 L13 6.8" stroke="#7FB3FF" stroke-width="2" stroke-linecap="round"/></svg>
+  <div class="desk"></div>
+<img class="mascot2" src="mascot.png" alt="Saathy, the cloud mascot">
+<p class="says">9:00 pm. Saathy kept your place.<small>it answers from your teacher's notes, nothing else.</small></p></div></main><footer class="cover mini"><div class="wrap"><div class="copy2" style="margin-top:0"><span>© 2026 VidhyaSaathy. All rights reserved.</span><div class="flinks"><a href="landing.html">About</a><a href="landing.html#day">How it works</a><a href="landing.html#safety">Privacy</a><a href="#">Contact</a></div><span>Learning with you</span></div></div></footer><script>document.querySelectorAll('.tabs').forEach(t=>t.addEventListener('click',e=>{const b=e.target.closest('.tab');if(!b)return;t.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',x===b));document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on',p.id===b.dataset.p))}))</script><script src="fx.js"></script></body></html>

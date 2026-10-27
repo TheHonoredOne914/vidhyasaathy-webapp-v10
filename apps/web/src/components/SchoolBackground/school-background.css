@@ -1,0 +1,103 @@
+.school-scene { position: relative; isolation: isolate; }
+.school-background {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgb(81 125 171 / .24), #D6E2E6 24%, #F9F6EE 72%);
+}
+.school-background svg { position: absolute; height: auto; fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
+.school-background-cloud { fill: rgb(249 246 238 / .6) !important; stroke: #517DAB !important; opacity: .24; animation: school-cloud-drift 100s ease-in-out infinite alternate; }
+.school-background-doodle { stroke: #28517C !important; opacity: .11; transform: rotate(var(--school-rotation)); animation: school-doodle-float 20s ease-in-out infinite alternate; }
+.school-background--faint { opacity: .22; }
+.app-shell.school-scene { background: #F9F6EE; }
+.app-shell.school-scene :is(.app-body, .app-main) { background: transparent; }
+@keyframes school-cloud-drift { from { transform: translateX(-24px); } to { transform: translateX(42px); } }
+@keyframes school-doodle-float { from { transform: translateY(0) rotate(var(--school-rotation)); } to { transform: translateY(-10px) rotate(calc(var(--school-rotation) + 3deg)); } }
+.school-background--sky {
+  background: linear-gradient(180deg, rgb(81 125 171 / .18), #D6E2E6 36%, rgb(249 246 238 / 0) 74%);
+}
+.school-section-scene {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: .4;
+}
+.school-section-scene svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.school-section-scene--hero { opacity: .62; }
+.school-section-scene--day { opacity: .28; }
+.nb-vision > .school-section-scene,
+.nb-cover > .school-section-scene { opacity: .7; }
+.school-drift { animation: school-drift 90s linear infinite; }
+.school-glide { animation: school-glide 28s linear infinite; }
+.school-bird { animation: school-bird 32s linear infinite; }
+.school-flap { transform-box: fill-box; transform-origin: center; animation: school-flap .7s ease-in-out infinite alternate; }
+.school-kite { transform-origin: 50% 100%; animation: school-kite 5s ease-in-out infinite alternate; }
+.school-swing { transform-box: fill-box; transform-origin: 50% 0; animation: school-swing 2.8s ease-in-out infinite alternate; }
+.school-tick { transform-box: fill-box; transform-origin: center; animation: school-tick 60s linear infinite; }
+.school-twk { animation: school-twk 4s ease-in-out infinite alternate; }
+.board-w { stroke-dasharray: 400; stroke-dashoffset: 400; transition: stroke-dashoffset 1.2s; }
+#who:hover .board-w { stroke-dashoffset: 0; }
+.pball { opacity: 0; }
+#board:hover .pball, #faq:hover .pball { animation: school-drop .9s cubic-bezier(.5, 0, .7, 1.4) forwards; }
+@keyframes school-drift { from { transform: translateX(-80px); } to { transform: translateX(520px); } }
+@keyframes school-glide { from { transform: translateX(-120px) rotate(-6deg); } to { transform: translateX(920px) rotate(4deg); } }
+@keyframes school-bird { from { transform: translateX(-80px); } to { transform: translateX(980px); } }
+@keyframes school-flap { to { transform: scaleY(.45); } }
+@keyframes school-kite { to { transform: rotate(7deg) translate(6px, -8px); } }
+@keyframes school-swing { from { transform: rotate(-6deg); } to { transform: rotate(6deg); } }
+@keyframes school-tick { to { transform: rotate(360deg); } }
+@keyframes school-twk { to { opacity: .3; } }
+@keyframes school-drop { from { opacity: 0; transform: translateY(-80px); } to { opacity: 1; transform: translateY(0); } }
+.school-bell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 4px;
+  border: 0;
+  background: none;
+  color: #28517C;
+  font: inherit;
+  font-size: 19px;
+  cursor: pointer;
+}
+.school-bell svg { width: 30px; height: 32px; transform-origin: 50% 12%; }
+.school-bell.is-ringing svg { animation: school-ring .8s ease; }
+@keyframes school-ring { 20%, 60% { transform: rotate(16deg); } 40%, 80% { transform: rotate(-16deg); } }
+.school-scrap {
+  position: fixed;
+  z-index: 50;
+  width: 22px;
+  height: 16px;
+  pointer-events: none;
+  animation: school-burst 1.4s cubic-bezier(.2, .7, .3, 1) forwards;
+}
+@keyframes school-burst { to { transform: translate(var(--x), var(--y)) rotate(var(--r)); opacity: 0; } }
+.school-chhutti {
+  position: fixed;
+  z-index: 51;
+  left: 22%;
+  top: 96px;
+  padding: 6px 16px;
+  border: 2px solid #041D3D;
+  background: #F9F6EE;
+  color: #041D3D;
+  font: 22px/1.2 "Patrick Hand", cursive;
+  box-shadow: 4px 4px 0 #D6E2E6;
+  transform: rotate(-3deg);
+  animation: school-pop 2.5s ease forwards;
+}
+@keyframes school-pop { 0% { opacity: 0; scale: .8; } 12% { opacity: 1; scale: 1; } 80% { opacity: 1; } 100% { opacity: 0; } }
+@media (max-width: 900px) {
+  .school-bell span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .school-background svg, .school-section-scene *, .school-bell svg, .school-scrap, .school-chhutti { animation: none; }
+  .school-chhutti { opacity: 1; }
+  .school-reveal { opacity: 1; }
+}
+@media print { .school-background, .school-section-scene, .school-bell { display: none; } }

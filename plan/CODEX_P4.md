@@ -1,0 +1,4 @@
+CODEX - Phase P4 backend. Read plan/PHASES.md (your phase section), plan/SPEC_SUMMARY.md, plan/AGENT_RULES.md, plan/vs-design/TRD.md, plan/vs-design/USER_FLOW.md, plan/vs-design/DESIGN_SPEC.md. Follow the user flows in the docs exactly for every role. Visual style: match the current Sign-in/Register look (navy night + ivory, sky #7FB3FF, peach #FFB38A, Plus Jakarta Sans, Patrick Hand (via @fontsource/patrick-hand) for every handwritten/note accent instead of Caveat, apps/web/src/auth/auth.css tokens) - premium, hand-crafted, never plain white paper. No Supabase, no Android. Be token efficient.
+Do ONLY the CODEX part of P4: packages/contracts first, then apps/api (schema, migrations, routes, api tests), packages/core. Never edit apps/web or e2e. You cannot run npm; write tests carefully. End with a short summary.
+
+SPEED: work fast and lean. Reuse existing components and styles, no exploratory refactors, minimal reading beyond your phase section.

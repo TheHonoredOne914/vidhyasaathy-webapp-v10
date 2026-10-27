@@ -1,0 +1,5 @@
+﻿Read plan/v9/HARD_RULES.md, plan/v9/DECISIONS.md, plan/v9/AUDIT.md, then implement plan/v9/PHASE1.md completely.
+Keep landing and theme hex untouched. Additive migration only. Token-efficient: rg, minimal diffs.
+Extend existing claim/PIN/password flows — do not rewrite auth from scratch.
+Add OTP layer for student activate + parent login (dev OTP returned in JSON + console log).
+Ensure seed archetypes per DECISIONS. Reply with changed files list only.

@@ -1,0 +1,238 @@
+.staff-main {
+  background: var(--vs-app-bg-desk);
+}
+
+.staff-main > .vs-page,
+.staff-main > .lesson-shell,
+.staff-main > .session-stage {
+  max-width: 1120px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.vs-role-page {
+  padding-bottom: 40px;
+}
+
+.vs-role-page .vs-page-header {
+  max-width: none;
+  margin: 0 0 28px;
+  padding: 28px 32px 30px;
+  border: 1px solid var(--vs-card-border);
+  border-radius: 20px;
+  background: var(--vs-card);
+  box-shadow: 5px 5px 0 var(--vs-peach);
+}
+
+.vs-role-page .vs-page-header h1 {
+  max-width: 18ch;
+  font-size: clamp(32px, 5vw, 52px);
+  line-height: 1.05;
+}
+
+.vs-role-page .vs-page-header > p:last-child::after {
+  display: block;
+  width: 90px;
+  height: 8px;
+  margin-top: 12px;
+  border-bottom: 3px solid var(--vs-peach-strong);
+  border-radius: 50%;
+  content: '';
+  transform: rotate(-3deg);
+}
+
+.dash {
+  max-width: none;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.dash > :first-child {
+  grid-column: 1 / -1;
+  color: var(--vs-text-2);
+}
+
+.dash-panel {
+  grid-column: span 6;
+  min-width: 0;
+  padding: 22px 24px;
+  border: 1px solid var(--vs-card-border);
+  border-radius: 18px 12px 20px 12px;
+  background: var(--vs-card);
+  box-shadow: 3px 4px 0 rgb(214 226 230 / 75%);
+}
+
+.dash-panel h2 {
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--vs-divider);
+  color: var(--vs-navy);
+  font-size: 26px;
+}
+
+.dash-list {
+  gap: 8px;
+}
+
+.dash-list li {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--vs-card-head);
+}
+
+.dash-list li p {
+  margin: 2px 0 0;
+  color: var(--vs-text-2);
+}
+
+.dash-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-top: 16px;
+}
+
+.dash-actions a,
+.lesson-actions a {
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: var(--vs-navy);
+  color: var(--vs-ivory);
+  text-decoration: none;
+}
+
+.heat-list {
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.heat-list li {
+  min-height: 82px;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.heat-title {
+  font-size: 18px;
+}
+
+.lesson-shell,
+.session-stage {
+  margin-top: -8px;
+  border-radius: 20px;
+  background: var(--vs-navy);
+  box-shadow: 5px 5px 0 var(--vs-peach-strong);
+}
+
+.lesson-banner {
+  padding: 32px 28px 34px;
+  background: transparent;
+}
+
+.lesson-banner h1,
+.session-stage h1 {
+  font-size: clamp(34px, 5vw, 54px);
+}
+
+.lesson-card,
+.app-main .lesson-shell form,
+.app-main .session-stage form {
+  max-width: none;
+  border: 1px solid var(--vs-card-border);
+  border-radius: 16px 10px 18px 10px;
+  background: var(--vs-card);
+  box-shadow: 3px 4px 0 var(--vs-ice);
+}
+
+.lesson-card h2,
+.lesson-shell h2,
+.session-stage h2 {
+  font-size: 28px;
+}
+
+.lesson-list {
+  border-color: var(--vs-card-border);
+  box-shadow: 2px 3px 0 rgb(214 226 230 / 65%);
+}
+
+.lesson-list li {
+  min-height: 60px;
+  padding: 10px 18px;
+}
+
+.lesson-list li:nth-child(odd) {
+  background: rgb(238 244 250 / 55%);
+}
+
+.lesson-list a {
+  font-size: 19px;
+  font-weight: 400;
+}
+
+.lesson-status {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--vs-peach);
+  font-size: 15px;
+}
+
+.lesson-shell input,
+.lesson-shell select,
+.lesson-shell textarea,
+.session-stage input,
+.session-stage select,
+.session-stage textarea {
+  border-color: var(--vs-card-border);
+  border-radius: 9px;
+  background: var(--vs-ivory);
+  color: var(--vs-text);
+}
+
+.lesson-shell fieldset,
+.session-stage fieldset {
+  margin: 0;
+  padding: 18px;
+  border: 1px solid var(--vs-divider);
+  border-radius: 12px;
+  background: rgb(238 244 250 / 55%);
+}
+
+.lesson-shell legend,
+.session-stage legend {
+  padding: 0 6px;
+  color: var(--vs-navy);
+  font-size: 20px;
+}
+
+.lesson-preview {
+  border: 1px solid var(--vs-divider);
+  box-shadow: 2px 3px 0 var(--vs-ice);
+}
+
+@media (max-width: 760px) {
+  .vs-role-page .vs-page-header {
+    padding: 22px 20px 24px;
+  }
+
+  .dash {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .dash-panel {
+    grid-column: auto;
+    padding: 18px;
+  }
+
+  .lesson-shell,
+  .session-stage {
+    margin-right: -16px;
+    margin-left: -16px;
+    border-radius: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vs-role-page .vs-page-header > p:last-child::after {
+    transform: none;
+  }
+}

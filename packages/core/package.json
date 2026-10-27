@@ -1,0 +1,26 @@
+{
+  "name": "@vidhyasaathy/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./claim.ts",
+    "./claim": "./claim.ts",
+    "./roster": "./roster.ts",
+    "./session": "./session.ts",
+    "./sync": "./sync.ts",
+    "./mastery": "./mastery.ts",
+    "./remediation": "./remediation.ts",
+    "./study-plan": "./study-plan.ts",
+    "./games": "./games.ts",
+    "./interleaving": "./interleaving.ts",
+    "./streak": "./streak.ts"
+  },
+  "scripts": {
+    "test": "vitest run --configLoader native --pool threads --reporter dot",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@vidhyasaathy/contracts": "*"
+  }
+}

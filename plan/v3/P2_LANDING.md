@@ -1,0 +1,3 @@
+Read plan/POLISH.md first and follow it. Do NOT run git/npm. Edit only listed paths. Terse.
+
+Task: landing + auth polish. Paths: apps/web/src/routes/Landing*, SignIn*, RegisterSchool*, Recover*, Claim*, PinSignIn*, StudentAccess*, AuthForm*, landing/auth css. Keep structure/copy/bell + chhutti card; make it look like a real product: larger type, refined gradients per POLISH, livelier but subtle motion (floating cards, parallax doodles, staggered entrances), clear hero with a product-preview card (stacked UI cards showing a student's next activity, streak, a game tile) built in HTML/SVG. Footer: rights left, links center, 'Learning with you' right, icons.

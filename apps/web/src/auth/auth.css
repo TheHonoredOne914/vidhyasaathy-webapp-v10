@@ -1,0 +1,304 @@
+/* Shared with the approved landing notebook; auth behavior lives in the forms. */
+.vs-auth-page .vs-auth-body { position: relative; display: grid; grid-template-columns: 1fr 31vw; min-height: calc(100vh - 88px); }
+.vs-auth-body > .school-background { z-index: 0; }
+.vs-auth-body > :not(.school-background) { position: relative; z-index: 1; }
+.vs-auth-page .vs-auth-signin { padding: 56px 0 96px 96px; min-width: 0; }
+.vs-auth-page .vs-auth-eyebrow { font-size: 22px; color: var(--nb-muted); display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.vs-auth-eyebrow::before { content: ''; width: 24px; height: 2px; background: var(--nb-navy); }
+.vs-auth-eyebrow > svg { flex: none; }
+.vs-auth-page .vs-auth-intro h1 { font-size: 56px; line-height: 1; font-weight: 400; letter-spacing: -.3px; }
+.vs-auth-page .vs-auth-intro p { font-size: 22px; color: var(--nb-muted); line-height: 1.5; margin-top: 16px; max-width: 620px; }
+.vs-auth-signin-card { max-width: 620px; margin-top: 56px; position: relative; border: 2px solid var(--nb-navy); padding: 40px 48px 40px 88px; background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cpath d='M0 39.5H40' stroke='%23d6e2e6' stroke-opacity='.45'/%3E%3C/svg%3E") 0 18px; box-shadow: 6px 6px 0 #041d3d1f; }
+.vs-auth-signin-card::before, .vs-auth-register-card::before { content: ''; position: absolute; left: 60px; top: 0; bottom: 0; width: 2px; background: var(--nb-peach); pointer-events: none; }
+.vs-auth-page .vs-auth-role-heading { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.vs-auth-roles { display: flex; gap: 6px; position: absolute; top: -46px; left: 40px; }
+.vs-auth-page .vs-auth-role { display: inline-flex; align-items: center; gap: 6px; font-size: 21px; color: var(--nb-navy); background: #d6e2e6; border: 2px solid var(--nb-navy); border-bottom: 0; border-radius: 10px 10px 0 0; padding: 8px 18px 10px; transform: translateY(6px); cursor: pointer; line-height: 1.2; white-space: nowrap; }
+.vs-auth-role:nth-child(2) { background: #f9f6ee; }
+.vs-auth-role:nth-child(3) { background: #f9f6ee; }
+.vs-auth-page .vs-auth-role[aria-pressed='true'] { background: white; transform: none; padding-bottom: 16px; z-index: 2; margin-bottom: -2px; }
+.vs-auth-role > svg { flex: none; }
+.vs-auth-role-indicator { display: none; }
+.vs-auth-role > span:not(.vs-auth-role-indicator) { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.vs-auth-role strong { font-size: inherit; }
+.vs-auth-page .vs-auth-divider { display: flex; align-items: center; gap: 8px; font-size: 32px; line-height: 1.2; margin-bottom: 8px; }
+.vs-auth-page .vs-auth-form-hint { font-size: 19px; color: var(--nb-muted); margin-bottom: 24px; }
+.vs-auth-page .vs-auth-form { display: grid; gap: 24px; margin: 0; }
+.vs-auth-page .vs-auth-form > .grid { gap: 0; }
+.vs-auth-page .vs-auth-form label { display: block; font-size: 20px; line-height: 1.5; color: var(--nb-navy); }
+.vs-auth-labeled-field { position: relative; min-width: 0; }
+.vs-auth-label-icon { position: absolute; left: 0; top: 4px; display: flex; color: var(--nb-rust); pointer-events: none; }
+.vs-auth-label-icon svg { width: 18px; height: 18px; }
+.vs-auth-labeled-field > .grid { gap: 0; }
+.vs-auth-labeled-field > .grid > label { padding-left: 26px; }
+.vs-auth-page .vs-auth-form label > svg { display: inline-block; vertical-align: -3px; margin-right: 8px; color: var(--nb-rust); }
+.vs-auth-page .field-box, .vs-auth-page .vs-auth-phone, .vs-auth-page .vs-auth-address { position: relative; display: flex; align-items: center; border: 0; background: transparent; border-radius: 0; box-shadow: none; }
+.vs-auth-page .field-icon, .vs-auth-page .vs-auth-select-icon > svg, .vs-auth-phone > svg, .vs-auth-address > svg { display: none; }
+.vs-auth-page :is(input:not([type='checkbox']), select, textarea) { width: 100%; min-width: 0; min-height: 44px; font: 24px/1.5 var(--vs-font); color: var(--nb-navy); background: transparent; border: 0; border-bottom: 2px solid var(--nb-navy); border-radius: 0; padding: 4px 2px; box-shadow: none; }
+.vs-auth-page :is(input, textarea)::placeholder { color: #28517c; opacity: 1; }
+.vs-auth-page :is(input:not([type='checkbox']), select, textarea):focus { border-bottom-color: var(--nb-rust); background-color: #517dab26; }
+.vs-auth-page .field-box:has(.reveal-btn) input { padding-right: 44px; }
+.vs-auth-page .reveal-btn { position: absolute; right: 0; top: 0; display: grid; place-items: center; width: 44px; height: 44px; padding: 8px; border: 0; border-radius: 0; color: var(--nb-muted); background: transparent; box-shadow: none; cursor: pointer; }
+.vs-auth-page .vs-auth-form :is([id$='-hint'], .vs-auth-field-hint) { font-size: 17px; color: var(--nb-muted); line-height: 1.3; margin-top: 6px; }
+.vs-auth-page :is([role='alert'], [aria-invalid='true']) { color: #193e69; }
+.vs-auth-page [aria-invalid='true'] { border-bottom-color: #193e69; }
+.vs-auth-page [role='alert'] { font-size: 19px; line-height: 1.35; }
+.vs-auth-page .vs-auth-form :is(button[type='submit'], .vs-auth-primary-link), .vs-auth-page a.vs-auth-primary-link { display: inline-flex; justify-content: center; align-items: center; gap: 12px; justify-self: start; width: auto; background: var(--nb-navy); color: var(--nb-ivory); border: 0; border-radius: 8px; padding: 16px 32px; font-size: 24px; line-height: 1.3; text-decoration: none; box-shadow: 4px 4px 0 var(--nb-sky); cursor: pointer; margin-top: 8px; }
+.vs-auth-page button:disabled { opacity: .65; cursor: wait; }
+.vs-auth-options { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.vs-auth-page .vs-auth-options label, .vs-auth-page .vs-auth-duplicate-warning label { display: flex; align-items: center; gap: 8px; font-size: 18px; }
+.vs-auth-page input[type='checkbox'] { accent-color: var(--nb-navy); width: 18px; height: 18px; flex: none; }
+.vs-auth-options a { font-size: 18px; text-underline-offset: 4px; }
+.vs-auth-register-link { font-size: 20px; margin-top: 24px !important; color: var(--nb-muted); }
+.vs-auth-register-link a, .vs-auth-under-card a, .vs-auth-help { color: var(--nb-navy); text-underline-offset: 4px; }
+.vs-auth-register-link a { display: inline-flex; gap: 6px; align-items: center; }
+.vs-auth-under-card { display: block; max-width: 620px; font-size: 20px; margin-top: 20px !important; color: var(--nb-muted); }
+.vs-auth-under-card > svg { vertical-align: middle; }
+.vs-auth-message { margin-top: 24px !important; max-width: 620px; border: 1px solid var(--nb-rust); padding: 8px 16px; font-size: 20px; }
+.vs-auth-scene { position: relative; min-width: 0; }
+.vs-auth-scene .nb-night { position: absolute; width: 100%; }
+.nb-night--auth .nb-night-mascot { position: absolute; left: 40%; top: calc(60% - 172px); width: 190px; height: auto; transform: translateX(-50%) rotate(-6deg); }
+.nb-night--auth .nb-desk { position: absolute; left: 24px; right: 24px; top: 60%; height: 2px; background: #f9f6ee59; }
+.nb-night--auth .nb-lamp { width: 100px; height: 110px; right: 44px; top: calc(60% - 108px); }
+.nb-night-says { position: absolute; left: 48px; right: 48px; bottom: 96px; color: var(--nb-ivory); font-size: 26px; line-height: 1.3; }
+.nb-night-says small { display: block; color: #d6e2e6; font-size: 19px; margin-top: 8px; }
+.vs-auth-footer { background: var(--nb-navy); }
+.vs-auth-footer a { text-underline-offset: 4px; }
+.vs-auth-student-switch { display: flex; gap: 20px; border-bottom: 1px solid #041d3d40; margin-bottom: 24px; }
+.vs-auth-page .vs-auth-student-switch button { display: inline-flex; align-items: center; gap: 6px; color: var(--nb-muted); border: 0; border-bottom: 2px solid transparent; padding: 8px 0; background: transparent; font-size: 20px; cursor: pointer; }
+.vs-auth-page .vs-auth-student-switch button[aria-pressed='true'] { color: var(--nb-navy); border-bottom-color: var(--nb-rust); }
+.vs-auth-student-empty { display: grid; gap: 12px; font-size: 21px; }
+.vs-auth-student-empty > span { display: none; }
+.vs-auth-student-empty strong { font-size: 26px; }
+.vs-auth-page .vs-auth-student-page .vs-auth-signin-card > h2 { font-size: 32px; margin-bottom: 24px; }
+.vs-auth-help { display: inline-flex; align-items: center; min-height: 44px; font-size: 19px; line-height: 1.5; }
+.vs-auth-page button.vs-auth-help { border: 0; background: transparent; padding: 0; color: var(--nb-navy); font: 19px/1.5 var(--vs-font); text-decoration: underline; cursor: pointer; }
+.vs-auth-sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+.vs-auth-page--register .vs-auth-body { max-width: 1120px; margin: 0 auto; grid-template-columns: minmax(0, 1fr) 300px; gap: 64px; padding: 72px 80px 120px; }
+.vs-auth-register-story { min-width: 0; }
+.vs-auth-register-card { position: relative; margin-top: 56px; border: 2px solid var(--nb-navy); padding: 40px 48px 40px 88px; background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cpath d='M0 39.5H40' stroke='%23d6e2e6' stroke-opacity='.45'/%3E%3C/svg%3E") 0 18px; box-shadow: 6px 6px #041d3d1f; }
+.vs-auth-register-heading { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.vs-auth-card-icon { display: none; }
+.vs-auth-stamp { position: absolute; right: 40px; top: 28px; border: 2px solid var(--nb-rust); color: var(--nb-rust); padding: 4px 14px; font-size: 18px; transform: rotate(6deg); border-radius: 4px; }
+.vs-auth-stepper { display: flex; gap: 6px; position: absolute; top: -52px; left: 40px; list-style: none; padding: 0; }
+.vs-auth-stepper li { display: flex; align-items: center; gap: 6px; font-size: 21px; color: var(--nb-navy); background: #d6e2e6; border: 2px solid var(--nb-navy); border-bottom: 0; border-radius: 10px 10px 0 0; padding: 8px 18px 10px; transform: translateY(6px); white-space: nowrap; }
+.vs-auth-stepper li:nth-child(2) { background: #f9f6ee; }
+.vs-auth-stepper li:nth-child(3) { background: #f9f6ee; }
+.vs-auth-stepper li[aria-current='step'] { background: white; transform: none; padding-bottom: 16px; z-index: 2; margin-bottom: -2px; }
+.vs-auth-stepper li > span { display: grid; place-items: center; border: 2px solid var(--nb-navy); border-radius: 50%; width: 26px; height: 26px; font-size: 17px; }
+.vs-auth-stepper strong { display: inline-flex; align-items: center; gap: 6px; font-size: inherit; }
+.vs-auth-step-title { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; padding-right: 140px; }
+.vs-auth-step-title h3 { font-size: 28px; line-height: 1.2; }
+.vs-auth-step-title > span { font-size: 18px; color: var(--nb-muted); }
+.vs-auth-school-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 32px; }
+.vs-auth-page [hidden] { display: none !important; }
+.vs-auth-full-width { grid-column: 1 / -1; }
+.vs-auth-phone > span { font-size: 24px; border-bottom: 2px solid var(--nb-navy); min-height: 42px; padding: 4px 12px 4px 2px; }
+.vs-auth-address textarea { resize: vertical; }
+.vs-auth-admin-fields { display: grid; gap: 24px; }
+.vs-auth-step-description { font-size: 21px; color: var(--nb-muted); line-height: 1.35; }
+.vs-auth-register-actions { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+.vs-auth-page .vs-auth-back { display: inline-flex; align-items: center; gap: 8px; background: transparent; border: 0; color: var(--nb-navy); font-size: 21px; padding: 12px 0; cursor: pointer; }
+.vs-auth-review { font-size: 21px; }
+.vs-auth-review > div { display: grid; grid-template-columns: 140px 1fr; gap: 16px; border-bottom: 1px solid #041d3d40; padding: 12px 0; }
+.vs-auth-review dt { color: var(--nb-muted); }
+.vs-auth-review dd { overflow-wrap: anywhere; }
+.vs-auth-confirm { font-size: 22px; line-height: 1.4; }
+.vs-auth-confirm > span { display: none; }
+.vs-auth-confirm h3 { font-size: 32px; margin-bottom: 16px; }
+.vs-auth-duplicate-warning { padding: 16px; background: #f9f6ee; border: 1px solid var(--nb-rust); }
+.vs-auth-duplicate-warning > p { margin-top: 8px; }
+.vs-auth-duplicate-warning label { margin-top: 16px; }
+.vs-auth-register-footnote { display: flex; align-items: center; gap: 8px; font-size: 18px; color: var(--nb-muted); margin-top: 24px !important; }
+.vs-auth-register-aside { padding-top: 220px; }
+.vs-auth-sticky { background: #f9f6ee; padding: 24px 28px; font-size: 21px; line-height: 1.4; transform: rotate(2deg); box-shadow: 3px 4px #041d3d1f; position: relative; }
+.vs-auth-sticky .nb-tape { left: 100px; }
+.vs-auth-sticky h2 { font-size: 26px; margin-bottom: 8px; }
+.vs-auth-sticky ol { padding-left: 22px; }
+.vs-auth-sticky li { margin-top: 12px; }
+.vs-auth-register-aside .vs-auth-under-card { margin-top: 40px !important; }
+
+@media (max-width: 1199px) {
+  .vs-auth-page .vs-auth-signin { padding-left: 48px; padding-right: 40px; }
+  .vs-auth-signin-card { padding: 40px 32px 40px 72px; }
+  .vs-auth-signin-card::before { left: 48px; }
+  .vs-auth-roles { left: 24px; }
+  .vs-auth-page .vs-auth-role { padding-inline: 18px; }
+  .nb-night-says { left: 32px; right: 32px; }
+  .vs-auth-page--register .vs-auth-body { padding-inline: 40px; gap: 40px; grid-template-columns: minmax(0, 1fr) 260px; }
+  .vs-auth-register-card { padding-inline: 72px 32px; }
+  .vs-auth-register-card::before { left: 48px; }
+  .vs-auth-stepper { left: 24px; }
+  .vs-auth-stepper li { padding-inline: 12px; font-size: 20px; }
+  .vs-auth-stamp { right: 24px; }
+}
+@media (max-width: 900px) {
+  .vs-auth-page .vs-auth-body { grid-template-columns: minmax(0, 1fr) 30%; }
+  .vs-auth-page .vs-auth-signin { padding: 48px 24px 72px; }
+  .vs-auth-page .vs-auth-intro h1 { font-size: 48px; }
+  .vs-auth-signin-card { padding: 32px 24px 32px 48px; }
+  .vs-auth-signin-card::before { left: 28px; }
+  .vs-auth-roles { left: 12px; gap: 4px; }
+  .vs-auth-page .vs-auth-role { padding-inline: 8px; font-size: 18px; }
+  .nb-night--auth .nb-night-mascot { width: 150px; top: calc(60% - 142px); }
+  .nb-night--auth .nb-lamp { right: 20px; width: 68px; height: 80px; top: calc(60% - 78px); }
+  .nb-night-says { left: 24px; right: 24px; bottom: 64px; font-size: 23px; }
+  .vs-auth-page--register .vs-auth-body { grid-template-columns: minmax(0, 1fr); padding: 56px 24px 80px; gap: 48px; }
+  .vs-auth-register-card { padding: 40px 32px 40px 72px; }
+  .vs-auth-register-card::before { left: 48px; }
+  .vs-auth-register-aside { padding-top: 0; max-width: 340px; margin-left: auto; }
+}
+
+@media (min-width: 901px) {
+  .vs-auth-page .vs-auth-body { min-height: calc(100vh - 172px); align-items: stretch; }
+  .vs-auth-page .vs-auth-signin { display: flex; flex-direction: column; justify-content: center; padding: 28px 0; }
+  .vs-auth-page .vs-auth-signin-card { width: min(100%, 620px); margin-top: 32px; }
+  .vs-auth-page .vs-auth-scene { min-height: 0; margin: 16px 0; }
+  .vs-auth-page .vs-auth-scene .nb-night { height: 100%; min-height: 0; }
+  .vs-auth-page .nb-night--auth .nb-night-says { bottom: 40px; }
+}
+
+@media (min-width: 901px) and (max-height: 840px) {
+  .vs-auth-page .vs-auth-intro h1 { font-size: 44px; }
+  .vs-auth-page .vs-auth-intro p { font-size: 20px; margin-top: 8px; }
+  .vs-auth-page .vs-auth-signin-card { margin-top: 24px; padding-block: 24px 28px; }
+  .vs-auth-page .vs-auth-form { gap: 14px; }
+  .vs-auth-page .vs-auth-scene { margin-block: 12px; }
+  .vs-auth-page .nb-night--auth .nb-night-says { bottom: 28px; font-size: 24px; }
+}
+
+.vs-auth-page .vs-auth-scene { position: relative; overflow: hidden; background: var(--color-midnight); border: 1px solid var(--color-navy); box-shadow: 10px 12px 0 var(--color-steel); }
+.vs-auth-alive-panel { position: relative; display: grid; min-height: 100%; align-content: center; justify-items: center; gap: 12px; padding: 48px 30px 34px; color: var(--color-ivory); isolation: isolate; }
+.vs-auth-alive-panel::before { position: absolute; inset: 0; z-index: -1; background: radial-gradient(circle at 50% 30%, rgb(81 125 171 / 0.34), transparent 42%), repeating-linear-gradient(0deg, transparent 0 35px, rgb(191 227 245 / 0.08) 36px); content: ''; }
+.vs-auth-doodles { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--color-sky); opacity: 0.5; pointer-events: none; }
+.vs-auth-doodles path { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
+.vs-auth-alive-kicker, .vs-auth-preview-label { color: var(--color-gold); font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+.vs-auth-alive-kicker, .vs-auth-alive-line, .vs-auth-preview { position: relative; z-index: 1; margin: 0; text-align: center; }
+.vs-auth-alive-line { max-width: 220px; color: var(--color-sky); font-size: 22px; line-height: 1.1; }
+.vs-auth-alive-mascot { position: relative; z-index: 1; animation: saathy-float 4.8s ease-in-out infinite; filter: drop-shadow(0 12px 0 rgb(4 29 61 / 0.24)); }
+.vs-auth-preview { display: grid; gap: 8px; width: min(100%, 230px); margin-top: 10px; padding: 14px 16px; border: 1px solid rgb(249 246 238 / 0.22); border-radius: 12px; background: var(--color-ivory); color: var(--color-midnight); box-shadow: 4px 4px 0 var(--color-gold); transform: rotate(-2deg); }
+.vs-auth-preview strong { font-size: 20px; line-height: 1; }
+.vs-auth-preview > span:last-child { color: var(--color-blue); font-size: 15px; }
+.vs-auth-preview-rule { height: 1px; background: var(--color-peach); }
+@media (prefers-reduced-motion: reduce) { .vs-auth-alive-mascot { animation: none; } }
+
+@media (min-width: 901px) {
+  .vs-auth-page .vs-auth-body { height: calc(100vh - 172px); min-height: 0; }
+  .vs-auth-page .vs-auth-signin-card { margin-top: 72px; }
+  .vs-auth-page .vs-auth-scene { height: calc(100% - 32px); overflow: hidden; }
+}
+
+@media (min-width: 901px) and (max-height: 840px) {
+  .vs-auth-page .vs-auth-signin-card { margin-top: 64px; }
+}
+@media (max-width: 600px) {
+  .vs-auth-page .vs-auth-body { display: block; min-height: calc(100vh - 80px); }
+  .vs-auth-page .vs-auth-signin { padding: 40px 20px 56px; }
+  .vs-auth-page .vs-auth-intro h1 { font-size: 44px; }
+  .vs-auth-page .vs-auth-intro p { font-size: 21px; }
+  .vs-auth-signin-card { margin-top: 64px; padding: 28px 20px 28px 36px; }
+  .vs-auth-signin-card::before { left: 22px; }
+  .vs-auth-roles { left: 8px; top: -43px; gap: 3px; }
+  .vs-auth-page .vs-auth-role { font-size: 17px; padding: 8px 6px 10px; gap: 4px; }
+  .vs-auth-role > svg { width: 16px; height: 16px; }
+  .vs-auth-page .vs-auth-role[aria-pressed='true'] { padding-bottom: 16px; }
+  .vs-auth-page .vs-auth-divider { font-size: 30px; }
+  .vs-auth-page .vs-auth-form { gap: 20px; }
+  .vs-auth-page .vs-auth-form :is(button[type='submit'], .vs-auth-primary-link) { padding: 14px 24px; font-size: 22px; }
+  .vs-auth-student-switch { gap: 16px; }
+  .vs-auth-scene { min-height: 420px; }
+  .vs-auth-scene .nb-night { border-top-left-radius: 32px; }
+  .nb-night--auth .nb-night-mascot { left: 40%; top: 36px; width: 160px; }
+  .nb-night--auth .nb-desk { top: 190px; }
+  .nb-night--auth .nb-lamp { top: 112px; right: 52px; }
+  .nb-night-says { bottom: 48px; font-size: 26px; }
+  .vs-auth-page--register .vs-auth-body { padding: 40px 20px 64px; }
+  .vs-auth-register-card { margin-top: 76px; padding: 64px 20px 28px 36px; }
+  .vs-auth-register-card::before { left: 22px; }
+  .vs-auth-stamp { right: 20px; top: 16px; font-size: 16px; }
+  .vs-auth-stepper { left: 6px; gap: 3px; top: -48px; }
+  .vs-auth-stepper li { font-size: 16px; gap: 3px; padding: 8px 6px 10px; }
+  .vs-auth-stepper li > span { width: 18px; height: 18px; font-size: 14px; }
+  .vs-auth-stepper strong { gap: 3px; }
+  .vs-auth-stepper strong > svg { width: 14px; height: 14px; }
+  .vs-auth-school-fields { grid-template-columns: 1fr; gap: 20px; }
+  .vs-auth-review > div { grid-template-columns: 1fr; gap: 4px; }
+  .vs-auth-register-aside { margin: 48px 8px 0; }
+  .vs-auth-step-title { align-items: flex-start; flex-direction: column; padding-right: 0; }
+}
+
+/* Auth polish: a calmer, more legible workspace with tactile controls. */
+.vs-auth-page { background: radial-gradient(1000px 560px at 0 -10%, #e6f4fb, transparent 62%), radial-gradient(720px 520px at 100% 10%, #ffe9dc, transparent 58%), #f9f6ee; }
+.vs-auth-page .vs-auth-body { min-height: calc(100vh - 88px); }
+.vs-auth-page .vs-auth-signin { padding-top: 72px; }
+.vs-auth-page .vs-auth-intro h1 { font-size: clamp(52px, 5vw, 72px); line-height: 1.02; }
+.vs-auth-page .vs-auth-intro p { font-size: 24px; max-width: 560px; }
+.vs-auth-signin-card, .vs-auth-register-card { border: 1.5px solid #041d3d26; border-radius: 22px; background-color: #f9f6ee; box-shadow: 0 16px 34px -18px #041d3d55, 7px 7px 0 #d6e2e6; transition: transform .24s cubic-bezier(.2,.8,.2,1), box-shadow .24s; }
+.vs-auth-signin-card:hover, .vs-auth-register-card:hover { transform: translateY(-3px); box-shadow: 0 20px 40px -18px #041d3d55, 9px 10px 0 #d6e2e6; }
+.vs-auth-page .vs-auth-role { min-height: 48px; border-radius: 14px 14px 0 0; transition: transform .24s cubic-bezier(.2,.8,.2,1), background .24s; }
+.vs-auth-page .vs-auth-role[aria-pressed='true'] { box-shadow: 0 -3px 0 #ffb894; }
+.vs-auth-page :is(input:not([type='checkbox']), select, textarea) { min-height: 48px; font-size: 24px; border-bottom-width: 1.5px; transition: background-color .16s, border-color .16s; }
+.vs-auth-page :is(input:not([type='checkbox']), select, textarea):focus { border-bottom-color: #517dab; background-color: #bfe3f54d; }
+.vs-auth-page .vs-auth-form :is(button[type='submit'], .vs-auth-primary-link), .vs-auth-page a.vs-auth-primary-link { min-height: 50px; border-radius: 14px; background: #041d3d; box-shadow: 0 4px 0 #28517c; transition: transform .16s, box-shadow .16s; }
+.vs-auth-page .vs-auth-form :is(button[type='submit'], .vs-auth-primary-link):hover, .vs-auth-page a.vs-auth-primary-link:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #28517c; }
+.vs-auth-page .vs-auth-form :is(button[type='submit'], .vs-auth-primary-link):active, .vs-auth-page a.vs-auth-primary-link:active { transform: translateY(3px); box-shadow: 0 1px 0 #28517c; }
+.vs-auth-page .vs-auth-options a, .vs-auth-page .vs-auth-register-link a, .vs-auth-page .vs-auth-under-card a { text-decoration-thickness: 1.5px; text-underline-offset: 4px; }
+.vs-auth-page .vs-auth-scene { border-radius: 28px 0 0 28px; overflow: hidden; }
+.vs-auth-page .nb-night--auth .nb-night-says { font-size: 27px; }
+.vs-auth-footer .nb-footer-bottom { min-height: 84px; font-size: 17px; }
+.vs-auth-footer .nb-footer-bottom::before { content: '✦'; color: #ffb894; margin-right: 8px; }
+.vs-auth-footer .nb-footer-links::before { content: '⌁'; color: #517dab; margin-right: 14px; }
+.vs-auth-page .vs-auth-sticky { border: 1.5px solid #041d3d1f; border-radius: 18px; box-shadow: 5px 6px 0 #d6e2e6; }
+.auth-page { min-height: 100vh; padding: 32px; color: #041d3d; background: radial-gradient(900px 520px at 0 -12%, #e6f4fb, transparent 62%), radial-gradient(760px 520px at 100% 0, #ffe9dc, transparent 58%), #f9f6ee; }
+.auth-frame { width: min(1120px, 100%); min-height: calc(100vh - 64px); margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) 360px; align-items: center; gap: 64px; }
+.auth-panel { padding: clamp(28px, 5vw, 68px); border: 1.5px solid #041d3d26; border-radius: 28px; background: #f9f6ee; box-shadow: 0 16px 34px -18px #041d3d55, 8px 8px 0 #d6e2e6; }
+.auth-panel h1 { margin: 24px 0 16px; font-size: clamp(42px, 5vw, 64px); line-height: 1.05; }
+.auth-panel h2 { margin-top: 36px; font-size: 30px; }
+.auth-panel p { max-width: 620px; margin-top: 16px; font-size: 20px; line-height: 1.4; color: #193e69; }
+.auth-panel nav { margin-top: 28px; }
+.auth-panel .text-link { color: #041d3d; text-decoration-thickness: 1.5px; text-underline-offset: 4px; }
+.auth-visual { min-height: 460px; overflow: hidden; border: 2px solid #041d3d; border-radius: 28px; box-shadow: 10px 12px 0 #517dab; transform: rotate(2deg); }
+.auth-visual img { width: 100%; height: 100%; min-height: 460px; object-fit: cover; }
+@media (max-width: 760px) { .auth-page { padding: 20px; } .auth-frame { display: block; min-height: calc(100vh - 40px); } .auth-panel { padding: 28px 22px; } .auth-visual { display: none; } }
+@media (prefers-reduced-motion: reduce) { .vs-auth-signin-card, .vs-auth-register-card, .vs-auth-page .vs-auth-role, .vs-auth-page .vs-auth-form :is(button[type='submit'], .vs-auth-primary-link) { transition: none; } }
+
+/* Shared formal product frame for sign-in, registration, and student PIN access. */
+.vs-auth-page { background: #f9f6ee; }
+.vs-auth-page .nb-header { width: min(1200px, 100%); margin: 0 auto; padding-inline: 32px; }
+.vs-auth-page .vs-auth-body { width: min(1200px, 100%); margin: 0 auto; grid-template-columns: minmax(0, 1fr) 320px; gap: 48px; }
+.vs-auth-page .vs-auth-signin { padding: 72px 0 96px; }
+.vs-auth-page .vs-auth-intro h1 { font-size: clamp(38px, 4vw, 52px); }
+.vs-auth-page .vs-auth-signin-card, .vs-auth-page .vs-auth-register-card { border: 1.5px solid rgb(4 29 61 / .14); border-radius: 18px; box-shadow: 0 10px 30px -12px rgb(4 29 61 / .18); }
+.vs-auth-page .vs-auth-signin-card { margin-top: 48px; padding: 32px 40px 36px 72px; }
+.vs-auth-page .vs-auth-form { gap: 20px; }
+.vs-auth-page .vs-auth-form :is(button[type='submit'], .vs-auth-primary-link) { min-height: 48px; border-radius: 14px; box-shadow: 0 4px 0 #28517c; }
+.vs-auth-page .vs-auth-scene { border-radius: 28px; margin: 32px 0; }
+.vs-auth-page--register .vs-auth-body { width: min(1200px, 100%); margin: 0 auto; padding-inline: 32px; gap: 48px; }
+.vs-auth-page--register .vs-auth-register-card { padding: 40px 40px 40px 72px; }
+.vs-auth-page--register .vs-auth-register-story { padding-top: 72px; }
+@media (max-width: 900px) {
+  .vs-auth-page .nb-header { padding-inline: 24px; }
+  .vs-auth-page .vs-auth-body { display: block; width: min(720px, 100%); padding-inline: 24px; }
+  .vs-auth-page .vs-auth-signin { padding-block: 56px 72px; }
+  .vs-auth-page .vs-auth-scene { display: none; }
+  .vs-auth-page--register .vs-auth-body { padding-inline: 24px; }
+  .vs-auth-page--register .vs-auth-register-story { padding-top: 56px; }
+}
+
+@media (min-width: 901px) {
+  .vs-auth-page .vs-auth-body { min-height: calc(100vh - 172px); align-items: stretch; }
+  .vs-auth-page .vs-auth-signin { display: flex; flex-direction: column; justify-content: center; }
+  .vs-auth-page .vs-auth-signin-card { width: min(100%, 620px); align-self: center; margin-top: 72px; }
+  .vs-auth-page .vs-auth-scene { min-height: 0; margin: 16px 0; }
+  .vs-auth-page .vs-auth-scene .nb-night { height: 100%; min-height: 0; }
+  .vs-auth-page .nb-night--auth .nb-night-says { bottom: 40px; }
+}
+
+@media (min-width: 901px) and (max-height: 840px) {
+  .vs-auth-page .vs-auth-intro h1 { font-size: 44px; }
+  .vs-auth-page .vs-auth-intro p { font-size: 20px; margin-top: 8px; }
+  .vs-auth-page .vs-auth-signin-card { margin-top: 64px; padding-block: 24px 28px; }
+  .vs-auth-page .vs-auth-form { gap: 14px; }
+  .vs-auth-page .vs-auth-scene { margin-block: 12px; }
+  .vs-auth-page .nb-night--auth .nb-night-says { bottom: 28px; font-size: 24px; }
+}

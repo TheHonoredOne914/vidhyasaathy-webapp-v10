@@ -1,0 +1,12 @@
+﻿
+ RUN  v3.2.7 C:/Users/jce/OneDrive/Desktop/VidhyaSaathy/Frontend/vidhyasaathy-webapp/apps/web
+
+ Γ£ô |web| src/games/newton/newton.test.ts (5 tests) 29ms
+ Γ£ô |web| src/games/graphs/graphs.test.ts (5 tests) 24ms
+
+ Test Files  2 passed (2)
+      Tests  10 passed (10)
+   Start at  14:42:04
+   Duration  17.09s (transform 1.15s, setup 0ms, collect 4.10s, tests 53ms, environment 1ms, prepare 2.04s)
+
+

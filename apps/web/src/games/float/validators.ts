@@ -1,0 +1,6 @@
+import type { Feedback } from '../engine/types';
+
+export const freeFallValidator = (g: number): Feedback => Math.abs(g) < 0.05 ? { correct: true, feedback: 'Correct. In free fall, g is zero and apparent weight vanishes.' } : { correct: false, feedback: 'Set gravity to 0 m/s². Free fall means no support force.' };
+export const massWeightValidator = (mass: number, weight: number, planet: string): Feedback => planet === 'Moon' && Math.abs(mass - 60) < .1 && Math.abs(weight - 96.6) < .2 ? { correct: true, feedback: 'Correct. Mass stays 60 kg; Moon weight is 60 × 1.61 = 96.6 N.' } : { correct: false, feedback: 'Choose Moon with mass 60 kg. Weight should be about 96.6 N, while mass stays 60 kg.' };
+export const pressureValidator = (area: number, thrust: number): Feedback => area <= 25 && thrust === 100 ? { correct: true, feedback: 'Correct. With the same 100 N thrust, 25 cm² gives greater pressure.' } : { correct: false, feedback: 'Keep thrust at 100 N and reduce contact area to 25 cm² or less.' };
+export const archimedesValidator = (air: number, submerged: number): Feedback => Math.abs(air - 8) < .1 && Math.abs(submerged - 5) < .1 ? { correct: true, feedback: 'Correct. Upthrust is the apparent weight loss: 8 N − 5 N = 3 N.' } : { correct: false, feedback: 'Use the 8 N air reading and 5 N submerged reading.' };

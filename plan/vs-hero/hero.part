@@ -1,0 +1,28 @@
+
+<nav><a class="brand" href="#"><img src="logo-mark.png" alt=""><span>VidhyaSaathy</span></a>
+<div class="links"><a href="#">How it works</a><a href="#">For parents</a><a href="#">Safety</a></div>
+<a class="reg" href="#">Register your school</a></nav>
+<section class="hero">
+ <div class="night"><div class="frame"></div>
+  <svg class="lamp" viewBox="0 0 110 120" fill="none" stroke="#FFB38A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 112 L86 112 M54 112 L46 70 L74 40 M64 30 C 70 14, 96 14, 104 32 Z"/><path d="M90 46 l2 8 M78 48 l-3 8" opacity=".7"/></svg>
+  <svg class="star" style="left:30%;top:18%" viewBox="0 0 14 14"><path d="M7 1 L7.4 12.6 M1.2 7.2 L12.8 6.6" stroke="#FFF8EE" stroke-width="2" stroke-linecap="round"/></svg>
+  <svg class="star" style="left:62%;top:44%" viewBox="0 0 14 14"><path d="M7 1 L7 13 M1 7 L13 7.4 M3 3 L11 11" stroke="#FFF8EE" stroke-width="2" stroke-linecap="round"/></svg>
+  <svg class="star" style="left:86%;top:56%;transform:scale(.7)" viewBox="0 0 14 14"><path d="M7 1 L7.3 13 M1 7.3 L13 6.8" stroke="#7FB3FF" stroke-width="2" stroke-linecap="round"/></svg>
+  <p class="time9">9:00 pm<br>still here.</p>
+ </div>
+ <div class="copy">
+  <p class="eyebrow">3:40 pm, school's out</p>
+  <h1>Learning doesn't stop at the <span class="bell">bell.<svg class="ul" viewBox="0 0 200 24" preserveAspectRatio="none"><path d="M3 15 C 30 9, 62 18, 95 12 S 160 7, 196 13 M14 20 C 60 15, 120 20, 170 16" fill="none" stroke="#FFB38A" stroke-width="4" stroke-linecap="round"/></svg><svg class="bd" viewBox="0 0 56 60" fill="none" stroke="#13224A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M28 6 L28 11 M14 40 C 16 30, 13 13, 28 12 C 43 12, 40 30, 43 40 Z M10 41 L46 40 M24 46 C 25 50, 31 50, 32 46"/><path d="M6 16 C 3 20, 3 26, 5 30 M50 15 C 53 19, 54 25, 51 30" stroke="#7FB3FF"/></svg></span></h1>
+  <p class="sub">Your school's notes, practice and Saathy, every evening.</p>
+  <div class="ctas"><a class="btn" href="#">See how it works</a><a class="tl" href="#">Register your school</a></div>
+  <p class="trust">for <b>students</b> · <b>teachers</b> · <b>parents</b> · <b>schools</b></p>
+ </div>
+ <svg class="path" viewBox="0 0 1280 712" preserveAspectRatio="none"><path vector-effect="non-scaling-stroke" d="M410 540 C 510 548, 640 520, 735 440" fill="none" stroke="#7FB3FF" stroke-width="2" stroke-dasharray="2 9" stroke-linecap="round"/></svg>
+ <div class="ground"></div><img class="mascot" src="mascot.png" alt="Saathy, the cloud mascot">
+ <div class="note">this is Saathy<svg viewBox="0 0 70 60"><path d="M2 20 C 20 6, 40 8, 60 30 M60 30 L48 28 M60 30 L58 18" fill="none" stroke="#13224A" stroke-width="2" stroke-linecap="round"/></svg></div>
+ <div class="phone"><img src="chat-crop.jpg" alt="Saathy explaining the Cartesian plane with an interactive graph"></div>
+ <div class="games"><p>tonight's games</p><div class="row">
+  <div class="pol"><img src="g-bio-quest.jpg" alt=""><small>Bio Quest</small></div>
+  <div class="pol"><img src="g-atom-workshop-3d.jpg" alt=""><small>Atom Workshop</small></div>
+  <div class="pol"><img src="g-reflection-lab.jpg" alt=""><small>Reflection Lab</small></div></div></div>
+</section>

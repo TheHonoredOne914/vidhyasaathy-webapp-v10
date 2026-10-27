@@ -1,0 +1,199 @@
+- generic [ref=e2]:
+  - link "Skip to content" [ref=e3] [cursor=pointer]:
+    - /url: "#content"
+  - generic [ref=e4]:
+    - navigation "Primary" [ref=e5]:
+      - link "VidhyaSaathy Learning, with you" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e8]:
+          - generic [ref=e9]: VidhyaSaathy
+          - generic [ref=e10]: Learning, with you
+      - button "Open menu" [ref=e11] [cursor=pointer]
+      - generic [ref=e13]:
+        - link "Register a school" [ref=e14] [cursor=pointer]:
+          - /url: /register-school
+        - link "Sign in" [ref=e15] [cursor=pointer]:
+          - /url: /signin
+    - main [ref=e18]:
+      - region [ref=e19]:
+        - generic [ref=e20]:
+          - paragraph [ref=e21]: Your school, beyond the classroom
+          - heading "Learning doesn't have to stop when the school bell rings." [level=1] [ref=e25]
+          - paragraph [ref=e26]: After school, students continue the lesson their teacher shared. Teachers see what to take up next. Parents can tell how to help.
+          - generic [ref=e27]:
+            - link "Sign in to your school" [ref=e28] [cursor=pointer]:
+              - /url: /signin
+            - link "Register a school" [ref=e31] [cursor=pointer]:
+              - /url: /register-school
+          - paragraph [ref=e32]:
+            - text: Already have an account?
+            - link "Sign in" [ref=e33] [cursor=pointer]:
+              - /url: /signin
+            - text: with your school details.
+        - generic [ref=e34]:
+          - img "Cloud mascot at a laptop on a wooden desk, with books and plants by the window." [ref=e35]
+          - paragraph [ref=e36]: Better Learning, Brighter Futures
+      - region [ref=e37]:
+        - generic [ref=e38]:
+          - generic [ref=e39]:
+            - heading "One school. Four ways in." [level=2] [ref=e40]
+            - paragraph [ref=e41]: Students, teachers, parents and the office share the same classes.
+          - generic [ref=e42]:
+            - article [ref=e43]:
+              - heading "For Students" [level=3] [ref=e48]
+              - paragraph [ref=e49]: Continue with the lessons your school shared, then practise the same ideas.
+              - link "See the student screens" [ref=e50] [cursor=pointer]:
+                - /url: "#inside"
+            - article [ref=e53]:
+              - heading "For Teachers" [level=3] [ref=e57]
+              - paragraph [ref=e58]: Share notes, set the next session, and see which concepts still need work.
+              - link "What teachers share" [ref=e59] [cursor=pointer]:
+                - /url: "#after-the-bell"
+            - article [ref=e62]:
+              - heading "For Parents" [level=3] [ref=e69]
+              - paragraph [ref=e70]: See what your child worked on, and what is worth a few minutes at home.
+              - link "What parents see" [ref=e71] [cursor=pointer]:
+                - /url: "#after-the-bell"
+            - article [ref=e74]:
+              - heading "For School Admins" [level=3] [ref=e81]
+              - paragraph [ref=e82]: Manage your school, classes, teachers and students in one place.
+              - link "Register a school" [ref=e83] [cursor=pointer]:
+                - /url: /register-school
+      - region [ref=e86]:
+        - generic [ref=e88]:
+          - generic [ref=e89]:
+            - paragraph [ref=e90]: The learning loop
+            - heading "From classroom to home, step by step." [level=2] [ref=e91]
+            - paragraph [ref=e92]: The same lesson moves from the teacher, to the student, to the idea that still needs work.
+            - paragraph [ref=e93]:
+              - link "See it on a real screen" [ref=e94] [cursor=pointer]:
+                - /url: "#inside"
+          - list [ref=e95]:
+            - listitem [ref=e96]:
+              - generic [aria-hidden] [ref=e97]: "1"
+              - heading "Teacher shares a lesson" [level=3] [ref=e98]
+              - paragraph [ref=e99]: Notes and resources the school has approved.
+            - listitem [ref=e100]:
+              - generic [aria-hidden] [ref=e101]: "2"
+              - heading "Student studies and practises" [level=3] [ref=e102]
+              - paragraph [ref=e103]: The lesson, then questions on those ideas.
+            - listitem [ref=e104]:
+              - generic [aria-hidden] [ref=e105]: "3"
+              - heading "Learning evidence highlights what needs attention" [level=3] [ref=e106]
+              - paragraph [ref=e107]: The answers show the idea the class is still missing.
+            - listitem [ref=e108]:
+              - generic [aria-hidden] [ref=e109]: "4"
+              - heading "Student gets a suitable next step, and the teacher can respond to gaps" [level=3] [ref=e110]
+              - paragraph [ref=e111]: Practice on that gap, which the teacher can see.
+      - region [ref=e112]:
+        - generic [ref=e113]:
+          - generic [ref=e114]:
+            - heading "Inside VidhyaSaathy" [level=2] [ref=e115]
+            - paragraph [ref=e116]: A lesson in chat, a picture of how that student learns, a numerical game, and a paper marked like a board exam.
+          - figure [ref=e117]:
+            - img "Saathy explaining the Cartesian plane for Class 9, with a graph the student can drag." [ref=e118]
+            - generic [ref=e119]:
+              - heading "Ask Saathy in the lesson" [level=3] [ref=e120]
+              - paragraph [ref=e121]: Class 9 mathematics. The axes, in the words of the chapter, then a line the student can move.
+          - generic [ref=e122]:
+            - figure [ref=e123]:
+              - 'img "Learning profile for a motion lesson: difficulty moving from L2 to L3, shorter steps, diagrams first, and fewer hints." [ref=e124]'
+              - generic [ref=e125]:
+                - heading "Four ways the lesson changes" [level=3] [ref=e126]
+                - paragraph [ref=e127]: "From recent work: difficulty, pace, whether a diagram helps, and when a hint should wait."
+            - figure [ref=e128]:
+              - img "Numerical game asking how far a bus goes from rest at 2 metres per second squared for 5 seconds, with the area under the velocity graph shaded." [ref=e129]
+              - generic [ref=e130]:
+                - heading "A numerical game" [level=3] [ref=e131]
+                - paragraph [ref=e132]: A bus starts from rest and accelerates at 2 m/s² for 5 s. Shade the area, then choose the distance.
+            - figure [ref=e133]:
+              - img "Board examiner marking a handwritten solution of a motion question, with the final mark lost for a missing unit." [ref=e134]
+              - generic [ref=e135]:
+                - heading "Marked like a board exam" [level=3] [ref=e136]
+                - paragraph [ref=e137]: Handwritten working, checked against the mark scheme. One mark goes because the answer has no unit.
+      - region [ref=e138]:
+        - generic [ref=e139]:
+          - heading "Learning games" [level=2] [ref=e141]
+          - generic [ref=e142]:
+            - figure [ref=e143]:
+              - img "Bio Quest level on the cell membrane, with diffusion, osmosis, a carrier protein and the sodium-potassium pump." [ref=e144]
+              - generic [ref=e145]:
+                - heading "Bio Quest" [level=3] [ref=e146]
+                - paragraph [ref=e147]: The cell membrane. Each molecule has to go through the right gate.
+            - figure [ref=e148]:
+              - img "Atom Workshop 3D, adding a neutron to a carbon nucleus to make the isotope carbon-13." [ref=e149]
+              - generic [ref=e150]:
+                - heading "Atom Workshop 3D" [level=3] [ref=e151]
+                - paragraph [ref=e152]: Add a neutron to carbon. The element stays carbon. The mass number changes. That is an isotope.
+            - figure [ref=e153]:
+              - img "Reflection Lab, a torch on a dark grid with a ray of light aimed across the board." [ref=e154]
+              - generic [ref=e155]:
+                - heading "Reflection Lab" [level=3] [ref=e156]
+                - paragraph [ref=e157]: A torch and a ray. See where the light goes.
+            - figure [ref=e158]:
+              - img "Tinker level for the early humans chapter, a side-view scene in front of a lit building." [ref=e159]
+              - generic [ref=e160]:
+                - heading "Tinker" [level=3] [ref=e161]
+                - paragraph [ref=e162]: A chapter you can move through, not only read. This one is early humans.
+          - paragraph [ref=e163]: All these games are developed for the conceptual learning of students.
+      - region [ref=e164]:
+        - generic [ref=e166]:
+          - generic [ref=e167]:
+            - heading "After the bell, school and home stay in touch." [level=2] [ref=e168]
+            - paragraph [ref=e169]: Teachers and parents see the same day, without sitting in the classroom.
+          - list [ref=e170]:
+            - listitem [ref=e171]:
+              - generic [ref=e176]:
+                - heading "Daily teacher report" [level=3] [ref=e177]
+                - paragraph [ref=e178]: A short account of what the class did that day.
+            - listitem [ref=e179]:
+              - generic [ref=e186]:
+                - heading "Parent view" [level=3] [ref=e187]
+                - paragraph [ref=e188]: What your child finished, and one thing to ask about at home.
+            - listitem [ref=e189]:
+              - generic [ref=e194]:
+                - heading "Notes from the teacher" [level=3] [ref=e195]
+                - paragraph [ref=e196]: The pages uploaded for that class, still there after school.
+            - listitem [ref=e197]:
+              - generic [ref=e201]:
+                - heading "A friendly challenge" [level=3] [ref=e202]
+                - paragraph [ref=e203]: A short task from the teacher. Not a public ranking.
+      - region [ref=e204]:
+        - generic [ref=e205]:
+          - heading "The school stays in charge of the answers." [level=2] [ref=e207]
+          - generic [ref=e208]:
+            - article [ref=e209]:
+              - heading "School-connected" [level=3] [ref=e210]
+              - paragraph [ref=e213]: Saathy is meant to answer from the notes your school uploaded. If the question is not in those notes, it should say so, instead of inventing a page.
+            - article [ref=e214]:
+              - heading "Privacy and child safety" [level=3] [ref=e215]
+              - paragraph [ref=e218]: A student sees their class. A teacher sees the classes they teach. A parent sees the child linked to them. A chat with Saathy is not handed to parents as a transcript. What a parent gets is a summary.
+              - paragraph [ref=e219]:
+                - link "Read the privacy notes" [ref=e220] [cursor=pointer]:
+                  - /url: /privacy
+      - region [ref=e221]:
+        - generic [ref=e224]:
+          - heading "A school system where no child needs a coaching class to understand their own textbook." [level=2] [ref=e225]
+          - generic [ref=e226]:
+            - link "Register a school" [ref=e227] [cursor=pointer]:
+              - /url: /register-school
+            - link "Sign in" [ref=e228] [cursor=pointer]:
+              - /url: /signin
+    - contentinfo [ref=e231]:
+      - link "VidhyaSaathy Learning, with you" [ref=e232] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e234]:
+          - generic [ref=e235]: VidhyaSaathy
+          - generic [ref=e236]: Learning, with you
+      - navigation "Footer" [ref=e237]:
+        - link "How it works" [ref=e238] [cursor=pointer]:
+          - /url: "#how-it-works"
+        - link "Inside VidhyaSaathy" [ref=e239] [cursor=pointer]:
+          - /url: "#inside"
+        - link "The idea" [ref=e240] [cursor=pointer]:
+          - /url: "#vision"
+        - link "Privacy" [ref=e241] [cursor=pointer]:
+          - /url: /privacy
+        - link "Register a school" [ref=e242] [cursor=pointer]:
+          - /url: /register-school
+      - paragraph [ref=e243]: © 2026 VidhyaSaathy

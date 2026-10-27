@@ -1,0 +1,778 @@
+:root {
+  --vs-midnight: #13224a;
+  --vs-navy: #24375f;
+  --vs-navy-2: #28517c;
+  --vs-steel: #517dab;
+  --vs-ivory: #fff8ee;
+  --vs-ice: #d6e2e6;
+  --vs-mk-bg-top: #09213b;
+  --vs-mk-bg: #1c3d65;
+  --vs-mk-bg-deep: #0c2948;
+  --vs-mk-card: rgb(41 76 123 / 55%);
+  --vs-mk-card-border: rgb(127 179 255 / 18%);
+  --vs-mk-accent: #7fb3ff;
+  --vs-mk-btn-grad: #7fb3ff;
+  --vs-mk-text: #fff;
+  --vs-mk-muted: rgb(255 255 255 / 72%);
+  --vs-mk-input: #162f4a;
+  --vs-mk-panel: #0d284b;
+  --vs-rg-page: #e7eef1;
+  --vs-rg-body: #f2f5f7;
+  --vs-rg-title: #1e4573;
+  --vs-app-bg: #fbf4ec;
+  --vs-app-bg-desk: #f9f6ee;
+  --vs-app-header: #fdf8f2;
+  --vs-card: #fff8ee;
+  --vs-card-border: #f1d9c4;
+  --vs-card-head: #eef4fa;
+  --vs-divider: #dce7f1;
+  --vs-text: #041d3d;
+  --vs-text-2: #46576d;
+  --vs-text-3: #99abc0;
+  --vs-meta-brown: #8a4b1e;
+  --vs-peach: #fdebdd;
+  --vs-peach-strong: #ffb38a;
+  --vs-success-bg: #d3e4d4;
+  --vs-success-text: #2f5e3a;
+  --vs-sidebar: #041d3d;
+  --vs-sidebar-active: #193e69;
+  --vs-input-border: #e5d3c2;
+  --vs-desktop-card-border: #e3e6ea;
+  --vs-font: var(--font-sans);
+  --vs-type-display: 56px;
+  --vs-type-display-mobile: 36px;
+  --vs-type-section: 36px;
+  --vs-type-section-mobile: 26px;
+  --vs-type-title: 28px;
+  --vs-type-title-mobile: 22px;
+  --vs-type-card: 18px;
+  --vs-type-card-mobile: 17px;
+  --vs-type-body: 16px;
+  --vs-type-small: 14px;
+  --vs-type-eyebrow: 12px;
+  --vs-type-caption: 12px;
+  --vs-space-1: 4px;
+  --vs-space-2: 8px;
+  --vs-space-3: 12px;
+  --vs-space-4: 16px;
+  --vs-space-5: 20px;
+  --vs-space-6: 24px;
+  --vs-space-8: 32px;
+  --vs-space-12: 48px;
+  --vs-space-16: 64px;
+  --vs-space-24: 96px;
+  --vs-radius-pill: 999px;
+  --vs-radius-input: 10px;
+  --vs-radius-card: 14px;
+  --vs-radius-marketing: 16px;
+  --vs-radius-frame: 24px;
+  --vs-radius-chip: 8px;
+  --vs-shadow-card: 0 1px 2px rgb(4 29 61 / 4%);
+  --vs-shadow-marketing: 0 10px 30px rgb(0 0 0 / 18%), inset 0 1px 0 rgb(255 255 255 / 6%);
+  --vs-shadow-marketing-button: 0 6px 20px rgb(127 179 255 / 35%);
+  --vs-shadow-registration: 0 20px 50px rgb(4 29 61 / 10%);
+  --vs-sidebar-width: 240px;
+}
+
+.vs-page {
+  min-width: 0;
+  color: var(--vs-text);
+  font-family: var(--vs-font);
+  font-size: var(--vs-type-body);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.vs-page *,
+.vs-page *::before,
+.vs-page *::after {
+  box-sizing: border-box;
+}
+
+.vs-page :is(a, button):focus-visible {
+  outline: 2px solid var(--vs-steel);
+  outline-offset: 3px;
+}
+
+.vs-page-header {
+  max-width: 720px;
+  margin-bottom: var(--vs-space-8);
+}
+
+.vs-eyebrow {
+  margin: 0 0 var(--vs-space-3);
+  color: var(--vs-navy-2);
+  font-size: var(--vs-type-eyebrow);
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.vs-page h1 {
+  margin: 0;
+  color: var(--vs-text);
+  font-size: var(--vs-type-title-mobile);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.vs-page-header > p:not(.vs-eyebrow),
+.vs-status-description {
+  margin: var(--vs-space-4) 0 0;
+  max-width: 64ch;
+  color: var(--vs-text-2);
+}
+
+.vs-card {
+  min-width: 0;
+  border: 1px solid var(--vs-card-border);
+  border-radius: var(--vs-radius-card);
+  background: var(--vs-card);
+  box-shadow: var(--vs-shadow-card);
+}
+
+.vs-card-heading {
+  margin: 0;
+  padding: var(--vs-space-4) var(--vs-space-5);
+  border-bottom: 1px solid var(--vs-divider);
+  border-radius: var(--vs-radius-card) var(--vs-radius-card) 0 0;
+  background: var(--vs-card-head);
+  color: var(--vs-navy);
+  font-size: var(--vs-type-card-mobile);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.vs-card-body {
+  padding: var(--vs-space-5);
+  color: var(--vs-text-2);
+}
+
+.vs-card-body > p {
+  margin: 0;
+}
+
+.vs-action,
+.vs-invite-card form > button[type="submit"] {
+  display: inline-flex;
+  min-height: 44px;
+  max-width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: var(--vs-space-3);
+  padding: var(--vs-space-3) var(--vs-space-6);
+  border: 1px solid var(--vs-navy);
+  border-radius: var(--vs-radius-pill);
+  background: var(--vs-navy);
+  color: var(--vs-card);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color 150ms, border-color 150ms;
+}
+
+.vs-action:hover,
+.vs-invite-card form > button[type="submit"]:hover:not(:disabled) {
+  border-color: var(--vs-navy-2);
+  background: var(--vs-navy-2);
+}
+
+.vs-recovery-grid,
+.vs-join-grid {
+  display: grid;
+  gap: var(--vs-space-4);
+}
+
+.vs-recovery-grid .vs-card,
+.vs-join-grid .vs-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.vs-recovery-grid .vs-card-body,
+.vs-join-grid .vs-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--vs-space-6);
+}
+
+.vs-recovery-grid .vs-action,
+.vs-join-grid .vs-action {
+  margin-top: auto;
+}
+
+.vs-notice {
+  margin-top: var(--vs-space-6);
+  padding: var(--vs-space-4) var(--vs-space-5);
+  border: 1px solid var(--vs-steel);
+  border-radius: var(--vs-radius-chip);
+  background: var(--vs-card-head);
+  color: var(--vs-text-2);
+  font-size: 14px;
+}
+
+.vs-notice p {
+  margin: 0;
+}
+
+.vs-notice strong {
+  color: var(--vs-navy);
+}
+
+.vs-privacy-layout {
+  display: grid;
+  align-items: start;
+  gap: var(--vs-space-6);
+}
+
+.vs-contents {
+  padding: var(--vs-space-5);
+}
+
+.vs-contents h2 {
+  margin: 0 0 var(--vs-space-2);
+  color: var(--vs-navy);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.vs-contents ul {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vs-contents a {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  padding: var(--vs-space-2) 0;
+  color: var(--vs-navy);
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.vs-privacy-article {
+  padding: 0 var(--vs-space-5);
+}
+
+.vs-privacy-article section {
+  padding: var(--vs-space-6) 0;
+  scroll-margin-top: var(--vs-space-6);
+}
+
+.vs-privacy-article section + section {
+  border-top: 1px solid var(--vs-divider);
+}
+
+.vs-privacy-article h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.vs-privacy-article p {
+  margin: var(--vs-space-3) 0 0;
+  color: var(--vs-text-2);
+}
+
+.vs-status-page {
+  max-width: 720px;
+  margin: var(--vs-space-6) auto;
+}
+
+.vs-status-card {
+  padding: var(--vs-space-6);
+  border-top: 4px solid var(--vs-navy);
+}
+
+.vs-status-mascot {
+  display: block;
+  width: 96px;
+  height: 96px;
+  margin: 0 0 var(--vs-space-4);
+  object-fit: contain;
+}
+
+.vs-status-code {
+  margin: 0 0 var(--vs-space-6);
+  color: var(--vs-navy);
+  font-size: 64px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.vs-status-card .vs-action {
+  margin-top: var(--vs-space-6);
+}
+
+.vs-class-grid,
+.vs-claim-grid {
+  display: grid;
+  gap: var(--vs-space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vs-class-grid .vs-card-heading {
+  padding: 0;
+}
+
+.vs-class-link {
+  display: flex;
+  min-height: 52px;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--vs-space-4);
+  padding: var(--vs-space-3) var(--vs-space-5);
+  border-radius: var(--vs-radius-card) var(--vs-radius-card) 0 0;
+  color: var(--vs-navy);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.vs-class-link:hover {
+  background: var(--vs-ice);
+}
+
+.vs-class-details {
+  display: grid;
+  gap: var(--vs-space-5);
+}
+
+.vs-class-details h3 {
+  margin: 0 0 var(--vs-space-2);
+  color: var(--vs-navy);
+  font-size: var(--vs-type-small);
+  font-weight: 700;
+}
+
+.vs-class-details ul {
+  display: grid;
+  gap: var(--vs-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vs-invite-page {
+  max-width: 640px;
+  margin-inline: auto;
+}
+
+.vs-invite-card {
+  padding: var(--vs-space-6);
+}
+
+.vs-invite-card > header {
+  margin-bottom: var(--vs-space-6);
+}
+
+.vs-invite-card > header p {
+  color: var(--vs-text-2);
+}
+
+.vs-invite-card form {
+  max-width: none;
+}
+
+.vs-invite-card label {
+  color: var(--vs-text);
+  font-size: var(--vs-type-small);
+  font-weight: 700;
+}
+
+.vs-invite-card input {
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid var(--vs-input-border);
+  border-radius: var(--vs-radius-input);
+  background: var(--vs-card);
+  color: var(--vs-text);
+  font: inherit;
+}
+
+.vs-invite-card input:focus-visible {
+  outline: 2px solid var(--vs-steel);
+  outline-offset: 2px;
+}
+
+.vs-invite-card input[aria-invalid="true"] {
+  border-color: var(--vs-meta-brown);
+}
+
+.vs-invite-card [role="alert"] {
+  color: var(--vs-meta-brown);
+}
+
+.vs-empty-card,
+.vs-claim-slip {
+  padding: var(--vs-space-6);
+}
+
+.vs-empty-card > div {
+  max-width: none;
+}
+
+.vs-empty-card h2,
+.vs-claim-slip h2 {
+  margin: 0;
+  color: var(--vs-text);
+  font-size: var(--vs-type-card-mobile);
+  font-weight: 700;
+}
+
+.vs-claim-meta {
+  margin-top: var(--vs-space-2);
+  color: var(--vs-text-2);
+  font-size: var(--vs-type-small);
+}
+
+.vs-claim-code {
+  margin-block: var(--vs-space-5);
+  color: var(--vs-navy);
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+}
+
+.vs-claim-expiry {
+  color: var(--vs-meta-brown);
+  font-size: var(--vs-type-caption);
+}
+
+/* Only these route roots opt the existing public shell into this theme. */
+#root > div:has(> main > .vs-page) {
+  background: var(--vs-app-bg);
+  font-family: var(--vs-font);
+}
+
+#root > div:has(> main > .vs-page) > header {
+  border-color: var(--vs-divider);
+  background: var(--vs-app-header);
+}
+
+#root > div:has(> main > .vs-page) > :is(header, footer) > div,
+#root > div:has(> main > .vs-page) > :is(main, footer) {
+  max-width: 1120px;
+}
+
+#root > div:has(> main > .vs-page) > main {
+  padding-block: var(--vs-space-8) var(--vs-space-12);
+}
+
+/* RoleHome is shared with Cursor-owned admin/student screens: do not edit it.
+   Match only its teacher/parent output, never other signed-in route content. */
+#root > div:is(:has(> main > header), :has(> main > .vs-role-page)):has(> header nav a:is([href="/teacher"], [href="/parent"])) {
+  background: var(--vs-app-bg);
+  color: var(--vs-text);
+  font-family: var(--vs-font);
+  overflow-wrap: anywhere;
+
+  & > header {
+    border-color: var(--vs-divider);
+    background: var(--vs-app-header);
+  }
+
+  & > main > header {
+    max-width: none;
+    margin-bottom: var(--vs-space-8);
+  }
+
+  & > main h1 {
+    color: var(--vs-text);
+    font-size: var(--vs-type-title-mobile);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  & > main > header p {
+    max-width: 64ch;
+    color: var(--vs-text-2);
+  }
+
+  & > main > h2 {
+    margin: var(--vs-space-6) 0 0;
+    padding: var(--vs-space-4) var(--vs-space-5);
+    border: 1px solid var(--vs-card-border);
+    border-bottom-color: var(--vs-divider);
+    border-radius: var(--vs-radius-card) var(--vs-radius-card) 0 0;
+    background: var(--vs-card-head);
+    color: var(--vs-navy);
+    font-size: var(--vs-type-card-mobile);
+    font-weight: 700;
+  }
+
+  & > main > ul[aria-label] {
+    gap: 0;
+    margin: 0 0 var(--vs-space-6);
+    padding: 0;
+    border: 1px solid var(--vs-card-border);
+    border-top: 0;
+    border-radius: 0 0 var(--vs-radius-card) var(--vs-radius-card);
+    background: var(--vs-card);
+    box-shadow: var(--vs-shadow-card);
+    list-style: none;
+  }
+
+  & > main > ul[aria-label] > li {
+    min-width: 0;
+    padding: var(--vs-space-2) var(--vs-space-5);
+    color: var(--vs-text-2);
+  }
+
+  & > main > ul[aria-label] > li + li {
+    border-top: 1px solid var(--vs-divider);
+  }
+
+  & > main > div {
+    max-width: none;
+    border: 1px solid var(--vs-card-border);
+    border-radius: var(--vs-radius-card);
+    background: var(--vs-card);
+    box-shadow: var(--vs-shadow-card);
+  }
+
+  & > main > h2 + div {
+    border-top: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+
+  & > main > div > h2 {
+    padding: var(--vs-space-4) var(--vs-space-5);
+    border-bottom: 1px solid var(--vs-divider);
+    border-radius: var(--vs-radius-card) var(--vs-radius-card) 0 0;
+    background: var(--vs-card-head);
+    color: var(--vs-navy);
+    font-size: var(--vs-type-card-mobile);
+    font-weight: 700;
+  }
+
+  & > main > div > div {
+    margin: 0;
+    padding: var(--vs-space-6);
+    color: var(--vs-text-2);
+  }
+
+  & > main > [role="status"] {
+    max-width: none;
+    padding: var(--vs-space-4);
+    border-radius: var(--vs-radius-chip);
+    background: var(--vs-card-head);
+    color: var(--vs-text-2);
+  }
+
+  @media (min-width: 1024px) {
+    display: grid;
+    grid-template-columns: var(--vs-sidebar-width) minmax(0, 1fr);
+    grid-template-rows: 1fr auto;
+    background: var(--vs-app-bg-desk);
+
+    & > header {
+      position: sticky;
+      top: 0;
+      grid-row: 1 / 3;
+      height: 100vh;
+      height: 100svh;
+      border: 0;
+      background: var(--vs-sidebar);
+      color: var(--vs-card);
+    }
+
+    & > header > div {
+      height: 100%;
+      max-width: none;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      align-items: stretch;
+      justify-content: flex-start;
+      gap: var(--vs-space-8);
+      padding: var(--vs-space-6) var(--vs-space-4);
+    }
+
+    & > header > div > a {
+      gap: var(--vs-space-2);
+      color: var(--vs-card);
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    & > header nav {
+      flex: 1;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      align-items: stretch;
+      gap: var(--vs-space-2);
+    }
+
+    & > header nav a {
+      min-height: 44px;
+      padding: var(--vs-space-3);
+      border-radius: var(--vs-radius-chip);
+      background: var(--vs-sidebar-active);
+      color: var(--vs-card);
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    & > header nav button {
+      margin-top: auto;
+      border: 1px solid var(--vs-steel);
+      border-radius: var(--vs-radius-pill);
+      background: transparent;
+      color: var(--vs-card);
+    }
+
+    & > header nav button:hover {
+      background: var(--vs-sidebar-active);
+    }
+
+    & > header :is(a, button):focus-visible {
+      outline: 2px solid var(--vs-mk-accent);
+      outline-offset: 3px;
+    }
+
+    & > :is(main, footer) {
+      min-width: 0;
+      max-width: 1120px;
+      padding-inline: var(--vs-space-8);
+    }
+
+    & > main {
+      padding-top: var(--vs-space-8);
+    }
+
+    & > main h1 {
+      font-size: var(--vs-type-title);
+    }
+
+    & > main > :is(div, h2, ul[aria-label]) {
+      border-color: var(--vs-desktop-card-border);
+    }
+  }
+}
+
+@media (min-width: 640px) {
+  .vs-recovery-grid,
+  .vs-join-grid,
+  .vs-class-grid,
+  .vs-claim-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--vs-space-6);
+  }
+
+  .vs-status-card {
+    padding: var(--vs-space-12);
+  }
+}
+
+@media (min-width: 1024px) {
+  .vs-join-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .vs-page h1 {
+    font-size: var(--vs-type-title);
+  }
+
+  .vs-card {
+    border-color: var(--vs-desktop-card-border);
+  }
+
+  .vs-card-heading,
+  .vs-privacy-article h2 {
+    font-size: var(--vs-type-card);
+  }
+
+  .vs-privacy-layout {
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: var(--vs-space-8);
+  }
+
+  .vs-contents {
+    position: sticky;
+    top: var(--vs-space-6);
+  }
+
+  .vs-privacy-article {
+    padding-inline: var(--vs-space-8);
+  }
+
+  #root > div:has(> main > .vs-page) {
+    background: var(--vs-app-bg-desk);
+  }
+
+  #root > div:has(> main > .vs-page) > main {
+    padding-block: var(--vs-space-12) var(--vs-space-16);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vs-page * {
+    scroll-behavior: auto;
+    transition: none;
+  }
+}
+
+@media print {
+  #root > div:has(> main > .vs-claim-page) {
+    display: block;
+    min-height: 0;
+    background: #fff;
+  }
+
+  #root > div:has(> main > .vs-claim-page) > :is(header, footer, a),
+  .vs-claim-page .no-print {
+    display: none;
+  }
+
+  #root > div:has(> main > .vs-claim-page) > main {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .vs-claim-page {
+    color: #000;
+    font-size: 11pt;
+  }
+
+  .vs-claim-page .vs-page-header {
+    max-width: none;
+    margin-bottom: 6mm;
+  }
+
+  .vs-claim-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6mm;
+  }
+
+  .vs-claim-slip {
+    break-inside: avoid;
+    padding: 6mm;
+    border: 1px solid #666;
+    border-radius: 0;
+    background: #fff;
+    box-shadow: none;
+  }
+
+  .vs-claim-slip :is(h2, p) {
+    color: #000;
+  }
+}

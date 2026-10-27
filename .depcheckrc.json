@@ -1,0 +1,4 @@
+{
+  "ignoreDirs": ["node_modules", ".git", ".npm-cache", "plan", "coverage", "test-results", "playwright-report"],
+  "ignores": ["@types/*"]
+}

@@ -1,0 +1,140 @@
+<!-- 2 WHO -->
+<section class="s" id="who"><div class="wrap">
+ <p class="kicker">who it's for</p>
+ <h2>One school, <span class="circ">four<svg viewBox="0 0 100 50" preserveAspectRatio="none"><path class="doodle" d="M8 28 C 4 8, 70 2, 92 18 C 104 30, 70 48, 34 46 C 10 44, 2 34, 14 20"/></svg></span> kinds of homework.</h2>
+ <div class="tt ruled paper"><div class="margin"></div>
+  <div class="title">Timetable, after the bell <small>written in by your school</small></div>
+  <table>
+   <tr><th style="width:110px"></th><th>Student</th><th>Teacher</th><th>Parent</th><th>School admin</th></tr>
+   <tr><td class="p">gets</td>
+    <td><ul><li>your teacher's notes and short sessions, one idea per slide</li><li>quizzes, games and friendly challenges</li><li>Saathy, for doubts at night</li></ul></td>
+    <td><ul><li>publish notes, sessions and quizzes per chapter</li><li>a <span class="hl">daily report</span>: who finished, which concept is weak</li><li>doubts grouped by topic</li></ul></td>
+    <td><ul><li>a dashboard with your child's progress</li><li>what was studied and what needs practice</li><li>never your child's private Saathy chats</li></ul></td>
+    <td><ul><li>set up classes, sections and subjects</li><li>invite teachers</li><li>import the roster and print claim sheets</li></ul></td></tr>
+   <tr><td class="p">signs in with</td><td>school code + PIN</td><td>email + password</td><td>email + password</td><td>email + password</td></tr>
+  </table>
+  <p class="note-a" style="right:-24px;bottom:-44px;transform:rotate(-3deg)">same app, a different page for each</p>
+ </div>
+</div></section>
+
+<!-- 3 DAY -->
+<section class="day" id="day"><div class="wrap">
+ <p class="kicker">a student's day</p>
+ <h2>What happens after 3:40.</h2>
+ <div class="tl-line"></div>
+ <div class="stop"><span class="dot"></span><div class="t">3:40 pm<small>school's out</small></div>
+  <div class="body">
+   <div class="slip ruled paper" style="transform:rotate(-1.5deg)"><span class="tape" style="left:140px;top:-10px;transform:rotate(3deg)"></span>
+    <h4>Ch 8 · Motion</h4>notes from class, by your teacher<br>· speed vs velocity<br>· <span class="hls">uniform acceleration</span><br>· s = ut + ½at²</div>
+   <div class="ann"><p>Your teacher's notes are waiting, the same ones from class.</p><p style="color:var(--muted)">Sessions unlock one slide at a time, and end with a short check.</p></div>
+  </div></div>
+ <div class="stop"><span class="dot"></span><div class="t">5:00 pm<small>a doubt</small></div>
+  <div class="body">
+   <div class="clip paper" style="transform:rotate(2deg)"><span class="tape sky" style="left:120px;top:-12px;transform:rotate(-4deg)"></span><img src="s-chat.jpg" width="260" alt="Saathy chat with an interactive graph"></div>
+   <div class="ann"><p>Ask Saathy. It answers <span class="hl">only from your teacher's material</span>, gives a hint before the answer, and shows which note it used.</p><p style="color:var(--muted)">If it isn't in the notes, Saathy says so.</p></div>
+  </div></div>
+ <div class="stop"><span class="dot"></span><div class="t">7:00 pm<small>practice</small></div>
+  <div class="body">
+   <div class="clip paper" style="transform:rotate(-2deg)"><span class="tape" style="left:100px;top:-12px;transform:rotate(5deg)"></span><img src="s-numerical.jpg" width="300" alt="Numerical game: bus accelerating from rest"></div>
+   <div class="ann"><p>A numerical game on the same chapter: drag the point, see the distance as an area.</p><p>Missed a concept? A short lesson and a 2-question check come first.</p></div>
+  </div></div>
+ <div class="stop light"><span class="dot"></span><div class="t">9:00 pm<small>report goes home</small></div>
+  <div class="body">
+   <div class="slip grid paper" style="transform:rotate(1.5deg);color:var(--navy);line-height:1.5"><span class="tape sky" style="left:150px;top:-10px"></span>
+    <h4>Today, Aditya (sample)</h4>session: Uniform acceleration, done<br>check: 4 / 5<br>to revisit: <span class="hl">units in answers</span></div>
+   <div class="ann"><p>Parents see a progress summary. The teacher's daily report is ready before the next class.</p></div>
+  </div></div>
+</div></section>
+
+<!-- 4 GAMES -->
+<section class="s" id="games"><div class="wrap">
+ <p class="kicker">tonight's games</p>
+ <h2>Five games, one textbook.</h2>
+ <p class="lead">All these games are developed for the <span class="hl">conceptual learning</span> of students.</p>
+ <div class="tickets">
+  <div class="tk" style="transform:rotate(-3deg)"><span class="pin"></span><img src="s-bio.jpg" alt=""><div class="stub">Bio Quest<small>Ch 5 · cell membrane</small></div></div>
+  <div class="tk" style="transform:rotate(2deg);margin-top:24px"><span class="pin"></span><img src="s-atom.jpg" alt=""><div class="stub">Atom Workshop 3D<small>Ch 4 · structure of the atom</small></div></div>
+  <div class="tk" style="transform:rotate(-1deg)"><span class="pin"></span><img src="s-refl.jpg" alt="" style="filter:brightness(1.5)"><div class="stub">Reflection Lab<small>light kahan jaayegi?</small></div></div>
+  <div class="tk" style="transform:rotate(3deg);margin-top:32px"><span class="pin"></span><img src="s-tinker.jpg" alt=""><div class="stub">Tinker<small>history · early humans</small></div></div>
+  <div class="tk" style="transform:rotate(-2deg);margin-top:8px"><span class="pin"></span><img src="s-numerical.jpg" alt="" style="object-position:top"><div class="stub">Numerical game<small>Ch 8 · motion</small></div></div>
+ </div>
+ <p class="note-a" style="position:relative;margin-top:40px;margin-left:600px;transform:rotate(-2deg)">streaks count <span class="strike">logins</span> correct practice, never time spent</p>
+</div></section>
+
+<!-- 5 BOARD -->
+<section class="s" id="board" style="padding-top:64px"><div class="wrap">
+ <p class="kicker">board examiner</p>
+ <h2>Checked like the board would.</h2>
+ <p class="lead">Write your answer step by step. The board examiner marks it against the CBSE marking scheme and shows exactly where the mark went.</p>
+ <div class="sheet ruled paper"><div class="margin"></div>
+  <div class="hdr"><span>Q14 · 3 marks</span><span>Science · Class 9</span><span>Ch 8 · Motion</span></div>
+  <img src="s-board.jpg" alt="Board examiner marking an answer step by step">
+  <div class="mk pe" style="left:16px;top:120px;font-size:44px;transform:rotate(-8deg)">2/3</div>
+  <svg style="position:absolute;left:4px;top:108px;width:84px;height:72px" viewBox="0 0 84 72"><path d="M42 6 C 12 4, 2 30, 10 50 C 20 70, 70 70, 78 40 C 84 14, 56 2, 36 10" fill="none" stroke="#B4582A" stroke-width="2" stroke-linecap="round"/></svg>
+  <div class="side" style="top:200px"><p class="mk" style="position:relative;transform:rotate(-2deg)">"25" without "m" costs the final mark.<br><span style="color:#B4582A">The physics is right.</span></p>
+  <svg viewBox="0 0 120 40" width="120" height="40" style="margin-left:-80px"><path class="doodle" d="M116 8 C 80 4, 40 14, 6 30 M6 30 L18 20 M6 30 L20 34"/></svg></div>
+  <div class="side" style="top:420px"><p class="mk" style="position:relative;transform:rotate(1deg)">then: show the model answer,<br>or try a similar question</p></div>
+ </div>
+</div></section>
+
+<!-- 6 REPORT CARD -->
+<section class="s" id="learn" style="padding-top:64px"><div class="wrap">
+ <p class="kicker">personalised learning</p>
+ <h2>A report card that changes the lesson.</h2>
+ <div class="rc">
+  <div><img src="s-learner.jpg" width="380" alt="Saathy learner profile: difficulty, pace, explanation style, hints" style="display:block;border:1px solid rgba(19,34,74,.2)"></div>
+  <div>
+   <div class="crest"><img src="logo-mark.png" alt="">Progress card</div>
+   <div style="color:var(--muted);font-size:20px">Class 9-A · CBSE · last 3 weeks</div>
+   <dl><dt>Difficulty</dt><dd>moves up when you get 3 in a row</dd><dt>Pace</dt><dd>shorter steps if long sessions drop off</dd><dt>Explanation</dt><dd>diagrams first, if diagrams help you</dd><dt>Hints</dt><dd>fewer, later, as you grow</dd></dl>
+   <p class="rem"><span style="color:var(--muted)">Remarks:</span> every student falls into one of <span class="circ">four learner groups<svg viewBox="0 0 100 50" preserveAspectRatio="none"><path d="M6 30 C 2 10, 60 2, 94 16 C 104 32, 70 48, 30 46 C 8 44, 0 30, 12 18" fill="none" stroke="#FFB38A" stroke-width="2"/></svg></span>, and the next session is picked from the evidence.</p>
+  </div>
+ </div>
+</div></section>
+
+<!-- 7 PERMISSION SLIP -->
+<section class="s" id="safety" style="padding-top:64px"><div class="wrap" style="display:grid;grid-template-columns:1fr 560px;gap:56px;align-items:center">
+ <div><p class="kicker">privacy and safety</p><h2>Signed, before anything starts.</h2><p class="lead">Built for children, with India's DPDP Act 2023 in mind: a child's data needs a parent's consent, and every account sees only what its role allows.</p></div>
+ <div class="ps paper" style="margin:0"><svg class="scissor" viewBox="0 0 28 20" width="28" height="20"><g fill="none" stroke="#13224A" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="5" r="4"/><circle cx="6" cy="15" r="4"/><path d="M9 7 L26 15 M9 13 L26 5"/></g></svg>
+  <h3>Permission slip</h3><p class="sub2">VidhyaSaathy · to be returned to the class teacher</p>
+  <ul>
+   <li><span class="box"><svg viewBox="0 0 32 30"><path class="doodle" d="M4 16 L12 24 L28 4"/></svg></span>Students claim accounts the school creates. Nobody signs up a child.</li>
+   <li><span class="box"><svg viewBox="0 0 32 30"><path class="doodle" d="M4 16 L12 24 L28 4"/></svg></span>Parents see progress, never private Saathy chats.</li>
+   <li><span class="box"><svg viewBox="0 0 32 30"><path class="doodle" d="M4 16 L12 24 L28 4"/></svg></span>Saathy answers only from school-approved material.</li>
+   <li><span class="box"><svg viewBox="0 0 32 30"><path class="doodle" d="M4 16 L12 24 L28 4"/></svg></span>No public leaderboards. Shared phones get one PIN per child.</li>
+  </ul>
+  <div class="sign"><div>Parent's signature<span></span></div><div>Date<span style="width:110px"></span></div></div>
+ </div>
+</div></section>
+
+<!-- 8 FAQ -->
+<section class="s" id="faq" style="padding-top:64px"><div class="wrap">
+ <p class="kicker">questions passed in class</p>
+ <h2>Chits from the back bench.</h2>
+ <div class="chits">
+  <div class="chit paper" style="transform:rotate(-1.5deg)"><p class="q"><b>Q.</b>Does Saathy just make things up?</p>No. It answers from your teacher's notes and school material, and cites the note. If something isn't covered, it says so.</div>
+  <div class="chit paper" style="transform:rotate(1.2deg);margin-top:32px"><p class="q"><b>Q.</b>We share one phone at home. Okay?</p>Yes. Each child has a separate profile with their own PIN, so progress never mixes.</div>
+  <div class="chit paper" style="transform:rotate(.8deg)"><p class="q"><b>Q.</b>What if the internet drops?</p>Chapters, quizzes and games you've synced keep working offline. Answers save on the phone and sync later.</div>
+  <div class="chit paper" style="transform:rotate(-1deg);margin-top:24px"><p class="q"><b>Q.</b>How does a student get an account?</p>The school prints a claim sheet with a code for each student. Enter it once, set a PIN, done.</div>
+ </div>
+</div></section>
+
+<!-- 9 VISION -->
+<section class="vision"><div class="wrap">
+ <p class="kicker" style="color:#C9D3EA">why we're building this</p>
+ <h2>A school system where no child needs a coaching class to understand their own textbook.</h2>
+ <a class="btn2" href="register.html">Register your school</a>
+ <div class="sleep">
+  <svg viewBox="0 0 260 220" width="260" height="220" style="position:absolute;left:0;top:0"><g fill="none" stroke="#FFB38A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></g><g stroke="#FFF8EE" stroke-width="2" stroke-linejoin="round"><path d="M18 172 L238 168 L240 198 L20 202 Z" fill="#FFB38A"/><path d="M30 142 L226 138 L228 168 L32 172 Z" fill="#7FB3FF"/><path d="M48 114 L210 112 L212 140 L50 142 Z" fill="#FFF8EE"/><path d="M30 186 L228 182 M44 156 L214 152" fill="none" stroke="#13224A" opacity=".5"/></g><g><g fill="none" stroke="#FFF8EE" stroke-width="2" stroke-linecap="round"><path d="M200 40 L214 40 L200 56 L214 56"/><path d="M222 14 L232 14 L222 26 L232 26"/></g></svg>
+  <img src="mascot.png" alt="Saathy asleep on a stack of books">
+ </div>
+</div></section>
+
+<!-- 10 BACK COVER -->
+<footer class="cover"><div class="wrap">
+ <div class="fl">
+  <div class="label"><div style="display:flex;align-items:center;gap:12px;font-size:28px;margin-bottom:4px"><img src="logo-mark.png" alt="" style="height:32px">VidhyaSaathy</div>Name<span class="ln"></span><br>Class<span class="ln" style="width:120px"></span> Section<span class="ln" style="width:100px"></span><br>School<span class="ln" style="width:290px"></span></div>
+  <div class="flinks"><a href="#">About</a><a href="#day">How it works</a><a href="#safety">Privacy</a><a href="#">Contact</a><a href="register.html">Register a school</a></div>
+ </div>
+ <div class="copy2"><span>© 2026 VidhyaSaathy. All rights reserved.</span><span>learning, with you</span></div>
+</div></footer>

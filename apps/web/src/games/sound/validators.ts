@@ -1,0 +1,6 @@
+import type { CheckpointAnswer, Feedback } from '../engine/types';
+const result = (correct: boolean, feedback: string): Feedback => ({ correct, feedback });
+export const longitudinalCheck = (answer: CheckpointAnswer) => result(typeof answer === 'object' && !Array.isArray(answer) && answer.wave === 'longitudinal' && answer.pressure === 'high', 'Compression is a crowded, high-pressure region in a longitudinal wave.');
+export const pitchCheck = (answer: CheckpointAnswer) => result(Number((answer as Record<string, unknown>).frequency) >= 400 && Number((answer as Record<string, unknown>).frequency) <= 480, 'Correct. Frequency controls pitch; tune the source near 440 Hz.');
+export const loudnessCheck = (answer: CheckpointAnswer) => result(Number((answer as Record<string, unknown>).amplitude) >= 7 && Number((answer as Record<string, unknown>).amplitude) <= 9, 'Correct. A larger amplitude makes the sound louder.');
+export const echoSonarCheck = (answer: CheckpointAnswer) => { const data = answer as Record<string, unknown>; const time = Number(data.time); const distance = Number(data.distance); return result(Math.abs(time - 0.1) < 0.011 && Math.abs(distance - 17.2) < 0.21, 'Correct. Distance = 344 × 0.1 ÷ 2 = 17.2 m.'); };

@@ -1,0 +1,32 @@
+{
+  "name": "@vidhyasaathy/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 5173 --strictPort",
+    "test": "vitest run --configLoader native --pool threads --reporter dot",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fontsource/patrick-hand": "^5.3.0",
+    "@vidhyasaathy/contracts": "*",
+    "@vidhyasaathy/core": "*",
+    "lucide-react": "^1.61.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.9.4",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
+    "@tailwindcss/vite": "^4.1.16",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "@vitejs/plugin-react": "^5.1.0",
+    "tailwindcss": "^4.1.16",
+    "vite": "^7.1.12"
+  }
+}

@@ -1,0 +1,8 @@
+import type { Feedback } from '../engine/types';
+const right = (feedback: string): Feedback => ({ correct: true, feedback });
+const wrong = (feedback: string): Feedback => ({ correct: false, feedback });
+export type MatterState = 'solid' | 'liquid' | 'gas';
+export function validateState(answer: { phase: MatterState | string; temperature: number | string }): Feedback { return answer.phase === 'liquid' && Number(answer.temperature) >= 1 && Number(answer.temperature) < 100 ? right('Correct: liquid has a fixed volume but takes the shape of its container.') : wrong('Set water between 0°C and 100°C to show the liquid state.'); }
+export function validateDiffusion(answer: string): Feedback { return answer === 'hot' ? right('Correct: higher temperature gives particles more kinetic energy.') : wrong('Diffusion is faster in hot water because its particles move faster.'); }
+export function validateHeatingCurve(answer: number | string): Feedback { return Number(answer) === 0 ? right('Correct: melting uses latent heat while temperature stays at 0°C.') : wrong('Choose the 0°C plateau: heat changes the state, not the temperature.'); }
+export function validateEvaporation(answer: { heat?: boolean; surface?: boolean; wind?: boolean } | string): Feedback { const factors = typeof answer === 'string' ? { heat: false, surface: false, wind: answer === 'fan' } : answer; return factors.heat === true && factors.surface === true && factors.wind === true ? right('Excellent: heat, larger surface area and wind all speed evaporation.') : wrong('Turn on heat, spread the liquid out, and use moving air.'); }

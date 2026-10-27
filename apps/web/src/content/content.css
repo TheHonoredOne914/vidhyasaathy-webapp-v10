@@ -1,0 +1,310 @@
+.lesson-shell,
+.session-stage {
+  margin: -16px -16px 0;
+  padding: 16px 16px 32px;
+  background: var(--vs-midnight);
+  color: var(--vs-ivory);
+  font: 18px/1.5 var(--vs-font);
+  overflow-wrap: break-word;
+}
+
+.lesson-banner,
+.session-stage-inner {
+  position: relative;
+}
+
+.lesson-banner {
+  margin-bottom: 20px;
+  padding: 28px 24px 32px;
+  border-radius: 10px;
+  background: var(--vs-midnight);
+  color: var(--vs-ivory);
+}
+
+.lesson-kicker {
+  margin: 0 0 8px;
+  color: #7fb3ff;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.lesson-banner h1,
+.session-stage h1 {
+  margin: 0;
+  color: #f9f6ee;
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 1.15;
+}
+
+.lesson-hand {
+  max-width: 16ch;
+  margin: 12px 0 0;
+  color: #ffb38a;
+  font-family: var(--vs-font);
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 1.5;
+  transform: rotate(-4deg);
+}
+
+.lesson-card,
+.app-main .lesson-shell form,
+.app-main .session-stage form {
+  max-width: 720px;
+  margin-top: 16px;
+  padding: 20px;
+  border: 2px solid var(--vs-midnight);
+  border-radius: 4px 10px 4px 8px;
+  background: var(--vs-ivory);
+  color: var(--vs-midnight);
+  box-shadow: 4px 4px 0 #7fb3ff;
+}
+
+.lesson-card h2,
+.lesson-shell h2,
+.session-stage h2 {
+  margin: 0 0 12px;
+  color: inherit;
+  font-size: 22px;
+}
+
+.lesson-card p,
+.lesson-shell li,
+.session-stage p {
+  font-size: 16px;
+}
+
+.lesson-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid #d6e2e6;
+  border-radius: 10px;
+  background: #f9f6ee;
+  color: #041d3d;
+}
+
+.lesson-list li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  padding: 8px 16px;
+}
+
+.lesson-list li + li {
+  border-top: 1px solid #d6e2e6;
+}
+
+.lesson-shell a,
+.session-stage a {
+  color: #7fb3ff;
+}
+
+.lesson-card a,
+.lesson-list a,
+.lesson-shell form a,
+.session-stage form a {
+  color: #193e69;
+}
+
+.lesson-list a,
+.lesson-actions a,
+.player-btn,
+.lesson-check {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+}
+
+.lesson-status {
+  color: #193e69;
+  font-size: 16px;
+}
+
+.lesson-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.lesson-check {
+  gap: 8px;
+  font-weight: 600;
+}
+
+.lesson-check input[type="checkbox"],
+.lesson-check input[type="radio"] {
+  width: 20px;
+  height: 20px;
+}
+
+.lesson-note {
+  white-space: pre-wrap;
+}
+
+.lesson-preview {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.lesson-cite {
+  margin: 16px 0 0;
+  padding: 12px 16px;
+  border: 1px solid #193e69;
+  background: #e7eef1;
+  color: #041d3d;
+}
+
+.session-stage .lesson-cite {
+  border-color: #7fb3ff;
+  background: #0a294b;
+  color: #f9f6ee;
+}
+
+.session-stage {
+  min-height: 100svh;
+}
+
+.session-stage-inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.player-btn {
+  justify-content: center;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  background: #f9f6ee;
+  color: #041d3d;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.player-btn.secondary {
+  background: transparent;
+  color: #f9f6ee;
+  outline: 2px solid #7fb3ff;
+}
+
+.player-btn:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.app-main:has(.lesson-shell),
+.app-main:has(.session-stage) {
+  background: #041d3d;
+}
+
+.app-main:has(.lesson-shell) .app-help,
+.app-main:has(.session-stage) .app-help {
+  border-top-color: transparent;
+}
+
+.app-main:has(.lesson-shell) .app-help a,
+.app-main:has(.session-stage) .app-help a {
+  color: #f9f6ee;
+}
+
+.app-shell:has(.session-stage:not(.is-done)) .app-aside,
+.app-shell:has(.session-stage:not(.is-done)) .app-mobilebar,
+.app-shell:has(.session-stage:not(.is-done)) .app-scrim,
+.app-shell:has(.session-stage:not(.is-done)) .app-help {
+  display: none !important;
+}
+
+.offline-banner {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 0 0 16px;
+  padding: 6px 10px;
+  border-left: 3px solid #ffb38a;
+  background: #fff0e8;
+  color: #193e69;
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.offline-banner p {
+  margin: 0;
+}
+
+.offline-retry {
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #041d3d;
+  font: inherit;
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.app-shell:has(.session-stage:not(.is-done)) {
+  display: block;
+  background: #041d3d;
+}
+
+.lesson-shell .text-navy,
+.session-stage .text-navy {
+  color: #d6e2e6;
+}
+
+.lesson-card .text-navy,
+.lesson-shell form .text-navy {
+  color: #193e69;
+}
+
+.concept-map {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.concept-map li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  min-height: 44px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.concept-map .d1 { margin-left: 20px; }
+.concept-map .d2 { margin-left: 40px; }
+.concept-map .d3 { margin-left: 60px; }
+.concept-map .d4 { margin-left: 80px; }
+
+@media (min-width: 1024px) {
+  .lesson-shell,
+  .session-stage {
+    margin: -32px -32px 0;
+    padding: 32px 32px 48px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .ask-dock.is-sticky {
+    position: sticky;
+    bottom: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lesson-hand {
+    transform: none;
+  }
+}

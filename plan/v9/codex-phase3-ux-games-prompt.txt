@@ -1,0 +1,36 @@
+﻿VidhyaSaathy v9 — PHASE 3 UX polish + GAMES teach-via-play (continue, do not restart phases 1–2).
+
+LOCKED: landing page, cream+navy+gold theme tokens, Saathy mascot. Map Scholar Indigo → navy tokens; never adopt new hex from inspo brands.
+
+READ FIRST (in order):
+1. plan/v9/HARD_RULES.md
+2. plan/v9/inspo/WORKSPACE_INSPO.md  (+ images in plan/v9/inspo/)
+3. plan/v9/PHASE3_UX_HARD.md
+4. plan/v9/GAMES_TEACH.md   ← TOP PRIORITY for games
+
+STACK: Vite React TS + Fastify + SQLite/Drizzle. Node at C:\Users\jce\AppData\Local\node24. PowerShell: use `;` not `&&`. workspace-write + dangerously-bypass OK.
+
+BRANCH: create/use v9-phase3-ux from current master. Commit when typecheck passes.
+
+PART A — Shell + student screens (WORKSPACE_INSPO §2–3 + PHASE3_UX_HARD):
+- 240px sidebar + 56px topbar cream shell (all signed-in roles)
+- Student home: Continue hero + 3 centered stats + path nodes + queue (Khan+Duolingo patterns)
+- Subjects: cards 280×160 + mastery; Sessions: 64px rows + filters + overdue state
+- Notifications: Linear density; Settings header ≤72px; Privacy max-width 640px
+- Error card + Retry instead of toast-over-skeleton; fix segmented control
+- Screenshots 1440 + 360 for home/subjects/sessions/notifications/settings/privacy → e2e/screenshots/p3ux/
+
+PART B — ALL 10 games (GAMES_TEACH + WORKSPACE_INSPO §4) BEFORE phase 4:
+Games must TEACH through play — living simulation, NOT quizzes/MCQ.
+- Continuous animation (idle bob/orbit/particles)
+- Direct manipulation (drag electrons→shells, push cricket ball→F=ma, etc.)
+- Juicy feedback <100ms (particles, streak glow, easing); soft fail + Reset
+- 4 escalating levels; short narrated beats that pause for input
+- Reward moment when concept clicks; human copy only (no raw i18n keys)
+- Fix Atom Forge drag + Check toast + max-update-depth FIRST as gold pattern; match plan/v9/inspo/00-vs-atom-forge-target.png + 00-vs-bio-quest-target.png
+- QA: Playwright real pointer-drag that moves object AND changes meter/state; record short webm/mp4 OR GIF per game under e2e/screenshots/games/ plus PNG after interaction
+- No MCQ-style screens inside games
+
+PART C: after games green, STOP and report. Do NOT start phase 4/5 yet in this session.
+
+Verify: pnpm/typecheck in apps/web (+ relevant packages). Commit message: "v9 phase3-ux: shell+home polish + teach-via-play games".

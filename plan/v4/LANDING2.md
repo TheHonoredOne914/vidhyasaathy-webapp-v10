@@ -1,0 +1,6 @@
+Read plan/POLISH.md first. Do NOT run git/npm. Edit only: apps/web/src/routes/Landing.tsx, apps/web/src/landing/**, apps/web/src/auth/**, apps/web/src/routes/StudentHome.tsx, apps/web/src/student/**. Terse.
+
+Fixes (current screenshots show overlaps):
+1) Landing hero: use ONE phone preview only (delete the second/stacked "My learning desk" card or merge its Next up/streak/Bio Quest content into the single phone). Layout as a CSS grid: [hero text col | phone col | night panel col] with fixed gutters (>=32px); nothing positioned absolutely over another column. Phone max-height so the full hero (nav + hero + polaroid shelf) fits within 1440x900 and 1280x800 viewports without scrolling or clipping. Hero text, CTA row and 'Register your school' link never covered. Keep Saathy SVG peeking above the phone top-left with 'this is Saathy' label + curved arrow, fully visible (not under nav). Polaroids fully inside night panel, one baseline.
+2) Sign-in / PIN sign-in: the form card and dark side panel must both fit the viewport; dark panel text not cut at bottom; form centred in its column, consistent widths; at 1440x900 and 1280x800.
+3) Student home: greeting heading 'Hello, <name>' is near-invisible (light text on light card) - use navy #041D3D text with >=4.5:1 contrast; same for subtitle.

@@ -1,0 +1,11 @@
+import type { Checkpoint, Scene } from '../../engine/types';
+import { CellArt, MembraneStage } from '../art/CellArt';
+
+const gateAnswer = { oxygen: 'simple', carbonDioxide: 'simple', water: 'aquaporin', glucose: 'carrier', sodium: 'pump', potassium: 'pump' };
+export const membraneValidator: Checkpoint['validate'] = (answer) => {
+  if (!answer || typeof answer !== 'object' || Array.isArray(answer)) return { correct: false, feedback: 'Drag every molecule to its gate.' };
+  const placements = answer as Record<string, string>;
+  const correct = Object.entries(gateAnswer).every(([molecule, gate]) => placements[molecule] === gate);
+  return correct ? { correct: true, feedback: 'Excellent. Each gate matches its transport job.' } : { correct: false, feedback: 'O₂ diffuses, water uses aquaporin, glucose uses a carrier; ions need the pump.' };
+};
+export const scene2: Scene = { id: 'gatekeeper-drag', durationMs: 16000, narration: ['Drag each molecule to its matching gate.', 'The pump spends ATP to move ions uphill.'], signals: ['drag', 'pump'], focusCheck: { atMs: 5000, prompt: 'Spot the aquaporin gate.', target: { x: 39, y: 50, label: 'Aquaporin gate' } }, checkpoint: { kind: 'drag', prompt: 'Move each molecule to the correct membrane gate.', conceptId: 'cell-membrane-selective-permeability', validate: membraneValidator, items: [{ id: 'oxygen', label: 'O₂' }, { id: 'carbonDioxide', label: 'CO₂' }, { id: 'water', label: 'H₂O' }, { id: 'glucose', label: 'glucose' }, { id: 'sodium', label: 'Na⁺' }, { id: 'potassium', label: 'K⁺' }], targets: [{ id: 'simple', label: 'Simple diffusion · O₂/CO₂' }, { id: 'aquaporin', label: 'Aquaporin · water' }, { id: 'carrier', label: 'Carrier · glucose' }, { id: 'pump', label: 'Na⁺/K⁺ pump · ATP' }], reteach: { sceneId: 'gatekeeper-drag', hint: 'Water uses aquaporin. Ions need ATP.', recall: { prompt: 'Which transport needs ATP?', choices: [{ id: 'pump', label: 'active transport by a pump' }, { id: 'diffusion', label: 'simple diffusion' }], answerId: 'pump', explanation: 'Active transport uses ATP to move against a gradient.' } } }, render: (t, state) => <CellArt label="Transport gates for oxygen carbon dioxide water glucose sodium and potassium"><MembraneStage t={t} solved={state.solved} /></CellArt> };

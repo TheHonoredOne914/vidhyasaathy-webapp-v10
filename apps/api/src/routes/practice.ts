@@ -1,0 +1,26 @@
+import { PracticeQuerySchema, SubmitPracticeAttemptSchema } from '@vidhyasaathy/contracts';
+import type { FastifyInstance } from 'fastify';
+import { requireRole } from '../auth/middleware.ts';
+import type { AuthService } from '../auth/service.ts';
+import { resourceId } from '../content/access.ts';
+import type { Db } from '../db/index.ts';
+import { parseInput } from '../errors.ts';
+import { practiceSet, practiceStreak, submitPractice } from '../practice/service.ts';
+import { mutate } from '../school/access.ts';
+
+export function registerPracticeRoutes(app: FastifyInstance, db: Db, auth: AuthService, now: () => number) {
+  const student = { preHandler: requireRole('student'), bodyLimit: 16 * 1024 };
+  app.get('/chapters/:id/practice', student, async (request) => {
+    const query = parseInput(PracticeQuerySchema, request.query);
+    return practiceSet(db, request, resourceId(request), query.gameId, query.limit, now());
+  });
+  app.post('/practice/attempts', student, async (request) => {
+    const input = parseInput(SubmitPracticeAttemptSchema, request.body);
+    return mutate(() => db.transaction(() => {
+      const result = submitPractice(db, request, input, now());
+      auth.audit(request, 'practice.attempt');
+      return result;
+    }));
+  });
+  app.get('/practice/streak', student, async (request) => practiceStreak(db, request, now()));
+}

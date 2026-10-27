@@ -1,0 +1,1 @@
+param([string]$n) $env:PATH="$env:LOCALAPPDATA\node24;$env:PATH"; cmd /c "codex exec --dangerously-bypass-approvals-and-sandbox ""Read plan/v8/$n.md and implement it fully."" > plan\v8\$n.log 2>&1"

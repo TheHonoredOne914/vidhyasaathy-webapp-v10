@@ -1,0 +1,2 @@
+param([string]$list)
+foreach($n in $list.Split(',')){ cmd /c "codex exec --dangerously-bypass-approvals-and-sandbox ""Read plan/v7/$n.md and implement it fully."" -i plan\gameref\atom-forge.png plan\gameref\bio-quest.png > plan\v7\$n.log 2>&1" }

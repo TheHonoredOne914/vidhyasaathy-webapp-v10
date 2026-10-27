@@ -1,0 +1,24 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Register your school · VidhyaSaathy</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="hero.css"><link rel="stylesheet" href="paper.css"><link rel="stylesheet" href="auth.css"><link rel="stylesheet" href="fx.css"></head><body>
+<nav><a class="brand" href="#"><img src="logo-mark.png" alt=""><span>VidhyaSaathy</span></a>
+<div class="links"><a href="landing.html#day">How it works</a><a href="#">For parents</a><a href="#">Safety</a></div>
+<a class="reg" href="register.html">Register your school</a></nav>
+<main class="wrap" style="display:grid;grid-template-columns:1fr 300px;gap:64px;padding-top:72px;padding-bottom:120px">
+<div><p class="kicker">for schools</p><h2>Register your school.</h2><p class="lead" style="font-size:22px">One admission form. Three pages. Then you set up classes and invite teachers.</p>
+<div class="book" style="max-width:none"><div class="tabs steps" role="tablist">
+<button class="tab" role="tab" aria-selected="true" data-p="s1"><b>1</b>School</button><button class="tab" role="tab" aria-selected="false" data-p="s2"><b>2</b>Admin</button><button class="tab" role="tab" aria-selected="false" data-p="s3"><b>3</b>Confirm</button></div>
+<div class="pg"><span class="stamp">admission form</span>
+<form class="panel on" id="s1"><h3>1. About the school</h3><p class="hint">Write it the way it appears on your board's records.</p>
+<label class="fld" style="max-width:440px"><span>School name</span><input placeholder="e.g. Sunrise Public School"></label>
+<div class="row2"><label class="fld"><span>Board</span><select><option>CBSE</option><option>ICSE</option><option>State board</option></select></label><label class="fld"><span>City</span><input placeholder="e.g. Pune"></label></div>
+<button class="btn" type="button">Next: admin</button></form>
+<form class="panel" id="s2"><h3>2. Who's the admin?</h3><p class="hint">This person sets up classes and invites teachers.</p>
+<label class="fld"><span>Full name</span><input></label><div class="row2"><label class="fld"><span>Email</span><input type="email"></label><label class="fld"><span>Phone</span><input type="tel"></label></div>
+<button class="btn" type="button">Next: confirm</button></form>
+<form class="panel" id="s3"><h3>3. Check and sign</h3><p class="hint">Read it once more.</p><button class="btn" type="button">Register school</button></form>
+</div></div></div>
+<aside style="padding-top:220px"><div class="sn"><span class="tape" style="left:100px;top:-10px"></span><h4>after you register</h4><ol><li>set up classes, sections and subjects</li><li>invite your teachers</li><li>import the roster and print claim sheets</li></ol></div>
+<p class="aside-a" style="margin-top:40px">already registered? <a href="signin.html">sign in</a></p></aside>
+</main><footer class="cover mini"><div class="wrap"><div class="copy2" style="margin-top:0"><span>© 2026 VidhyaSaathy. All rights reserved.</span><div class="flinks"><a href="landing.html">About</a><a href="landing.html#day">How it works</a><a href="landing.html#safety">Privacy</a><a href="#">Contact</a></div><span>Learning with you</span></div></div></footer><script>document.querySelectorAll('.tabs').forEach(t=>t.addEventListener('click',e=>{const b=e.target.closest('.tab');if(!b)return;t.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',x===b));document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on',p.id===b.dataset.p))}))</script><script src="fx.js"></script></body></html>

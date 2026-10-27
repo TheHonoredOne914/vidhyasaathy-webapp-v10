@@ -1,0 +1,19 @@
+import type { ArenaApi, ArenaLevel, GameDef } from '../engine/types';
+import { DegreeStage, FactorStage, ValueStage, ZeroStage } from './PolyStage';
+import { validateDegree, validateFactor, validateValue, validateZeros } from './validators';
+import './poly-arena.css';
+
+const ladder = (active: string) => <><h3>POLYNOMIAL TYPES LADDER</h3><div className="poly-ladder"><span className={active === 'linear' ? 'active' : ''}>1 · Linear</span><span className={active === 'quadratic' ? 'active' : ''}>2 · Quadratic</span><span className={active === 'cubic' ? 'active' : ''}>3 · Cubic</span></div></>;
+const meter = (api: ArenaApi) => <div className="poly-meter"><div><span>Remainder meter</span><b>{api.readout.remainder ?? '—'}</b></div><i><em style={{ width: `${Math.min(100, Number(api.readout.remainder ?? 0) * 12)}%` }} /></i><small>Not factor <strong>0 = exact factor</strong> Factor</small></div>;
+const tiles = (api: ArenaApi) => <div className="poly-data"><div><small>p(x)</small><b>{api.readout.expression ?? '2x² + 3x + 1'}</b></div><div><small>Degree</small><b>{api.readout.degree ?? '2'}</b></div><div><small>Terms</small><b>{api.readout.terms ?? '3'}</b></div></div>;
+
+const levels: ArenaLevel[] = [
+  { title: 'TERM TRAIL', subtitle: 'Build the polynomial from algebra tiles and read its degree.', taskTitle: 'Build the expression', taskText: 'Set the x², x and constant tiles. Then identify the degree and type.', taskBody: tiles, card2: ladder('quadratic'), primaryLabel: 'Check polynomial', concept: <>The <strong>highest power</strong> tells the degree. Three non-zero terms make a trinomial; degree 2 is <strong>quadratic</strong>.</>, Stage: DegreeStage, check: () => {} },
+  { title: 'VALUE VALLEY', subtitle: 'Substitute a number and follow p(a) to its live value.', taskTitle: 'Find p(2)', taskText: 'For p(x) = x² − 3x + 2, slide a to 2 and calculate p(a).', taskBody: tiles, card2: <><h3>SUBSTITUTION CARD</h3><div className="poly-equation">p(2) = 2² − 3(2) + 2</div><div className="poly-answer">Answer <b>0</b></div></>, primaryLabel: 'Check value', concept: <>To find <strong>p(a)</strong>, replace every x with a. Keep signs and calculate each term before adding.</>, Stage: ValueStage, check: () => {} },
+  { title: 'ZERO SUMMIT', subtitle: 'Drag the point along the graph and mark both x-intercepts.', taskTitle: 'Find the zeroes', taskText: 'For p(x) = x² − 5x + 6, find both values where the curve crosses the x-axis.', card2: (api) => <><h3>ZEROES FOUND</h3><div className="poly-zeroes"><b>{api.readout.zeroes ?? '—'}</b><small>roots on x-axis</small></div><div className="poly-equation">p(x) = (x − 2)(x − 3)</div></>, primaryLabel: 'Check zeroes', concept: <>A <strong>zero</strong> is an x-value that makes p(x) = 0. On the graph, zeroes are where the curve crosses the x-axis.</>, Stage: ZeroStage, check: () => {} },
+  { title: 'FACTOR PASS', subtitle: 'Use the remainder theorem to test a possible factor.', taskTitle: 'Test x − 1', taskText: 'For p(x) = x² + 2x + 3, evaluate p(1). Is x − 1 a factor?', taskBody: (api) => <>{meter(api)}<div className="poly-equation">p(1) = 1² + 2(1) + 3</div></>, card2: <><h3>FACTOR THEOREM</h3><div className="poly-flow"><span>x − a</span><b>→</b><span>remainder p(a)</span></div><div className="poly-factor-note">If remainder = 0, factor confirmed.</div></>, primaryLabel: 'Check remainder', concept: <>The <strong>remainder theorem</strong> says division by x − a leaves p(a). A zero remainder means x − a is a <strong>factor</strong>.</>, Stage: FactorStage, check: () => {} },
+];
+
+export const game: GameDef = { id: 'poly', title: 'Poly Peaks', chapterRef: 'NCERT · Class 9 · Ch 2 Polynomials', conceptIds: ['poly.degree', 'poly.value', 'poly.zeroes', 'poly.factor-theorem'], scenes: [], arena: { name: 'POLY PEAKS', world: 'Poly Peaks', chapterLabel: 'Ch 2 Polynomials', levels } };
+export { validateDegree, validateValue, validateZeros, validateFactor };
+export default game;

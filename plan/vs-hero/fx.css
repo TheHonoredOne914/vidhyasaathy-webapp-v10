@@ -1,0 +1,59 @@
+:root{--midnight:#041D3D;--deep:#193E69;--classic:#28517C;--cool:#517DAB;--bivory:#F9F6EE;--ice:#D6E2E6;--skyb:#BFE3F5;--pch:#FFD9C2}
+html{background:var(--bivory)}body{background:transparent!important}
+.scene{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.scene>svg{position:absolute;inset:0;width:100%;height:100%}
+.scene .ln{fill:none;stroke:var(--classic);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+section.s,.day,.vision,footer.cover,.hero,main.auth,body>main{position:relative}
+section.s>.wrap,.day>.wrap,.vision>.wrap,footer.cover>.wrap,body>main>*{position:relative;z-index:1}
+.hot{pointer-events:auto}
+/* motions */
+.a-glide{animation:glide 16s linear infinite}
+@keyframes glide{0%{transform:translate(-200px,60px) rotate(-8deg)}50%{transform:translate(700px,-20px) rotate(4deg)}100%{transform:translate(1600px,40px) rotate(-6deg)}}
+.a-drift{animation:drift 60s linear infinite}@keyframes drift{from{transform:translateX(-300px)}to{transform:translateX(1500px)}}
+.a-kite{transform-origin:50% 100%;animation:kite 4s ease-in-out infinite alternate}@keyframes kite{to{transform:rotate(8deg) translate(10px,-12px)}}
+.a-bird{animation:bird 22s linear infinite}@keyframes bird{from{transform:translate(-100px,0)}50%{transform:translate(600px,-30px)}to{transform:translate(1400px,10px)}}
+.a-flap{transform-box:fill-box;transform-origin:center;animation:flap .5s ease-in-out infinite alternate}@keyframes flap{to{transform:scaleY(.4)}}
+.a-swing{transform-box:fill-box;transform-origin:50% 0;animation:swing 2.4s ease-in-out infinite alternate}@keyframes swing{from{transform:rotate(-7deg)}to{transform:rotate(7deg)}}
+.a-tick{transform-box:view-box;animation:tick 60s steps(60) infinite}@keyframes tick{to{transform:rotate(360deg)}}
+.a-dust{animation:dust 7s ease-in infinite}@keyframes dust{0%{transform:translateY(0);opacity:0}20%{opacity:.7}100%{transform:translateY(120px) translateX(20px);opacity:0}}
+.a-fall{animation:fall 5s ease-in infinite}@keyframes fall{0%{transform:translateY(-20px) rotate(0);opacity:0}15%{opacity:1}100%{transform:translateY(160px) rotate(220deg);opacity:0}}
+.a-write{stroke-dasharray:300;animation:write 5s ease-in-out infinite}@keyframes write{0%{stroke-dashoffset:300}60%,100%{stroke-dashoffset:0}}
+.a-pen{animation:pen 5s ease-in-out infinite}@keyframes pen{0%{transform:translate(0,0)}60%,100%{transform:translate(150px,0)}}
+.a-flip{transform-box:fill-box;transform-origin:0 50%;animation:flip 6s ease-in-out infinite}@keyframes flip{0%,40%{transform:scaleX(1)}55%{transform:scaleX(-1)}100%{transform:scaleX(-1)}}
+.a-twk{animation:twk 3s ease-in-out infinite alternate}@keyframes twk{to{opacity:.25}}
+.a-bob{animation:bobs 5s ease-in-out infinite alternate}@keyframes bobs{to{transform:translateY(-10px)}}
+/* easter eggs */
+.board-w{stroke-dasharray:400;stroke-dashoffset:400;transition:stroke-dashoffset 1.2s}
+.hot.board:hover~.board-w,.hot.board:hover .board-w{stroke-dashoffset:0}
+.pball{opacity:0;transform:translateY(-140px)}
+.hot.desk:hover .pball{animation:drop .9s cubic-bezier(.5,0,.7,1.4) forwards}
+@keyframes drop{0%{opacity:1;transform:translateY(-140px)}100%{opacity:1;transform:translateY(0)}}
+/* bell */
+.bellbtn{background:none;border:0;cursor:pointer;padding:4px;margin-left:-24px;display:flex;align-items:center;gap:6px;font:inherit;font-size:19px;color:var(--classic)}
+.bellbtn svg{width:34px;height:36px;transform-origin:50% 10%}
+.ring .bellbtn svg,.bellbtn.ring svg{animation:ringb .9s ease}
+@keyframes ringb{10%,50%{transform:rotate(22deg)}30%,70%{transform:rotate(-22deg)}90%{transform:rotate(6deg)}}
+.scrap{position:fixed;z-index:50;pointer-events:none;width:22px;height:16px;animation:burst 1.6s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes burst{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--x),var(--y)) rotate(var(--r));opacity:0}}
+.chhutti{position:fixed;z-index:51;left:22%;top:96px;background:var(--bivory);border:2px solid var(--midnight);padding:6px 18px;font-size:26px;color:var(--midnight);transform:rotate(-3deg);box-shadow:4px 4px 0 var(--pch);animation:pop 2.6s ease forwards}
+@keyframes pop{0%{opacity:0;scale:.6}12%{opacity:1;scale:1.05}20%{scale:1}85%{opacity:1}100%{opacity:0}}
+/* icons, interactions kept */
+.ic{display:inline-block;width:22px;height:22px;vertical-align:-4px;margin-right:8px;flex:none}
+.ic path,.ic circle,.ic rect{fill:none;stroke:var(--classic);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tt th .ic{width:26px;height:26px;vertical-align:-5px}.fld>span{display:flex!important;align-items:center}
+.paper,.tk,.chit,.pol,.label{transition:transform .35s cubic-bezier(.3,1.4,.5,1),box-shadow .35s}
+.paper:hover,.tk:hover,.chit:hover{transform:translateY(-4px) rotate(-.4deg)!important}
+.pol:hover{animation:wig .5s ease}@keyframes wig{25%{transform:rotate(3deg)}75%{transform:rotate(-4deg)}}
+.flinks a,.aside-a a,.tl{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 6' preserveAspectRatio='none'%3E%3Cpath d='M1 4 C20 1 40 5 60 3 S90 2 99 4' fill='none' stroke='%23517DAB' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") left 100%/0 6px no-repeat;padding-bottom:5px;transition:background-size .3s}
+.flinks a:hover,.aside-a a:hover,.tl:hover{background-size:100% 6px}
+.mascot,.mascot2{animation:mbob 3.6s ease-in-out infinite alternate}@keyframes mbob{to{translate:0 -8px}}
+.rv{opacity:0;transform:translateY(18px);transition:opacity .7s,transform .7s}.rv.in{opacity:1;transform:none}
+footer.cover{background:var(--midnight)}
+footer.cover .copy2{display:flex;justify-content:space-between;align-items:center;gap:24px;width:100%;margin-top:48px;padding-top:20px;border-top:1.5px dashed rgba(214,226,230,.3);color:var(--ice);font-size:18px}
+footer.cover .copy2 .flinks{gap:28px;font-size:20px}footer.cover .fl{justify-content:flex-start}
+footer.mini{padding:24px 0}footer.mini .wrap{max-width:none}footer.mini .copy2{border-top:0;padding-top:0;margin-top:0}
+.day{background:none!important}
+@media (prefers-reduced-motion:reduce){.scene *,.mascot,.mascot2,.scrap{animation:none!important}.rv{opacity:1;transform:none}}
+
+body:has(.hero)>nav,body>nav{background:#BFE3F5}
+body>nav{position:relative;z-index:2}

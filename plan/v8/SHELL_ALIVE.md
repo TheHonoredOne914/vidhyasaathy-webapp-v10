@@ -1,0 +1,7 @@
+# V8 SHELL_ALIVE (no git commits, do NOT touch the landing page)
+Goal: the app shell and arena games feel like one school product. Attached: two arena game references (palette/feel) and the approved landing.
+1. Sign-in page: the blue side panel is empty. Fill it with school-themed content: the transparent Saathy cloud (/img/mascot.webp, no background patch), hand-drawn doodles (inline SVG: pencil, ruler, star, notebook lines, paper plane), one short line in the handwritten font, and a small mini preview card (e.g. a tiny game tile or streak). Brand colours only.
+2. Mascot: use one shared <SaathyMascot/> component (mascot.webp, transparent) everywhere a cloud/mascot appears in the app (headers, empty states, Ask Saathy, sign-in). Remove any other cloud images or blue-patch variants.
+3. Theme tokens used consistently: #041D3D #193E69 #28517C #517DAB #F9F6EE #D6E2E6, sky-blue, peach, gold accent from the game refs. Put them in one tokens file/CSS vars; replace stray colours in app shell pages.
+4. Alive: subtle notebook-paper textures, doodle accents, gentle micro-animations (hover lift, mascot float, respect prefers-reduced-motion), and friendly filled empty states with the mascot + a next action. Nothing empty, nothing overcrowded. Student home / subjects / progress / teacher / parent / admin / examiner screens all.
+5. Navigation: clear links student home -> subjects -> games/practice -> progress; arena games have a back link to the subject. Keep typecheck and tests passing.

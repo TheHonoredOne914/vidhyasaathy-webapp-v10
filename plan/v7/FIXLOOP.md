@@ -1,0 +1,2 @@
+# V7 FIXLOOP
+No git/npm. React warns 'Maximum update depth exceeded' on atom, matter, newton, float arena games (probably setStats/api calls in useEffect with object/function deps changing each render, or shell recreating api each render). Fix at the root (stable api via useMemo/useCallback in games/arena/ArenaShell, and correct effect deps in games). No visual changes.

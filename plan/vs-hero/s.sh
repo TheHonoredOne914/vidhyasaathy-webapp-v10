@@ -1,0 +1,1 @@
+for s in "1280,800" "1440,900"; do google-chrome --headless --no-sandbox --hide-scrollbars --virtual-time-budget=4000 --window-size=$s --screenshot=hero-${s%,*}.png file:///workspace/vs-hero/index.html 2>/dev/null; done; cp hero-1280.png /tmp/vsh-a$1.png; cp hero-1440.png /tmp/vsh-b$1.png
