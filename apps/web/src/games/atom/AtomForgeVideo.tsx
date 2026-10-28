@@ -20,8 +20,8 @@ type Episode = {
 const EPISODES: Episode[] = [
   {
     id: 'zoom',
-    title: '1 · From salt to atoms',
-    blurb: 'Zoom into matter',
+    title: '1 · Salt → atoms',
+    blurb: 'Zoom in',
     durationMs: 11000,
     captions: [
       'A tiny grain of salt sits in your hand.',
@@ -38,7 +38,7 @@ const EPISODES: Episode[] = [
   },
   {
     id: 'nucleus',
-    title: '2 · Nucleus up close',
+    title: '2 · Nucleus',
     blurb: 'Protons + neutrons',
     durationMs: 10000,
     captions: [
@@ -56,7 +56,7 @@ const EPISODES: Episode[] = [
   },
   {
     id: 'shells',
-    title: '3 · Electrons fill shells',
+    title: '3 · Shells',
     blurb: 'K then L',
     durationMs: 12000,
     captions: [
@@ -74,8 +74,8 @@ const EPISODES: Episode[] = [
   },
   {
     id: 'sodium',
-    title: '4 · Build sodium',
-    blurb: 'Na · 2, 8, 1',
+    title: '4 · Sodium',
+    blurb: 'Na · 2,8,1',
     durationMs: 13000,
     captions: [
       'Sodium has 11 protons — atomic number 11.',
@@ -92,7 +92,7 @@ const EPISODES: Episode[] = [
   },
   {
     id: 'bond',
-    title: '5 · Why atoms bond',
+    title: '5 · Bond',
     blurb: 'Salt is born',
     durationMs: 14000,
     captions: [
@@ -111,6 +111,13 @@ const EPISODES: Episode[] = [
 ];
 
 type Phase = 'intro' | 'play' | 'act' | 'branch' | 'done';
+
+function fmt(ms: number) {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return m > 0 ? `${m}:${String(r).padStart(2, '0')}` : `${r}s`;
+}
 
 export function AtomForgeVideo() {
   const [phase, setPhase] = useState<Phase>('intro');
@@ -182,7 +189,7 @@ export function AtomForgeVideo() {
       setMs(0);
       setPhase('play');
       setPlaying(true);
-    }, 1700);
+    }, 1600);
   }, [episode, epIndex, totalMs]);
 
   const fail = useCallback(() => {
@@ -193,7 +200,7 @@ export function AtomForgeVideo() {
       setMs(Math.max(0, episode.actAt - 2200));
       setPhase('play');
       setPlaying(true);
-    }, 2000);
+    }, 1900);
   }, [episode]);
 
   const targetShell =
@@ -218,24 +225,30 @@ export function AtomForgeVideo() {
       if (!inAct || episode.actKind !== 'tap-nucleus') return;
       succeed();
     },
-    onShellDrop: (shell, ok) => {
+    onShellDrop: (_shell, ok) => {
       if (!inAct) return;
       if (ok) succeed();
       else fail();
     },
   };
 
+  const doneApi: SceneApi = {
+    episode: 'bond', phase: 'done', t: 1, branchKind: 'ok', dragElectron: false, targetShell: null,
+    onNucleusTap: () => {}, onShellDrop: () => {},
+  };
+  const restart = () => { setEpIndex(0); setMs(0); setUnlocked(0); setFrontier(0); setXp(0); setPhase('play'); setPlaying(true); };
+
   const seekEpisode = (index: number) => {
     if (index > unlocked) return;
-    setPlaying(false);
     setBranch(null);
     setEpIndex(index);
     setMs(0);
     setPhase('play');
+    setPlaying(true);
   };
 
   const scrub = (value: number) => {
-    const target = Math.max(0, Math.min(frontier, value));
+    const target = Math.max(0, Math.min(Math.max(frontier, 1), value));
     let index = 0;
     for (let i = 1; i <= unlocked; i += 1) {
       if ((offsets[i] ?? Infinity) <= target) index = i;
@@ -246,6 +259,23 @@ export function AtomForgeVideo() {
     setMs(Math.min(EPISODES[index]!.durationMs, target - (offsets[index] ?? 0)));
     setPhase('play');
   };
+
+  const chapters = (
+    <nav className={`afv-chapters ${phase === 'intro' ? '' : 'afv-chapters--pills'}`} aria-label="Episode chapters">
+      {EPISODES.map((ep, index) => (
+        <button
+          key={ep.id}
+          type="button"
+          disabled={phase === 'intro' ? true : index > unlocked}
+          aria-current={phase !== 'intro' && index === epIndex ? 'step' : undefined}
+          onClick={() => (phase === 'intro' ? undefined : seekEpisode(index))}
+        >
+          <strong>{ep.title}</strong>
+          {phase === 'intro' && <small>{ep.blurb}</small>}
+        </button>
+      ))}
+    </nav>
+  );
 
   if (phase === 'intro') {
     return (
@@ -258,27 +288,11 @@ export function AtomForgeVideo() {
           <span className="afv-xp">3D interactive video</span>
         </div>
         <p className="afv-lede">
-          A Kurzgesagt-style silent short: camera zooms from salt into atoms, then you grab electrons in 3D.
-          No quiz screens — only act-in-scene.
+          A silent Kurzgesagt-style short — camera whip-zooms from salt into atoms, then you grab electrons in 3D.
         </p>
-        <nav className="afv-chapters" aria-label="Episode chapters">
-          {EPISODES.map((ep) => (
-            <button key={ep.id} type="button" disabled>
-              <strong>{ep.title}</strong>
-              <small>{ep.blurb}</small>
-            </button>
-          ))}
-        </nav>
+        {chapters}
         <div className="afv-controls">
-          <button
-            type="button"
-            className="primary"
-            data-afv-begin="1"
-            onClick={() => {
-              setPhase('play');
-              setPlaying(true);
-            }}
-          >
+          <button type="button" className="primary" data-afv-begin="1" onClick={() => { setPhase('play'); setPlaying(true); }}>
             Begin episode 1
           </button>
         </div>
@@ -286,161 +300,94 @@ export function AtomForgeVideo() {
     );
   }
 
-  if (phase === 'done') {
-    return (
-      <section className="afv" aria-label="Atom Forge complete">
-        <div className="afv-top">
-          <div>
-            <p>Episode complete</p>
-            <h1>Salt forged from atoms</h1>
-          </div>
-          <span className="afv-xp">+{xp} XP</span>
-        </div>
-        <p className="afv-lede">You zoomed into matter, built sodium, and watched an ionic bond bloom into a crystal.</p>
-        <div className="afv-stage-wrap afv-stage-wrap--static">
-          <AtomForgeScene
-            api={{
-              episode: 'bond',
-              phase: 'done',
-              t: 1,
-              branchKind: 'ok',
-              dragElectron: false,
-              targetShell: null,
-              onNucleusTap: () => {},
-              onShellDrop: () => {},
-            }}
-          />
-        </div>
-        <button
-          type="button"
-          className="primary"
-          onClick={() => {
-            setEpIndex(0);
-            setMs(0);
-            setUnlocked(0);
-            setFrontier(0);
-            setXp(0);
-            setPhase('play');
-            setPlaying(true);
-          }}
-        >
-          Watch again
-        </button>
-      </section>
-    );
-  }
-
   return (
     <section
-      className="afv"
+      className="afv afv--stage"
       aria-label="Atom Forge interactive video"
       data-afv-playing={playing ? '1' : '0'}
       data-afv-phase={phase}
       data-afv-episode={episode.id}
     >
-      <div className="afv-top">
-        <div>
-          <p>NCERT · Class 9 · Ch 4 Structure of the Atom</p>
-          <h1>Atom Forge</h1>
-        </div>
-        <span className="afv-xp">{xp} XP</span>
-      </div>
-
-      <nav className="afv-chapters" aria-label="Episode chapters">
-        {EPISODES.map((ep, index) => (
-          <button
-            key={ep.id}
-            type="button"
-            disabled={index > unlocked}
-            aria-current={index === epIndex ? 'step' : undefined}
-            onClick={() => seekEpisode(index)}
-          >
-            <strong>{ep.title}</strong>
-            <small>{ep.blurb}</small>
-          </button>
-        ))}
-      </nav>
-
       <div className="afv-stage-wrap">
-        <AtomForgeScene api={api} />
+        <AtomForgeScene api={phase === 'done' ? doneApi : api} />
+        {phase === 'done' && (
+          <div className="afv-overlay-top">
+            <div className="afv-overlay-title">
+              <p>Episode complete - Salt forged from atoms</p>
+              <span className="afv-xp">+{xp} XP</span>
+            </div>
+          </div>
+        )}
+        {phase !== 'done' && <div className="afv-overlay-top">
+          <div className="afv-overlay-title">
+            <p>Atom Forge · {episode.title}</p>
+            <span className="afv-xp">{xp} XP</span>
+          </div>
+          {chapters}
+        </div>}
 
         {inAct && episode.actKind === 'tap-nucleus' && (
-          <button
-            type="button"
-            className="afv-hotspot afv-hotspot--nucleus"
-            data-afv-hotspot="nucleus"
-            aria-label="Nucleus"
-            onClick={() => succeed()}
-          />
+          <button type="button" className="afv-hotspot afv-hotspot--nucleus" data-afv-hotspot="nucleus" aria-label="Nucleus" onClick={() => succeed()} />
         )}
         {inAct && episode.actKind === 'drag-electron-k' && (
           <>
             <div className="afv-hotspot afv-hotspot--electron" data-afv-electron="1" />
             <div className="afv-hotspot afv-hotspot--k" data-afv-drop="k" />
-            <button type="button" className="afv-assist" data-afv-assist="k" onClick={() => succeed()}>
-              Snap to K shell
-            </button>
+            <button type="button" className="afv-assist" data-afv-assist="k" onClick={() => succeed()}>Snap to K</button>
           </>
         )}
         {inAct && episode.actKind === 'drag-electron-m' && (
           <>
             <div className="afv-hotspot afv-hotspot--electron" data-afv-electron="1" />
             <div className="afv-hotspot afv-hotspot--m" data-afv-drop="m" />
-            <button type="button" className="afv-assist" data-afv-assist="m" onClick={() => succeed()}>
-              Snap to M shell
-            </button>
+            <button type="button" className="afv-assist" data-afv-assist="m" onClick={() => succeed()}>Snap to M</button>
           </>
         )}
         {inAct && episode.actKind === 'drag-bond' && (
           <>
             <div className="afv-hotspot afv-hotspot--electron" data-afv-electron="1" />
             <div className="afv-hotspot afv-hotspot--cl" data-afv-drop="cl" />
-            <button type="button" className="afv-assist" data-afv-assist="cl" onClick={() => succeed()}>
-              Transfer to Cl
-            </button>
+            <button type="button" className="afv-assist" data-afv-assist="cl" onClick={() => succeed()}>Transfer to Cl</button>
           </>
         )}
-
         {inAct && <div className="afv-prompt" data-afv-prompt="1">{episode.actPrompt}</div>}
-
         {branch && (
           <div className="afv-branch" data-kind={branch.kind} data-afv-branch={branch.kind}>
             <h2>{branch.kind === 'ok' ? 'Nice!' : 'Watch again'}</h2>
             <p>{branch.text}</p>
           </div>
         )}
-
         <div className="afv-caption" aria-live="polite">
           <div>
             <strong>Saathy</strong>
-            <span>{inAct ? episode.actPrompt : branch ? branch.text : caption}</span>
+            <span>{phase === 'done' ? 'You zoomed into matter, built sodium, and watched salt bloom.' : inAct ? episode.actPrompt : branch ? branch.text : caption}</span>
           </div>
         </div>
       </div>
 
-      <div className="afv-controls">
-        <button type="button" data-afv-play="1" disabled={inAct || Boolean(branch)} onClick={() => setPlaying((p) => !p)}>
+      <div className="afv-controls afv-controls--bar">
+        {phase === 'done' && <button type="button" className="primary" onClick={restart}>Watch again</button>}
+        {phase !== 'done' && <button type="button" data-afv-play="1" disabled={inAct || Boolean(branch)} onClick={() => setPlaying((p) => !p)}>
           {playing ? 'Pause' : 'Play'}
-        </button>
+        </button>}
         <label className="afv-scrub">
           <input
             type="range"
             min={0}
-            max={Math.max(1, frontier)}
+            max={totalMs}
             step={1}
-            value={Math.min(frontier, globalMs)}
+            value={Math.min(totalMs, globalMs)}
             aria-label="Progress scrubber"
             data-afv-scrub="1"
-            disabled={frontier === 0 || Boolean(branch)}
+            disabled={Boolean(branch)}
             onChange={(e) => scrub(Number(e.target.value))}
           />
-          <small>
-            {Math.floor(globalMs / 1000)}s / {Math.floor(Math.max(frontier, 1) / 1000)}s watched · episode {epIndex + 1}/
-            {EPISODES.length}
+          <small data-afv-time="1">
+            {fmt(globalMs)} / {fmt(totalMs)} · ep {epIndex + 1}/{EPISODES.length}
+            {frontier < totalMs ? ` · unlocked ${fmt(frontier)}` : ''}
           </small>
         </label>
       </div>
-
       <footer className="afv-footer">
         <span>{episode.concept}</span>
         <span>Silent · act-in-scene · no quiz</span>

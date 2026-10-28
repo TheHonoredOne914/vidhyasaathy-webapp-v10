@@ -1,0 +1,6 @@
+
+.atom-stage.is-shake{animation:atom-shake .32s ease}
+.atom-stage.is-glow .atom-svg{filter:drop-shadow(0 0 12px rgba(212,160,23,.45))}
+.atom-narrate{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:2;background:#fff;border:1px solid #e6e1d9;border-radius:999px;padding:6px 14px;font-size:11px;font-weight:700;color:#193e69;box-shadow:0 2px 8px #00000014;max-width:90%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.atom-orbit{transform-origin:390px 280px}
+@keyframes atom-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}

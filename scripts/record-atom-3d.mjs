@@ -21,21 +21,30 @@ db.prepare('INSERT INTO session (token_hash, profile_id, school_id, expires_at, 
 );
 db.close();
 
-async function waitAct(page, timeout = 40000) {
+async function ensurePlaying(page) {
+  const playBtn = page.getByRole('button', { name: /^Play$/i });
+  if (await playBtn.count()) {
+    try { await playBtn.first().click({ timeout: 1000 }); } catch {}
+  }
+}
+
+async function waitAct(page, timeout = 35000) {
+  await ensurePlaying(page);
   await page.waitForSelector('[data-afv-phase="act"]', { timeout });
 }
 
 async function doAct(page, kind) {
+  console.log('act', kind);
   await waitAct(page);
-  await page.waitForTimeout(400);
+  await page.waitForTimeout(350);
   if (kind === 'tap') {
     const nuc = page.locator('[data-afv-hotspot="nucleus"]');
     await nuc.first().click({ force: true });
   } else {
     const assist = page.locator(`[data-afv-assist="${kind}"]`);
-    if (await assist.count()) await assist.first().click();
-    else {
-      // fallback: click drop zone center via mouse after grabbing electron hotspot
+    if (await assist.count()) {
+      await assist.first().click({ force: true });
+    } else {
       const el = page.locator('[data-afv-electron="1"]');
       const drop = page.locator(`[data-afv-drop="${kind}"]`);
       const a = await el.boundingBox();
@@ -43,46 +52,54 @@ async function doAct(page, kind) {
       if (a && b) {
         await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2);
         await page.mouse.down();
-        await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 20 });
+        await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 16 });
         await page.mouse.up();
       }
     }
   }
-  await page.waitForTimeout(1800);
+  await page.waitForTimeout(1200);
+  console.log('act-done', kind);
 }
 
-const browser = await chromium.launch({ headless: true });
+const browser = await chromium.launch({ headless: true, args: ['--use-angle=d3d11', '--enable-gpu', '--ignore-gpu-blocklist', '--enable-webgl'] });
 const context = await browser.newContext({
   baseURL,
-  viewport: { width: 1440, height: 900 },
-  recordVideo: { dir: resolve(outDir, 'videos'), size: { width: 1440, height: 900 } },
+  viewport: { width: 1280, height: 720 },
+  recordVideo: { dir: resolve(outDir, 'videos'), size: { width: 1280, height: 720 } },
 });
 await context.addCookies([{ name: 'vidhyasaathy_session', value: token, domain: '127.0.0.1', path: '/', httpOnly: true, sameSite: 'Lax' }]);
 const page = await context.newPage();
+const t0 = Date.now();
+page.on('pageerror', (e) => console.log('PAGEERROR', e.message));
+page.setDefaultTimeout(45000);
 const url = `/student/chapters/${chapter.id}/practice/engine/atom`;
 console.log('goto', url);
 await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
 await page.waitForSelector('.afv, [data-afv-begin]', { timeout: 30000 });
-await page.waitForTimeout(800);
+await page.waitForTimeout(600);
 await page.screenshot({ path: resolve(outDir, 'atom-forge-3d-1-intro.png'), fullPage: false });
 
 await page.locator('[data-afv-begin="1"]').click();
 await page.waitForSelector('[data-afv-playing]', { timeout: 15000 });
-await page.waitForTimeout(2800);
+await page.waitForTimeout(2400);
 await page.screenshot({ path: resolve(outDir, 'atom-forge-3d-2-playing.png'), fullPage: false });
 
-await doAct(page, 'tap'); // zoom -> nucleus tap
+await doAct(page, 'tap'); // zoom
+await page.waitForTimeout(2000);
 await page.screenshot({ path: resolve(outDir, 'atom-forge-3d-3-nucleus.png'), fullPage: false });
-await doAct(page, 'tap'); // nucleus episode
+await doAct(page, 'tap'); // nucleus
 await doAct(page, 'k');
 await page.screenshot({ path: resolve(outDir, 'atom-forge-3d-4-act.png'), fullPage: false });
 await doAct(page, 'm');
 await doAct(page, 'cl');
 
-await page.waitForSelector('text=Salt forged from atoms', { timeout: 25000 }).catch(() => {});
-await page.waitForTimeout(1500);
+await page.waitForTimeout(2000);
+await page.waitForSelector('[data-afv-phase="done"]', { timeout: 20000 }).catch(() => {});
+await page.waitForTimeout(800);
 
 const video = page.video();
+console.log('DURATION_S', ((Date.now() - t0) / 1000).toFixed(1));
+console.log('closing');
 await context.close();
 await browser.close();
 
