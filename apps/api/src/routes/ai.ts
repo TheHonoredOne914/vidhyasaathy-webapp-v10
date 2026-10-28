@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { AskSchema, CreateDraftJobSchema, ReviewDraftJobSchema, type AskResponse } from '@vidhyasaathy/contracts';
 import { and, eq, lte } from 'drizzle-orm';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
+import { extractAnswer } from '../ai/extract.ts';
 import { approveDraft, draftJobView, draftSource, runDraftJob } from '../ai/jobs.ts';
 import { ProviderAnswerSchema, type LlmProvider } from '../ai/provider.ts';
 import { digest, retrieveNotes } from '../ai/retrieval.ts';
@@ -33,16 +34,26 @@ export function registerAiRoutes(app: FastifyInstance, database: Database, auth:
       status: 'not_in_notes', message: 'This is not in your notes. Ask your teacher for help.',
       hintLevel: input.hintLevel, socratic: input.socratic, citations: [], cached: false, updatedAt: now(),
     };
-    if (sources.length && !provider.configured) response = { ...response, status: 'not_configured', message: 'AI not configured' };
-    if (sources.length && provider.configured) {
-      if (input.hintLevel > 1) {
-        const earlier = db.select().from(doubts).where(and(eq(doubts.schoolId, school.id), eq(doubts.profileId, profile.id),
-          eq(doubts.chapterId, input.chapterId), eq(doubts.question, question))).all();
-        if (!earlier.some((entry) => entry.response.status === 'answered' && entry.response.hintLevel >= input.hintLevel - 1
-          && entry.response.socratic === input.socratic)) {
-          throw new ApiException(409, 'HINT_FIRST', 'Try the previous hint first.');
-        }
+    const requirePreviousHint = () => {
+      if (input.hintLevel <= 1) return;
+      const earlier = db.select().from(doubts).where(and(eq(doubts.schoolId, school.id), eq(doubts.profileId, profile.id),
+        eq(doubts.chapterId, input.chapterId), eq(doubts.question, question))).all();
+      if (!earlier.some((entry) => entry.response.status === 'answered' && entry.response.hintLevel >= input.hintLevel - 1
+        && entry.response.socratic === input.socratic)) {
+        throw new ApiException(409, 'HINT_FIRST', 'Try the previous hint first.');
       }
+    };
+    if (sources.length && !provider.configured) {
+      // Without a provider, quote the released notes directly; questions they do not cover stay unanswered.
+      const extracted = extractAnswer(question, sources, input.hintLevel, input.socratic);
+      if (extracted) {
+        requirePreviousHint();
+        response = { ...response, status: 'answered', message: extracted.message, updatedAt: now(),
+          citations: extracted.quotes.map(({ source, quote }) => ({ noteId: source.noteId, title: source.title, locator: `Text chunk ${source.position + 1}`, quote })) };
+      }
+    }
+    if (sources.length && provider.configured) {
+      requirePreviousHint();
       const key = digest({ schoolId: school.id, profileId: profile.id, chapterId: input.chapterId, question, sources, provider: provider.id,
         hintLevel: input.hintLevel, socratic: input.socratic });
       const cached = db.select().from(aiCache).where(eq(aiCache.key, key)).get();

@@ -31,7 +31,9 @@ teacher or admin chat/history endpoint exists.
   recommendations optional; deadlines are never changed. `continue.resumeAt`
   is the next slide/question index. Due teacher work is ordered first.
 
-The default provider never invents answers or drafts. Set `OPENAI_API_KEY` on the
+The default provider never invents answers or drafts. Without a provider, `POST /ask`
+quotes the released note sentences that cover most of the question's subject words
+(status `answered`, verbatim citations) and otherwise returns `not_in_notes`. Set `OPENAI_API_KEY` on the
 API only to enable the hosted adapter (`OPENAI_MODEL` is configurable). Notes are
 indexed as text; image/PDF bytes are not OCR'd. Supply the note body for retrieval.
 Private debugging records expire after 24 hours; answer caches after one hour.
