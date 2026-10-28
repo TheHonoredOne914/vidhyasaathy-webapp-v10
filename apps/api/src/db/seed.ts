@@ -1,5 +1,5 @@
 import { openDatabase } from './index.ts';
-import { demoLogins, seedDemo } from './demo.ts';
+import { demoLogins, resetDemoLogins, seedDemo } from './demo.ts';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -10,7 +10,12 @@ if (!process.env.DEMO_PASSWORD || !process.env.DEMO_PIN) throw new Error('Set DE
 const database = openDatabase(process.env.DATABASE_PATH ?? './data/vidhyasaathy.db');
 try {
   const result = await seedDemo(database.db, { password: process.env.DEMO_PASSWORD, pin: process.env.DEMO_PIN }, Date.now(), { rich: true });
-  console.info(result.created ? 'Created Demo school.' : 'Demo school already exists; credentials unchanged.');
+  if (!result.created && process.env.DEMO_RESET_LOGINS === 'true') {
+    const count = await resetDemoLogins(database.db, process.env.DEMO_PASSWORD);
+    console.info(`Demo school already exists; reset ${count} staff passwords to DEMO_PASSWORD (PINs and progress unchanged).`);
+  } else {
+    console.info(result.created ? 'Created Demo school.' : 'Demo school already exists; credentials unchanged (set DEMO_RESET_LOGINS=true to reset staff passwords).');
+  }
   const logins = demoLogins(database.db, process.env.DEMO_PASSWORD, process.env.DEMO_PIN);
   console.info(logins);
   const { mkdir, writeFile } = await import('node:fs/promises');

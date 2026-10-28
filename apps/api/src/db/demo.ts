@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { eq } from 'drizzle-orm';
+import { and, eq, inArray, isNotNull } from 'drizzle-orm';
 import { z } from 'zod';
 import { SaveItemSchema } from '@vidhyasaathy/contracts';
 import { hashCredential, hashToken } from '../auth/security.ts';
@@ -18,6 +18,8 @@ export async function seedDemo(db: Db, credentials: z.input<typeof Credentials>,
   const existing = db.select().from(schools).where(eq(schools.id, DEMO_SCHOOL_ID)).get();
   if (existing) {
     if (existing.name !== 'Demo school') throw new Error('Demo school ID is already in use.');
+    // Content-only upgrade for older demo databases; accounts and progress stay untouched.
+    db.transaction(() => ensureMotionContent(db, now));
     return { schoolId: existing.id, created: false };
   }
   const passwordHash = await hashCredential(input.password);
@@ -116,6 +118,7 @@ export async function seedDemo(db: Db, credentials: z.input<typeof Credentials>,
       conceptId: motionConcepts.find((concept) => concept.title === conceptTitle)!.id,
       content: SaveItemSchema.parse({ type: 'mcq', prompt, options, answer, difficulty: 1, sourceRef: null, conceptId: motionConcepts.find((concept) => concept.title === conceptTitle)!.id }),
     }))).run();
+    ensureMotionContent(db, now);
     if (options.rich) for (const [index, key] of (['student', 'student2', 'student3'] as const).entries()) {
       const profileId = profileIds[key]!;
       db.insert(sessionProgress).values({ sessionId, profileId, schoolId, viewedSlides: index === 0 ? 2 : 1,
@@ -138,6 +141,77 @@ export async function seedDemo(db: Db, credentials: z.input<typeof Credentials>,
     }
     return { schoolId, created: true };
   });
+}
+
+const MOTION_NOTES = [
+  { concept: 'Distance & Displacement', title: 'Motion notes: distance and displacement', body: 'Distance is the total length of the path travelled by an object, whatever direction it moves in. '
+    + 'Distance is a scalar quantity: it has magnitude only and is never negative. '
+    + 'Displacement is the shortest straight-line distance from the initial position to the final position of an object, together with its direction. '
+    + 'Displacement is a vector quantity: it has both magnitude and direction. '
+    + 'The difference between distance and displacement is that distance measures the whole path travelled, while displacement only compares the starting and final positions. '
+    + 'If an object comes back to its starting point, its displacement is zero even though the distance travelled is not zero. '
+    + 'For example, a runner who completes one round of a 400 m track covers a distance of 400 m but has zero displacement.' },
+  { concept: 'Speed & Velocity', title: 'Motion notes: speed and velocity', body: 'Speed is the distance travelled by an object per unit time, so speed = distance / time. '
+    + 'The SI unit of speed is metre per second (m/s). '
+    + 'Average speed is the total distance travelled divided by the total time taken. '
+    + 'Velocity is the speed of an object in a definite direction, so velocity = displacement / time. '
+    + 'Velocity is a vector quantity, while speed is a scalar quantity. '
+    + 'An object moving at constant speed along a circular path has a changing velocity because its direction keeps changing. '
+    + 'Uniform motion means an object covers equal distances in equal intervals of time; non-uniform motion means it covers unequal distances in equal intervals of time.' },
+  { concept: 'Acceleration', title: 'Motion notes: acceleration', body: 'Acceleration is the rate of change of velocity with time. '
+    + 'Acceleration = (final velocity - initial velocity) / time, written a = (v - u) / t. '
+    + 'The SI unit of acceleration is metre per second squared (m/s2). '
+    + 'Acceleration is positive when velocity increases and negative when velocity decreases; negative acceleration is also called retardation or deceleration. '
+    + 'Motion in which velocity changes by equal amounts in equal intervals of time is called uniformly accelerated motion, for example a ball rolling down a smooth slope. '
+    + 'The equations of uniformly accelerated motion are v = u + at, s = ut + 1/2 at2 and v2 = u2 + 2as.' },
+] as const;
+
+const MOTION_SLIDES = [
+  { concept: 'Distance & Displacement', title: 'Distance vs displacement', body: 'Distance is the whole path travelled and has no direction. Displacement is the straight line from start to finish, with direction. One round of a 400 m track: distance 400 m, displacement 0.' },
+  { concept: 'Speed & Velocity', title: 'Speed vs velocity', body: 'Speed = distance / time (m/s). Velocity = displacement / time, so it has a direction. Going round a circle at a steady speed still changes your velocity.' },
+  { concept: 'Acceleration', title: 'Acceleration', body: 'Acceleration is the rate of change of velocity: a = (v - u) / t, measured in m/s2. Slowing down is negative acceleration, also called retardation.' },
+  { concept: 'Acceleration', title: 'Before the check', body: 'Ask yourself: Does it have a direction? Is it the whole path or just start to finish? Is the velocity changing? Then try the five check questions.' },
+] as const;
+
+/** Idempotently adds the Class 9 Motion notes and Session 3 slides that older demo seeds lacked. */
+export function ensureMotionContent(db: Db, now: number) {
+  const chapter = db.select().from(chapters).where(and(eq(chapters.schoolId, DEMO_SCHOOL_ID), eq(chapters.title, 'Motion'))).get();
+  if (!chapter) return;
+  const conceptRows = db.select().from(concepts).where(eq(concepts.chapterId, chapter.id)).all();
+  const conceptId = (title: string) => conceptRows.find((row) => row.title === title)?.id;
+  if (MOTION_NOTES.some((note) => !conceptId(note.concept))) return;
+  const session = db.select().from(learningSessions).where(eq(learningSessions.chapterId, chapter.id)).all()
+    .find((row) => row.title.startsWith('Session 3'));
+  // Notes must be released no later than the session that cites them.
+  const releaseAt = Math.min(now, session?.releaseAt ?? now);
+  const existingNotes = db.select().from(notes).where(eq(notes.chapterId, chapter.id)).all();
+  const noteIds: Record<string, string> = {};
+  for (const note of MOTION_NOTES) {
+    const found = existingNotes.find((row) => row.title === note.title);
+    if (found) { noteIds[note.concept] = found.id; continue; }
+    const id = randomUUID();
+    db.insert(notes).values({ id, schoolId: DEMO_SCHOOL_ID, chapterId: chapter.id, title: note.title, body: note.body,
+      status: 'published', releaseAt, updatedAt: now }).run();
+    db.insert(noteConcepts).values({ noteId: id, schoolId: DEMO_SCHOOL_ID, chapterId: chapter.id, conceptId: conceptId(note.concept)! }).run();
+    noteIds[note.concept] = id;
+  }
+  if (!session || db.select().from(slides).where(eq(slides.sessionId, session.id)).all().length > 0) return;
+  db.insert(slides).values(MOTION_SLIDES.map((slide, position) => ({ id: randomUUID(), schoolId: DEMO_SCHOOL_ID, chapterId: chapter.id,
+    sessionId: session.id, conceptId: conceptId(slide.concept)!, noteId: noteIds[slide.concept] ?? null, position, title: slide.title, body: slide.body }))).run();
+}
+
+/**
+ * Dev-only: sets every demo staff password back to the documented demo password so the
+ * walkthrough credentials work on an older database. Student PINs and progress are untouched.
+ */
+export async function resetDemoLogins(db: Db, password: string) {
+  const parsed = Credentials.shape.password.parse(password);
+  const passwordHash = await hashCredential(parsed);
+  const staff = db.select({ userId: profiles.userId }).from(profiles).innerJoin(users, eq(users.id, profiles.userId))
+    .where(and(eq(profiles.schoolId, DEMO_SCHOOL_ID), isNotNull(users.email))).all().map((row) => row.userId);
+  if (!staff.length) return 0;
+  db.update(users).set({ passwordHash }).where(inArray(users.id, staff)).run();
+  return staff.length;
 }
 
 export function demoLogins(db: Db, password: string, pin: string) {

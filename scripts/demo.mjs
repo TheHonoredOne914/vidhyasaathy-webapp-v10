@@ -9,6 +9,8 @@ const env = {
   DEMO_SEED: 'true',
   DEMO_PASSWORD: 'Saathy@2026!',
   DEMO_PIN: '2468',
+  // Keeps the documented staff password working on an existing demo database.
+  DEMO_RESET_LOGINS: 'true',
   API_PORT: String(apiPort),
   APP_ORIGIN: `http://127.0.0.1:${webPort}`,
   VITE_API_URL: '/api',
