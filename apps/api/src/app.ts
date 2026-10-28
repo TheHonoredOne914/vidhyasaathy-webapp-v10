@@ -93,7 +93,7 @@ export async function buildApp(input: AppOptions) {
     await app.register(cookie);
     app.addHook('onRequest', auth.authenticateRequest);
     await app.register(rateLimit, {
-      max: input.rateLimitMax ?? 20,
+      max: input.rateLimitMax ?? 120,
       timeWindow: 60000,
       keyGenerator: (request) => hashToken(request.ip),
       store: sqliteRateLimitStore(db, options.now),
