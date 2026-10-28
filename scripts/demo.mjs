@@ -7,7 +7,7 @@ const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const env = {
   ...process.env,
   DEMO_SEED: 'true',
-  DEMO_PASSWORD: 'Saathy@2026',
+  DEMO_PASSWORD: 'Saathy@2026!',
   DEMO_PIN: '2468',
   API_PORT: String(apiPort),
   APP_ORIGIN: `http://127.0.0.1:${webPort}`,

@@ -158,7 +158,7 @@ test('practice, streak, and shared-device profile chooser', async ({ page, brows
   await studentPage.getByRole('button', { name: 'Continue' }).click();
   await expect(studentPage).toHaveURL('/student/welcome');
   await studentPage.goto('/student');
-  await expect(studentPage.getByRole('heading', { level: 1, name: 'Hello, Mira Sen' })).toBeVisible();
+  await expect(studentPage.getByRole('heading', { level: 1, name: /^Namaste, Mira Sen/ })).toBeVisible();
   await studentPage.getByRole('button', { name: 'Switch student' }).click();
   await expect(studentPage).toHaveURL('/signin/student');
   await expect(studentPage.getByRole('button', { name: 'Asha Rao' })).toBeVisible();
@@ -171,8 +171,8 @@ test('practice, streak, and shared-device profile chooser', async ({ page, brows
   await studentPage.getByRole('button', { name: 'Asha Rao' }).click();
   await studentPage.getByLabel('PIN').fill('2468');
   await studentPage.getByRole('button', { name: 'Sign in' }).click();
-  await expect(studentPage.getByRole('heading', { level: 1, name: 'Hello, Asha Rao' })).toBeVisible();
-  await expect(studentPage.getByRole('heading', { level: 1, name: 'Hello, Mira Sen' })).toHaveCount(0);
+  await expect(studentPage.getByRole('heading', { level: 1, name: /^Namaste, Asha Rao/ })).toBeVisible();
+  await expect(studentPage.getByRole('heading', { level: 1, name: /^Namaste, Mira Sen/ })).toHaveCount(0);
 
   const after = await api<{ concepts: { title: string; attempts: number }[] }>(teacherPage, 'GET', `/sections/${section.id}/insights`);
   expect(after.concepts.find((concept) => concept.title === 'Halves')?.attempts).toBeGreaterThan(0);
