@@ -1,4 +1,5 @@
-// Records a paced demo walkthrough of VidhyaSaathy (1280x720 webm, video only).
+// Records a paced demo walkthrough of VidhyaSaathy (1280x720 webm, video only), v2:
+// adds the Motion chapter, learning path, session slides, an Ask Saathy answer and the teacher login.
 // Usage: node scripts/record-walkthrough.mjs [--dry] [--pin]
 //   --dry  no video, frames only (rehearsal)
 //   --pin  skip the activation-code flow and use the profile picker + PIN
@@ -14,6 +15,9 @@ const FORCE_PIN = process.argv.includes('--pin') || DRY;
 const OUT = resolve('e2e/screenshots/walkthrough');
 const VIDEO_DIR = join(OUT, 'raw');
 const PIN = '2468';
+const TEACHER_EMAIL = 'teacher@demo.invalid';
+const TEACHER_PASSWORD = 'Saathy@2026!';
+const TEACHER_PIN = '1357';
 mkdirSync(OUT, { recursive: true });
 if (!DRY) { rmSync(VIDEO_DIR, { recursive: true, force: true }); mkdirSync(VIDEO_DIR, { recursive: true }); }
 
@@ -130,9 +134,8 @@ async function signOut() {
 const browser = await chromium.launch({ args: ['--disable-gpu-compositing'] });
 const pre = await browser.newContext({ extraHTTPHeaders: { origin: new URL(BASE).origin } });
 const motion = await (async () => {
-  const r = await pre.request.post(`${API}/auth/login`, { data: { email: 'teacher@demo.invalid', password: 'Saathy@2026!' } });
-  const r2 = r.ok() ? r : await pre.request.post(`${API}/auth/login`, { data: { email: 'teacher@demo.invalid', password: 'Saathy@2026' } });
-  return { teacherPassword: r.ok() ? 'Saathy@2026!' : r2.ok() ? 'Saathy@2026' : null, teacherStatus: `${r.status()}/${r2.status()}` };
+  const r = await pre.request.post(`${API}/auth/login`, { data: { email: TEACHER_EMAIL, password: TEACHER_PASSWORD } });
+  return { teacherPassword: r.ok() ? TEACHER_PASSWORD : null, teacherStatus: String(r.status()) };
 })();
 const lookup = await pre.request.post(`${API}/auth/student/lookup`, { data: { slug: 'Demo school', rollNo: '1' } });
 const lookupBody = lookup.ok() ? await lookup.json() : null;
@@ -237,8 +240,37 @@ await step('my subjects and chapter', async () => {
   await frame('subject');
   await scrollTour({ max: 1200 });
   const motionLink = page.locator('main').getByRole('link', { name: /Motion/ });
-  await point(motionLink, { pause: 1500 });
+  await point(motionLink, { pause: 900 });
   chapterUrl = new URL(await motionLink.first().getAttribute('href'), BASE).href;
+  await click(motionLink, { after: 1500 });
+  await settle(1800);
+  await frame('chapter');
+});
+await step('learning path and notes', async () => {
+  const concepts = page.locator('.lesson-card').filter({ has: page.getByRole('heading', { name: 'Concepts' }) });
+  await point(concepts, { pause: 2200 });
+  await frame('learning-path');
+  const notes = page.locator('.lesson-card').filter({ has: page.getByRole('heading', { name: 'Notes' }) });
+  await point(notes, { pause: 1800 });
+  const sessions = page.locator('.lesson-card').filter({ has: page.getByRole('heading', { name: 'Sessions' }) });
+  await point(sessions, { pause: 1400 });
+  await frame('chapter-sessions');
+});
+await step('session player', async () => {
+  await click(page.getByRole('list', { name: 'Sessions' }).getByRole('link', { name: /Motion/ }), { after: 1500 });
+  await settle(1800);
+  await page.getByTestId('current-slide').waitFor({ timeout: 10000 });
+  await point(page.getByTestId('current-slide'), { pause: 2200 });
+  await frame('slide-1');
+  for (let i = 2; i <= 3; i += 1) {
+    const next = page.locator('.lesson-actions').getByRole('button', { name: /^(Next|Continue)$/ });
+    if (!(await next.count())) break;
+    await click(next, { after: 1500 });
+    await point(page.getByTestId('current-slide'), { pause: 2000 });
+    await frame(`slide-${i}`);
+  }
+  await click(page.getByRole('link', { name: 'Save and leave' }), { after: 1500 });
+  await settle(1000);
 });
 
 // 5. Study session
@@ -246,10 +278,7 @@ await step('study sessions', async () => {
   await click(nav('Study sessions'), { after: 1500 });
   await settle(1200);
   await frame('sessions');
-  await point(page.locator('main').getByRole('link', { name: /Physics|Open chapters/ }), { pause: 1500 });
-  // Not shown: the session player. Aarav's only published session (Session 3: Motion diagnostic)
-  // has no slides, which makes the Motion chapter page fail, and the fractions demo session is
-  // not available to his section.
+  await scrollTour({ max: 900 });
 });
 
 // 6. Homework, Ask Saathy, progress
@@ -267,18 +296,25 @@ await step('ask saathy', async () => {
   const subject = page.locator('#ask-subject');
   if (await subject.count() && !(await subject.inputValue().catch(() => ''))) {
     const opts = await subject.locator('option').evaluateAll((os) => os.map((o) => o.value).filter(Boolean));
-    if (opts[0]) { await point(subject); await subject.selectOption(opts.find(() => true)); await wait(700); }
+    const labels = await subject.locator('option').evaluateAll((os) => os.filter((o) => o.value).map((o) => ({ v: o.value, t: o.textContent })));
+    const pick = labels.find((o) => /Physics|Science/i.test(o.t))?.v ?? opts[0];
+    if (pick) { await point(subject); await subject.selectOption(pick); await wait(700); }
   }
   const chapter = page.locator('#ask-chapter');
   if (await chapter.count() && !(await chapter.inputValue().catch(() => ''))) {
     const opts = await chapter.locator('option').evaluateAll((os) => os.map((o) => o.value).filter(Boolean));
-    if (opts[0]) { await point(chapter); await chapter.selectOption(opts[0]); await wait(700); }
+    const labels = await chapter.locator('option').evaluateAll((os) => os.filter((o) => o.value).map((o) => ({ v: o.value, t: o.textContent })));
+    const pick = labels.find((o) => /Motion/i.test(o.t))?.v ?? opts[0];
+    if (pick) { await point(chapter); await chapter.selectOption(pick); await wait(700); }
   }
   await type(question, 'What is the difference between distance and displacement?');
   await click(page.locator('main, [role="dialog"], aside').getByRole('button', { name: 'Ask Saathy', exact: true }), { after: 1200 });
   await page.waitForFunction(() => !document.body.innerText.includes('Asking'), null, { timeout: 25000 }).catch(() => {});
-  await wait(3500);
+  await wait(2500);
   await frame('ask');
+  await scrollTour({ max: 700, back: false });
+  await wait(1500);
+  await frame('ask-answer');
 });
 await step('my progress', async () => {
   await click(nav('My progress'), { after: 1500 });
@@ -299,14 +335,14 @@ await step('games and atom forge', async () => {
   await settle(2500);
   const begin = page.locator('[data-afv-begin]');
   if (await begin.count()) await click(begin, { after: 1500 });
-  const until = Date.now() + 22000;
+  const until = Date.now() + 12000;
   let shot = false;
   while (Date.now() < until) {
     for (const sel of ['[data-afv-hotspot]', '[data-afv-assist]']) {
       const target = page.locator(sel);
       if (await target.count() && await target.first().isVisible().catch(() => false)) await click(target, { after: 1500 }).catch(() => {});
     }
-    if (!shot && Date.now() > until - 12000) { await frame('atom-forge'); shot = true; }
+    if (!shot && Date.now() > until - 7000) { await frame('atom-forge'); shot = true; }
     await wait(1200);
   }
   await page.goBack();
@@ -327,6 +363,7 @@ for (const [label, name] of [['Notifications', 'notifications'], ['Settings', 's
 
 // 9. Teacher, then parent
 await step('teacher', async () => {
+  if (DRY) throw new Error('teacher skipped in --dry so the first-login PIN prompt stays for the real take');
   if (!motion.teacherPassword) throw new Error(`teacher password rejected (${motion.teacherStatus})`);
   await page.goto(BASE + '/student');
   await settle(600);
@@ -335,15 +372,19 @@ await step('teacher', async () => {
   await settle(800);
   await settle(1000);
   await click(page.locator('.vs-auth-role--teacher'));
-  await type(page.getByLabel('Email', { exact: true }), 'teacher@demo.invalid');
+  await type(page.getByLabel('Email', { exact: true }), TEACHER_EMAIL);
   await type(page.getByLabel('Password', { exact: true }), motion.teacherPassword);
   await click(page.locator('form').getByRole('button', { name: /^Sign in/ }), { after: 2500 });
   const firstPin = page.getByLabel('First-login PIN');
-  if (await firstPin.count()) { note('  teacher first-login PIN prompt: setting PIN 2468'); await type(firstPin, PIN); await click(page.locator('form').getByRole('button', { name: /Set PIN/ }), { after: 2000 }); }
+  if (await firstPin.count()) { note(`  teacher first-login PIN prompt: setting PIN ${TEACHER_PIN}`); await type(firstPin, TEACHER_PIN); await frame('teacher-pin'); await click(page.locator('form').getByRole('button', { name: /Set PIN/ }), { after: 2000 }); }
   await page.waitForURL((u) => u.pathname.startsWith('/teacher'), { timeout: 15000 });
   await settle(2000);
   await frame('teacher');
   await scrollTour({ max: 2000 });
+  await click(nav('Lessons'), { after: 1500 });
+  await settle(1500);
+  await frame('teacher-lessons');
+  await scrollTour({ max: 900 });
 });
 await step('parent', async () => {
   if (!(await page.locator('a.nb-signin').count())) { await page.goto(BASE + '/student'); await settle(800); if (/\/(teacher|student)/.test(new URL(page.url()).pathname)) await signOut(); }
@@ -373,6 +414,6 @@ await ctx.close();
 await browser.close();
 if (video) {
   const raw = await video.path();
-  renameSync(raw, join(OUT, 'app-walkthrough.webm'));
+  renameSync(raw, join(OUT, 'app-walkthrough-v2.webm'));
 }
 note(`done; skipped: ${skipped.length ? skipped.join(' || ') : 'none'}`);
