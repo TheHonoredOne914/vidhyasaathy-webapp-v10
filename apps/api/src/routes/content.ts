@@ -106,8 +106,10 @@ export function registerContentRoutes(app: FastifyInstance, db: Db, auth: AuthSe
   });
   app.get('/my-class', { preHandler: requireRole('student') }, async (request) => {
     const { school, profile } = requireAuth(request);
-    if (!profile.sectionId) throw new ApiException(404, 'NOT_FOUND', 'Class workspace not found.');
-    const section = found(db.select().from(sections).where(scope(sections, school.id, profile.sectionId)).get());
+    // The session profile has no section; read the enrolment row.
+    const enrolled = found(db.select().from(profiles).where(scope(profiles, school.id, profile.id)).get());
+    if (!enrolled.sectionId) throw new ApiException(404, 'NOT_FOUND', 'Class workspace not found.');
+    const section = found(db.select().from(sections).where(scope(sections, school.id, enrolled.sectionId)).get());
     const subjectRows = db.select().from(subjects).where(and(eq(subjects.schoolId, school.id), eq(subjects.classId, section.classId))).all();
     return subjectRows.map((subject) => ({ ...subject, chapters: db.select().from(chapters).where(and(eq(chapters.schoolId, school.id), eq(chapters.subjectId, subject.id))).all().map((chapter) => ({
       ...chapter, status: chapterStatus(db, request, chapter.id, now()), concepts: db.select().from(concepts).where(and(eq(concepts.schoolId, school.id), eq(concepts.chapterId, chapter.id))).all().map((concept) => ({
