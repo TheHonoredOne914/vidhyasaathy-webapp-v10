@@ -40,7 +40,8 @@ uploads, test output, and local npm caches are gitignored.
 | `SESSION_COOKIE_NAME` | Defaults `vidhyasaathy_session` |
 | `SESSION_TTL_SECONDS` | Absolute session lifetime, defaults 604800 (7 days) |
 | `PIN_LOCKOUT_SECONDS` | Lockout after five failures, defaults 900 (15 minutes) |
-| `AUTH_RATE_LIMIT_MAX` | Shared per-IP request budget per minute, defaults 20 |
+| `RATE_LIMIT_MAX` | Per-IP request budget per minute for ordinary routes, defaults 120 |
+| `AUTH_RATE_LIMIT_MAX` | Per-IP budget per minute shared by the public `/auth/*` credential routes, defaults 20 |
 
 No session signing secret is needed: opaque 256-bit session tokens are generated
 with Node crypto and only SHA-256 token hashes are stored. HTTPS origins set

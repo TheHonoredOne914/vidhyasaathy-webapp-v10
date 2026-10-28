@@ -1,7 +1,7 @@
 import cookie from '@fastify/cookie';
 import rateLimit from '@fastify/rate-limit';
 import { SchoolSchema } from '@vidhyasaathy/contracts';
-import Fastify from 'fastify';
+import Fastify, { type FastifyRequest } from 'fastify';
 import { requireAuth, requireRole, requireSchool } from './auth/middleware.ts';
 import { generateSessionToken, hashCredential, hashToken } from './auth/security.ts';
 import { createAuthService, type AuthOptions } from './auth/service.ts';
@@ -34,7 +34,10 @@ export interface AppOptions {
   cookieName?: string;
   sessionTtlMs?: number;
   pinLockoutMs?: number;
+  /** Requests per minute per client for ordinary routes. */
   rateLimitMax?: number;
+  /** Requests per minute per client, shared across the public /auth/* credential routes. */
+  authRateLimitMax?: number;
   now?: () => number;
   logger?: boolean;
   claimCodeEncryptionKey?: string;
@@ -92,6 +95,17 @@ export async function buildApp(input: AppOptions) {
   try {
     await app.register(cookie);
     app.addHook('onRequest', auth.authenticateRequest);
+    // Must run before the rate-limit plugin's own onRoute hook: credential routes share one stricter bucket.
+    const authRateLimit = {
+      max: input.authRateLimitMax ?? 20,
+      timeWindow: 60000,
+      keyGenerator: (request: FastifyRequest) => `auth:${hashToken(request.ip)}`,
+    };
+    app.addHook('onRoute', (route) => {
+      if (route.url.startsWith('/auth/') && route.config?.public === true && route.config.rateLimit === undefined) {
+        route.config = { ...route.config, rateLimit: authRateLimit };
+      }
+    });
     await app.register(rateLimit, {
       max: input.rateLimitMax ?? 120,
       timeWindow: 60000,

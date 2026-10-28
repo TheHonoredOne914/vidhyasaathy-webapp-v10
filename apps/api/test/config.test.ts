@@ -21,4 +21,12 @@ describe('API environment', () => {
     const key = 'ab'.repeat(32);
     expect(loadConfig({ APP_ORIGIN: 'https://school.test', CLAIM_CODE_ENCRYPTION_KEY: key }).CLAIM_CODE_ENCRYPTION_KEY).toBe(key);
   });
+
+  it('defaults to 120 requests a minute for ordinary routes and 20 for credential routes', () => {
+    const config = loadConfig({ APP_ORIGIN: 'https://school.test' });
+    expect(config.RATE_LIMIT_MAX).toBe(120);
+    expect(config.AUTH_RATE_LIMIT_MAX).toBe(20);
+    expect(loadConfig({ APP_ORIGIN: 'https://school.test', RATE_LIMIT_MAX: '300' }).RATE_LIMIT_MAX).toBe(300);
+    expect(() => loadConfig({ APP_ORIGIN: 'https://school.test', RATE_LIMIT_MAX: '0' })).toThrow();
+  });
 });

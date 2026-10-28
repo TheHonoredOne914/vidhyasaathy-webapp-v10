@@ -12,6 +12,8 @@ const EnvironmentSchema = z.object({
   SESSION_COOKIE_NAME: z.string().regex(/^[A-Za-z][A-Za-z0-9_]*$/).default('vidhyasaathy_session'),
   SESSION_TTL_SECONDS: z.coerce.number().int().min(60).max(2592000).default(604800),
   PIN_LOCKOUT_SECONDS: z.coerce.number().int().min(60).max(86400).default(900),
+  // Per client per minute: RATE_LIMIT_MAX covers ordinary routes; AUTH_RATE_LIMIT_MAX is the shared budget for /auth/* credential routes.
+  RATE_LIMIT_MAX: z.coerce.number().int().min(1).max(10000).default(120),
   AUTH_RATE_LIMIT_MAX: z.coerce.number().int().min(1).max(1000).default(20),
   UPLOAD_DIRECTORY: z.string().trim().min(1).default('./uploads'),
   OPENAI_API_KEY: z.string().trim().min(1).optional(),
