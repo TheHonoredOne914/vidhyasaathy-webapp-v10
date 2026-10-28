@@ -11,8 +11,16 @@ import { chapterAccess, isAvailable, requireAvailable } from './access.ts';
 export function learningSessionAccess(db: Db, request: FastifyRequest, id: string, now: number, write = false) {
   const session = found(db.select().from(learningSessions).where(scope(learningSessions, requireAuth(request).school.id, id)).get());
   chapterAccess(db, request, session.chapterId, write, session.sectionId);
-  if (requireAuth(request).profile.role === 'student') requireAvailable(session, now);
+  if (requireAuth(request).profile.role === 'student') {
+    requireAvailable(session, now);
+    // A session without slides is not playable yet; students must not reach it.
+    if (!hasSlides(db, session.id)) found(undefined);
+  }
   return session;
+}
+
+export function hasSlides(db: Db, sessionId: string) {
+  return db.select({ id: slides.id }).from(slides).where(eq(slides.sessionId, sessionId)).limit(1).get() !== undefined;
 }
 
 export function sessionSlides(db: Db, sessionId: string) {
@@ -47,6 +55,7 @@ export function sessionView(db: Db, request: FastifyRequest, session: typeof lea
   const allSlides = sessionSlides(db, session.id);
   const check = sessionItems(db, session.id);
   if (requireAuth(request).profile.role !== 'student') return { ...session, slides: allSlides, check, progress: null };
+  if (!allSlides.length) return { ...session, slides: [], check: [], progress: null };
   const row = progressRow(db, session.id, requireAuth(request).profile.id);
   const progress = progressFor(allSlides.length, row?.viewedSlides ?? 0, row?.checkSubmittedAt != null);
   return {
@@ -67,7 +76,7 @@ export function visibleSessions(db: Db, request: FastifyRequest, chapterId: stri
     return all.filter((session) => assignments.some((assignment) => assignment.sectionId === session.sectionId));
   }
   const enrolled = found(db.select().from(profiles).where(scope(profiles, school.id, profile.id)).get());
-  return all.filter((session) => session.sectionId === enrolled.sectionId && isAvailable(session, now));
+  return all.filter((session) => session.sectionId === enrolled.sectionId && isAvailable(session, now) && hasSlides(db, session.id));
 }
 
 export function chapterStatus(db: Db, request: FastifyRequest, chapterId: string, now: number) {

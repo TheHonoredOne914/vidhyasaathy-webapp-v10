@@ -7,7 +7,7 @@ import { conceptAccess, prerequisiteGap, remediationState } from '../ai/remediat
 import { digest } from '../ai/retrieval.ts';
 import { requireAuth, requireRole } from '../auth/middleware.ts';
 import { resourceId } from '../content/access.ts';
-import { progressRow, sessionSlides } from '../content/sessions.ts';
+import { hasSlides, progressRow, sessionSlides } from '../content/sessions.ts';
 import type { Database } from '../db/index.ts';
 import { assignments, attempts, chapters, concepts, learningEvidence, learningSessions, profiles, remediationChecks, studentConceptStates } from '../db/schema.ts';
 import { ApiException, parseInput } from '../errors.ts';
@@ -74,7 +74,7 @@ export function registerRemediationRoutes(app: FastifyInstance, database: Databa
     for (const session of db.select().from(learningSessions).where(and(eq(learningSessions.schoolId, school.id),
       eq(learningSessions.sectionId, enrolled.sectionId ?? ''), eq(learningSessions.status, 'published'), lte(learningSessions.releaseAt, now()))).all()) {
       const progress = progressRow(db, session.id, profile.id);
-      if (progress?.completedAt != null) continue;
+      if (progress?.completedAt != null || !hasSlides(db, session.id)) continue;
       plan.push({ id: session.id, chapterId: session.chapterId, title: session.title, kind: 'session', required: true, dueAt: null,
         resumeAt: Math.min(progress?.viewedSlides ?? 0, sessionSlides(db, session.id).length) });
     }

@@ -280,6 +280,20 @@ describe('content and learning sessions', () => {
     expect((await get(`/chapters/${chapterId}/sessions`, otherStudent)).json()).toEqual([]);
   });
 
+  it('hides a published session that has no slides instead of failing the chapter', async () => {
+    const session = await createSession();
+    await h.post(`/sessions/${session.id}/publish`, {}, teacher);
+    // Seeds and imports can bypass the save schema; an empty published session must not break the chapter.
+    h.database.db.delete(slides).where(eq(slides.sessionId, session.id)).run();
+    const listed = await get(`/chapters/${chapterId}/sessions`, student);
+    expect(listed.statusCode).toBe(200);
+    expect(listed.json()).toEqual([]);
+    expect((await get(`/chapters/${chapterId}`, student)).statusCode).toBe(200);
+    expect((await get(`/sessions/${session.id}`, student)).statusCode).toBe(404);
+    expect((await get(`/sessions/${session.id}`, teacher)).json()).toMatchObject({ slides: [], progress: null });
+    expect((await get(`/chapters/${chapterId}/sessions`, teacher)).json()).toHaveLength(1);
+  });
+
   it('unlocks slides sequentially and completes only after a full check, idempotently per student', async () => {
     const session = await createSession();
     await h.post(`/sessions/${session.id}/publish`, {}, teacher);
