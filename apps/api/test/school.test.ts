@@ -163,7 +163,7 @@ describe('roster and claim-code sheets', () => {
   it('commits valid rows, reports physical row numbers, and leaves no orphan profiles, users or codes', async () => {
     const school = await setup();
     const csv = 'name,rollNumber,phone\r\n"Test, student",001,9876543210\r\n,002,9876543211\r\nDuplicate,001,9876543212\r\nBad,003,extra,9876543213\r\nbad"quote,004,9876543214\r\nValid,005,9876543215';
-    const response = await h.post('/admin/import-roster', { sectionId: school.section.id, csv }, school.cookie);
+    const response = await h.post('/admin/import-roster', { sectionId: school.section.id, csv, strict: false }, school.cookie);
     expect(response.statusCode).toBe(200);
     const result = RosterImportResultSchema.parse(response.json());
     expect(result.imported.map((row) => row.row)).toEqual([2, 7]);

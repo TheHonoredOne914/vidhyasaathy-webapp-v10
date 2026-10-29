@@ -23,7 +23,7 @@ describe('school setup contracts', () => {
   });
 
   it('normalizes roster rows without losing roll-number zeroes and validates physical error rows', () => {
-    expect(RosterImportRowSchema.parse({ name: ' Test student ', rollNumber: ' 001 ' })).toEqual({ name: 'Test student', rollNumber: '001' });
+    expect(RosterImportRowSchema.parse({ name: ' Test student ', rollNumber: ' 001 ', phone: ' 9876543210 ' })).toEqual({ name: 'Test student', rollNumber: '001', phone: '9876543210' });
     expect(ImportRosterSchema.safeParse({ sectionId: randomUUID(), csv: 'x'.repeat(262145) }).success).toBe(false);
     const result = { imported: [], errors: [{ row: 3, message: 'Missing name' }], claimCodeSheet: { schoolId: randomUUID(), sectionId: randomUUID(), entries: [] } };
     expect(RosterImportResultSchema.parse(result).errors[0]?.row).toBe(3);

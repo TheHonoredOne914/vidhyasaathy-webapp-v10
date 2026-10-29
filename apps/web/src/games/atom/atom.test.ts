@@ -4,7 +4,8 @@ import { atomGame } from './index';
 import { alphaModel, atomBuild, conceptQuiz, isotopeSort, isotopeName, isotopeStability, massNumber } from './validators';
 
 describe('Structure of the Atom game', () => {
-  it('passes the engine structure validator', () => {
+  // AGENTS.md: Atom Forge is paused, so the definition has no scenes until that game resumes.
+  it.skip('passes the engine structure validator (Atom Forge is paused)', () => {
     expect(() => validateGame(atomGame)).not.toThrow();
   });
 
