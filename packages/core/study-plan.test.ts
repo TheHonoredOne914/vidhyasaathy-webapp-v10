@@ -1,7 +1,7 @@
 import { expect, it } from 'vitest';
 import { buildStudyPlan, type StudyPlanItem } from './study-plan.ts';
 
-it('puts due work first, then remediation, while keeping teacher deadlines and resume positions', () => {
+it('puts unfinished work before due work, then revision, new work, and games', () => {
   const now = Date.UTC(2026, 9, 24, 12);
   const base = { chapterId: 'chapter', title: 'Practice', resumeAt: 0, dueAt: null };
   const input: StudyPlanItem[] = [
@@ -9,10 +9,12 @@ it('puts due work first, then remediation, while keeping teacher deadlines and r
     { ...base, id: 'review', kind: 'review', required: false, dueAt: now - 100 },
     { ...base, id: 'remediation', kind: 'remediation', required: false },
     { ...base, id: 'homework', kind: 'assignment', required: true, dueAt: now + 3600000 },
+    { ...base, id: 'fresh', kind: 'session', required: true },
+    { ...base, id: 'game', kind: 'game', required: false },
   ];
   const plan = buildStudyPlan(input, now);
-  expect(plan.items.map((item) => item.id)).toEqual(['homework', 'remediation', 'session', 'review']);
-  expect(plan.nextAction).toBe(input[3]);
+  expect(plan.items.map((item) => item.id)).toEqual(['session', 'review', 'homework', 'remediation', 'fresh', 'game']);
+  expect(plan.nextAction).toBe(input[0]);
   expect(plan.continue).toBe(input[0]);
   expect(input[3]?.dueAt).toBe(now + 3600000);
   expect(input[0]?.resumeAt).toBe(2);
