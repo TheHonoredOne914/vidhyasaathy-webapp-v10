@@ -101,6 +101,7 @@ test('ask, plan, concept map, remediation and unapproved drafts', async ({ page,
     check: [
       question('How many equal parts are in one half?', ['two', 'three'], 'two', true),
       question('Are the parts equal?', ['yes', 'no'], 'yes', true),
+      question('Two halves make a whole?', ['two', 'three'], 'two', false),
     ],
   });
   await api(teacherPage, 'POST', `/sessions/${first.id}/publish`, {});
@@ -156,8 +157,10 @@ test('ask, plan, concept map, remediation and unapproved drafts', async ({ page,
 
   await studentPage.goto(`/student/sessions/${first.id}`);
   await studentPage.getByRole('button', { name: 'Continue to the check' }).click();
-  await studentPage.getByRole('group', { name: 'How many equal parts are in one half?' }).getByRole('radio', { name: 'three' }).check();
+  await studentPage.getByRole('group', { name: 'How many equal parts are in one half?' }).getByRole('radio', { name: 'two' }).check();
   await studentPage.getByRole('group', { name: 'Are the parts equal?' }).getByRole('radio', { name: 'no' }).check();
+  await studentPage.getByRole('group', { name: 'Two halves make a whole?' }).getByRole('radio', { name: 'two' }).check();
+  for (const sure of await studentPage.getByRole('radio', { name: 'Sure' }).all()) await sure.check();
   await studentPage.getByRole('button', { name: 'Submit check' }).click();
   await expect(studentPage.getByRole('heading', { level: 1, name: 'Session complete' })).toBeVisible();
 

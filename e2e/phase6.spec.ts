@@ -110,8 +110,9 @@ test('dashboards, announcements, and parent access', async ({ page, browser }) =
   await expect(studentPage).toHaveURL('/student/welcome');
   await studentPage.goto(`/student/sessions/${session.id}`);
   await studentPage.getByRole('button', { name: 'Continue to the check' }).click();
-  await studentPage.getByRole('group', { name: 'How many equal parts are in one half?' }).getByRole('radio', { name: 'three' }).check();
-  await studentPage.getByRole('group', { name: 'Are the parts equal?' }).getByRole('radio', { name: 'no' }).check();
+  await studentPage.getByRole('group', { name: 'How many equal parts are in one half?' }).getByRole('radio', { name: 'two' }).check();
+  await studentPage.getByRole('group', { name: 'Are the parts equal?' }).getByRole('radio', { name: 'yes' }).check();
+  for (const sure of await studentPage.getByRole('radio', { name: 'Sure' }).all()) await sure.check();
   await studentPage.getByRole('button', { name: 'Submit check' }).click();
   await expect(studentPage.getByRole('heading', { level: 1, name: 'Session complete' })).toBeVisible();
 

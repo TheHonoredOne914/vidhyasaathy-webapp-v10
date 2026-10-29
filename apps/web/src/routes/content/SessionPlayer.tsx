@@ -8,7 +8,25 @@ import { useRemote } from '../../setup/useRemote';
 import { ErrorState } from '../../ui/ErrorState';
 import { Skeleton } from '../../ui/Skeleton';
 import { fieldClass } from '../../ui/Field';
+import { ConfidenceChips, type ConfidenceChoice } from '../../ui/ConfidenceChips';
 import { AccessDenied } from '../AccessDenied';
+
+function WhyWrong({ review }: { review: NonNullable<ReturnType<typeof LearningSessionSchema.parse>['review']> }) {
+  if (!review.misses.length && !review.bridge) return null;
+  return (
+    <div className="check-paper" data-testid="why-wrong">
+      {review.bridge ? <p>{review.bridge}</p> : null}
+      {review.misses.length ? (
+        <>
+          <h2>Why this was wrong</h2>
+          <ul>
+            {review.misses.map((miss) => <li key={miss.itemId}><strong>{miss.prompt}</strong><p>{miss.explanation}</p></li>)}
+          </ul>
+        </>
+      ) : null}
+    </div>
+  );
+}
 
 function isPublicItem(item: { type?: string; content?: unknown }): item is PublicItem {
   return !('content' in item);
@@ -23,6 +41,7 @@ export function SessionPlayer() {
   const [error, setError] = useState<string | null>(null);
   const [blockedConcept, setBlockedConcept] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
+  const [confidence, setConfidence] = useState<Record<string, ConfidenceChoice>>({});
   const progress = session.data?.progress ?? null;
   const viewed = progress?.viewedSlides ?? 0;
   const total = progress?.totalSlides ?? 0;
@@ -76,7 +95,11 @@ export function SessionPlayer() {
       setError('Answer each part of the check.');
       return;
     }
-    const payload = { answers: built.map((entry) => ({ itemId: entry.itemId, answer: entry.answer as string | string[] })) };
+    if (checks.some((item) => !confidence[item.id])) {
+      setError('Choose Sure, Unsure, or Guess for each question.');
+      return;
+    }
+    const payload = { answers: built.map((entry) => ({ itemId: entry.itemId, answer: entry.answer as string | string[], confidence: confidence[entry.itemId] })) };
     setPending(true);
     setError(null);
     setBlockedConcept(null);
@@ -105,10 +128,12 @@ export function SessionPlayer() {
             <h1>Session complete</h1>
             <p className="lesson-hand">You finished the check.</p>
             <p>Every slide was opened, and the check was submitted.</p>
+            {session.data.review ? <WhyWrong review={session.data.review} /> : null}
             <p className="lesson-actions"><Link to={`/student/chapters/${session.data.chapterId}`}>Back to the chapter</Link></p>
           </>
         ) : showCheck ? (
-          <>
+          <div className="check-paper">
+            {session.data.review ? <WhyWrong review={session.data.review} /> : null}
             <h1>Check</h1>
             <p>The session is complete only after this check is submitted.</p>
             {checks.length === 0 ? <p role="alert">The check is not available yet.</p> : checks.map((item) => (
@@ -142,6 +167,7 @@ export function SessionPlayer() {
                   <input className={fieldClass} aria-label={item.type === 'flashcard' ? 'What you remember' : 'Your answer'} value={typeof answers[item.id] === 'string' ? answers[item.id] : ''} onChange={(event) => { setAnswers((current) => ({ ...current, [item.id]: event.target.value })); }} />
                 ) : null}
                 {item.sourceRef ? <p className="lesson-cite">From your teacher’s notes · {item.sourceRef.locator}</p> : null}
+                <ConfidenceChips name={`confidence-${item.id}`} value={confidence[item.id] ?? ''} onChange={(value) => { setConfidence((current) => ({ ...current, [item.id]: value })); }} />
               </fieldset>
             ))}
             {error ? <p role="alert">{error}</p> : null}
@@ -151,7 +177,7 @@ export function SessionPlayer() {
               <button type="button" className="player-btn secondary" onClick={() => { setReview(true); setCursor(0); }}>Review slides</button>
               <Link to={`/student/chapters/${session.data.chapterId}`}>Save and leave</Link>
             </div>
-          </>
+          </div>
         ) : slide ? (
           <>
             <p>Slide {cursor + 1} of {progress.totalSlides}</p>

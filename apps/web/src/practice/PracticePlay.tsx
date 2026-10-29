@@ -10,6 +10,7 @@ import { useRemote } from '../setup/useRemote';
 import { Button } from '../ui/Button';
 import { ErrorState } from '../ui/ErrorState';
 import { fieldClass } from '../ui/Field';
+import { ConfidenceChips, type ConfidenceChoice } from '../ui/ConfidenceChips';
 import { Skeleton } from '../ui/Skeleton';
 import { draftAnswer, gameCopy, kindLabel } from './games';
 import './practice.css';
@@ -24,6 +25,9 @@ export function PracticePlay() {
   const [pairs, setPairs] = useState<string[]>([]);
   const [pending, setPending] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [confidence, setConfidence] = useState<ConfidenceChoice | ''>('');
+  const [wrongs, setWrongs] = useState<{ prompt: string; explanation: string }[]>([]);
+  const [bridge, setBridge] = useState<string | null>(null);
   const [remediation, setRemediation] = useState<string | null>(null);
   const events = useRef<Record<string, string>>({});
   const loaded = useRef('');
@@ -41,6 +45,9 @@ export function PracticePlay() {
     setPairs([]);
     setNotice(null);
     setRemediation(null);
+    setConfidence('');
+    setWrongs([]);
+    setBridge(null);
     if (remote.data.items.length === 0) {
       setGame(null);
       return;
@@ -81,8 +88,13 @@ export function PracticePlay() {
   async function submit(current: PublicItem) {
     if (!game || pending) return;
     const answer = draftAnswer(current, choice, pairs);
+    const currentPrompt = current.prompt;
     if (!answer) {
       setNotice(current.type === 'mcq' ? 'Choose an answer.' : current.type === 'match_pairs' ? 'Match each one to a different value.' : 'Enter an answer.');
+      return;
+    }
+    if (!confidence) {
+      setNotice('Choose Sure, Unsure, or Guess.');
       return;
     }
     const clientTs = Date.now();
@@ -98,6 +110,7 @@ export function PracticePlay() {
       answer,
       timeMs: Math.min(86_400_000, Math.max(0, clientTs - game.startedAt)),
       clientTs,
+      confidence,
     };
     try {
       const marked = await postJson('/practice/attempts', PracticeAttemptSchema, input);
@@ -105,6 +118,9 @@ export function PracticePlay() {
       setChoice('');
       setPairs([]);
       setNotice(marked.correct ? 'Correct.' : 'Not correct.');
+      if (!marked.correct && marked.explanation) setWrongs((current) => [...current, { prompt: currentPrompt, explanation: marked.explanation! }]);
+      if (marked.bridge) setBridge(marked.bridge);
+      setConfidence('');
     } catch (error) {
       if (error instanceof ApiClientError && error.code === 'REMEDIATION_REQUIRED') {
         setRemediation(error.message);
@@ -120,6 +136,13 @@ export function PracticePlay() {
     <LessonFrame kicker="Practice" title={copy.title} script="Optional. This does not change a deadline." stale={remote}>
       {back}
       <p className="practice-note">{copy.detail}</p>
+      {set.bridge || bridge ? <p className="check-paper">{bridge ?? set.bridge}</p> : null}
+      {wrongs.length ? (
+        <div className="check-paper" data-testid="why-wrong">
+          <h2>Why this was wrong</h2>
+          <ul>{wrongs.map((miss) => <li key={miss.prompt}><strong>{miss.prompt}</strong><p>{miss.explanation}</p></li>)}</ul>
+        </div>
+      ) : null}
       {set.items.length === 0 ? <p>No released questions match this game yet.</p> : null}
       {game?.deadline != null && !done ? <p className="practice-clock">Seconds left: {Math.max(0, Math.ceil((game.deadline - tick) / 1000))}</p> : null}
       {done && result ? (
@@ -159,6 +182,7 @@ export function PracticePlay() {
                 <input id="practice-text" className={fieldClass} value={choice} onChange={(event) => { setChoice(event.target.value); }} />
               </label>
             ) : null}
+            <ConfidenceChips name="practice-confidence" value={confidence} onChange={setConfidence} />
           </fieldset>
           {notice ? <p role="status">{notice}</p> : null}
           {remediation ? <p role="alert">{remediation} <Link to={`/student/concepts/${item.conceptId}/remediation`}>Open the lesson and check</Link></p> : null}

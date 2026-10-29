@@ -49,6 +49,20 @@ export function TeacherDesk({ data, sections }: { data: Dashboard; sections: { i
         })}</ul> : <div className="dash-placeholder"><strong>No class data is available yet.</strong><span>Class learning signals will appear here.</span></div>}
       </article>
       <article className="dash-panel">
+        <h2>Chapter bands</h2>
+        <p>Internal only. Students do not see these bands.</p>
+        {data.bands.length ? (
+          <ul className="dash-list">
+            {data.bands.map((row) => (
+              <li key={`${row.profileId}:${row.chapterId}`} className="heat-none">
+                <strong>{row.studentName}</strong>
+                <p>{row.chapterTitle}. Band {row.band}.</p>
+              </li>
+            ))}
+          </ul>
+        ) : <p>No chapter band is recorded yet.</p>}
+      </article>
+      <article className="dash-panel">
         <h2>Homework and quizzes</h2>
         {data.assignments.length ? (
           <ul className="dash-list">

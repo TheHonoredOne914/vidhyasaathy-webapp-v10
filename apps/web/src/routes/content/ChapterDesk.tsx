@@ -17,6 +17,7 @@ import { fieldClass } from '../../ui/Field';
 import { AccessDenied } from '../AccessDenied';
 import { AssignmentList } from '../../assessment/AssignmentList';
 import { ConceptMap } from '../../ai/ConceptMap';
+import { DiagnosticPanel } from './DiagnosticPanel';
 import { LessonFrame } from './LessonFrame';
 
 function toggle(list: string[], id: string): string[] {
@@ -188,6 +189,7 @@ export function ChapterPage() {
         </form>
       )}
 
+      {student ? <DiagnosticPanel chapterId={current.id} /> : null}
       <div className="lesson-card">
         <h2>Sessions</h2>
         {sessionRows.length === 0 ? (

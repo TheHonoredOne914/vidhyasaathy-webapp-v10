@@ -213,6 +213,7 @@ test('teacher publishes a session and the student cannot skip or finish early', 
   await expect(studentPage.getByRole('heading', { level: 1, name: 'Session complete' })).toHaveCount(0);
   await shot(studentPage, 'session-check');
   await studentPage.getByRole('radio', { name: 'The top number' }).check();
+  await studentPage.getByRole('radio', { name: 'Sure' }).check();
   await studentPage.getByRole('button', { name: 'Submit check' }).click();
   await expect(studentPage.getByRole('heading', { level: 1, name: 'Session complete' })).toBeVisible();
   await expect(studentPage.getByRole('navigation', { name: 'Primary' })).toBeVisible();

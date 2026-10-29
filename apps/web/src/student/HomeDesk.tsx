@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Assignment, Me, PlanItem } from '@vidhyasaathy/contracts';
 import { ProgressSchema, StreakSchema, StudyPlanSchema } from '@vidhyasaathy/contracts';
 import { Link } from 'react-router-dom';
@@ -17,7 +17,6 @@ type Subject = { id: string; name: string };
 type Style = 'visual' | 'story' | 'practice';
 
 const STYLE_KEY = 'vidhyasaathy.learn-style';
-const MASTERED = 0.8;
 
 // Each game belongs to the NCERT chapter whose title contains one of these words.
 const GAMES = [
@@ -121,7 +120,6 @@ export function HomeDesk({ me, stale, updatedAt, message }: { me: Me; stale: boo
   });
 
   const now = Date.now();
-  const mastery = useMemo(() => new Map((progress.data?.concepts ?? []).map((item) => [item.conceptId, item])), [progress.data]);
   const next = plan.data?.nextAction ?? plan.data?.continue ?? null;
   const chapterById = new Map((chapters ?? []).map((chapter) => [chapter.id, chapter]));
   const subjectById = new Map((subjects.data ?? []).map((subject) => [subject.id, subject]));
@@ -164,18 +162,19 @@ export function HomeDesk({ me, stale, updatedAt, message }: { me: Me; stale: boo
   const dateLine = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata' });
   const streakDays = streak.data?.currentDays ?? 0;
 
+  const wordFor = (conceptId: string) => progress.data?.masteryWords.find((row) => row.conceptId === conceptId)?.word ?? 'New';
+  const isMastered = (word: string) => word === 'Mastered' || word === 'Top form';
   const conceptNodes = (() => {
     const list = (concepts.data ?? []).slice(0, 5);
     let learningGiven = false;
     return list.map((concept) => {
-      const insight = mastery.get(concept.id);
-      const rate = insight?.passRate ?? null;
-      if (rate !== null && rate >= MASTERED) return { concept, state: 'mastered' as const, note: `Score ${Math.round(rate * 100)}%` };
+      const word = wordFor(concept.id);
+      if (isMastered(word)) return { concept, state: 'mastered' as const, note: word };
       if (!learningGiven) {
         learningGiven = true;
-        return { concept, state: 'learning' as const, note: rate !== null ? `${Math.round(rate * 100)}% so far` : 'Start here' };
+        return { concept, state: 'learning' as const, note: word };
       }
-      return { concept, state: 'next' as const, note: rate !== null ? `${Math.round(rate * 100)}% so far` : 'Coming up' };
+      return { concept, state: 'next' as const, note: word };
     });
   })();
 
@@ -186,7 +185,7 @@ export function HomeDesk({ me, stale, updatedAt, message }: { me: Me; stale: boo
         <section className="vs-home-hero">
           <div className="vs-home-hero-copy">
             <span className="vs-home-date">{dateLine}</span>
-            <h1>Namaste, <span className="vs-home-name">{me.profile.name} <span aria-hidden="true">👋</span></span></h1>
+            <h1>Namaste, <span className="vs-home-name">{me.profile.name}</span></h1>
             <p>School day ends, but your learning continues here.</p>
           </div>
           <div className="vs-home-saathy">
@@ -218,7 +217,7 @@ export function HomeDesk({ me, stale, updatedAt, message }: { me: Me; stale: boo
                   <g stroke="#041d3d" strokeWidth="2.3" fill="none" strokeLinecap="round"><circle cx="112" cy="62" r="6.5" /><path d="M112 69 V84M112 74 L102 80M112 74 L122 78M112 84 L104 98M112 84 L120 98" /></g>
                   <path d="M160 74 V48" stroke="#041d3d" strokeWidth="2.2" /><path d="M160 48 L178 55 L160 62 Z" fill="#041d3d" />
                 </svg>
-                <span className="vs-home-play" aria-hidden="true">▶</span>
+                <span className="vs-home-play">Play</span>
               </Link>
             </>;
           })() : <div>
@@ -234,7 +233,7 @@ export function HomeDesk({ me, stale, updatedAt, message }: { me: Me; stale: boo
           {subjects.status === 'loading' && !subjects.data ? <Skeleton /> : subjects.status === 'error' && !subjects.data ? <Retry what="your subjects" onRetry={subjects.reload} /> : subjects.data?.length ? <div className="vs-home-subject-grid">{subjects.data.map((subject, index) => {
             const current = chapters ? currentChapter(chapters, subject.id) : null;
             const own = (progress.data?.concepts ?? []).filter((item) => item.subjectId === subject.id);
-            const mastered = own.filter((item) => (item.passRate ?? 0) >= MASTERED).length;
+            const mastered = own.filter((item) => isMastered(wordFor(item.conceptId))).length;
             const share = own.length ? Math.round((mastered / own.length) * 100) : 0;
             return <Link className={`vs-home-subject is-${ACCENTS[index % ACCENTS.length]}`} key={subject.id} to={`/student/subjects/${subject.id}`}>
               <span className="vs-home-subject-icon"><SubjectIcon name={subject.name} /></span>
@@ -253,7 +252,7 @@ export function HomeDesk({ me, stale, updatedAt, message }: { me: Me; stale: boo
             <ol className="vs-home-days">{days.map((day) => <li key={day.date} className={`${day.practiced ? 'is-on' : ''} ${day.date === today ? 'is-today' : ''}`} aria-label={`${day.date}: ${day.practiced ? 'practised' : 'not practised'}`}><i /><span>{dayLabel(day.date)}</span></li>)}</ol>
           </section>
           {game ? <Link className="vs-home-game vs-sketch" to={`/student/chapters/${game.chapter.id}/practice/engine/${game.game.id}`}>
-            <span className="vs-home-game-art" aria-hidden="true">{game.game.art}</span>
+            <span className="vs-home-game-art">Play</span>
             <span><strong>Today’s game</strong><small>{game.game.title} · {game.game.hook}</small><em>Play →</em></span>
           </Link> : null}
         </div>
