@@ -20,9 +20,10 @@ export function registerContentRoutes(app: FastifyInstance, db: Db, auth: AuthSe
     auth.audit(request, `content.${action}`);
     return result;
   }));
-  const conceptView = (row: typeof concepts.$inferSelect) => ({
-    ...row, prerequisiteIds: db.select().from(conceptPrereqs).where(eq(conceptPrereqs.conceptId, row.id)).all().map((edge) => edge.prereqId),
-  });
+  const conceptView = (row: typeof concepts.$inferSelect) => {
+    const { sourceClass: _sourceClass, ...concept } = row;
+    return { ...concept, prerequisiteIds: db.select().from(conceptPrereqs).where(eq(conceptPrereqs.conceptId, row.id)).all().map((edge) => edge.prereqId) };
+  };
   function setPrereqs(schoolId: string, chapterId: string, id: string, ids: string[]) {
     const chapter = found(db.select().from(chapters).where(scope(chapters, schoolId, chapterId)).get());
     const edges = db.select().from(conceptPrereqs).where(eq(conceptPrereqs.schoolId, schoolId)).all();

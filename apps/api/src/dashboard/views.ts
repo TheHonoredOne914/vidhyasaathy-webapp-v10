@@ -1,4 +1,5 @@
 import { MIN_ANALYTICS_ATTEMPTS, type ClassInsights, type ConceptInsight, type EvidenceSummary, type Progress } from '@vidhyasaathy/contracts';
+import { levelWord, type Level } from '@vidhyasaathy/core/learning';
 import { CONCEPT_PASS_THRESHOLD } from '@vidhyasaathy/core/remediation';
 import { and, desc, eq, isNotNull } from 'drizzle-orm';
 import type { FastifyRequest } from 'fastify';
@@ -6,7 +7,7 @@ import { requireAuth } from '../auth/middleware.ts';
 import { assignmentFilter, assignmentView } from '../assessment/service.ts';
 import type { Db } from '../db/index.ts';
 import { announcements, assignments, attempts, chapters, classes, classConceptDaily, concepts, doubts,
-  learningEvidence, learningSessions, misconceptionDaily, parentLinks, profiles, reteachDecisions,
+  chapterBands, conceptLadders, learningEvidence, learningSessions, misconceptionDaily, parentLinks, profiles, reteachDecisions,
   sections, sessionProgress, studentConceptStates, subjects, teacherAssignments } from '../db/schema.ts';
 import { ApiException } from '../errors.ts';
 import { found, scope } from '../school/access.ts';
@@ -94,6 +95,7 @@ export function studentProgress(db: Db, request: FastifyRequest, student: typeof
   const raw = db.select().from(attempts).where(and(eq(attempts.schoolId, student.schoolId), eq(attempts.profileId, student.id))).all();
   const learning = db.select().from(learningEvidence).where(and(eq(learningEvidence.schoolId, student.schoolId), eq(learningEvidence.profileId, student.id))).all();
   const states = db.select().from(studentConceptStates).where(and(eq(studentConceptStates.schoolId, student.schoolId), eq(studentConceptStates.profileId, student.id))).all();
+  const ladders = db.select().from(conceptLadders).where(and(eq(conceptLadders.schoolId, student.schoolId), eq(conceptLadders.profileId, student.id))).all();
   const conceptViews = visible.map(({ concept, chapter }): ConceptInsight => {
     const rows = [...raw, ...learning].filter((row) => row.conceptId === concept.id);
     const evidence = summarizeEvidence(rows.filter((row) => row.correct !== null).length,
@@ -110,7 +112,11 @@ export function studentProgress(db: Db, request: FastifyRequest, student: typeof
   return { profileId: student.id, updatedAt: timestamp,
     evidence: summarizeEvidence(conceptViews.reduce((sum, row) => sum + row.attempts, 0),
       conceptViews.reduce((sum, row) => sum + row.correct, 0), conceptViews.reduce((sum, row) => sum + row.pendingReview, 0)),
-    completedSessions: completed.length, concepts: conceptViews, assignments: work.map((row) => assignmentView(db, request, row, student.id)) };
+    completedSessions: completed.length, concepts: conceptViews, assignments: work.map((row) => assignmentView(db, request, row, student.id)),
+    masteryWords: visible.map(({ concept }) => {
+      const ladder = ladders.find((row) => row.conceptId === concept.id);
+      return { conceptId: concept.id, title: concept.title, word: levelWord((ladder?.masteryLevel ?? null) as Level | null) };
+    }) };
 }
 
 export function teacherDashboard(db: Db, request: FastifyRequest, sectionId: string | undefined, timestamp: number) {
@@ -130,8 +136,18 @@ export function teacherDashboard(db: Db, request: FastifyRequest, sectionId: str
       && session.releaseAt <= timestamp && session.releaseAt >= Math.floor(timestamp / 86400000) * 86400000
       && assigned.some((row) => row.sectionId === session.sectionId && row.subjectId === subjectId))
     .map(({ session }) => ({ id: session.id, title: session.title, chapterId: session.chapterId, releaseAt: session.releaseAt }));
+  const pupils = db.select().from(profiles).where(and(eq(profiles.schoolId, school.id), eq(profiles.role, 'student'))).all()
+    .filter((row) => row.sectionId !== null && ids.includes(row.sectionId));
+  const pupilIds = new Set(pupils.map((row) => row.id));
+  const chapterTitles = new Map(db.select().from(chapters).where(eq(chapters.schoolId, school.id)).all().map((row) => [row.id, row.title]));
+  const bands = db.select().from(chapterBands).where(eq(chapterBands.schoolId, school.id)).all()
+    .filter((row) => pupilIds.has(row.profileId))
+    .map((row) => ({
+      profileId: row.profileId, studentName: pupils.find((pupil) => pupil.id === row.profileId)?.name ?? 'Student',
+      chapterId: row.chapterId, chapterTitle: chapterTitles.get(row.chapterId) ?? 'Chapter', band: row.band, updatedAt: row.updatedAt,
+    }));
   return { updatedAt: timestamp, classes: ids.map((id) => classInsights(db, request, id, timestamp)),
-    reviewQueue: queue.length, assignments: work.map(({ assignment }) => assignmentView(db, request, assignment)), sessions };
+    reviewQueue: queue.length, assignments: work.map(({ assignment }) => assignmentView(db, request, assignment)), sessions, bands };
 }
 
 export function visibleAnnouncements(db: Db, request: FastifyRequest, sectionId?: string) {

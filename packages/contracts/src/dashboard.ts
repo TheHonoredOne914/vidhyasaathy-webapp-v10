@@ -31,10 +31,16 @@ export const TeacherDashboardSchema = z.object({
   updatedAt: Time, classes: z.array(ClassInsightsSchema), reviewQueue: Count,
   assignments: z.array(AssignmentSchema),
   sessions: z.array(z.object({ id: Id, title: z.string(), chapterId: Id, releaseAt: Time.nullable() }).strict()),
+  bands: z.array(z.object({
+    profileId: Id, studentName: z.string(), chapterId: Id, chapterTitle: z.string(),
+    band: z.enum(['0-25', '25-50', '50-75', '75-100']), updatedAt: Time,
+  }).strict()),
 }).strict();
+export const MasteryWordSchema = z.enum(["Let's fix this", 'Almost there', 'Mastered', 'Top form', 'New']);
 export const ProgressSchema = z.object({
   profileId: Id, updatedAt: Time, evidence: EvidenceSummarySchema, completedSessions: Count,
   concepts: z.array(ConceptInsightSchema), assignments: z.array(AssignmentSchema),
+  masteryWords: z.array(z.object({ conceptId: Id, title: z.string(), word: MasteryWordSchema }).strict()),
 }).strict();
 export const NotificationChannelSchema = z.enum(['in_app', 'email', 'whatsapp']);
 export const SaveNotificationSettingsSchema = z.object({

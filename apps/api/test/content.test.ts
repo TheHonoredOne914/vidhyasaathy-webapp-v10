@@ -302,7 +302,7 @@ describe('content and learning sessions', () => {
     expect(initial.json()).toMatchObject({ check: [], progress: { viewedSlides: 0, completed: false, checkAvailable: false } });
     expect(initial.body).not.toContain('Final hidden slide');
     expect(initial.body).not.toContain('acceptedAnswers');
-    const answers = session.check.map((item, index) => ({ itemId: item.id, answer: index === 1 ? ['half', 'third'] : 'one third' }));
+    const answers = session.check.map((item, index) => ({ itemId: item.id, answer: index === 1 ? ['half', 'third'] : 'one half' }));
     expect((await h.post(`/sessions/${session.id}/check`, { answers }, student)).statusCode).toBe(403);
     expect((await h.post(`/sessions/${session.id}/advance`, { slideId: session.slides[2]!.id }, student)).statusCode).toBe(403);
     expect((await h.post(`/sessions/${session.id}/advance`, { slideId: randomUUID() }, student)).statusCode).toBe(404);

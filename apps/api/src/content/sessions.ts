@@ -57,11 +57,23 @@ export function sessionView(db: Db, request: FastifyRequest, session: typeof lea
   if (requireAuth(request).profile.role !== 'student') return { ...session, slides: allSlides, check, progress: null };
   if (!allSlides.length) return { ...session, slides: [], check: [], progress: null };
   const row = progressRow(db, session.id, requireAuth(request).profile.id);
-  const progress = progressFor(allSlides.length, row?.viewedSlides ?? 0, row?.checkSubmittedAt != null);
+  const progress = progressFor(allSlides.length, row?.viewedSlides ?? 0, row?.completedAt != null);
+  const review = parseReview(row?.lastReview);
   return {
-    ...session, progress, slides: allSlides.slice(0, Math.min(progress.viewedSlides + 1, allSlides.length)),
+    ...session, progress, ...(review ? { review } : {}),
+    slides: allSlides.slice(0, Math.min(progress.viewedSlides + 1, allSlides.length)),
     check: progress.checkAvailable ? check.map(publicItem) : [],
   };
+}
+
+function parseReview(value: string | null | undefined) {
+  if (!value) return null;
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    return parsed && typeof parsed === 'object' ? parsed : null;
+  } catch {
+    return null;
+  }
 }
 
 export function visibleSessions(db: Db, request: FastifyRequest, chapterId: string, now: number) {

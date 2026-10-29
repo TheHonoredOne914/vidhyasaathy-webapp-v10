@@ -30,6 +30,7 @@ export const PublishAssignmentSchema = z.object({}).strict();
 export const SubmitAttemptSchema = z.object({
   clientEventId: Id, assignmentId: Id, itemId: Id, answer: AnswerSchema,
   timeMs: z.number().int().nonnegative().max(86400000), clientTs: Timestamp,
+  confidence: z.enum(['sure', 'unsure', 'guess']).optional(),
 }).strict();
 export const AttemptSchema = SubmitAttemptSchema.extend({
   id: Id, schoolId: Id, profileId: Id, conceptId: Id, correct: z.boolean().nullable(),

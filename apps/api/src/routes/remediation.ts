@@ -1,4 +1,5 @@
 import { SubmitRemediationSchema, type PlanItem, type RemediationResult } from '@vidhyasaathy/contracts';
+import { clampLevel } from '@vidhyasaathy/core/learning';
 import { buildStudyPlan } from '@vidhyasaathy/core/study-plan';
 import { and, eq, lte } from 'drizzle-orm';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
@@ -11,6 +12,7 @@ import { hasSlides, progressRow, sessionSlides } from '../content/sessions.ts';
 import type { Database } from '../db/index.ts';
 import { assignments, attempts, chapters, concepts, learningEvidence, learningSessions, profiles, remediationChecks, studentConceptStates } from '../db/schema.ts';
 import { ApiException, parseInput } from '../errors.ts';
+import { recordAnswer } from '../learning/record.ts';
 import { found, scope } from '../school/access.ts';
 
 export function registerRemediationRoutes(app: FastifyInstance, database: Database, now: () => number) {
@@ -52,8 +54,17 @@ export function registerRemediationRoutes(app: FastifyInstance, database: Databa
         correct, passed: correct === 2, checkAttempt, passedOnSecondAttempt: correct === 2 && checkAttempt === 2, updatedAt: now() };
       db.insert(remediationChecks).values({ clientEventId: input.clientEventId, schoolId: school.id, profileId: profile.id,
         conceptId, targetConceptId: state.target.id, failureId: state.failureId, inputHash, result, createdAt: now() }).run();
-      for (const mark of marks) db.insert(learningEvidence).values({ id: `remediation:${input.clientEventId}:${mark.item.id}`,
-        schoolId: school.id, profileId: profile.id, conceptId: state.target.id, correct: mark.correct, source: 'remediation', createdAt: now() }).run();
+      for (const mark of marks) {
+        db.insert(learningEvidence).values({ id: `remediation:${input.clientEventId}:${mark.item.id}`,
+          schoolId: school.id, profileId: profile.id, conceptId: state.target.id, correct: mark.correct, source: 'remediation', createdAt: now() }).run();
+        const submitted = input.answers.find((answer) => answer.itemId === mark.item.id)!;
+        recordAnswer(db, {
+          id: `remediation:${input.clientEventId}:${mark.item.id}`, schoolId: school.id, profileId: profile.id,
+          conceptId: state.target.id, chapterId: mark.item.chapterId, itemId: mark.item.id,
+          level: clampLevel(mark.item.content.difficulty), correct: mark.correct, confidence: 'unsure', source: 'remediation',
+          timeMs: 0, answer: submitted.answer,
+        }, now());
+      }
       refreshConcept(db, { schoolId: school.id, profileId: profile.id, conceptId: state.target.id }, now());
       return result;
     });

@@ -34,12 +34,18 @@ export const UploadFileSchema = z.object({
 }).strict();
 export const PublishContentSchema = z.object({ releaseAt: z.number().int().nonnegative().nullable().default(null) }).strict();
 
+export const ErrorFamilySchema = z.enum(['concept_gap', 'careless', 'method', 'guess']);
 const ItemBase = z.object({
   conceptId: Id, prompt: Title, difficulty: z.number().int().min(1).max(5),
   sourceRef: z.object({ noteId: Id, locator: Title }).strict().nullable(),
+  explanation: z.string().trim().min(1).max(500).optional(),
+  role: z.enum(['check', 'practice', 'diagnostic']).optional(),
 });
 const Option = z.string().trim().min(1).max(1000);
-const Mcq = ItemBase.extend({ type: z.literal('mcq'), options: z.array(Option).min(2).max(8), answer: Option }).strict();
+const Mcq = ItemBase.extend({
+  type: z.literal('mcq'), options: z.array(Option).min(2).max(8), answer: Option,
+  mistakes: z.array(z.object({ option: Option, errorType: ErrorFamilySchema, explanation: z.string().trim().min(1).max(500) }).strict()).max(8).optional(),
+}).strict();
 const Match = ItemBase.extend({
   type: z.literal('match_pairs'), pairs: z.array(z.object({ left: Option, right: Option }).strict()).min(2).max(12),
 }).strict();
@@ -77,12 +83,36 @@ export const LearningSessionSummarySchema = Scoped.extend({
   releaseAt: z.number().int().nonnegative().nullable(), updatedAt: z.number().int().nonnegative(),
   progress: SessionProgressSchema.nullable(),
 }).strict();
+export const CheckMissSchema = z.object({
+  itemId: Id, prompt: z.string(), explanation: z.string(), errorType: ErrorFamilySchema,
+}).strict();
+export const CheckReviewSchema = z.object({
+  score: z.number().min(0).max(1), passed: z.boolean(), bridge: z.string().nullable(), misses: z.array(CheckMissSchema),
+}).strict();
 export const LearningSessionSchema = LearningSessionSummarySchema.extend({
   slides: z.array(SlideSchema), check: z.array(z.union([ItemSchema, PublicItemSchema])),
+  review: CheckReviewSchema.optional(),
 }).strict();
 export const AdvanceSessionSchema = z.object({ slideId: Id }).strict();
 export const SubmitSessionCheckSchema = z.object({
-  answers: z.array(z.object({ itemId: Id, answer: z.union([Option, z.array(Option).min(2).max(12)]) }).strict()).min(1).max(20),
+  answers: z.array(z.object({
+    itemId: Id, answer: z.union([Option, z.array(Option).min(2).max(12)]),
+    confidence: z.enum(['sure', 'unsure', 'guess']).optional(),
+    timeMs: z.number().int().nonnegative().max(86400000).optional(),
+  }).strict()).min(1).max(20),
+}).strict();
+export const DiagnosticOfferSchema = z.object({
+  chapterId: Id, offered: z.boolean(), title: z.string(), questions: z.array(PublicItemSchema),
+}).strict();
+export const SubmitDiagnosticSchema = z.object({
+  answers: z.array(z.object({
+    itemId: Id, answer: z.union([Option, z.array(Option).min(2).max(12)]),
+    confidence: z.enum(['sure', 'unsure', 'guess']),
+    timeMs: z.number().int().nonnegative().max(86400000).default(0),
+  }).strict()).min(1).max(8),
+}).strict();
+export const DiagnosticResultSchema = z.object({
+  chapterId: Id, route: z.enum(['challenge', 'steady', 'repair']), word: z.string(), message: z.string(),
 }).strict();
 
 export type SaveItem = z.infer<typeof SaveItemSchema>;

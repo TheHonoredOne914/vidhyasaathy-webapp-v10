@@ -56,7 +56,9 @@ it('starts at L2, climbs after three correct, and drops after two wrong with bri
   expect(dropped).toMatchObject({ level: 2, dropped: true, bridge: BRIDGE_ON_DROP, streakWrong: 0 });
   const floor = stepLadder(stepLadder({ level: 1, streakCorrect: 0, streakWrong: 1 }, false), false);
   expect(floor.level).toBe(1);
-  const ceiling = [1, 2, 3].reduce((current) => stepLadder(current, true), { level: 4, streakCorrect: 2, streakWrong: 0 });
+  let ceiling = stepLadder({ level: 4, streakCorrect: 2, streakWrong: 0 }, true);
+  ceiling = stepLadder(ceiling, true);
+  ceiling = stepLadder(ceiling, true);
   expect(ceiling.level).toBe(4);
 });
 

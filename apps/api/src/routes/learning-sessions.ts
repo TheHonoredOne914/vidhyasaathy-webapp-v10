@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { AdvanceSessionSchema, PublishContentSchema, SaveLearningSessionSchema, SubmitSessionCheckSchema, type SaveLearningSession } from '@vidhyasaathy/contracts';
+import { clampLevel, sessionGate, type Confidence, type ErrorFamily } from '@vidhyasaathy/core/learning';
 import { advanceSlide, completeSession } from '@vidhyasaathy/core/session';
 import { and, eq } from 'drizzle-orm';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
@@ -11,6 +12,7 @@ import { chapterAccess, requireDraft, resourceId } from '../content/access.ts';
 import { learningSessionAccess, progressRow, sessionItems, sessionSlides, sessionView, visibleSessions } from '../content/sessions.ts';
 import type { Db } from '../db/index.ts';
 import { concepts, items, learningEvidence, learningSessions, notes, sessionProgress, slides } from '../db/schema.ts';
+import { mistakeFor, recordAnswer } from '../learning/record.ts';
 import { ApiException, parseInput } from '../errors.ts';
 import { found, mutate, scope } from '../school/access.ts';
 
@@ -120,25 +122,51 @@ export function registerLearningSessionRoutes(app: FastifyInstance, db: Db, auth
       if (ids.size !== input.answers.length || ids.size !== check.length || !check.every((item) => ids.has(item.id))) {
         throw new ApiException(400, 'INCOMPLETE_CHECK', 'Answer each check item exactly once.');
       }
-        if (previous.completedAt === null) {
-          for (const conceptId of new Set(check.map((item) => item.content.conceptId))) {
-            requireRemediationComplete(db, session.schoolId, profileId, conceptId);
+      if (previous.completedAt === null && previous.checkSubmittedAt === null) {
+        for (const conceptId of new Set(check.map((item) => item.content.conceptId))) {
+          requireRemediationComplete(db, session.schoolId, profileId, conceptId);
         }
-        }
-      for (const item of check) {
-        const answer = input.answers.find((entry) => entry.itemId === item.id)!.answer;
-          const correct = markItem(item.content, answer);
-          if (previous.completedAt === null && correct !== null) {
-            db.insert(learningEvidence).values({ id: `session:${session.id}:${profileId}:${item.id}`,
-              schoolId: session.schoolId, profileId, conceptId: item.content.conceptId, correct, source: 'session', createdAt: now() })
-              .onConflictDoNothing().run();
-            refreshConcept(db, { schoolId: session.schoolId, profileId, conceptId: item.content.conceptId }, now());
-          }
       }
-      completeSession(allSlides.length, previous.viewedSlides, true);
-      if (previous.completedAt === null) db.update(sessionProgress).set({ checkSubmittedAt: now(), completedAt: now() }).where(and(
-        eq(sessionProgress.sessionId, session.id), eq(sessionProgress.profileId, profileId),
-      )).run();
+      const stamp = previous.checkSubmittedAt ?? 0;
+      const marks = check.map((item) => {
+        const submitted = input.answers.find((entry) => entry.itemId === item.id)!;
+        const correct = markItem(item.content, submitted.answer);
+        const confidence = (submitted.confidence ?? 'unsure') as Confidence;
+        const timeMs = submitted.timeMs ?? 0;
+        const feedback = mistakeFor(item.content, submitted.answer);
+        return { item, submitted, correct, confidence, timeMs, feedback, errorType: null as ErrorFamily | null };
+      });
+      const gate = sessionGate(marks.map((mark) => mark.correct));
+      if (previous.completedAt === null) {
+        for (const mark of marks) {
+          if (mark.correct === null) continue;
+          db.insert(learningEvidence).values({ id: `session:${session.id}:${profileId}:${mark.item.id}:${stamp}`,
+            schoolId: session.schoolId, profileId, conceptId: mark.item.content.conceptId, correct: mark.correct, source: 'session', createdAt: now() })
+            .onConflictDoNothing().run();
+          const recorded = recordAnswer(db, {
+            id: `session:${session.id}:${profileId}:${mark.item.id}:${stamp}`, schoolId: session.schoolId, profileId,
+            conceptId: mark.item.content.conceptId, chapterId: session.chapterId, itemId: mark.item.id,
+            level: clampLevel(mark.item.content.difficulty), correct: mark.correct, confidence: mark.confidence,
+            source: mark.item.content.type === 'flashcard' ? 'flashcard' : 'session', timeMs: mark.timeMs,
+            answer: mark.submitted.answer, markedFamily: mark.feedback.errorType, explanation: mark.feedback.explanation,
+          }, now());
+          mark.errorType = recorded.errorType;
+          refreshConcept(db, { schoolId: session.schoolId, profileId, conceptId: mark.item.content.conceptId }, now());
+        }
+        const review = {
+          score: gate.ratio, passed: gate.passed, bridge: gate.bridge,
+          misses: marks.filter((mark) => mark.correct === false).map((mark) => ({
+            itemId: mark.item.id, prompt: mark.item.content.prompt,
+            explanation: mark.feedback.explanation ?? "Look at this idea again, then try a simpler question.",
+            errorType: mark.errorType ?? 'concept_gap',
+          })),
+        };
+        db.update(sessionProgress).set({
+          checkSubmittedAt: previous.checkSubmittedAt ?? now(), lastReview: JSON.stringify(review),
+          ...(gate.passed ? { completedAt: now() } : {}),
+        }).where(and(eq(sessionProgress.sessionId, session.id), eq(sessionProgress.profileId, profileId))).run();
+      }
+      if (gate.passed || previous.completedAt !== null) completeSession(allSlides.length, previous.viewedSlides, true);
       return sessionView(db, request, session);
     });
   });

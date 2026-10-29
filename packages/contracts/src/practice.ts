@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { AttemptSchema, SubmitAttemptSchema } from './assessment.ts';
-import { PublicItemSchema } from './content.ts';
+import { ErrorFamilySchema, PublicItemSchema } from './content.ts';
 
 export const GameIdSchema = z.enum([
   'timed_concept_challenge', 'mcq_rush', 'quick_revision_quiz', 'match_the_concept', 'chapter_progress_challenge',
@@ -11,10 +11,17 @@ export const PracticeQuerySchema = z.object({
 export const PracticeSetSchema = z.object({
   chapterId: z.string().uuid(), gameId: GameIdSchema, required: z.literal(false), updatedAt: z.number().int().nonnegative(),
   items: z.array(z.object({ item: PublicItemSchema, kind: z.enum(['new', 'review']) }).strict()),
+  bridge: z.string().nullable(),
+}).strict();
+export const PracticeNextSchema = z.object({
+  chapterId: z.string().uuid(), item: PublicItemSchema.nullable(), level: z.number().int().min(1).max(4),
+  word: z.string(), bridge: z.string().nullable(),
 }).strict();
 // Games emit the same answer event as assignments, without an assignment/deadline.
 export const SubmitPracticeAttemptSchema = SubmitAttemptSchema.omit({ assignmentId: true });
-export const PracticeAttemptSchema = AttemptSchema.omit({ assignmentId: true }).extend({ assignmentId: z.null() }).strict();
+export const PracticeAttemptSchema = AttemptSchema.omit({ assignmentId: true }).extend({
+  assignmentId: z.null(), explanation: z.string().nullable(), errorType: ErrorFamilySchema.nullable(), bridge: z.string().nullable(),
+}).strict();
 export const StreakSchema = z.object({
   timezone: z.literal('Asia/Kolkata'), currentDays: z.number().int().nonnegative(), longestDays: z.number().int().nonnegative(),
   lastPracticedOn: z.string().date().nullable(), updatedAt: z.number().int().nonnegative(),

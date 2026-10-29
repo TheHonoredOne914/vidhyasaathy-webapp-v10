@@ -11,7 +11,9 @@ import { requireAuth } from '../auth/middleware.ts';
 import { chapterAccess } from '../content/access.ts';
 import { publicItem } from '../content/sessions.ts';
 import type { Db } from '../db/index.ts';
-import { assignmentItems, assignments, attempts, items, learningEvidence, learningSessions, profiles, studentConceptStates } from '../db/schema.ts';
+import { answerEvidence, assignmentItems, assignments, attempts, conceptLadders, items, learningEvidence, learningSessions, profiles, studentConceptStates } from '../db/schema.ts';
+import { mistakeFor, recordAnswer } from '../learning/record.ts';
+import { clampLevel, levelWord, pickLadderItem, type Level } from '@vidhyasaathy/core/learning';
 import { ApiException } from '../errors.ts';
 import { found, scope } from '../school/access.ts';
 
@@ -46,8 +48,35 @@ export function practiceSet(db: Db, request: FastifyRequest, chapterId: string, 
   const eligible = publishedItems(db, request, timestamp, chapterId).filter((row) => accepted.includes(row.content.type));
   const fresh = eligible.filter((row) => !earlier.has(row.conceptId));
   const review = eligible.filter((row) => due.has(row.conceptId));
-  return { chapterId, gameId, required: false, updatedAt: timestamp,
+  const conceptIds = new Set(eligible.map((row) => row.conceptId));
+  const bridge = db.select().from(conceptLadders).where(and(eq(conceptLadders.schoolId, school.id), eq(conceptLadders.profileId, profile.id))).all()
+    .find((row) => conceptIds.has(row.conceptId) && row.bridge)?.bridge ?? null;
+  return { chapterId, gameId, required: false, updatedAt: timestamp, bridge,
     items: interleave(fresh, review, limit).map(({ item, kind }) => ({ item: publicItem(item), kind })) };
+}
+
+export function practiceNext(db: Db, request: FastifyRequest, chapterId: string, timestamp: number) {
+  const { school, profile } = requireAuth(request);
+  const ladders = db.select().from(conceptLadders).where(and(eq(conceptLadders.schoolId, school.id), eq(conceptLadders.profileId, profile.id))).all();
+  const eligible = publishedItems(db, request, timestamp, chapterId).filter((row) => row.content.type === 'mcq' || row.content.type === 'short_answer');
+  const picked = pickLadderItem(eligible.map((row) => ({ row, conceptId: row.conceptId, level: clampLevel(row.content.difficulty) })),
+    ladders.map((row) => ({ conceptId: row.conceptId, level: row.ladderLevel as Level })));
+  const ladder = picked ? ladders.find((row) => row.conceptId === picked.conceptId) : null;
+  return {
+    chapterId, item: picked ? publicItem(picked.row) : null, level: ladder?.ladderLevel ?? picked?.level ?? 2,
+    word: levelWord((ladder?.masteryLevel ?? null) as Level | null), bridge: ladder?.bridge ?? null,
+  };
+}
+
+function presentPractice(db: Db, row: typeof attempts.$inferSelect) {
+  const item = db.select().from(items).where(eq(items.id, row.itemId)).get();
+  const feedback = item ? mistakeFor(item.content, row.answer) : { errorType: null, explanation: null };
+  const saved = db.select().from(answerEvidence).where(eq(answerEvidence.id, `practice:${row.clientEventId}`)).get();
+  const ladder = db.select().from(conceptLadders).where(and(eq(conceptLadders.profileId, row.profileId), eq(conceptLadders.conceptId, row.conceptId))).get();
+  return {
+    ...row, explanation: row.correct ? null : (feedback.explanation ?? 'Look at this idea again, then try a simpler question.'),
+    errorType: saved?.errorType ?? null, bridge: ladder?.bridge ?? null,
+  };
 }
 
 export function submitPractice(db: Db, request: FastifyRequest, input: SubmitPracticeAttempt, timestamp: number) {
@@ -60,14 +89,22 @@ export function submitPractice(db: Db, request: FastifyRequest, input: SubmitPra
   }
   const item = found(db.select().from(items).where(scope(items, school.id, input.itemId)).get());
   found(publishedItems(db, request, timestamp, item.chapterId).find((row) => row.id === item.id));
-  if (existing) return existing;
+  if (existing) return presentPractice(db, existing);
   requireRemediationComplete(db, school.id, profile.id, item.conceptId);
   const correct = markItem(item.content, input.answer);
   if (correct === null) throw new ApiException(400, 'UNMARKED_PRACTICE', 'Use a teacher assignment for answers that need review.');
-  const row = db.insert(attempts).values({ ...input, id: randomUUID(), schoolId: school.id, profileId: profile.id,
+  const { confidence: _confidence, ...attempt } = input;
+  const row = db.insert(attempts).values({ ...attempt, id: randomUUID(), schoolId: school.id, profileId: profile.id,
     assignmentId: null, conceptId: item.conceptId, correct, needsReview: false, serverTs: timestamp, updatedAt: timestamp }).returning().get()!;
   attemptChanged(db, row, timestamp);
-  return row;
+  const feedback = mistakeFor(item.content, input.answer);
+  recordAnswer(db, {
+    id: `practice:${input.clientEventId}`, schoolId: school.id, profileId: profile.id, conceptId: item.conceptId,
+    chapterId: item.chapterId, itemId: item.id, level: clampLevel(item.content.difficulty), correct,
+    confidence: input.confidence ?? 'unsure', source: 'game:practice', timeMs: input.timeMs, answer: input.answer,
+    markedFamily: feedback.errorType, explanation: feedback.explanation,
+  }, timestamp);
+  return presentPractice(db, row);
 }
 
 export function practiceStreak(db: Db, request: FastifyRequest, timestamp: number) {

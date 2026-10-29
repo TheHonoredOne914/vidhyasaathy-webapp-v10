@@ -182,6 +182,7 @@ export const chapters = sqliteTable('chapter', {
 export const concepts = sqliteTable('concept', {
   id: text('id').primaryKey(), schoolId: text('school_id').notNull(), chapterId: text('chapter_id').notNull(),
   title: text('title').notNull(), description: text('description').notNull(),
+  sourceClass: integer('source_class'),
 }, (t) => [
   uniqueIndex('concept_id_school_unique').on(t.id, t.schoolId),
   uniqueIndex('concept_id_chapter_school_unique').on(t.id, t.chapterId, t.schoolId),
@@ -280,6 +281,7 @@ export const sessionProgress = sqliteTable('session_progress', {
   sessionId: text('session_id').notNull(), profileId: text('profile_id').notNull(), schoolId: text('school_id').notNull(),
   viewedSlides: integer('viewed_slides').notNull().default(0),
   checkSubmittedAt: integer('check_submitted_at'), completedAt: integer('completed_at'),
+  lastReview: text('last_review'),
 }, (t) => [
   uniqueIndex('session_progress_unique').on(t.sessionId, t.profileId),
   index('session_progress_profile_idx').on(t.schoolId, t.profileId),
@@ -420,6 +422,62 @@ export const learningEvidence = sqliteTable('learning_evidence', {
   index('learning_evidence_profile_idx').on(t.schoolId, t.profileId, t.conceptId),
   foreignKey({ columns: [t.profileId, t.schoolId], foreignColumns: [profiles.id, profiles.schoolId] }),
   foreignKey({ columns: [t.conceptId, t.schoolId], foreignColumns: [concepts.id, concepts.schoolId] }),
+]);
+
+export const answerEvidence = sqliteTable('answer_evidence', {
+  id: text('id').primaryKey(), schoolId: text('school_id').notNull(), profileId: text('profile_id').notNull(),
+  conceptId: text('concept_id').notNull(), itemId: text('item_id').notNull(),
+  level: integer('level').notNull(), correct: integer('correct', { mode: 'boolean' }).notNull(),
+  confidence: text('confidence', { enum: ['sure', 'unsure', 'guess'] }).notNull(),
+  source: text('source').notNull(), errorType: text('error_type', { enum: ['concept_gap', 'careless', 'method', 'guess'] }),
+  timeMs: integer('time_ms').notNull(), answer: text('answer', { mode: 'json' }).notNull().$type<string | string[]>(),
+  notTaught: integer('not_taught', { mode: 'boolean' }).notNull().default(false), createdAt: integer('created_at').notNull(),
+}, (t) => [
+  index('answer_evidence_profile_idx').on(t.schoolId, t.profileId, t.conceptId, t.createdAt),
+  foreignKey({ columns: [t.profileId, t.schoolId], foreignColumns: [profiles.id, profiles.schoolId] }),
+  foreignKey({ columns: [t.conceptId, t.schoolId], foreignColumns: [concepts.id, concepts.schoolId] }),
+  foreignKey({ columns: [t.itemId, t.conceptId, t.schoolId], foreignColumns: [items.id, items.conceptId, items.schoolId] }),
+]);
+
+export const conceptLadders = sqliteTable('concept_ladder', {
+  schoolId: text('school_id').notNull(), profileId: text('profile_id').notNull(), conceptId: text('concept_id').notNull(),
+  ladderLevel: integer('ladder_level').notNull().default(2), streakCorrect: integer('streak_correct').notNull().default(0),
+  streakWrong: integer('streak_wrong').notNull().default(0), masteryLevel: integer('mastery_level'),
+  masteryScore: real('mastery_score').notNull().default(0), misconception: integer('misconception', { mode: 'boolean' }).notNull().default(false),
+  bridge: text('bridge'), updatedAt: integer('updated_at').notNull(),
+}, (t) => [
+  uniqueIndex('concept_ladder_pk').on(t.profileId, t.conceptId),
+  index('concept_ladder_school_idx').on(t.schoolId, t.profileId),
+  foreignKey({ columns: [t.profileId, t.schoolId], foreignColumns: [profiles.id, profiles.schoolId] }),
+  foreignKey({ columns: [t.conceptId, t.schoolId], foreignColumns: [concepts.id, concepts.schoolId] }),
+]);
+
+export const chapterBands = sqliteTable('chapter_band', {
+  schoolId: text('school_id').notNull(), profileId: text('profile_id').notNull(), chapterId: text('chapter_id').notNull(),
+  band: text('band', { enum: ['0-25', '25-50', '50-75', '75-100'] }).notNull(), updatedAt: integer('updated_at').notNull(),
+}, (t) => [
+  uniqueIndex('chapter_band_pk').on(t.profileId, t.chapterId),
+  foreignKey({ columns: [t.profileId, t.schoolId], foreignColumns: [profiles.id, profiles.schoolId] }),
+  foreignKey({ columns: [t.chapterId, t.schoolId], foreignColumns: [chapters.id, chapters.schoolId] }),
+]);
+
+export const bandEvents = sqliteTable('band_event', {
+  id: text('id').primaryKey(), schoolId: text('school_id').notNull(), profileId: text('profile_id').notNull(),
+  chapterId: text('chapter_id').notNull(), fromBand: text('from_band', { enum: ['0-25', '25-50', '50-75', '75-100'] }),
+  toBand: text('to_band', { enum: ['0-25', '25-50', '50-75', '75-100'] }).notNull(), createdAt: integer('created_at').notNull(),
+}, (t) => [
+  index('band_event_profile_idx').on(t.schoolId, t.profileId, t.chapterId, t.createdAt),
+  foreignKey({ columns: [t.profileId, t.schoolId], foreignColumns: [profiles.id, profiles.schoolId] }),
+  foreignKey({ columns: [t.chapterId, t.schoolId], foreignColumns: [chapters.id, chapters.schoolId] }),
+]);
+
+export const diagnosticResults = sqliteTable('diagnostic_result', {
+  schoolId: text('school_id').notNull(), profileId: text('profile_id').notNull(), chapterId: text('chapter_id').notNull(),
+  route: text('route', { enum: ['challenge', 'steady', 'repair'] }).notNull(), createdAt: integer('created_at').notNull(),
+}, (t) => [
+  uniqueIndex('diagnostic_result_pk').on(t.profileId, t.chapterId),
+  foreignKey({ columns: [t.profileId, t.schoolId], foreignColumns: [profiles.id, profiles.schoolId] }),
+  foreignKey({ columns: [t.chapterId, t.schoolId], foreignColumns: [chapters.id, chapters.schoolId] }),
 ]);
 
 export const remediationChecks = sqliteTable('remediation_check', {

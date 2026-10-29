@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { Answer, Assignment, SaveItem, SubmitAttempt } from '@vidhyasaathy/contracts';
+import { clampLevel } from '@vidhyasaathy/core/learning';
 import { calculateMastery } from '@vidhyasaathy/core/mastery';
 import { and, eq, exists, isNull } from 'drizzle-orm';
 import type { FastifyRequest } from 'fastify';
@@ -8,6 +9,7 @@ import { remediationProgress, requireRemediationComplete } from '../ai/remediati
 import { chapterAccess } from '../content/access.ts';
 import { publicItem } from '../content/sessions.ts';
 import type { Db } from '../db/index.ts';
+import { mistakeFor, recordAnswer } from '../learning/record.ts';
 import { assignmentItems, assignments, attempts, chapters, items, learningEvidence, profiles, studentConceptStates, syncChanges, teacherAssignments } from '../db/schema.ts';
 import { ApiException } from '../errors.ts';
 import { found, scope } from '../school/access.ts';
@@ -123,11 +125,21 @@ export function submitAttempt(db: Db, request: FastifyRequest, input: SubmitAtte
     ? db.select().from(attempts).where(eq(attempts.id, progress.failureId.slice('attempt:'.length))).get() : undefined;
   if (openFailure?.assignmentId !== input.assignmentId) requireRemediationComplete(db, school.id, profile.id, question.content.conceptId);
   const correct = markItem(question.content, input.answer);
+  const { confidence, ...attemptInput } = input;
   const row = db.insert(attempts).values({
-    ...input, id: randomUUID(), schoolId: school.id, profileId: profile.id, conceptId: question.content.conceptId,
+    ...attemptInput, id: randomUUID(), schoolId: school.id, profileId: profile.id, conceptId: question.content.conceptId,
     correct, needsReview: correct === null, serverTs: timestamp, updatedAt: timestamp,
   }).returning().get()!;
   attemptChanged(db, row, timestamp);
+  if (correct !== null) {
+    const feedback = mistakeFor(question.content, input.answer);
+    recordAnswer(db, {
+      id: `attempt:${row.clientEventId}`, schoolId: school.id, profileId: profile.id, conceptId: question.content.conceptId,
+      chapterId: question.chapterId, itemId: question.id, level: clampLevel(question.content.difficulty), correct,
+      confidence: confidence ?? 'unsure', source: assignment.kind === 'quiz' ? 'quiz' : 'homework', timeMs: input.timeMs,
+      answer: input.answer, markedFamily: feedback.errorType, explanation: feedback.explanation,
+    }, timestamp);
+  }
   return row;
 }
 

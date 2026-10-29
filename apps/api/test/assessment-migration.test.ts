@@ -41,7 +41,7 @@ it('upgrades populated P3 items without losing session content or progress, and 
     migrate(db, { migrationsFolder });
     expect(db.select().from(schema.items).all()).toEqual([{ id: itemId, schoolId, chapterId, sessionId, conceptId, position: 0, content }]);
     expect(db.select().from(schema.sessionProgress).all()).toEqual([{ sessionId, schoolId, profileId,
-      viewedSlides: 1, checkSubmittedAt: 2, completedAt: 2 }]);
+      viewedSlides: 1, checkSubmittedAt: 2, completedAt: 2, lastReview: null }]);
     db.insert(schema.items).values({ id: randomUUID(), schoolId, chapterId, conceptId, position: 0, content }).run();
     expect(db.select().from(schema.items).all()).toHaveLength(2);
     for (const table of [schema.assignments, schema.assignmentItems, schema.attempts, schema.studentConceptStates, schema.syncChanges]) {

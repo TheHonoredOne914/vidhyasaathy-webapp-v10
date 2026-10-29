@@ -61,6 +61,7 @@ test('P5: grounded hints, private scope, reviewed drafts, remediation gate and p
     generated = { title: 'Practise halves', slides: [{ title: 'Equal parts', body, conceptId, noteId }], check: [
       { type: 'mcq', conceptId, prompt: 'How many equal parts make halves?', difficulty: 1, sourceRef: { noteId, locator: 'Text opening' }, options: ['two', 'three'], answer: 'two' },
       { type: 'mcq', conceptId, prompt: 'Are the parts equal?', difficulty: 1, sourceRef: { noteId, locator: 'Text opening' }, options: ['yes', 'no'], answer: 'yes' },
+      { type: 'short_answer', conceptId, prompt: 'Write the word two', difficulty: 1, sourceRef: { noteId, locator: 'Text opening' }, acceptedAnswers: ['two'] },
     ] };
     const queued = await h.post('/ai/draft-jobs', { noteId, sectionId }, admin);
     assert.equal(queued.statusCode, 202, queued.body);
@@ -77,7 +78,7 @@ test('P5: grounded hints, private scope, reviewed drafts, remediation gate and p
     assert.equal((await h.post(`/sessions/${approved.sessionId}/publish`, {}, admin)).statusCode, 200);
     const session = LearningSessionSchema.parse((await get(`/sessions/${approved.sessionId}`, admin)).json());
     assert.equal((await h.post(`/sessions/${session.id}/advance`, { slideId: session.slides[0]!.id }, student.cookie)).statusCode, 200);
-    const failed = await h.post(`/sessions/${session.id}/check`, { answers: session.check.map((item, index) => ({ itemId: item.id, answer: index === 0 ? 'two' : 'no' })) }, student.cookie);
+    const failed = await h.post(`/sessions/${session.id}/check`, { answers: session.check.map((item, index) => ({ itemId: item.id, answer: index === 1 ? 'no' : 'two' })) }, student.cookie);
     assert.equal(failed.statusCode, 200, failed.body);
     let remediation = RemediationSchema.parse((await get(`/concepts/${conceptId}/remediation`)).json());
     assert.equal(remediation.status, 'ready');

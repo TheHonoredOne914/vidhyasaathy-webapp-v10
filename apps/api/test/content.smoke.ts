@@ -58,7 +58,7 @@ test('P3: scheduled content, authenticated files, sequential slides and a requir
     assert.equal(first.statusCode, 200, first.body);
     assert.equal(first.body.includes('Last hidden slide'), false);
     assert.equal((await h.post(`/sessions/${session.id}/advance`, { slideId: session.slides[1]!.id }, student.cookie)).statusCode, 403);
-    const answers = [{ itemId: session.check[0]!.id, answer: 'three' }];
+    const answers = [{ itemId: session.check[0]!.id, answer: 'two' }];
     assert.equal((await h.post(`/sessions/${session.id}/check`, { answers }, student.cookie)).statusCode, 403);
     for (const slide of session.slides) assert.equal((await h.post(`/sessions/${session.id}/advance`, { slideId: slide.id }, student.cookie)).statusCode, 200);
     const ready = LearningSessionSchema.parse((await get(`/sessions/${session.id}`)).json());
