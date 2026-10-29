@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { SaveItemSchema } from '@vidhyasaathy/contracts';
 import { hashCredential, hashToken } from '../auth/security.ts';
 import type { Db } from './index.ts';
+import { ensureMotionBank, ensureMotionHistories } from '../content/motion-bank.ts';
 import { academicYears, assignmentItems, assignments, chapters, classes, conceptPrereqs, concepts, items,
   claimCodes, learningEvidence, learningSessions, noteConcepts, notes, parentLinks, profiles, schools, sections, sessionProgress,
   slides, studentConceptStates, subjects, syncChanges, teacherAssignments, users, attempts } from './schema.ts';
@@ -19,7 +20,11 @@ export async function seedDemo(db: Db, credentials: z.input<typeof Credentials>,
   if (existing) {
     if (existing.name !== 'Demo school') throw new Error('Demo school ID is already in use.');
     // Content-only upgrade for older demo databases; accounts and progress stay untouched.
-    db.transaction(() => ensureMotionContent(db, now));
+    db.transaction(() => {
+      ensureMotionContent(db, now);
+      ensureMotionBank(db, DEMO_SCHOOL_ID, now);
+      ensureMotionHistories(db, DEMO_SCHOOL_ID, now);
+    });
     return { schoolId: existing.id, created: false };
   }
   const passwordHash = await hashCredential(input.password);
@@ -46,11 +51,13 @@ export async function seedDemo(db: Db, credentials: z.input<typeof Credentials>,
         sectionId: null, rollNumber: null, phone: role === 'parent' ? '9876543210' : '', createdAt: now }).run();
       profileIds[role] = profileId;
     }
-    const students = options.rich ? [['student', '1'], ['student2', '2'], ['student3', '3']] as const : [['student', '1']] as const;
-    for (const [key, rollNumber] of students) {
+    const students = options.rich
+      ? [['student', '1', 'Aarav'], ['student2', '2', 'Meera'], ['student3', '3', 'Kabir'], ['student4', '4', 'Priya'], ['student5', '5', 'Rohan']] as const
+      : [['student', '1', 'Aarav']] as const;
+    for (const [key, rollNumber, name] of students) {
       const userId = randomUUID(), profileId = randomUUID();
       db.insert(users).values({ id: userId, email: null, passwordHash: null, pinHash, createdAt: now }).run();
-      db.insert(profiles).values({ id: profileId, userId, schoolId, role: 'student', name: key === 'student' ? 'Aarav' : key === 'student2' ? 'Meera' : 'Kabir',
+      db.insert(profiles).values({ id: profileId, userId, schoolId, role: 'student', name,
         sectionId: options.rich ? section9aId : sectionId, rollNumber, phone: '9876543210', createdAt: now }).run();
       profileIds[key] = profileId;
     }
@@ -119,7 +126,9 @@ export async function seedDemo(db: Db, credentials: z.input<typeof Credentials>,
       content: SaveItemSchema.parse({ type: 'mcq', prompt, options, answer, difficulty: 1, sourceRef: null, conceptId: motionConcepts.find((concept) => concept.title === conceptTitle)!.id }),
     }))).run();
     ensureMotionContent(db, now);
-    if (options.rich) for (const [index, key] of (['student', 'student2', 'student3'] as const).entries()) {
+    ensureMotionBank(db, schoolId, now);
+    ensureMotionHistories(db, schoolId, now);
+    if (options.rich) for (const [index, key] of (['student', 'student2', 'student3', 'student4'] as const).entries()) {
       const profileId = profileIds[key]!;
       db.insert(sessionProgress).values({ sessionId, profileId, schoolId, viewedSlides: index === 0 ? 2 : 1,
         checkSubmittedAt: index === 0 ? now - 60000 : null, completedAt: index === 0 ? now - 30000 : null }).run();
@@ -212,6 +221,69 @@ export async function resetDemoLogins(db: Db, password: string) {
   if (!staff.length) return 0;
   db.update(users).set({ passwordHash }).where(inArray(users.id, staff)).run();
   return staff.length;
+}
+
+const DEMO_STUDENTS = [
+  { name: 'Aarav', roll: '1' }, { name: 'Meera', roll: '2' }, { name: 'Kabir', roll: '3' },
+  { name: 'Priya', roll: '4' }, { name: 'Rohan', roll: '5' },
+] as const;
+
+/** Adds any missing demo students. Existing pins and progress stay as they are. */
+export async function ensureDemoStudents(db: Db, pin: string, now: number) {
+  const pinHash = await hashCredential(Credentials.shape.pin.parse(pin));
+  const session = db.select().from(learningSessions).where(eq(learningSessions.schoolId, DEMO_SCHOOL_ID)).all()
+    .find((row) => row.title.startsWith('Session 3'));
+  const parent = db.select().from(profiles).where(and(eq(profiles.schoolId, DEMO_SCHOOL_ID), eq(profiles.role, 'parent'))).get();
+  if (!session || !parent) return;
+  const existing = db.select().from(profiles).where(and(eq(profiles.schoolId, DEMO_SCHOOL_ID), eq(profiles.role, 'student'))).all();
+  for (const student of DEMO_STUDENTS) {
+    if (existing.some((row) => row.name === student.name)) continue;
+    const userId = randomUUID();
+    const profileId = randomUUID();
+    db.insert(users).values({ id: userId, email: null, passwordHash: null, pinHash, createdAt: now }).run();
+    db.insert(profiles).values({
+      id: profileId, userId, schoolId: DEMO_SCHOOL_ID, role: 'student', name: student.name,
+      sectionId: session.sectionId, rollNumber: student.roll, phone: '9876543210', createdAt: now,
+    }).run();
+    db.insert(parentLinks).values({ id: randomUUID(), schoolId: DEMO_SCHOOL_ID, parentProfileId: parent.id, studentProfileId: profileId }).run();
+  }
+}
+
+const CANONICAL_PASSWORD = 'Saathy@2026!';
+const CANONICAL_PINS: Record<string, string> = { Aarav: '2468', Meera: '3579', Kabir: '4680', Priya: '5791', Rohan: '6802' };
+
+/** CLI only. Tests keep the pin they pass into seedDemo. */
+export async function applyDemoAccess(db: Db) {
+  const passwordHash = await hashCredential(CANONICAL_PASSWORD);
+  const teacherPin = await hashCredential('1357');
+  const staff = db.select({ userId: profiles.userId, role: profiles.role }).from(profiles)
+    .innerJoin(users, eq(users.id, profiles.userId))
+    .where(and(eq(profiles.schoolId, DEMO_SCHOOL_ID), isNotNull(users.email))).all();
+  for (const row of staff) {
+    db.update(users).set(row.role === 'teacher' ? { passwordHash, pinHash: teacherPin } : { passwordHash }).where(eq(users.id, row.userId)).run();
+  }
+  for (const [name, pin] of Object.entries(CANONICAL_PINS)) {
+    const profile = db.select().from(profiles).where(and(eq(profiles.schoolId, DEMO_SCHOOL_ID), eq(profiles.name, name), eq(profiles.role, 'student'))).get();
+    if (!profile) continue;
+    db.update(users).set({ pinHash: await hashCredential(pin) }).where(eq(users.id, profile.userId)).run();
+  }
+}
+
+export function canonicalDemoLogins() {
+  return [
+    `School: Demo school (${DEMO_SCHOOL_ID})`,
+    `Staff password: ${CANONICAL_PASSWORD}`,
+    'admin: admin@demo.invalid',
+    "teacher: teacher@demo.invalid (Sharma Ma'am), PIN 1357",
+    'parent: parent@demo.invalid',
+    'examiner: examiner@demo.invalid',
+    'Student PINs',
+    'Aarav: 2468',
+    'Meera: 3579',
+    'Kabir: 4680',
+    'Priya: 5791',
+    'Rohan: 6802',
+  ].join('\n');
 }
 
 export function demoLogins(db: Db, password: string, pin: string) {

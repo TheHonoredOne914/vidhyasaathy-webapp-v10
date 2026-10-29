@@ -1,5 +1,5 @@
 import { openDatabase } from './index.ts';
-import { demoLogins, resetDemoLogins, seedDemo } from './demo.ts';
+import { applyDemoAccess, canonicalDemoLogins, ensureDemoStudents, resetDemoLogins, seedDemo } from './demo.ts';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -16,11 +16,13 @@ try {
   } else {
     console.info(result.created ? 'Created Demo school.' : 'Demo school already exists; credentials unchanged (set DEMO_RESET_LOGINS=true to reset staff passwords).');
   }
-  const logins = demoLogins(database.db, process.env.DEMO_PASSWORD, process.env.DEMO_PIN);
+  await ensureDemoStudents(database.db, process.env.DEMO_PIN, Date.now());
+  await applyDemoAccess(database.db);
+  const logins = canonicalDemoLogins();
   console.info(logins);
   const { mkdir, writeFile } = await import('node:fs/promises');
   const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
-  const scriptsDir = resolve(repoRoot, 'scripts');
+  const scriptsDir = resolve(repoRoot, 'apps/scripts');
   await mkdir(scriptsDir, { recursive: true });
   await writeFile(resolve(scriptsDir, 'DEMO_LOGINS.md'), `# Demo logins\n\n\`\`\`text\n${logins}\n\`\`\`\n`, 'utf8');
 } finally {
