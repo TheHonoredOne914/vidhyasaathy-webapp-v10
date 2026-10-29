@@ -6,6 +6,7 @@
 @import "./landing/landing.css";
 @import "./content/content.css";
 @import "./student/student.css";
+@import "./theme/notebook.css";
 
 @layer base {
   html {

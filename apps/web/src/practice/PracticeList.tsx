@@ -18,11 +18,12 @@ export function PracticeList() {
   if (chapter.denied) return <AccessDenied />;
   if (!chapter.data) {
     if (chapter.status === 'error') return <ErrorState title="Could not open practice" message={chapter.message ?? 'Try again.'} onRetry={chapter.reload} />;
-    return <LessonFrame kicker="Practice" title="Practice"><Skeleton /></LessonFrame>;
+    return <LessonFrame paper kicker="Practice" title="Practice"><Skeleton /></LessonFrame>;
   }
   const chapterData = chapter.data;
   return (
-    <LessonFrame kicker="Practice" title={chapterData.title} script="Optional. Deadlines stay as the teacher set them." stale={chapter}>
+    <LessonFrame paper kicker="Practice" title={chapterData.title} script="Optional. Deadlines stay as the teacher set them." stale={chapter}>
+      <div className="practice-stage">
       <p className="lesson-actions"><Link to={`/student/chapters/${chapterData.id}`}>Back to the chapter</Link></p>
       <ul className="practice-games" aria-label="Games">
         {PRACTICE_GAMES.map((game) => (
@@ -59,6 +60,7 @@ export function PracticeList() {
           ))}
         </ul>
       </section>
+      </div>
     </LessonFrame>
   );
 }

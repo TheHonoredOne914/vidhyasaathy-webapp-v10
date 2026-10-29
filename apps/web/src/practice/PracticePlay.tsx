@@ -64,7 +64,7 @@ export function PracticePlay() {
 
   if (!id || !copy) {
     return (
-      <LessonFrame kicker="Practice" title="Practice">
+      <LessonFrame paper kicker="Practice" title="Practice">
         <p>This game is not on VidhyaSaathy.</p>
         <p className="lesson-actions"><Link to="/student">Go home</Link></p>
       </LessonFrame>
@@ -73,7 +73,7 @@ export function PracticePlay() {
   if (remote.denied) return <AccessDenied />;
   if (!remote.data || remote.status === 'loading') {
     if (remote.status === 'error') return <ErrorState title="Could not load this game" message={remote.message ?? 'Try again.'} onRetry={remote.reload} />;
-    return <LessonFrame kicker="Practice" title={copy.title}><Skeleton /></LessonFrame>;
+    return <LessonFrame paper kicker="Practice" title={copy.title}><Skeleton /></LessonFrame>;
   }
 
   const set = remote.data;
@@ -133,7 +133,8 @@ export function PracticePlay() {
   }
 
   return (
-    <LessonFrame kicker="Practice" title={copy.title} script="Optional. This does not change a deadline." stale={remote}>
+    <LessonFrame paper kicker="Practice" title={copy.title} script="Optional. This does not change a deadline." stale={remote}>
+      <div className="practice-stage">
       {back}
       <p className="practice-note">{copy.detail}</p>
       {set.bridge || bridge ? <p className="check-paper">{bridge ?? set.bridge}</p> : null}
@@ -189,6 +190,7 @@ export function PracticePlay() {
           <Button type="submit" disabled={pending}>{pending ? 'Checking' : 'Check answer'}</Button>
         </form>
       ) : notice && !done ? <p role="status">{notice}</p> : null}
+      </div>
     </LessonFrame>
   );
 }
