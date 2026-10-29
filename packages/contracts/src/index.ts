@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 export * from './content.ts';
+export * from './learn.ts';
 export * from './assessment.ts';
 export * from './ai.ts';
 export * from './dashboard.ts';

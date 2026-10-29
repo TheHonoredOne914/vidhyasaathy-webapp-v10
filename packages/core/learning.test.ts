@@ -88,6 +88,16 @@ it('places a chapter band from mastery scores and skips an empty chapter', () =>
   expect(chapterBand([0.75, 0.9])).toBe('75-100');
 });
 
+it('does not lower mastery when an answer is not taught', () => {
+  const before = masteryFromEvents([sure(true, 3), sure(true, 3), sure(true, 2)]);
+  const after = masteryFromEvents([
+    sure(true, 3), sure(true, 3), sure(true, 2),
+    { correct: false, confidence: 'sure', level: 1, timeMs: 1_000, notTaught: true },
+  ]);
+  expect(after).toEqual(before);
+  expect(countsAsMastery({ correct: false, confidence: 'sure', notTaught: true })).toBe(false);
+});
+
 it('routes a diagnostic without punishing an untaught prerequisite', () => {
   const missed = [{ correct: false, notTaught: false }, { correct: false, notTaught: false }, { correct: true, notTaught: false }];
   expect(diagnosticEntry(missed)).toEqual({ level: 1, route: 'repair' });

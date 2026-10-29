@@ -15,7 +15,8 @@
     "./games": "./games.ts",
     "./interleaving": "./interleaving.ts",
     "./streak": "./streak.ts",
-    "./learning": "./learning.ts"
+    "./learning": "./learning.ts",
+    "./learn": "./learn.ts"
   },
   "scripts": {
     "test": "vitest run --configLoader native --pool threads --reporter dot",
