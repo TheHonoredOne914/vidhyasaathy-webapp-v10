@@ -1,0 +1,2207 @@
+             V I D HYAS AAT HY
+             SM A LL STE PS M A KE BI G PROGRE SS
+
+
+
+
+          THE PRODUCT MASTER FILE
+
+
+
+
+          VidhyaSaathy
+          The definitive document that decides how everything works — from the first
+          sign-in to a fully working, adaptive learning app for Indian schools.
+
+              4 Roles · 4 Worlds               NCERT Class 9-10   4-Day Build Plan       Full Readiness Checklist
+
+              English Edition
+
+
+
+
+    This file is the single source of truth for the product. Every feature — quizzes, flashcards, school notes,
+    interactive notes, summary PDFs, curated YouTube, games, the AI cloud-mascot chat, parent
+    dashboards and the four-band adaptive engine — is defined here with its exact flow, the data behind it,
+    and the checklist item that proves it works. If a screen or rule is not in this file, it does not get built.
+
+
+    D O C U M E NT                            VER S IO N          S C O PE                              B U I L D W I ND O W
+
+    Product Master File                       1.0 — Definitive    Prototype · NCERT 9 & 10              4 Days
+
+    C O M PA NI O N
+
+    Build Prompts 01-10
+
+
+V I D H YA S A AT H Y · M A S T E R F I L E · 2 0 2 6                                          A P P K A F L O W, A P P K A S A C H
+CONTENTS
+
+
+What This File Decides
+Twelve parts, in the order you will need them: what the product is, who it serves, how the engine works,
+how every feature flows, and exactly what must be true by the end of Day 4. Page numbers refer to this
+PDF.
+
+
+00     How to Use This File                                                   1        01   Product Charter                                                      2
+
+       Single source of truth · relationship to the Build Prompts · what is                 The chaos problem · the moat statement · NCERT 9-10 scope ·
+       fixed forever                                                                        what "ready in 4 days" means
+
+
+02     The Four Worlds — Users & Roles                                        3        03   The Core Product Engine                                              5
+
+       Role cards · school-anchored identity · screen maps · the                            The five-station loop · diagnostic-first rule · Next-Action card · L1-
+       permission matrix                                                                    L4 mastery · evidence trail
+
+
+04     The Four Student Bands                                                 7        05   The AI Brain — Understanding Each Child                              9
+       The definitive routing table · promotion & the difficulty ladder ·                   Seven signals · Error DNA · learning prediction · the cloud
+       friendly language · three archetypes' evening                                        companion · safety rules · 11-step sequence
+
+
+06     Master Feature Catalog                                                 11       07   Complete User Flows                                                 19
+
+       Eleven groups A-K: identity, diagnostic, five study surfaces,
+                                                                                            Seven step-by-step flows with backend actions vs what the user
+       practice, AI, personalisation, games, teacher, parent, admin,
+                                                                                            sees — onboarding to game break
+       platform
+
+
+08     Data & Content Foundation                                            24         09   The 4-Day Build Plan                                               26
+
+       The concept map · question bank spec · content pipeline · the                        Day 0 prep · Days 1-4 with exit demos · daily rhythm · the if-
+       seeded demo world                                                                    behind triage table
+
+
+10     The Complete Readiness Checklist                                     28         11   Quality Gates & Final Testing                                      33
+
+       The 170-item master tracker in 13 groups — the file you update                       Global definition of done · the full-day acceptance script · edge-
+       daily                                                                                case sweep · two fix rounds
+
+
+12     The Moat — Why This Compounds                                        34
+       What we never build · the flywheel after launch · post-launch
+       backlog order
+
+A LS O FIXED B Y T H IS FILE
+
++      Band routing table & promotion rules                           Part 4           +    Daily session, minute by minute                                Part 7
+
++      If-behind triage table                                         Part 9           +    170-item master tracker                                       Part 10
+
+
+
+               How to read the numbers: page numbers refer to body numbering — "1" is the first content page (How to Use This File). The
+               cover and this contents page are unnumbered. If a screen, rule or flow is ever missing from this file, it does not get built;
+               that is the whole point of a master file.
+
+
+
+
+                                                                                   i
+O R I E N TAT I O N
+
+How to Use This File
+Read this once before anything else. It explains what this document is, what power it has, and how it connects to the Build
+Prompts you will paste into Cursor or Claude Code.
+
+This is the Product Master File for VidhyaSaathy. It is the document your backend decisions are checked against: every
+table, every rule, every screen flow and every acceptance test in the working app must trace back to a line in this file. It
+replaces the current situation — features exist as beautiful static screens, but nobody has defined how the app actually flows
+from sign-in to learning to progress — with one definitive, deliberate answer for every part of the product.
+The file is written in plain English on purpose. It is meant to be read by three audiences at once: you (the founding team,
+making product calls), the AI builder (Cursor or Claude Code, which will receive the companion Build Prompt files), and any
+future engineer or teacher who joins and needs to understand the whole system in one sitting. Where a rule is a hard rule, it
+is marked as such; where something is deliberately deferred to after launch, this file says so explicitly so nothing silently
+creeps into the four-day build.
+
+    The relationship to the Build Prompts: the folder VidhyaSaathy_Build_Prompts contains one master prompt plus ten
+    phase prompts (01 Database → 10 Launch) that instruct the AI builder. Those prompts say how to build. This file says
+    what the product is and how it must behave. When the two ever disagree, this file wins — update the prompt, not the
+    product truth. Before pasting any phase prompt, its matching part here should be re-read.
+
+
+   What this file fixes forever                                         What this file deliberately does not do
+   The complete flow from sign-up and sign-in to learning,              It does not include public leaderboards, coaching-institute
+   practice, games, AI help and parent reports; the four                integrations, fee or transport modules, camera-based emotion
+   performance bands and how each child is adaptively served;           detection, or AR/VR — these are permanent cuts from the
+   every feature's data and flow; the NCERT 9-10 content scope;         product strategy, recorded so they are never "accidentally"
+   the four-day execution plan; and the full readiness checklist        built. Deferred signature features (the advanced AI suite, PIN
+   you will tick off item by item.                                      profiles, recordings pipeline) sit in the post-launch backlog in
+                                                                        Part 12, in priority order.
+
+
+
+
+   4                                   2                                4                                    5
+   R O LES — S T U D EN T ,            C LA S S ES — N C ER T 9 &       P ER FO R MA N C E B A N D S         G A MES O N O N E
+   T EA C H ER , PA R EN T ,           1 0 O N LY                       R O U T IN G EV ER Y C H ILD         S H A R ED Q U ES T IO N
+   A D MIN                                                                                                   BANK
+
+
+
+
+   4
+   D AYS FR O M R EP O A U D IT T O LA U N C H ED A P P
+
+
+One final orientation note on tone. VidhyaSaathy is built around a simple promise made to a tired Class-9 student: "You don't
+need to decide what to study tonight. The app already knows, it knows how you learn, and it will walk with you." Every section
+that follows is just that promise, made engineering-real — the diagnostic that finds what you actually know, the bands that
+route you to what actually helps, the cloud companion that removes the chaos, and the evidence trail that proves to your
+teacher and your parents that you are moving. Keep that promise in mind whenever a decision feels ambiguous; it settles
+most arguments.
+
+
+
+
+                                                                    1
+PA R T 1
+
+Product Charter
+What VidhyaSaathy is, the problem it kills, why the app itself — not any single feature — is the moat, and exactly what
+"ready" means at the end of the four-day build.
+
+  1.1 — What VidhyaSaathy Is
+VidhyaSaathy is a school-anchored learning companion for Indian students of Class 9 and 10, built on NCERT content, in
+which the school's own structure — classes, sections, roll numbers, subjects, teachers — is the backbone of the product.
+The app mirrors the school instead of replacing it: teachers publish what they taught, students get one clear, adaptive path
+through it, parents finally see real progress in plain language, and the admin runs the whole world from one console. Four
+roles, one shared truth: every piece of content, every quiz attempt, every doubt and every plan lives against the same
+concept map, so evidence flows from the student's screen to the teacher's heatmap to the parent's weekly summary without
+anyone re-entering anything.
+The product's engine is deliberately simple and deliberately honest: diagnose first, teach second, adapt always. Before a
+student is taught anything, a short diagnostic identifies what they already know; the four performance bands (0-25%, 25-
+50%, 50-75%, 75-100%) then route them to the explanation depth, practice difficulty and pacing that fits; and as they work,
+every answer — including how confident they felt answering it — feeds back into per-concept mastery scores that re-route
+the next session. Nothing in the app is decorative: every screen either teaches, tests, adapts, reports, or removes chaos.
+
+  1.2 — The Problem We Kill
+The enemy is not ignorance; it is chaos. A Class-9 student preparing for a Physics test today is lost between a YouTube video
+of unknown quality, a PDF of someone else's notes, three WhatsApp groups, a friend's photocopy, and a coaching institute's
+timetable — with no idea which one matches what their teacher taught, their syllabus, and their actual gaps. Parents cannot
+help because they cannot see inside the chaos; they only see marks. Teachers cannot help after 5 pm because they have no
+view of what each child actually struggled with at home.
+
+
+    "The problem was never that the student is weak. The problem is that 17 different sources are shouting
+    at once and none of them knows the student."
+    F OUNDI NG I NSI GHT — F ROM THE ORI GI NAL PRODUCT VI SI ON
+
+
+VidhyaSaathy's answer is structural, not cosmetic: one Next-Action card that tells the student the single right thing to do
+tonight, one curated set of resources that the teacher approved for this exact concept, one cloud companion that answers
+doubts at 11 pm without judgement, and one progress trail that turns effort into visible proof for parents and teachers.
+Removing the chaos — not adding more content — is the product's core value, and it is why the home screen will always be
+quieter than any competitor's.
+
+  1.3 — The Moat Statement
+Features are copyable; the loop is not. Any competitor can ship quizzes, flashcards and an AI chatbot in a quarter. What they
+cannot copy is the compounding data flywheel that this app is designed around from day one, inside one real school, on one
+real board (CBSE/NCERT), with teachers publishing daily and students practising nightly:
+
+  F LY W H E E L 1         F LY W H E E L 2          F LY W H E E L 3           F LY W H E E L 4         F LY W H E E L 5
+  Every answer is          Evidence                  Routing improves           Outcomes earn            Trust deepens the
+  evidence                 improves routing          outcomes                   trust                    data
+  Correctness,             Band placement,           Students feel the app      Teachers keep            More nightly evidence
+  confidence, time-to-     difficulty ladders,       "gets" them — the          publishing, parents      → the loop tightens
+  answer and error type    revision radar and        personal-tuition feeling   keep linking, students   and the moat widens,
+  logged per concept,      reteach heatmaps get      at school scale.           keep showing up          school by school.
+  per child, every day.    sharper each week.                                   nightly.
+
+
+
+
+                                                                 2
+The strategic consequence is a strict priority order for the four-day build: the evidence trail (Part 3) and the adaptive routing
+(Part 4) are engineered before any delight feature, because the moat compounds on data quality, not on animation polish. A
+beautiful game that does not write concept-level evidence is a toy; a plain quiz that does is an asset.
+
+  1.4 — Prototype Scope — NCERT Class 9 & 10
+The entire prototype is trained and seeded on NCERT Class 9 and Class 10 content only, for one demo school with two
+sections per class. This is a permanent scope decision for the prototype phase, recorded here so the build never wanders
+into other boards, classes or languages. The demo anchor is Class 9-A, Physics, Chapter "Motion", with a three-concept
+prerequisite chain (distance & displacement → speed & average speed → acceleration), because it exercises every
+mechanic in the product: prerequisites, diagnostics, band routing, confidence signals, error DNA, reteach heatmaps and
+parent summaries.
+
+  Scope dimension                In the prototype                                          Explicitly out (for now)
+
+  Curriculum                     NCERT Science + Mathematics, Class 9 & 10                 Other boards (ICSE/State), other classes,
+                                                                                           other subjects
+
+  School model                   One school, two sections per class, real roll             Multi-school tenancy, coaching institutes
+                                 numbers
+
+  Languages                      English + Hindi (full parity), Hinglish tone in AI chat   Other Indian languages
+
+  AI surface                     Cloud-mascot chat, SnapDoubt, Socratic homework           Voice interaction, emotion detection (cut
+                                 mode, plan maker                                          forever), AR/VR
+
+  Devices                        Low-end Android phones via PWA, offline-first             Native app store builds
+                                 sessions
+
+
+  1.5 — What "Ready in 4 Days" Means
+"Ready" is defined before building begins, and it is deliberately a product definition, not a technology one. At the end of Day
+4 the following sentence must be true end-to-end, demonstrated live on a real phone: a school admin has set up the school
+and issued activation codes; a teacher has published tonight's session for Class 9-A with a diagnostic, notes and a quiz;
+three different students — strong, struggling and absent — have signed in, been routed differently by their bands, completed
+the session, asked the cloud companion a doubt, and played one game; and a parent has opened a dashboard with real
+graphs generated from those exact events. Every checklist item in Part 10 exists to make that one sentence true, and no work
+that does not serve it belongs in the four days.
+
+   Non-negotiable quality bar: "ready" means working flows with real data — server-side scoring, real database reads and
+   writes, row-level security on, no placeholder JSON, no mock logins. Screens that merely look finished do not count; Part
+   11's acceptance script will test behaviour, not pixels.
+
+
+
+PA R T 2
+
+The Four Worlds — Users & Roles
+VidhyaSaathy is four products sharing one truth. This part defines what each role wants, what they get, the screens they
+live on, and who may touch whose data.
+
+
+
+
+                                                                    3
+  2.1 — Role Cards
+
+   The Student — "Just tell me what to do tonight"                     The Teacher — "40 students, 5 minutes per
+   A 14-15 year old with a low-end Android phone, 30-60                evening"
+   free minutes on a school night, and exam pressure.                  The subject teacher (Sharma Ma'am, Physics) who
+   The student wants zero decisions: one next action,                  already works hard in class and has no evening
+   explanations at their level, help without judgement at              bandwidth. The teacher wants to publish tonight's
+   11 pm, and small wins that feel earned.                             session in under three minutes, see exactly where the
+   Gets: adaptive home with Next-Action card,                          class stumbled, and reteach one concept with one tap
+                                                                       instead of guessing.
+   diagnostic before new chapters, interactive concept
+   pages, quizzes with confidence buttons, flashcards,                 Gets: morning dashboard, class × concept heatmap
+   summary PDFs, curated YouTube, five games, streaks                  with drill-down, session builder with student-preview,
+   and badges, the cloud companion for doubts and                      question bank with auto-selection, short-answer
+   plans.                                                              grading queue, anonymous doubt clusters ("17 doubts
+   Never sees: their band label, other students' scores,               on acceleration").
+   public ranking.                                                     Never does: manual data entry of student progress —
+                                                                       evidence arrives on its own.
+
+
+   The Parent — "Show me progress I can act on"
+   A working parent who currently judges learning only                 The Admin — "Run the school's digital world
+   by exam marks, weeks after the fact. The parent wants               safely"
+   a truthful weekly picture in plain language, one                    The school's coordinator who owns setup and
+   concrete conversation to have, and reassurance                      accountability. The admin wants bulk onboarding
+   without surveillance.                                               without chaos, control over who sees what, and an
+   Gets: weekly summary dashboard with graphs (effort,                 audit trail when anything goes wrong.
+   mastery trend, streak), "Ask this" conversation                     Gets: school setup wizard, CSV import of students
+   prompts, milestone notifications, printable report.                 and staff, activation-code generation and export,
+   Never sees: the child's live AI chats, doubts, or raw               parent-link approvals, permission matrix, audit events,
+   answers — a hard privacy boundary (2.3).                            demo-reset script.
+                                                                       Never touches: students' AI conversations or doubt
+                                                                       content (same privacy wall).
+
+
+
+  2.2 — The School-Anchored Identity Model
+Nobody "creates an account" in the casual consumer sense. The app is a mirror of the school's real structure, so identity
+flows from it: the admin creates the school, academic year, classes and sections; teachers are invited by staff ID and email;
+students activate with a code plus their roll number and date of birth; parents are linked to their child via an OTP after school
+approval. This anchoring is what makes every later feature trustworthy — a "Class 9-A Physics session" means a real
+teacher's real session for a real section, not a generic course. It is also the security backbone: class membership, subject
+assignments and parent-child links are database facts that row-level security checks on every request, so a parent can never
+read another child's data and a student can never read answer keys.
+
+  2.3 — Screen Maps per Role
+  Role             Primary screens (in daily order of use)                                              Navigation shell
+
+  Student          Adaptive Home (Next-Action) · Class Workspace · Concept Page (notes +                Bottom tab bar — 5 tabs,
+                   checkpoints) · Quiz Player · Session Summary ("Why I got it wrong") · Doubt Chat     thumb-first
+                   with cloud companion · Games Arcade · Flashcards & Summary Sheets · Profile
+                   (streak, badges, mastery map)
+
+
+
+
+                                                                  4
+  Teacher      Morning Dashboard · Class × Concept Heatmap (drill + reteach) · Session Builder (with              Left sidebar (desktop) /
+               student preview) · Question Bank · Grading Queue · Doubt Clusters · Class Space                    top-drawer (mobile)
+               (announcements)
+
+  Parent       Weekly Home (graphs + plain-language summary) · Progress Detail per subject · "Ask This"           Simple top-nav, 3
+               card · Notifications · Report (print/share)                                                        entries maximum
+
+  Admin        School Setup · People (students/staff/parents) · Activation Codes · Approvals · Permission         Left sidebar with
+               Matrix · Audit Log · Demo Reset                                                                    admin-only sections
+
+
+  2.4 — Role × Feature Permission Matrix
+The matrix below is the security and product truth for who can do what. It is enforced server-side by row-level security
+policies, never merely hidden in the UI; the build prompts implement exactly this table.
+
+  Capability                           Student          Teacher           Parent           Admin            Hard boundary
+
+  Read published content &            Own class           Own               —                All            Section-scoped for students
+  sessions                                               classes
+
+  Attempt quizzes / games                Yes               —                —                —              Server-side scoring only
+
+  See answer keys                       Never              Yes              —                —              Keys never reach the student
+                                                                                                            client
+
+  Read child's progress                  Own              Own             Linked             All            Aggregates only for parents
+                                                        students           child
+
+  Read AI chats / doubts / raw           Own          Anonymised          Never            Never            Privacy wall — no exceptions
+  answers                                               clusters
+
+  Publish sessions & content              —                Yes              —                —              Own subject & section only
+
+  Approve AI-drafted questions            —                Yes              —                —              AI drafts never auto-publish
+
+  Manage people, codes, links             —                —                —               Yes             Audit-logged actions
+
+
+   Why the privacy wall matters commercially: students will only confess real confusion to the cloud companion if they are
+   certain no parent reads it. The wall is not compliance theatre — it is what makes the doubt data (and therefore the
+   teacher's heatmap) honest.
+
+
+
+PA R T 3
+
+The Core Product Engine
+One loop runs the entire app — Diagnose, Learn, Practice, Understand, Progress. Every feature exists to serve one
+station of this loop, and every station writes evidence the next station consumes.
+
+
+
+
+                                                                    5
+  3.1 — The Loop
+
+  S T A T ION 1                   S T A T ION 2                 S T A T ION 3                 S T A T ION 4                S T A T ION 5
+  Diagnose                        Learn                         Practice                      Understand                   Progress
+  A short, low-stakes             Concept pages at the          Adaptive quizzes and          "Why I got it wrong"         Per-concept mastery
+  test before teaching            student's band depth:         games on the same             feedback: concept tag        updates, streaks and
+  anything new — find             school notes,                 concept bank —                + error type + the one       badges for the
+  what the student                interactive                   difficulty climbs only as     fix. Doubts go to the        student, heatmaps for
+  already knows and               checkpoints, curated          fast as the student           cloud companion              the teacher, weekly
+  which prerequisites             video, worked                 proves it should.             instantly.                   graphs for the parent.
+  are shaky.                      examples.
+
+
+
+        Progress feeds the next Diagnose — the loop never resets, so the app knows the student a little better every single night.
+
+This loop is the product's spine and its scheduling discipline: no feature ships that does not sit at a named station. The
+games arcade, for example, lives at Station 3 (Practice) and Station 5 (Progress) — which is why every game scores against
+concepts and never against classmates. The flashcard deck lives at Station 2 and 3 as a Rapid Revision surface. The parent
+dashboard is Station 5 made visible. When a future idea arrives ("should we add a doubt marketplace?"), the first question is
+which station it serves; if the answer is none, it does not belong in VidhyaSaathy.
+
+  3.2 — Diagnostic-First Rule (Test Before Teach)
+Before a student is taught any new chapter, they take a short diagnostic — roughly five questions drawn from the chapter's
+prerequisite chain plus a taste of the new material. The result places each concept on the student's mastery map and
+decides the entry band: the 0-25% student gets prerequisite repair first, while the 75-100% student is challenged
+immediately. The diagnostic is framed to the student as a friendly "let's see what you already know — this is not a test," it is
+never graded, and it is never shown to parents as marks. Its output is routing, not judgement.
+This rule exists because teaching a student what they already know wastes their scarce 40 minutes and quietly insults them,
+while teaching over a broken prerequisite guarantees that tonight's effort evaporates by morning. The diagnostic is cheap
+(five questions, three minutes) and its payoff is the entire personalisation premise. Every new chapter, for every student,
+starts with a diagnostic — no exceptions, including chapters the teacher is confident about.
+
+  3.3 — The Next-Action Card (Chaos Removal, Made Literal)
+The student home screen is dominated by a single card that answers the only question that matters at 8 pm: "what should I
+do right now?" The card is computed server-side from the evidence trail — an unfinished session outranks everything; a due-
+tomorrow session outranks revision; revision of a decaying concept outranks new content; new content outranks games. It
+shows the concept, the estimated time, and one tap takes the student into exactly that activity mid-state. The rest of the
+home screen stays deliberately sparse: streak chip, one encouragement line, and quiet access to the rest of the world.
+Competing products fill this space with feeds; VidhyaSaathy fills it with calm, because the product promise in Part 1 was "you
+don't need to decide."
+
+  3.4 — Mastery Levels per Concept (L1-L4)
+  Level                  Meaning (internal)               How it is earned                                       What the student sees
+
+  L1 — Fragile           Seen it, cannot yet use it       Diagnostic partial, or first attempts mostly           "Let's fix this" + repair path
+                                                          wrong                                                  (prerequisites re-taught
+                                                                                                                 simply)
+
+  L2 — Steady            Handles basic questions          ≥60% quiz on the concept at L1-L2 difficulty           "Almost there" + guided
+                         reliably                                                                                practice
+
+  L3 — Strong            Solves application               Consistent correctness at L3 difficulty,               "Mastered" + unlock Boss
+                         problems                         confidence "Sure"                                      Level and Dushman questions
+
+
+
+
+                                                                             6
+  L4 —               Can handle exam         Board-format questions correct under               "Top form" + challenge set and next
+  Advanced           twists                  time pressure                                      chapter preview
+
+
+Mastery is per concept, never a single overall percentage — "Aarav: Distance 82%, Acceleration 30%" is the honest shape
+of a student, and an overall "56%" would hide exactly the gap the app exists to find. Levels decay gently over time (the
+revision radar, 5.6), so "mastered in September" must be re-proved lightly before half-yearly exams — matching how memory
+actually works.
+
+  3.5 — The Evidence Trail
+Every learning event is appended to one immutable log — quiz answers with confidence buttons and time-to-answer, game
+scores with concept tags, doubts asked, sessions completed, notes finished, streak touches. Nothing overwrites history;
+corrections are new events. This trail is what makes every downstream screen honest at zero extra teacher effort: the
+heatmap is an aggregation of the trail, the parent graphs are an aggregation of the trail, the band routing is a query over the
+trail, and the AI's context window is the recent slice of the trail. It is also the moat's raw material (Part 1.3) — which is why the
+trail is designed and built on Day 1, before any screen that displays it.
+
+
+PA R T 4
+
+The Four Student Bands
+The heart of personalisation: four internal performance bands — 0-25%, 25-50%, 50-75%, 75-100% — that silently
+route every child to the explanation depth, difficulty, pacing and tone that fits them, and move them up the moment they
+earn it.
+
+  4.1 — Two Non-Negotiable Rules (Read First)
+   Bands are internal, forever. A student never sees a band label, a percentage rank, or any wording that smells like one. The student-
+   visible vocabulary is only: "Mastered", "Almost there", "Let's fix this", "Top form". No leaderboards exist anywhere in the product —
+   this is a permanent strategic cut, not a missing feature.
+   People are never labelled — concepts are. Bands are a routing mechanism over per-concept mastery, not a verdict on a child. The
+   same student is routinely Band-4 on "Distance" and Band-1 on "Acceleration", and the app must be equally comfortable serving both
+   in one session.
+
+  4.2 — The Band Routing Table (Definitive)
+                                        Explanation & content
+  Band           Internal meaning                                         Practice entry           Pacing & AI tone     Games & extras
+                                        served
+
+  0-25%          Large gaps —           Simplest explanation with         L1 difficulty only,      Slow, lots of        Dushman
+                 prerequisites          everyday analogies;               tiny sets of 3-5         small wins;          (personal
+                 shaky                  prerequisite concepts re-         questions, heavy         companion tone       enemy)
+                                        taught first from the concept     guided practice          extra warm, zero     questions
+                                        map; shortest sentences;          with worked              jargon,              unlocked early
+                                        Hindi/Hinglish support            examples shown           celebrates single    on repaired
+                                        prominent                         before                   correct answers      concepts; Boss
+                                                                          attempting                                    Level locked
+                                                                                                                        until L2
+
+  25-50%         Basics partly clear    Standard notes + worked           Start L2, drop to        Medium;              All games except
+                                        examples step-by-step;            L1 instantly on          companion            Boss Level; daily
+                                        interactive checkpoints           two consecutive          checks               challenge at L1-
+                                        after each idea; flashcards       errors with an           understanding        L2 mix
+                                        pushed for retention              automatic bridge         with one gentle
+                                                                          explanation              question per
+                                                                                                   concept before
+                                                                                                   moving on
+
+
+
+
+                                                                      7
+  50-        Basics clear,     Full concept pages +          L2-L3 mix;            Steady; companion         All games; Dushman
+  75%        application       application focus:            adaptive ladder       shifts from               targets the student's
+             weak              case-based examples,          climbs after 3        explaining to             own 3 weakest
+                               numericals, "where            consecutive correct   quizzing ("you            concepts; Boss Level
+                               students typically slip"                            seem solid — try          unlocks at L3
+                               callouts                                            this twist")
+
+  75-        Consistent        Concise advanced              L3 default + board-   Fast; companion           Boss Level and
+  100%       understanding     notes; board-format           format questions;     tone is coach-like        challenge sets are the
+                               twists; next-concept          time-pressured sets   and brief, treats the     main loop; interest
+                               preview so boredom            for exam simulation   student as near-          mash-ups (same
+                               never arrives                                       peer                      concept, favourite
+                                                                                                             context) keep novelty
+                                                                                                             alive
+
+
+  4.3 — How Band Placement Is Computed
+Band placement is deliberately simple, explainable and per-concept: the diagnostic seeds an initial mastery score per
+concept; every subsequent quiz answer updates it (correct-at-high-difficulty counts more; "Guess" confidence discounts a
+correct answer heavily; "Sure" + wrong is treated as a real misconception, the most diagnostic signal in the app); a rolling
+window (last ~10 interactions per concept) smooths noise. The band for a chapter is then derived from its prerequisite-
+weighted average. There is no black-box model in the prototype — simple, honest arithmetic the team can inspect, explain to
+a teacher, and debug at 11 pm. Sophistication can come later; trust must exist from day one.
+
+  4.4 — Promotion, Demotion and the Difficulty Ladder
+Every question carries a difficulty tag — L1 basic, L2 medium, L3 application — and the ladder rule is fixed product law: a
+student starts at L2; three consecutive correct climb to L3; two consecutive wrong drop to L1, always with a bridge
+explanation so the drop is felt as help, not punishment. Promotion between bands follows sustained evidence (e.g. L2-L3
+correctness at ≥70% across the chapter's concepts plus "Sure" confidence on most), and every transition is written to the
+log so a teacher can see "Aarav moved 25-50 → 50-75 on Motion, Tuesday" — progress made visible is the product's
+favourite kind of motivation. Demotion after absences or decayed mastery is quiet and shame-free: the app simply serves
+bridge content and never announces a fall.
+
+  4.5 — Friendly Language Mapping (Student-Facing Words)
+  Internal state                         Student sees                                   Parent/teacher see
+
+  Band 1 (0-25%)                         "Let's fix this together" + repair path        "Needs foundation support — working on
+                                                                                        prerequisites"
+
+  Band 2 (25-50%)                        "Almost there — one more step"                 "Developing — basics partly clear, guided
+                                                                                        practice on"
+
+  Band 3 (50-75%)                        "Good going — try this twist"                  "Progressing — ready for application
+                                                                                        questions"
+
+  Band 4 (75-100%)                       "Top form — challenge yourself"                "Consistent — advancing to next concept"
+
+  Mastery decayed                        "Quick warm-up?" (2-minute refresher)          "Revision radar flagged 2 concepts fading"
+
+
+  4.6 — The Same Evening, Three Different Children
+The bands are best understood by watching one night in Class 9-A after Sharma Ma'am publishes the Motion session at 14:00
+(session opens 18:00, closes 08:00 next morning):
+
+
+
+
+                                                                   8
+   Aarav — strong (Band 4 on prerequisites)
+   Diagnostic confirms distance/speed are solid; he is routed straight to the acceleration concept page, concise variant.
+   He answers the quiz's L3 numericals in six minutes, taps "Sure" on four of five, misses one twist on sign convention
+   — the "Why I got it wrong" card tags it method error, not concept gap, shows the one-line fix, and queues a Dushman
+   question for tomorrow. Total time: 14 minutes. He then unlocks the Boss Level preview for the chapter and plays MCQ
+   Rush for four minutes purely for fun. The streak counter ticks to 12.
+
+
+
+
+   Priya — struggling (Band 1 on acceleration, Band 2 overall)
+   The diagnostic flags that her "average speed" prerequisite is fragile. Instead of the full session, her Next-Action card
+   offers a 10-minute repair path: the simplest distance-time explanation with a bus-journey analogy, then two guided
+   examples she completes with hints. Only then does the acceleration page open — in its simplest variant, Hindi labels
+   on. Her quiz is five L1 questions; she gets three right, taps "Guess" on one of those, which the engine discounts. The
+   companion's tone stays warm, celebrates the third correct answer explicitly, and schedules tomorrow's bridge
+   practice. No red, no failure language, anywhere.
+
+
+
+
+   Rohan — absent for three days (recovery path)
+   He opens the app at 20:30 after missing school. The Next-Action card does not dump three days of backlog; it offers
+   "Catch-up, 20 minutes" — the revision radar picks the two most decayed concepts from before his absence plus
+   tonight's session in compact form. The copy is shame-free: "Good to see you. Let's take this in small steps." The
+   evidence trail logs a recovery event (distinct from a fresh attempt), so his teacher's heatmap shows "recovered" rather
+   than a hole — and Sharma Ma'am's evening takes exactly one glance to know he is back.
+
+
+One session, three experiences, one database — this is the adaptive promise made concrete, and it is the acceptance
+demo's centrepiece (Part 11). If any of the three children would have an identical evening in the built app, personalisation has
+failed and the phase does not pass its checklist.
+
+
+PA R T 5
+
+The AI Brain — Understanding Each Child
+How the app learns the student: what signals it collects, how it diagnoses why an answer went wrong, how it predicts the
+way each child best learns, and the safety rules the AI may never break.
+
+  5.1 — The Signals We Collect (All Passive, All Logged)
+  Signal                      What it is                                        What it tells the engine
+
+  Correctness                 Right/wrong per question, per concept, at which   The mastery backbone — L1-L4 per concept
+                              difficulty
+
+  Confidence button           "Sure / Unsure / Guess" tapped before reveal,     Separates knowledge from luck; "Sure + wrong" =
+                              on every question                                 real misconception; "Guess + right" = discounted
+
+  Time-to-answer              Seconds from question shown to answer locked      Too fast + wrong = careless; too slow + right =
+                                                                                fragile mastery needing reinforcement
+
+  Error type                  Classified after each wrong answer (5.2)          Chooses the repair path — not all wrongs are
+                                                                                equal
+
+
+
+
+                                                                 9
+  Session rhythm     When the student studies, session length,             Plans realistic nightly goals; detects 11 pm cramming
+                     resumptions                                           and frustration patterns
+
+  Avoidance          Concepts repeatedly opened then skipped; chat         The "Darr ka map" — fear map of concepts quietly
+                     opened, doubt typed then deleted                      avoided
+
+  Revision           Flashcard flips, summary-sheet opens before           Learning-approach evidence: does this child
+  behaviour          quizzes                                               consolidate by re-reading or by testing?
+
+
+Every signal is passive — the student never fills a "learning style questionnaire", because self-reported styles are unreliable
+and add friction. The only active gesture is the confidence button, and it survives in the product because students genuinely
+enjoy tapping it; it feels like a game mechanic while being the single most honest signal in the system.
+
+  5.2 — Error DNA (Why the Answer Went Wrong)
+After every wrong answer the engine classifies the error, because the four families need completely different repairs.
+Mislabelling them is how generic apps waste student time — and how this one refuses to.
+
+  Error family              Signature in the signals                    Repair path served
+
+    Concept gap             "Sure" + wrong + slow; prerequisite         Bridge back: prerequisite concept re-taught in simplest
+                            mastery low                                 variant, then re-test
+
+    Careless slip           Very fast + wrong, on a concept otherwise   One-line nudge, no re-teach; a "slow down on signs"
+                            at L3+                                      micro-habit card
+
+    Method error            Right approach, wrong execution (unit,      Worked example of the exact same pattern, step
+                            sign, arithmetic)                           highlighted where it broke
+
+    Guess                   "Guess" confidence regardless of            Honest acknowledgement, short explanation, question re-
+                            outcome                                     queued in a different skin tomorrow
+
+
+  5.3 — How the AI Predicts the Way Each Child Learns
+The prediction layer is intentionally legible: it observes which explanation formats correlate with this child's subsequent
+correctness and shifts serving weights over time. If Priya answers consistently better after worked examples with everyday
+analogies, examples rise in her variant mix and dense theory sinks; if Aarav retains better after testing himself (flashcards and
+Dushman questions) than after re-reading, his Next-Action leans practice-first. The weights start neutral, move slowly, and
+are always inspectable in the profile ("explains best with: examples and Hindi terms; consolidates by: self-testing"). The AI
+never claims a scientific learning-style theory; it just stops serving what demonstrably does not work for this child. Prediction
+here means pattern memory with a paper trail, and that is a feature — teachers and parents can ask "why did it show her
+that?" and get a real answer.
+
+  5.4 — The Cloud Companion (Mascot, Chat and Plan-Maker)
+The cloud mascot is the AI's face and the student's constant, calm companion — the one place help always lives. It is a
+friendly blue cloud with a small book, present in the chat and in micro-reactions across the student world, with eight
+restrained behaviour states: idle (subtle float), greeting, thinking (while the AI processes), encouragement after meaningful
+progress, confusion-support when the student is stuck, celebration at milestones, resting while the student reads or solves,
+and error (something failed — never the student's fault). Hard rules inherited from the brand: the cloud never animates
+distractingly during question-solving, never flashes for attention, never uses emotional pressure to keep a child online, and
+honours reduced-motion device settings everywhere.
+In chat, the companion answers doubts in the student's chosen language (English, Hindi, or natural Hinglish), asks one
+clarifying question when the doubt is vague, and answers at the student's band depth — the same doubt about acceleration
+gets an analogy-first answer for Priya and a formula-forward answer for Aarav. As plan-maker it does the chaos removal of Part
+1 literally: "exam in 3 weeks, 6 concepts shaky, 25 minutes a night — here is the plan", generated from the evidence trail and
+always realistic (plans that assume a suddenly-perfect student are lies, and children know it). Every conversation is private to
+the student by the privacy wall of Part 2.4.
+
+                                                                  10
+  5.5 — AI Safety Rules (Non-Negotiable)
+   No fabricated citations. The AI never invents book page numbers, links or references. Content anchors only to concepts and
+   resources that exist in the school's own library.
+   The honest "I don't know." When unsure, the companion says so plainly and offers the doubt-escalation path — a wrong-but-
+   confident answer from a tutor destroys the product's core trust.
+   Homework mode is Socratic. If the teacher flagged the session as homework, the AI never hands the direct answer; it guides with
+   questions and hints, then encourages the student's own attempt.
+   AI-drafted content is visually separate and teacher-gated. AI-drafted practice questions appear in a distinct "AI draft" style and
+   never reach students without explicit teacher approval.
+   Keys stay server-side. The student client never receives correct-answer flags for quizzes — scoring happens on the server,
+   always.
+   Tone guardrails. No fear, no shame, no comparison with other children — encoded in the companion's system prompt and spot-
+   checked in QA.
+
+  5.6 — The Radars (Quiet Intelligence)
+
+  Revision / warm-up radar                                               Frustration radar
+  Tracks mastery decay on the forgetting curve; a 2-minute               Detects rapid wrong answers, fast retries and session
+  warm-up surfaces before decay hurts ("Quick warm-up?                   abandonment; the companion softens tone, shrinks the next
+  Distance & displacement — fading").                                    step, and may suggest a break. Never a red screen.
+
+
+
+  Ratta (rote) detector                                                  Avoidance radar ("Darr ka map")
+  Spotlights correct answers with "Sure" confidence that collapse        Maps quietly-avoided concepts and gently re-introduces them
+  when the same concept is asked with changed context —                  inside games where the stakes feel low — courage by disguise.
+  memorised form, not understanding.
+
+
+
+  5.7 — The 11-Step Server-Side Request Sequence
+Every AI chat turn follows one fixed server-side sequence (Edge Function, keys never in the client): 1) auth check → 2) rate-
+limit + token budget check → 3) load student context slice from the evidence trail → 4) load concept map around the doubt
+→ 5) detect language and band depth → 6) assemble system prompt with safety rules and tone profile → 7) stream the
+answer (SSE) with the companion's thinking state → 8) log the interaction privately → 9) update doubt-cluster counters
+(anonymised) → 10) write any promised follow-ups (Dushman queue, plan items) → 11) close budget accounting. The
+sequence is deliberately spelled out here because it is the difference between an AI feature and an AI liability: no step may
+be skipped, and none of it runs on the student's phone.
+
+
+PA R T 6
+
+Master Feature Catalog
+Every feature of VidhyaSaathy in one place — what it is, where it lives, how its flow works, and the data behind it. Eleven
+groups, A to K. If a feature is not in this catalog, it is not in the prototype.
+
+
+
+
+                                                                    11
+A — Identity & Onboarding
+
+   Sign-in / Sign-up (school-anchored)                       VS-01..08      Core
+
+    Lives: public landing + auth screens      Built: Day 1
+
+   Role-aware entry with one clean flow per role: teachers accept an emailed invite tied to their staff ID; students activate with a code
+   from their class teacher plus roll number and date of birth, then set a password; parents link via an OTP code issued through the
+   school. No free-floating "create account" exists — identity is always anchored to the school's real structure, which is what makes
+   every later permission honest.
+
+   Flow: landing → role select → invite/activate/link → SSR session → role-based redirect to the right shell. Data: profiles, memberships,
+   activation codes (single-use, expiring), parent-child links, audit events on every join. Must include: forgot password, wrong-code
+   friendly errors, English/Hindi toggle on all auth screens.
+
+
+
+   Parent linking & approvals               VS-08       Core
+    Lives: parent onboarding + admin approvals        Built: Day 3
+
+   A parent enters the code, verifies by OTP, and the link waits in the admin's approval queue until the school confirms the
+   relationship. Approved links grant read-access to progress aggregates only — never chats, doubts or raw answers — and can be
+   revoked at any time with one admin action that is fully audit-logged.
+
+   Flow: code → OTP → pending link → admin approve → parent world opens. Data: parent-child link table with status, approval history,
+   revocation events.
+
+
+B — Diagnostic & Placement
+
+   Chapter diagnostic (test-before-teach)                        VS-19       Core
+    Lives: first open of any new chapter      Built: Day 2
+
+   ~5 friendly questions from the chapter's prerequisite chain plus a taste of the new material; results seed per-concept mastery and
+   decide the entry band. Framed as "let's see what you already know", never graded, never shown as marks to anyone. Skipping is
+   allowed but the app simply defaults to Band-2 content until evidence arrives — the diagnostic remains the fastest path to a
+   personalised evening.
+
+   Flow: chapter open → diagnostic offer → 5 questions with confidence buttons → placement result card (friendly copy) → routed home.
+    Data: diagnostic attempts, per-concept seed scores, band assignment event in the log.
+
+
+C — Learning Content (the five study surfaces)
+
+   School notes (teacher-authored)                   VS-11           Core
+
+    Lives: concept page      Built: Day 2
+
+   The teacher's own notes for the concept, written or pasted in the session builder, tagged to concepts before publish. This is the
+   canonical text — what the teacher actually taught in class, in their own emphasis — so revision finally matches the classroom
+   instead of a stranger's YouTube summary. Notes support simple formatting, images, and Hindi text natively.
+
+   Flow: teacher writes/pastes → concept tags required → publish → student sees notes on the concept page at their band variant. Data:
+   notes table (subject/chapter/concept tags, versions, publish state).
+
+
+
+
+                                                                            12
+  Interactive notes           VS-11+         Core
+
+    Lives: concept page       Built: Day 2
+
+  School notes upgraded with structure the app understands: sections per idea, an inline checkpoint question after each idea (one tap,
+  instantly checked server-side), key-term highlighting, and a "explain this again simpler" action on every section that swaps to the
+  simple variant of the same idea. Reading is therefore never passive — the page quietly tests comprehension as the student goes,
+  and each checkpoint is evidence.
+
+  Flow: read section → checkpoint → instant feedback + micro-explanation if wrong → next section. Data: structured note blocks with
+  concept tags, checkpoint attempts as evidence events.
+
+
+
+  Summary notes as PDFs (chapter one-pagers)                               VS-44       Core-P1
+
+    Lives: chapter resources + offline library      Built: Day 2
+
+  A printable one-page-per-chapter summary sheet assembled from the teacher's notes: definitions, the 3-5 core formulas, the two
+  classic exam patterns, and the chapter's concept map in miniature. Students use it for the morning-of-exam scan; the data-saver
+  audience gets it as a clean PDF download rather than a heavy page render. AI may draft it, but it publishes only after teacher
+  approval, with the AI-draft visual marker removed once approved.
+
+  Flow: notes exist → generate draft (AI or template) → teacher approves → PDF in chapter resources → download/print/offline cache.
+   Data: summary documents with approval trail and version history.
+
+
+
+  Flashcards (auto-built concept decks)                         VS-93+          Core
+
+    Lives: chapter resources + Rapid Revision game              Built: Day 4
+
+  Each concept automatically owns a small deck: front = term/question/mini-diagram, back = the answer in one breath, sourced from
+  the teacher's notes and the question bank. Decks serve two moments: a deliberate 2-minute Rapid Revision before quizzes (which
+  the engine recommends exactly when the revision radar flags decay), and free self-testing — the strongest known consolidation
+  move. Card flips are logged as light evidence of revision behaviour.
+
+  Flow: chapter → deck → flip session (self-rated: knew it / almost / forgot) → feeds mastery signal. Data: cards per concept, flip + self-
+  rating events.
+
+
+
+  Curated YouTube with timestamps                        VS-13           Core
+    Lives: concept page resources        Built: Day 2
+
+  YouTube is not the enemy — discovery is. The teacher pastes a link, sets start/end (e.g. "watch 8:20-15:40 for this concept"), tags
+  the concept, and publishes with one line on why it is worth watching. The student gets a trimmed, contextualised, syllabus-matched
+  video instead of an algorithmic rabbit hole. Watching is logged as engagement, never as mastery — the app is honest about what a
+  view proves.
+
+  Flow: teacher pastes link → sets trim + concept + one-line reason → publish → student plays inline at timestamp. Data: resources table
+  (type=video, timestamps, concept tag, reason).
+
+
+D — Practice & Assessment
+
+  Quiz engine (server-scored)                    VS-18           Core
+
+    Lives: session + standalone practice         Built: Day 2
+
+  The workhorse of Station 3. Every quiz is drawn from the question bank by concept and difficulty, scored on the server (answer
+  keys never reach the client), and ends in the "Why I got it wrong" summary — each miss with its concept tag and error family, each
+  with its one-line fix. Sessions require ≥60% to complete; below that the app offers the bridge path rather than a bare "fail".
+
+  Flow: quiz start → per-question (answer + confidence button) → server score + error classification → summary with fixes → mastery
+  update. Data: questions (difficulty, format, concept), attempts, per-question responses with confidence + timing.
+
+
+
+
+                                                                                13
+   Confidence buttons (Pakka Meter)                    VS-39           Core
+
+    Lives: every question, everywhere       Built: Day 2
+
+   One row of three buttons — Sure / Unsure / Guess — sits under every question in every quiz and game, tapped before revealing the
+   answer. It is the app's single most diagnostic signal and doubles as a self-awareness trainer: students learn to notice the feeling of
+   guessing, which is half the battle in board exams. Teachers get the class-level view ("12 students were 'Sure' and wrong on
+   acceleration — that is a misconception, not carelessness").
+
+   Flow: answer selected → confidence tapped → reveal → engine weights the result. Data: confidence value on every response row.
+
+
+
+   Adaptive difficulty ladder            VS-23             Core
+
+    Lives: inside every quiz and game       Built: Day 3
+
+   Fixed product law: start at L2; three consecutive correct climb to L3; two consecutive wrong drop to L1 with an automatic bridge
+   explanation. The rule is simple enough to explain to a parent in one sentence and deterministic enough to debug — no magic, just a
+   ladder that keeps every child in the zone where effort is visible.
+
+   Flow: engine picks next question by ladder state → transition logged → bridge text on any drop. Data: ladder state per student-
+   concept, transition events.
+
+
+
+   Exam-format practice (Board mode)                        VS-24          P1
+
+    Lives: practice picker + test-prep signals      Built: Day 3
+
+   Every bank question carries a board-format tag — MCQ, Assertion-Reason, Case-Based, Numerical, Short Answer — so before
+   exams the app serves "Board-format practice" on the concepts the student actually owns. Knowing a concept and performing it in
+   exam clothing are different skills; this feature trains the second without pretending to be the first.
+
+   Flow: exam window or student choice → format-filtered set → timed → same feedback loop. Data: format tags on questions; format-
+   wise accuracy in the trail.
+
+
+
+   Homework submission               VS-17          Core
+    Lives: student homework list + teacher grading queue           Built: Day 3
+
+   Teachers assign homework attached to tonight's session; students submit short answers or attempts (text, and photo for written work
+   in the prototype's simple form), and the submission lands in the teacher's grading queue with the student's evidence trail beside it.
+   Objective items self-score; short answers queue for the teacher with AI-suggested marks that the teacher accepts or edits in one
+   tap. In homework mode the companion is strictly Socratic (5.5).
+
+   Flow: assign → attempt (AI Socratic help) → submit → queue → grade → returned with one comment line. Data: assignments,
+   submissions, grades, teacher edits to AI suggestions.
+
+
+E — AI Features (all behind the cloud companion)
+
+   Doubt chat with the cloud companion                      VS-28          Core
+
+    Lives: always one tap away (chat tab)        Built: Day 3
+
+   Natural-language doubts at the student's hour of need — 11 pm included — answered at band depth, in English/Hindi/Hinglish,
+   streaming token by token with the cloud's thinking state. The companion knows the student's recent evidence (privately) so its
+   answers reference where the student actually is: "you slipped on the sign convention yesterday, watch it in this one". AMA-style
+   general questions are allowed with truthful-source marking; homework-mode is Socratic; and every conversation is walled from
+   parents and admins by the privacy rule.
+
+   Flow: chat open → doubt typed/voiced-to-text (prototype: typed) → 11-step server sequence (5.7) → streamed answer → private log +
+   cluster counter. Data: conversations, messages, token spend, language detected.
+
+
+
+
+                                                                              14
+  SnapDoubt (photo to doubt)                  VS-30           P1
+
+    Lives: chat composer camera button         Built: Day 3
+
+  The classic 11 pm moment — a notebook page, one confusing line. The student photographs it, the app extracts the text server-side,
+  shows it for confirmation ("is this the doubt?"), and only then sends. The confirmation step exists because mistranscription at
+  midnight creates new confusion instead of killing old confusion; the student stays in control of what actually gets asked.
+
+  Flow: photo → extraction → confirm/edit → doubt chat continues as normal. Data: image in private storage, extracted text, the derived
+  doubt.
+
+
+
+  Study plans (the chaos-killer)                VS-34             Core
+
+    Lives: companion chat + profile "My plan"       Built: Day 3
+
+  "Exam in 3 weeks, 6 concepts shaky" → a realistic night-by-night plan generated from the evidence trail, honest about the student's
+  actual available minutes, sequenced by prerequisite order so each night stands on the last. The plan adapts when life happens: a
+  missed night shrinks the plan instead of breaking it. This is the feature that replaces the timetable-juggling stress students carry —
+  and the one parents quote back most.
+
+  Flow: ask for plan (or exam auto-detected) → trail slice + calendar → plan card → nightly steps feed Next-Action. Data: plans, plan
+  items, completion vs plan events.
+
+
+
+  Doubt clusters → teacher                VS-38            Core
+    Lives: teacher doubt inbox       Built: Day 3
+
+  Doubts are clustered by concept and shown to the teacher anonymised — "17 doubts on acceleration, 9 of them on sign convention"
+  — turning the invisible 11 pm confusion of a class into tomorrow's five-minute reteach. Named escalation is selective-in only: the
+  student can choose "also tell my teacher", which files the doubt with their name into the teacher's inbox; the default is always
+  anonymous. Teachers see clusters per concept with the actual anonymised snippets, not summaries of summaries.
+
+  Flow: doubts logged → nightly clustering job → teacher inbox card → optional one-tap reteach session push. Data: doubts, cluster
+  assignments, escalation opt-ins, teacher actions.
+
+
+F — Personalisation (beyond the bands)
+
+  Dushman questions (personal enemy)                        VS-41        Core
+
+    Lives: daily challenge + games       Built: Day 3
+
+  The three concepts that have personally defeated this student return, disguised, until they are beaten — re-skinned with new
+  contexts so recognition cannot masquerade as mastery, and retiring only at L3. Students name the feature themselves ("my
+  dushman is acceleration") and the emotional framing is deliberately playful revenge, not shame: the enemy is the concept, never
+  the child.
+
+  Flow: weakest-concepts query → re-skinned questions surface in daily challenge/games → defeat event → retirement at L3 with a
+  badge. Data: dushman queue per student, defeat/victory events.
+
+
+
+  Interest mash-ups              VS-45         P1
+
+    Lives: question presentation layer      Built: Day 3
+
+  Same concept, same difficulty, same scoring — dressed in the student's declared interest (cricket, dance, trains, space). A cricket-
+  mad child meets average speed through run-rates. The math never changes; the willingness does. Interests are chosen by the
+  student in onboarding, changed anytime, and never inferred from anything sensitive.
+
+  Flow: interest profile → question skin selection at serve-time → identical scoring path. Data: interest tags on students, skin variants on
+  questions.
+
+
+
+
+                                                                           15
+  Absence recovery path                  VS-20           Core
+
+    Lives: Next-Action card     Built: Day 3
+
+  After any absence the card offers "Catch-up" — the two most decayed prior concepts plus the missed sessions in compact form, 20
+  minutes, shame-free copy ("Good to see you. Small steps."). Recovery events are distinct in the trail so heatmaps show a child back
+  on track, not a hole. This tiny flow is one of the product's most humane decisions: most apps punish absence with a wall of backlog,
+  and lose the child precisely when they return.
+
+  Flow: absence detected → recovery offer → compact path → recovery event logged → heatmap reflects return. Data:
+  attendance/absence signals, recovery sessions, distinct event type.
+
+
+
+  Test-prep readiness signal               VS-47           P1
+
+    Lives: profile + parent summary       Built: Day 3
+
+  A three-state lamp per upcoming exam — Not ready / Getting there / Ready — computed from mastery across the exam's
+  concept list weighted by prerequisite depth. It replaces the anxious guesswork of "how prepared am I really?" with a number the
+  student can move every night, and gives parents the same truth without any marks drama.
+
+  Flow: exam scope defined → readiness query → lamp on profile/parent summary → moves with nightly evidence. Data: exam scope
+  table, readiness computation over mastery.
+
+
+G — Games & Motivation (one bank, five games)
+
+  Games arcade            VS-93..99            Core
+
+    Lives: games tab      Built: Day 4
+
+  Five games run on the same question bank and score as concept evidence: MCQ Rush (60-second streaks of quick MCQs), Match-
+  the-Concept (term ↔ definition pairs against the clock), Rapid Revision (the flashcard deck as a self-rated sprint), Streak
+  Challenge (bank your current streak's XP or risk it on one more question — a deliberate, tiny taste of downside), and Boss Level
+  (the chapter's mixed exam-format boss, gated at ≥70% chapter mastery, whose defeat unlocks the next chapter's preview). Every
+  game is solo — scores live against one's own history, never a class list. The permanent rule from the strategy: no public
+  leaderboards, ever; motivation comes from streaks, improvement badges and beaten enemies.
+
+  Flow: arcade → game → questions served by band + ladder → score → concept evidence + XP → streak/badge hooks. Data: game
+  sessions, per-question outcomes inside games, XP, unlocks.
+
+
+
+  Streaks with freezes + daily challenge                    VS-95..96    Core
+
+    Lives: student profile + home chip      Built: Day 4
+
+  The streak counts any meaningful learning act (session, game, warm-up) — not just full sessions — because 15 honest minutes
+  should not die on a technicality. Every 5 streak days earns a freeze (max 2 stored) that automatically protects an missed day; after a
+  true break, restart is gentle ("welcome back — day 1 starts today") rather than punitive. The 5-minute Daily Challenge feeds warm-
+  ups and Dushman questions, so even a compressed evening moves the needle. Streak logic is server-side and idempotent — one
+  touch per calendar day, ever.
+
+  Flow: daily act → idempotent streak touch → freeze accrual/burn → chips and milestone celebrations. Data: streak state, freeze
+  ledger, daily challenge completions.
+
+
+
+
+                                                                        16
+  Improvement badges                    VS-97         Core
+
+    Lives: profile badge shelf       Built: Day 4
+
+  Badges celebrate trajectories, not talent: "Fixed It — a concept moved L1→L2", "Comeback King — recovered after 3 absent days",
+  "Dushman Slayer — beat your enemy concept", "Boss Buster — cleared the chapter boss". The amber accent colour (the only place
+  it appears in volume) is reserved for this shelf, making achievement visually precious. No badge references other students; every
+  badge is a story the child can retell at dinner.
+
+  Flow: evidence events → badge rules engine → award + celebration animation (skippable, reduced-motion aware). Data: badge
+  catalog, awards with triggering event IDs.
+
+
+H — Teacher World
+
+  Morning dashboard                 VS-60           Core
+    Lives: teacher home          Built: Day 2
+
+  One screen answering yesterday's questions before the first bell: completion of last night's sessions, the three reddest heatmap
+  cells, new doubt clusters, submissions waiting for grading, and one suggested action ("2-minute reteach card for 9-B
+  acceleration?"). Nothing here requires data entry — everything is the class's own evidence, aggregated overnight.
+
+  Flow: login → dashboard (single query fan-out) → drill into any card. Data: aggregate views over sessions, responses, doubts,
+  submissions.
+
+
+
+  Class × concept heatmap                     VS-61        Core
+
+    Lives: teacher analytics        Built: Day 2
+
+  The grid every teacher dreams of: rows = students (or anonymised clusters), columns = concepts, cells = mastery state with the
+  three-colour scale — safe / unstable / critical. Drill into any cell for the underlying signals (confidence pattern, error
+  families, time patterns), and one tap offers "push reteach" — a ready-made repair session to the struggling subset. The heatmap is
+  the teacher's proof that publishing nightly was worth it.
+
+  Flow: heatmap → cell drill → signal view → one-tap reteach push → students receive repair path. Data: mastery rollups, reteach
+  session records.
+
+
+
+  Session builder with student preview                       VS-62    Core
+
+    Lives: teacher publish flow        Built: Day 2
+
+  Publishing tonight's session takes under three minutes: pick chapter/concepts (auto-suggested from the syllabus progress), attach
+  notes, trimmed video and summary sheet, select the quiz (auto-selected by concept + difficulty mix, editable), set open/close times
+  (18:00-08:00 default), and press preview — which renders exactly what the student will see, in the real player, not a mock.
+  Homework flag toggles the AI into Socratic mode for the session.
+
+  Flow: builder → auto-select → edit → student preview → publish → notification to class. Data: sessions with sections, resources, quiz
+  refs, timing, flags.
+
+
+
+  Question bank + AI-drafted questions                        VS-63    Core
+
+    Lives: teacher bank        Built: Day 2
+
+  Shared, searchable bank tagged by concept, difficulty and board format. Teachers can ask the AI to draft new questions on a
+  concept ("give me 5 L2 numericals on average speed") — drafts arrive marked as AI-drafted, in a visually distinct style, and enter
+  the bank only after explicit teacher approval. The teacher's own questions are always styled as authoritative; the boundary is never
+  blurred (5.5).
+
+  Flow: browse/filter → AI draft request → review → approve/reject → bank entry (provenance kept). Data: questions with provenance
+  (teacher vs AI-approved), approvals.
+
+
+
+
+                                                                        17
+  Class space & announcements                      VS-10          Core
+
+    Lives: class workspace feed        Built: Day 2
+
+  A quiet, section-scoped notice board: teacher announcements, session publish notices, and gentle class-level celebrations ("9-A
+  crossed a 200-night streak this week"). Section scoping keeps 9-A's feed 9-A's — no school-wide noise, no cross-class
+  comparison content, consistent with the no-leaderboard law.
+
+  Flow: teacher posts → class sees notification + feed entry → optional acknowledgement. Data: announcements scoped to section,
+  read receipts (aggregate only).
+
+
+I — Parent World
+
+  Weekly progress dashboard                      VS-73        Core
+    Lives: parent home     Built: Day 3
+
+  Graphs a parent can actually read: effort this week (sessions and minutes per night, as honest bars), mastery trend per subject (the
+  line that matters — up is up), streak health, and the three-state exam readiness lamp. Every graph is generated from the child's real
+  evidence trail, and the plain-language summary underneath explains the graphs in sentences a non-teacher parent can act on.
+  Weekly email digest carries the same truth to the inbox (cron-driven, data-saver friendly).
+
+  Flow: parent login → weekly dashboard (aggregates only) → detail per subject → printable report. Data: aggregate rollups; never raw
+  responses, never chats (2.4).
+
+
+
+  "Ask This" conversation prompts                     VS-75          Core
+
+    Lives: parent weekly card       Built: Day 3
+
+  One suggested conversation per week, grounded in something real the child did: "Aarav fixed his acceleration graph-reading this
+  week — ask him to show you how he reads one." The prompt turns parents from inspectors into interested witnesses, replaces "how
+  were your marks?" with a question the child can answer proudly, and is deliberately the only prescriptive parenting content in the
+  app.
+
+  Flow: week's notable events → prompt generation → card → optional "mark as had". Data: prompt templates, delivery/dismiss events
+  (no content snooping).
+
+
+
+  Notifications & milestones                VS-74          Core
+
+    Lives: parent + teacher apps       Built: Day 3
+
+  Finite, high-signal notifications only — milestone badges, streak milestones, exam readiness transitions, teacher notes — never a
+  stream of "your child opened the app". The notification philosophy mirrors the product's calm: a parent should hear from
+  VidhyaSaathy about twice a week, and every ping should be worth a dinner-table mention. Realtime unread counts for teachers on
+  doubt clusters and submissions.
+
+  Flow: events → notification rules → realtime/push → read state. Data: notification table, preferences per role.
+
+
+J — Admin World
+
+  School setup wizard + CSV onboarding                        VS-79..82          Core
+    Lives: admin console        Built: Day 1-3
+
+  Guided setup of school → academic year → classes → sections → subjects → teacher assignments, then bulk import of students and
+  staff from CSV with a column-mapping step, validation preview, and per-row error reporting that names the exact problem
+  (duplicate roll number, bad date format) instead of a generic "import failed". Activation codes are generated per class and exported
+  as printable slips for class teachers to distribute.
+
+  Flow: wizard → CSV map → validate preview → import → code export (printable). Data: school structure, memberships, import
+  batches with per-row outcomes, codes.
+
+
+
+
+                                                                            18
+      Approvals, permissions & audit               VS-83..87      Core
+
+       Lives: admin console     Built: Day 3
+
+      Parent-link approvals in a queue; a live permission matrix (the one from 2.4, editable only in ways that never violate the privacy
+      wall — that row is hard-locked); and an append-only audit log of every sensitive action (imports, approvals, revocations, resets).
+      The demo-reset script restores the seeded world in one command for repeat presentations — the same world the acceptance script
+      in Part 11 walks.
+
+      Flow: queues → approve/revoke → audit entries → exportable log. Data: audit events table, immutable.
+
+
+K — Platform (India layer)
+
+      Bilingual + PWA offline          VS-88..92          Core
+
+       Lives: everywhere      Built: Day 1 (i18n) / Day 4 (PWA)
+
+      English and Hindi with full parity — every string ships in both, zero missing keys, switchable anywhere — with the companion
+      speaking natural Hinglish when the student does. The app is a PWA: installable, offline-capable for the current chapter's content
+      ("save for offline"), with an IndexedDB outbox that syncs attempts taken on a flaky connection and marks them clearly as synced-
+      late. Data-saver mode swaps heavy renders for the PDF summaries; Lighthouse targets are ≥80 performance, ≥90 accessibility on a
+      low-end profile, and the whole student loop works on a 2-year-old Android phone on 3G-class networks.
+
+      Flow: language switch → instant re-render; offline flag → cached content + outbox → reconnect sync. Data: i18n key catalogue
+      (parity-audited), sync log with late-marking.
+
+
+
+PA R T 7
+
+Complete User Flows
+Seven flows carry the entire product — from the school's first setup to a game break. Each step shows what the system
+does (backend) and what the user sees (screen), so nothing is left to imagination or to the AI builder's guesswork.
+
+  Flow 1 — School Onboarding (Admin → Everyone)
+  1           Admin creates the school world
+              Setup wizard: school profile → academic year → classes 9 & 10 → sections A/B → subjects → teacher-subject-section
+              assignments. Every later permission hangs off these facts.
+                BAC K E ND                                                       U SE R SE E S
+                School, year, class, section, subject and assignment rows        A calm wizard with progress indicator, validation on each
+                written; admin gets owner role; all audit-logged.                step, and a final summary card of the created structure.
+
+
+
+  2           Teachers invited by staff ID + email
+              CSV or single-entry invite; the email carries a one-time link that verifies staff identity and lets the teacher set a password.
+                BAC K E ND                                                       U SE R SE E S
+                Teacher profile + membership rows; invite token (expiring,       Welcome screen with their classes pre-listed and an empty
+                single-use); assignment of subject/sections (Sharma Ma'am        morning dashboard prompting the first session publish.
+                → Physics 9-A/9-B).
+
+
+
+
+                                                                            19
+3    Students imported; activation codes exported
+     CSV of roll numbers, names, dates of birth; codes generated per class and exported as printable slips for class teachers to
+     hand out.
+       BAC K E ND                                                       U SE R SE E S
+       Student rows (no credentials yet); activation codes (single-     Admin sees validation preview before commit and a clean
+       use, expiring) linked to roll numbers; import batch report       import report naming any problem rows.
+       with per-row outcomes.
+
+
+
+4    Student activates with code + roll number + DOB
+     The student enters the code from the slip, proves identity with roll number and date of birth, sets a password and a recovery
+     question, and lands directly in the student shell.
+       BAC K E ND                                                       U SE R SE E S
+       Credential creation, membership activation, first-login event;   A two-minute friendly activation, English/Hindi toggle, and a
+       language preference recorded.                                    first home with the cloud companion greeting.
+
+
+
+5    Parent links via OTP; admin approves
+     Parent receives a link code through the school, verifies by OTP, and the pending link appears in the admin queue; approval
+     opens the parent world for that child only.
+       BAC K E ND                                                       U SE R SE E S
+       Parent profile, link row (pending → approved), audit entry;      Parent gets a first weekly view with plain-language intro;
+       aggregates-only read policy attached to the link.                student is told "your parent can now see your progress —
+                                                                        never your chats."
+
+
+
+
+Flow 2 — Student First Login → Diagnostic → Personalised Home
+1    Sign-in → class workspace
+     Roll-number-based identity means the student's world assembles itself: Class 9-A, Physics with Sharma Ma'am, the
+     chapters in syllabus order.
+       BAC K E ND                                                       U SE R SE E S
+       SSR session; one `student_home` RPC returns classes,             The bottom-tab student shell with a greeting from the cloud
+       subjects, chapters, pending items and streak state in a single   companion and the class workspace one tap away.
+       call.
+
+
+
+2    Chapter open → diagnostic offer
+     First open of "Motion" offers the 5-question friendly diagnostic ("let's see what you already know — this is not a test").
+       BAC K E ND                                                       U SE R SE E S
+       Diagnostic set drawn from prerequisite chain (distance →         Five light questions with confidence buttons and zero marks
+       average speed → acceleration) + 2 new-concept probes.            language; a placement card after ("You're already strong on
+                                                                        distance — let's build the rest").
+
+
+
+3    Band placement written; home adapts
+     Per-concept seed scores and the chapter band land in the evidence trail; the home screen's Next-Action card now reflects
+     this specific child.
+       BAC K E ND                                                       U SE R SE E S
+       Mastery seeds, band assignment event, routing profile            A personalised Next-Action card (Priya: repair path; Aarav:
+       initialised with neutral explanation-format weights.             acceleration concept) — and no band label anywhere.
+
+
+
+
+                                                                  20
+Flow 3 — The Daily Learning Session (minute by minute, 18:04)
+
+1     18:04 — Session opens, notification arrives
+      Sharma Ma'am published at 14:00; the session window opened at 18:00 (closes 08:00). The student gets one quiet
+      notification, not a barrage.
+        BAC K E ND                                                         U SE R SE E S
+        Session state flips to open (server time authoritative);           The card on home now reads "Tonight's Physics:
+        notification dispatched; Next-Action priority recalculated.        Acceleration — about 25 min".
+
+
+
+2     18:06 — Warm-up offer (if radar flagged decay)
+      Only when needed: a 2-minute flashcard warm-up on the two faded prerequisite concepts, offered as optional and
+      genuinely short.
+        BAC K E ND                                                         U SE R SE E S
+        Revision radar query over decayed mastery; warm-up                 "Quick warm-up? Distance & displacement — fading" with a
+        completion logged as revision behaviour evidence.                  skip option that is respected without guilt-tripping.
+
+
+
+3     18:10 — Concept pages with interactive checkpoints
+      The Learn station: school notes in the band's variant, checkpoint after each idea, curated video available inline at the
+      teacher's timestamp, "simpler explanation" one tap away.
+        BAC K E ND                                                         U SE R SE E S
+        Note blocks + checkpoint questions served; each checkpoint         Reading that talks back — a checkpoint card slides in after
+        response scored and logged immediately.                            each idea, and the cloud rests quietly in the corner.
+
+
+
+4     18:22 — Quiz with confidence buttons and the ladder
+      Practice station: questions served per band and the L1/L2/L3 ladder; Sure/Unsure/Guess tapped before each reveal;
+      difficulty moves with performance.
+        BAC K E ND                                                         U SE R SE E S
+        Server-side scoring and error classification per response;         Questions that get a little harder when they're rolling and
+        ladder transitions logged; bridge explanations attached to         kinder when they're not — with an explanation exactly
+        any drop.                                                          when the ladder drops.
+
+
+
+5     18:31 — "Why I got it wrong" summary
+      Understand station: each miss with its concept tag, error family and one-line fix; the Dushman queue updates silently; ≥60%
+      completes the session, below offers the bridge.
+        BAC K E ND                                                         U SE R SE E S
+        Session completion rule evaluated (all parts + quiz ≥60%);         A summary that reads like a coach, not a report card — and
+        mastery updates written; dushman queue recalculated.               the streak chip ticking up.
+
+
+
+6     18:34 — Optional game, then done
+      Four free minutes: MCQ Rush on tonight's concepts (scores count as light evidence), then close. The evening cost 30
+      minutes and moved three numbers that matter.
+        BAC K E ND                                                         U SE R SE E S
+        Game session logged with concept tags; idempotent streak           XP, a possible badge, the cloud's small celebration — and a
+        touch; overnight aggregates refresh for teacher and parent         home that has already recalculated tomorrow.
+        views.
+
+
+
+
+                                                                      21
+Flow 4 — Doubt to Answer (11 pm, the moment that builds the moat)
+
+1    23:02 — Doubt asked
+     Stuck on a numerical, the student opens the chat tab and types (or SnapDoubts a photo of the line) — "why is acceleration
+     negative here??"
+       BAC K E ND                                                      U SE R SE E S
+       SnapDoubt extraction → confirmation round-trip; 11-step         The cloud's thinking state — a restrained animation while
+       sequence begins (5.7): auth, rate-limit, context slice,         the answer streams in the student's language and depth.
+       concept map, language + band detection.
+
+
+
+2    23:04 — Answer at band depth, with tomorrow's hook
+     Analogy-first for Priya, formula-forward for Aarav; one clarifying question if the doubt was vague; a linked mini-practice
+     queued for tomorrow if the pattern suggests it.
+       BAC K E ND                                                      U SE R SE E S
+       Answer streamed (SSE); interaction logged privately; any        An answer that knows where they slipped yesterday — and
+       promised follow-up written (Dushman/practice queue);            zero fear of judgement.
+       budget closed.
+
+
+
+3    Morning — the teacher sees the cluster, not the child
+     "17 doubts on acceleration, 9 on sign convention" — anonymised, clustered, actionable; the student's name appears only if
+     they opted in.
+       BAC K E ND                                                      U SE R SE E S
+       Nightly clustering job; anonymised aggregates to the            Teacher sees a one-tap "push reteach" on the cluster;
+       teacher; opt-in escalations delivered named.                    tomorrow's class quietly fixes what 11 pm discovered.
+
+
+
+
+Flow 5 — Teacher's Day (from dashboard to reteach)
+
+1    07:40 — Morning dashboard
+     Last night's completion (9-A: 34/38), three reddest heatmap cells, two doubt clusters, five submissions pending — one
+     glance before the first bell.
+       BAC K E ND                                                      U SE R SE E S
+       Aggregate queries over the evidence trail, computed             A dashboard with one suggested action, not eleven menus.
+       overnight; realtime counters for doubts and submissions.
+
+
+
+2    11:20 — Heatmap drill and reteach push
+     Cell "9-B × acceleration" is critical; drill shows "Sure + wrong" dominance — a misconception, not carelessness; one tap
+     pushes a repair session to the 11 struggling students.
+       BAC K E ND                                                      U SE R SE E S
+       Cell-level signal query; reteach session created and targeted   Students get a friendly bridge path tonight — none of them
+       to a student subset; notifications scheduled for 18:00.         ever know they were "the red ones".
+
+
+
+3    14:00 — Publish tonight's session (under 3 minutes)
+     Auto-suggested concepts from syllabus progress; notes attached; quiz auto-selected and edited slightly; open/close times
+     default; student preview verified; publish.
+       BAC K E ND                                                      U SE R SE E S
+       Session row with resources, quiz ref, timing, homework          The real student player in preview — what Sharma Ma'am
+       flag; publish notification queued for 18:00.                    sees is exactly what Aarav gets.
+
+
+
+
+                                                                  22
+4          20:30 — Grading queue, gently assisted
+           Short-answer submissions with AI-suggested marks; she accepts six suggestions in a row and edits two, adding one
+           comment line each — ten minutes, done.
+             BAC K E ND                                                       U SE R SE E S
+             Submissions + AI suggestions fetched; teacher decisions          Students receive marks with a human comment, not a
+             written as authoritative; edits to suggestions logged for        machine verdict.
+             calibration.
+
+
+
+
+Flow 6 — Parent's Weekly View (Sunday, 10 minutes)
+
+1          Sunday morning — weekly dashboard
+           Effort bars for the week, mastery trend lines per subject, streak health, readiness lamp — all generated from the child's own
+           trail, in plain language.
+             BAC K E ND                                                       U SE R SE E S
+             Aggregates-only queries enforced by policy; plain-language       Graphs they can read without a manual, and not one raw
+             summary generated from the same aggregates; weekly               answer or chat bubble — by design.
+             email digest mirrors it.
+
+
+
+2          The "Ask This" card
+           "Aarav fixed his acceleration graphs this week — ask him to show you how he reads one." One concrete, warm conversation
+           starter grounded in something real.
+             BAC K E ND                                                       U SE R SE E S
+             Notable-events query → prompt selection; delivery logged,        A dinner-table question their child can answer proudly.
+             content never snooped.
+
+
+
+3          Printable report (when school asks)
+           A clean one-page PDF: subject trends, effort, readiness lamps, teacher note if any — the PTM handout that used to take an
+           evening to assemble.
+             BAC K E ND                                                       U SE R SE E S
+             Report data package → PDF render (data-saver friendly) →         A report that matches what the teacher sees — one truth,
+             download/share.                                                  three audiences.
+
+
+
+
+    What the parent dashboard actually looks like — honest bars, one trend line, one lamp, one prompt. Two children, one
+    screen pattern, zero comparison between them: each parent sees their own child's truth, and the plain-language line is
+    honest about effort and about distance still to travel. Note what is absent — no marks table, no class rank, no chat
+    transcripts; absence is a feature here, not a gap.
+
+
+
+
+                                                                         23
+  Aarav's week                   CLAS S 9-A · PHYS ICS FO CUS           Priya's week                  CLAS S 9-A · PHYS ICS FO CUS
+
+              Physics             Maths                All                         Physics             Maths                 All
+
+
+
+
+        Mon       Tue     Wed     Thu     Fri    Sat         Sun             Mon       Tue      Wed    Thu      Fri    Sat         Sun
+
+      Mastery trend — Motion                       62% → 71%            Mastery trend — Motion                          31% → 44%
+
+      Streak                                           12 nights        Streak                               5 nights · freeze saved
+
+      Half-yearly readiness                      Getting there          Half-yearly readiness                         Needs support
+
+       ASK T HIS                                                             ASK T HIS
+       Aarav fixed his acceleration graphs this week — ask                   Priya kept at her repair path even when it was hard
+       him to show you how he reads one.                                     — tell her you noticed.
+
+
+
+  Flow 7 — Game Break (with the boss gate)
+
+  1             Arcade entry — five doors, one bank
+                All games serve from the same concept-tagged question bank with the same ladder; the games tab shows tonight's
+                recommended door first (warm-up or Dushman). Solo play only — the high score list has exactly one name on it: the
+                player's own history.
+                  BAC K E ND                                                          U SE R SE E S
+                  Game session bound to student + concepts; per-question              Five cards, time estimates, and the amber Boss Level door
+                  outcomes logged as evidence with confidence buttons                 — locked until 70% chapter mastery.
+                  present here too.
+
+
+
+  2             Streak Challenge — the one taste of risk
+                Bank current XP or risk it on one more question: a deliberate, bounded lesson in downside, small enough to be fun and never
+                cruel. A wrong risk ends the run with the banked portion intact.
+                  BAC K E ND                                                          U SE R SE E S
+                  Risk resolution server-side; XP ledger updated; outcome             Big numbers, a heartbeat of suspense, and an honest
+                  logged with concept tags.                                           "banked 240 XP" when it ends.
+
+
+
+ 3              Boss Level — the chapter gate
+                Mixed exam-format boss on the whole chapter; ≥70% chapter mastery to enter, defeat unlocks the next chapter's preview.
+                This is the game that keeps games honest — the boss is the exam's shape, so the fun rehearses the thing that matters.
+                  BAC K E ND                                                          U SE R SE E S
+                  Gate check on chapter mastery; boss completion writes an            The cloud's full celebration, the amber "Boss Buster" badge
+                  unlock event and a badge candidacy.                                 — and a first glimpse of the next chapter.
+
+
+
+
+PA R T 8
+
+Data & Content Foundation
+The app is only as good as the NCERT fuel inside it. This part defines the concept map, the question bank spec, the
+content quality bar, and the seeded demo world used for every test and demo.
+
+  8.1 — The Concept Map (the product's skeleton)
+Content lives in a strict hierarchy — School → Year → Class → Subject → Chapter → Concept — and every concept carries
+prerequisite edges. The prerequisite graph is not decoration: the
+                                                              24 diagnostic draws from it, the repair paths walk backwards
+along it, the study plans sequence by it, and the "concepts are labelled, people are not" rule reads from it. For the prototype,
+the map is hand-built with teacher review for the seeded chapters, starting with the Motion chain.
+
+  Concept                      Prerequisites                       Why it is in the demo chain
+
+  Distance & displacement      Basic algebra, units                Entry concept — separates scalar/vector thinking, common early
+                                                                   fork in understanding
+
+  Speed & average speed        Distance & displacement             The classic "average speed ≠ mean of speeds" misconception
+                                                                   lives here — perfect Error DNA demo
+
+  Acceleration                 Speed & average speed               Sign convention confusion, graph reading, the highest-doubt
+                                                                   concept in the demo data
+
+
+  8.2 — Question Bank Specification
+Every question in the bank carries four mandatory tags — concept, difficulty (L1/L2/L3), board format, and provenance —
+plus its options, its correct answer (server-side only), and its error-family hints (which wrong option indicates which
+confusion). The prototype needs the seeded chapters fully banked, roughly:
+
+  Per seeded concept                      Diagnostic-grade         Practice pool             Format mix target
+
+  Distance & displacement                 2 questions              ~25 questions             MCQ 40% · Numerical 30% · Assertion-
+                                                                                             Reason 15% · Case-based 10% · Short 5%
+
+  Speed & average speed                   2 questions              ~25 questions             Same mix, heavier on the average-speed
+                                                                                             misconception pattern
+
+  Acceleration                            1 probe + 2              ~30 questions             Same mix, heavier on sign convention
+                                          prerequisite pulls                                 and graph reading
+
+
+Quality bar for every question: unambiguous stem, exactly one defensibly correct answer, distractors that mean something
+(each maps to a real confusion), bilingual-capable (stem at minimum in English and Hindi), and no trick questions — difficulty
+must come from thinking, not wording. Ten excellent questions beat thirty mediocre ones, because every bad question
+corrupts the evidence trail the whole moat stands on.
+
+  8.3 — Content Pipeline for the Prototype
+   Teacher-authored notes for the three seeded concepts (Sharma Ma'am's actual emphasis, ~1 page each, with 2-3 checkpoint
+   questions embedded per concept).
+   Simple and concise variants of each note for Band-1 and Band-4 serving — same truth, different depth (analogies and shortest
+   sentences vs. compact advanced form).
+   Summary one-pager PDF for the Motion chapter — definitions, core formulas, two classic exam patterns, mini concept map.
+   Flashcard decks — 8-12 cards per concept, fronts as terms/mini-questions, backs in one breath.
+   Two curated YouTube resources with teacher-set timestamps and one-line reasons (real links, trimmed ranges).
+   Hindi translations of every student-facing string and every content piece — full parity, audited to zero missing keys.
+
+  8.4 — The Seeded Demo World
+Every test and demo runs on one deterministic, re-loadable world (the reset script restores it in one command): Green Valley
+School (CBSE); Class 9-A and 9-B; Sharma Ma'am (Physics) plus one maths teacher; the Motion chapter with its three-
+concept chain; tonight's session published at 14:00, open 18:00-08:00; and three student archetypes whose evidence makes
+every screen demonstrable — Aarav (strong: 5/5 diagnostic, L3-L4 chain, 12-night streak), Priya (struggling: fragile average-
+speed prerequisite, mid-repair journey, warm-tone AI history), and Rohan (absent 3 days: decayed mastery, recovery path
+pending). Their parents are linked and approved; the badge, game and streak catalogs are seeded; and the doubt history
+includes a genuine acceleration cluster (17 doubts, 9 on sign convention) so the teacher's morning dashboard tells a true
+story on first load.
+
+
+
+                                                                  25
+PA R T 9
+
+The 4-Day Build Plan
+From the current static-HTML build to a working, adaptive, demo-ready app in four intense days. The ten Build Prompt
+phases map onto the days exactly as written below — one phase at a time, question gate honoured, checklist verified, no
+stacking.
+
+  9.1 — Day 0 (Evening Before) — Preparation
+Four days of building fail for logistics reasons more often than technical ones, so the evening before is a real work block:
+Supabase project created and keys stored in env vars (never committed); the Git repo audited and the existing static screens
+inventoried (the Build Prompts' first instruction); the seeded NCERT content pack (notes, variants, summary sheet,
+flashcards, ~80 banked questions, Hindi translations) staged and ready to load; demo accounts decided (admin, Sharma
+Ma'am, Aarav, Priya, Rohan, two parents); and the AI provider key provisioned with a spend cap. Content readiness is the
+difference between a Day 2 that demos learning and a Day 2 that demos skeletons.
+
+  9.2 — The Four Days
+
+    Day 1 — Foundation                                                  Build Prompts 01 + 02 + 03 · Database, Entry System, App Shell
+
+      Morning — Phase 01                             Afternoon — Phase 02                       Evening — Phase 03
+      Full schema migration (8 groups:               School-anchored auth end-to-end:           Scholar Indigo token system as the
+      identity, academic structure with the          admin wizard, teacher invite, student      single source of truth, component kit
+      concept map, content, assessment               activation (code + roll no + DOB),         in all states, the four role shells,
+      with server-side keys,                         parent OTP link, SSR sessions, role        notification infrastructure, bilingual
+      evidence/progress, AI/doubts,                  guards, forgot password.                   i18n skeleton, "continue where you
+      communication/motivation, ops) +                                                          left off".
+      RLS policy matrix + core RPCs
+      (submit_quiz, touch_streak) + storage
+      buckets + demo seed.
+
+
+      E XIT D E M O ( M US T PAS S T O S L E E P )
+      All four roles sign in with real credentials and land in their real shells; a student's class workspace reads real seeded
+      data; no mock logins anywhere; RLS proven by a rejected cross-role query.
+
+
+
+
+    Day 2 — The Learning Loop                                                Build Prompts 04 + 05 · Student Core Loop, Teacher World
+
+      Morning — Phase 04                             Afternoon — Phase 05                       Evening — buffer
+      student_home single-call RPC; session          Teacher morning dashboard; class ×         Fix the day's checklist failures; run
+      engine (open/close windows, resume             concept heatmap with drill and one-        Flow 3 (daily session) manually as
+      pointer, ≥60% completion); quiz                tap reteach; session builder with real     Aarav; seed deepens if time allows.
+      engine server-scored; confidence               student preview; question bank with
+      buttons on every question; "Why I got          auto-selection; class space
+      it wrong" with concept + error family;         announcements.
+      per-concept mastery view; the Next-
+      Action card.
+
+
+      E XIT D E M O ( M US T PAS S T O S L E E P )
+      Sharma Ma'am publishes tonight's session at 14:00 in under 3 minutes; at 18:05 Aarav completes it end-to-end —
+      warm-up, concept page with checkpoints, quiz with confidence buttons, "why wrong" summary — and her heatmap
+      updates from his real answers.
+
+
+
+
+                                                                       26
+  Day 3 — The Intelligence                                          Build Prompts 06 + 07 + 08 · Parent/Admin, AI Tutor, Personalisation
+
+     Morning — Phase 07                               Afternoon — Phase 08                          Evening — Phase 06
+     Cloud companion chat via the 11-step             Band routing live in every serving            Parent weekly dashboard with real
+     Edge Function sequence (SSE                      surface (note variants, quiz entry,           graphs from the trail; "Ask This"
+     streaming, server-side keys, rate                ladder); Error DNA repair paths;              cards; weekly email digest cron;
+     limits + budget); band-depth answers;            promotion/demotion logging; revision          admin CSV import, code export,
+     Socratic homework mode; honesty                  radar warm-ups; absence recovery              approvals, audit log, permission
+     layer; SnapDoubt with confirmation;              path; Dushman queue; study plans;             matrix.
+     doubt clustering to the teacher inbox.           frustration tone; interest mash-ups.
+
+
+     E XIT D E M O ( M US T PAS S T O S L E E P )
+     Priya and Aarav ask the same doubt and get visibly different-depth answers; Priya's repair path and Rohan's catch-up
+     card both work; a parent opens a dashboard whose graphs moved because of last night's real session; the privacy wall
+     is proven by a rejected parent query on chats.
+
+
+
+
+  Day 4 — Delight & Launch                                         Build Prompts 09 + 10 · Games & Motivation, India Layer, QA, Launch
+
+     Morning — Phase 09                               Afternoon — Phase 10                          Evening — launch block
+     The five games on the shared bank                PWA + service worker (save for                Two fix rounds for anything the
+     (MCQ Rush, Match-the-Concept,                    offline, outbox sync with late-               acceptance script surfaced; deploy;
+     Rapid Revision, Streak Challenge, Boss           marking); data-saver mode; full Hindi         runbook written; demo-reset script
+     Level with the 70% gate); streaks with           audit to zero missing keys; low-end           verified; the Part 1.5 sentence is
+     freezes; improvement badges; daily               Lighthouse pass ( ≥80 perf / ≥90 a11y);       demonstrated live on a real phone.
+     5-minute challenge; every game                   edge-case sweep; full-day
+     writes concept evidence.                         acceptance script (11.2) executed for
+                                                      real.
+
+
+     E XIT D E M O ( T HIS IS T HE D E M O )
+     The complete Part 11 acceptance script passes end-to-end on a deployed URL — admin 07:00 through next-morning
+     heatmap — and the three archetypes have three visibly different evenings.
+
+
+
+9.3 — Daily Rhythm (the discipline that makes 4 days possible)
+ One phase at a time, fully. The AI builder receives a phase, answers its question gate, builds, verifies its own checklist, reports —
+ then and only then the next phase. Stacking phases is how static-HTML chaos was born; do not revive it.
+ Test as the user, not as the developer. Every exit demo is walked on a real (preferably low-end) phone with the seeded accounts,
+ in both languages at least once a day.
+ No regressions. Each day ends with a five-minute regression pass of the previous days' exit demos. A feature that breaks
+ yesterday's demo is not a new feature; it is a bug.
+ Honest triage over silent scope creep. Anything slipping past its day goes through the 9.4 table explicitly — in the open, recorded,
+ never by quietly shipping it half-broken.
+
+9.4 — If Behind: Triage Table (in this order, no exceptions)
+Slipping item                                  Day-4 action                                     Why it is safe to defer
+
+Interest mash-ups, readiness lamp              Defer to post-launch backlog                     Nice differentiation, not load-bearing for the
+refinements                                                                                     demo sentence
+
+SnapDoubt photo pipeline                       Ship typed doubts only                           The chat already carries the doubt; the
+                                                                                                camera is sugar
+
+Streak Challenge game                          Ship four games, not five                        The arcade story survives with four doors;
+                                                                                                Streak Challenge is the most deferrable
+
+
+
+                                                                        27
+  Weekly email       In-app parent view only                                               The dashboard proves the graphs; cron
+  digest                                                                                   polish can follow
+
+  PWA offline        Install + cache shell only                                            Full outbox sync is Day-4-late acceptable;
+  depth                                                                                    online demo works regardless
+
+    Never            Server-side scoring · RLS · confidence buttons · band routing ·       These ARE the product — deferring any of
+  defer              teacher heatmap · parent aggregates · the evidence trail              them means the demo shows a mock
+
+
+
+PA R T 1 0
+
+The Complete Readiness Checklist
+The master tracker — every single thing that must be true, from sign-up to final testing, in thirteen groups. Tick items as
+they are verified in the real app (not as they are "probably done"). This section is the file you update daily.
+
+Rules of engagement for this tracker: an item is ticked only when it has been observed working in the deployed app by a
+human, in the role it belongs to. "The code is written", "the AI says it did it", and "it worked yesterday" do not count. When an
+item fails, it goes back to its Build Prompt phase with a one-line note — the tracker never lies to make anyone feel better,
+because the demo (11.2) will not.
+
+
+   10.1 Backend & Database                                                                                                     16 I TEMS
+
+       Full schema migrated: all 8 table groups exist with correct          Concept prerequisite map seeded (Motion chain verified)
+       relations
+       RLS enabled on every table — no policy gaps found by audit           Cross-role read attempt rejected in logs (e.g. parent →
+       query                                                                student chats)
+       Answer keys never reach the student client (network trace            submit_quiz RPC scores server-side and writes per-question
+       verified)                                                            evidence
+       touch_streak is idempotent (double-tap tested, single                Evidence trail is append-only; corrections create new events
+       increment)
+       Storage buckets private with signed-URL access only                  Demo seed loads in one command; reset script restores it
+                                                                            exactly
+       Session open/close enforced by server time (client clock             Migrations re-runnable on a fresh project without error
+       spoof ignored)
+       No secret keys in the repo (grep clean); env vars only               Indexes on hot paths (student_home query under 300 ms on
+                                                                            seed)
+       Audit log captures imports, approvals, revocations, resets           Nightly aggregates job runs (heatmap/parent data fresh by
+                                                                            morning)
+
+
+
+
+                                                                     28
+10.2 Auth & Onboarding                                                                                                       14 I TEMS
+
+  Admin wizard creates school → year → classes → sections              Teacher invite (staff ID + email) → invite link → password set
+  → subjects                                                           → lands in shell
+
+  Student activation: code + roll no + DOB → password →                Wrong roll no / DOB / expired code → named, friendly error
+  student shell                                                        (no leak)
+  Codes are single-use (second attempt rejected) and expiring          Parent link: OTP → pending → admin approval → parent
+                                                                       world for that child only
+  Parent link revocation works and is audit-logged                     Forgot-password flow completes by email for every role
+
+  SSR session: refresh keeps role; logout kills session                Role guard redirects wrong-role URL access (student →
+  everywhere                                                           /admin bounces)
+
+  Auth screens fully bilingual (EN/HI switch live)                     First student login greets via cloud companion; zero empty
+                                                                       states
+
+  CSV student import: validation preview + per-row error               Activation-code export produces printable slips per class
+  naming
+
+
+
+
+10.3 Student Experience                                                                                                      18 I TEMS
+
+  Home loads in one RPC call; Next-Action card is the visual           Next-Action priorities correct (unfinished > due > revision >
+  anchor                                                               new > games)
+  Diagnostic offered on first chapter open; 5 questions;               Diagnostic result routes content (Priya ≠ Aarav verified side-
+  friendly framing                                                     by-side)
+  Session player: resume mid-state works after app kill                Concept page: school notes render with formatting + Hindi
+
+  Interactive checkpoints fire, score, and explain inline              "Explain simpler" swaps note variant for the same idea
+  Curated YouTube plays inline at teacher's timestamp range            Summary one-pager PDF downloads/prints cleanly
+
+  Flashcards flip; self-ratings (knew/almost/forgot) logged            Confidence buttons on every question (quiz + games)
+  Quiz summary shows "why wrong" per miss with fix line                ≥60% completion rule enforced; below → bridge path
+                                                                       offered
+  Mastery map in profile shows per-concept L1-L4, friendly             No band labels, ranks, or classmate scores anywhere
+  words only                                                           (audited)
+  Absent student sees shame-free "Catch-up" card (Rohan                Chapter history persists — "forgot acceleration?" reopens in
+  verified)                                                            March
+
+
+
+
+10.4 Teacher Experience                                                                                                      14 I TEMS
+
+  Morning dashboard shows completion, red cells, clusters,             Heatmap grid correct vs seed; colours match
+  queue, one action                                                    safe/unstable/critical rules
+
+  Cell drill shows confidence pattern + error families for that        One-tap reteach pushes repair session to the struggling
+  student × concept                                                    subset only
+
+  Session builder: auto-suggested concepts, attach                     Quiz auto-selection by concept + difficulty mix; editable
+  notes/video/summary
+
+  Student preview renders the real player, not a mock                  Publish takes < 3 minutes timed, twice in a row
+  Publish notification reaches class at 18:00 open (not before)        Question bank filters by concept/difficulty/format;
+                                                                       provenance visible
+  AI-drafted questions marked visually; approve/reject both            Grading queue: AI suggestion, teacher accept/edit, comment
+  work                                                                 line, returned
+  Doubt clusters anonymised; opt-in named escalation delivers          Subject/section scoping: Sharma Ma'am cannot touch 9-C
+  correctly                                                            or Maths rows
+
+
+
+
+                                                                  29
+10.5 Parent Experience                                                                                                        10 I TEMS
+
+   Weekly dashboard graphs render from the child's real trail           Effort bars, mastery trend, streak, readiness lamp all match
+                                                                        seed truth
+   Plain-language summary reads like a person, updates                  "Ask This" card grounded in a real event of that child
+   weekly
+   Privacy wall proven: no chats, doubts, or raw answers                Multi-child parent switches children; only linked ones visible
+   reachable
+   Notifications only for milestones/readiness shifts (no spam)         Printable one-page report generates and matches teacher's
+                                                                        truth
+   Weekly email digest delivered (or triaged per 9.4 with reason        Parent screens bilingual; no jargon without plain-language
+   recorded)                                                            twin
+
+
+
+
+10.6 Admin Experience                                                                                                         10 I TEMS
+
+   Setup wizard completes without reference docs (usability             CSV import: happy path + one bad row → named error,
+   test)                                                                others commit
+
+   Activation codes generated per class; export prints correctly        Parent-link approval queue works; revoke cuts access
+                                                                        immediately
+
+   Permission matrix page matches Part 2.4 exactly                      Privacy-wall rows are hard-locked in the matrix UI (cannot
+                                                                        be toggled)
+
+   Audit log lists sensitive actions with actor, time, target           Demo-reset script restores the seeded world verbatim
+   Admin cannot read student AI chats (matrix + query both              Admin console navigation limited to admin role
+   verified)
+
+
+
+
+10.7 AI & Personalisation                                                                                                     16 I TEMS
+
+   Chat runs the full 11-step server sequence; keys never               Answers stream (SSE) with the cloud's thinking state
+   client-side
+
+   Same doubt, different depth: Priya vs Aarav outputs differ           English, Hindi, and natural Hinglish all answered in-language
+   appropriately
+
+   Homework mode refuses direct answers; guides Socratically            Honesty path: unsure questions get "I don't know" +
+                                                                        escalation offer
+
+   No fabricated citations in 20-probe adversarial spot-check           Rate limit + token budget enforced (burst test rejected
+                                                                        cleanly)
+
+   SnapDoubt: photo → extraction → confirmation → doubt (or             Doubt clustering job produces "17 on acceleration" from
+   triaged, 9.4)                                                        seed truth
+
+   Error DNA families drive four visibly different repair paths         Ladder: 3-up / 2-down rule observed live with bridge text on
+                                                                        drops
+
+   Band promotion event logged and visible to teacher ("moved           Revision radar warm-up appears exactly when decay is
+   25-50 → 50-75")                                                      seeded
+
+   Dushman queue targets 3 weakest concepts; retires at L3              Study plan generates realistic nights from trail; shrinks after a
+                                                                        miss
+
+
+
+
+                                                                   30
+10.8 Games & Motivation                                                                                                    12 I TEMS
+
+  All five games (or four per 9.4) playable end-to-end on low-        Every game scores against concepts and writes evidence
+  end phone                                                           rows
+  Confidence buttons present inside games too                         Ladder applies inside games (difficulty moves with
+                                                                      performance)
+  Boss Level locked below 70% chapter mastery (negative               Boss defeat unlocks next-chapter preview + badge
+  test done)                                                          candidacy
+  Streak accrues from any learning act; freeze burns on               Freeze rules: 1 per 5 days, max 2 stored (boundary tested)
+  missed day
+  Daily 5-minute challenge serves warm-up/Dushman content             Badges award on real trajectories (L1→L2, comeback,
+                                                                      dushman, boss)
+  No leaderboard, no classmate comparison anywhere                    Celebrations skippable; reduced-motion honoured in games
+  (audited)                                                           too
+
+
+
+
+10.9 Content & NCERT Data                                                                                                  12 I TEMS
+
+  Motion chain: 3 concepts + prerequisites seeded and correct         ~80 banked questions meet the four-tag rule
+                                                                      (concept/L/format/provenance)
+
+  Distractors map to real confusions (spot-checked with a             Notes for 3 concepts in 3 variants (simple/standard/concise)
+  teacher)
+
+  Interactive checkpoints embedded (2-3 per concept) and              Summary one-pager exists for Motion; teacher-approved
+  scored                                                              trail present
+
+  Flashcard decks: 8-12 cards × 3 concepts; content correct           Two curated videos with real timestamps + one-line reasons
+  Three archetypes seeded exactly per Part 8.4                        Doubt cluster history seeded (17 acceleration / 9 sign
+  (strong/struggling/absent)                                          convention)
+  Badge/game/streak catalogs seeded with icons + bilingual            Scope respected: NCERT 9-10 only, nothing else crept in
+  names
+
+
+
+
+10.10 Design System & Polish                                                                                               12 I TEMS
+
+  Scholar Indigo tokens are the single source (no hard-coded          Hero gradient appears ONLY on hero/auth surfaces (audit
+  colours)                                                            clean)
+
+  Amber accent < 5% of visual area (badges/achievement                Buttons/inputs/cards/modals all have loading, empty, error
+  only)                                                               states
+
+  Skeletons on every slow surface; no layout jump on load             Error + retry pattern with friendly copy everywhere it can
+                                                                      fail
+
+  4-pt spacing grid respected (spot audit of 10 screens)              Touch targets ≥ 44px on all primary actions
+  Cloud mascot states wired (thinking in chat, rest during            No mascot animation during question solving (verified
+  solving)                                                            visually)
+  Night variant readable (dark mode spot check)                       No lorem ipsum / placeholder text anywhere (grep + visual
+                                                                      audit)
+
+
+
+
+                                                                 31
+10.11 Performance, PWA & India Layer                                                                                         12 I TEMS
+
+  Lighthouse mobile: performance ≥ 80, accessibility ≥ 90              Student loop usable on 2-year-old Android over 3G-class
+                                                                       network
+  PWA installable; app shell caches; icon + splash correct             "Save for offline" caches current chapter; airplane-mode
+                                                                       read works
+  Offline attempts land in outbox; sync on reconnect with late-        Data-saver mode swaps heavy renders for PDF summaries
+  marking
+  Hindi audit: zero missing keys (automated parity check               Language switch instant, in place, state preserved
+  green)
+  Hinglish flows naturally in companion chat (native review)           No giant images on student paths; everything lazy or
+                                                                       compressed
+  Battery/memory sane after 15-minute session on low-end               Reduced-motion setting honoured globally (OS-level test)
+  device
+
+
+
+
+10.12 Testing & Acceptance                                                                                                   14 I TEMS
+
+  Full-day acceptance script (11.2) executed once, end-to-             Three-archetype evening visibly different (recorded side-
+  end, on record                                                       by-side)
+
+  Edge-case sweep (11.3) done: every listed case handled               Both languages walked through the full student loop
+  gracefully
+
+  Permission matrix negative tests all rejected (parent/admin          Rapid double-submit / flaky-network quiz submissions stay
+  walls)                                                               consistent
+
+  Streak idempotency across timezones/midnight edge                    AI adversarial probes: no citations fabricated, no fear/shame
+  verified                                                             tone
+
+  Regression pass of Days 1-3 exit demos green after Day 4             Fix round 1 items closed; fix round 2 items closed (or triaged)
+  changes
+
+  Fresh-eyes walkthrough: someone who did not build it                 All Part 10 sections ticked honestly; failures carry one-line
+  completes a session unaided                                          notes
+
+  Demo-reset verified AFTER final fixes (the world is                  The Part 1.5 sentence demonstrated live on a real phone —
+  repeatable)                                                          pass
+
+
+
+
+10.13 Launch & Demo Readiness                                                                                                10 I TEMS
+
+  Deployed URL live; HTTPS; env vars set in hosting (not local-        PDF metadata + analytics/error reporting basics on (or
+  only)                                                                triaged)
+  Runbook written: deploy, reset, seed, rotate keys, known             Demo script rehearsed once against the deployed world,
+  limits                                                               timed
+  Demo accounts + passwords listed in one secure place for             Fallback demo plan if venue network dies (offline-cached
+  presenters                                                           device)
+  AI spend cap + rate limits set for demo-day safety                   Post-launch backlog (Part 12.3) written down where the team
+                                                                       will see it
+  Team knows the triage table by heart (or has it printed)             Someone celebrated — four days of this deserves it
+
+
+
+
+                                                                  32
+PA R T 1 1
+
+Quality Gates & Final Testing
+The global definition of done, the full-day acceptance script that proves the product, the edge-case sweep, and the two
+fix rounds that turn "mostly working" into demo-ready.
+
+  11.1 — Global Definition of Done (applies to every phase, every day)
+   Real data, real flows. Every list, score, graph and notification is computed from the database on a real role's session — no
+   placeholder JSON, no mock logins, no "will wire later".
+   Both languages. Anything a user can read exists in English and Hindi with zero missing keys at the moment it ships.
+   All states designed. Loading, empty, error + retry, and permission-denied states exist for every async surface — the skeleton is
+   part of the feature.
+   Security proven, not assumed. Each new capability gets one positive test (right role succeeds) and one negative test (wrong role
+   rejected, in the database, not just hidden in UI).
+   Evidence written. If the feature touches learning, it writes to the trail with the right event shape — or it is a screen, not a feature.
+   No regressions. Previous exit demos still pass before the phase is called done.
+
+  11.2 — The Full-Day Acceptance Script (run this exactly, on the record)
+  Time                Actor                        What must happen (observed, not assumed)
+
+  07:00               Admin                        Signs in; dashboard healthy; approves one pending parent link; exports a fresh
+                                                   activation-code batch; audit log shows both actions
+
+  09:30               Teacher                      Morning dashboard shows last night's completion and the seeded doubt cluster; drills
+                                                   the acceleration cell; pushes one reteach to the struggling subset
+
+  14:00               Teacher                      Publishes tonight's Motion session (timed: under 3 minutes) with notes, checkpoint-
+                                                   embedded concept page, summary PDF, curated video, and a 5-question quiz
+
+  18:00               System                       Session opens on server time; notifications land quietly; Next-Action cards update
+
+  18:05               Aarav                        Skips warm-up (radar clear), concise variant, L3 quiz, 4/5 "Sure", one method-error
+                                                   fix, Dushman queued, MCQ Rush for fun, streak ticks to 13
+
+  18:20               Priya                        Repair path first (bus analogy), simplest variant, Hindi labels, L1 quiz 3/5 with one
+                                                   discounted "Guess", warm companion tone, bridge scheduled
+
+  20:30               Rohan                        Catch-up card, 20 minutes, shame-free copy, recovery event logged
+
+  22:45               Priya                        Asks the companion one real doubt; streamed answer at her depth; doubt joins the
+                                                   anonymous cluster
+
+  21:30               Parent                       Opens weekly dashboard; graphs moved because of tonight's real events; "Ask This"
+                                                   card reflects a true milestone; no chats anywhere in sight
+
+  Next 07:30          Teacher                      Heatmap cells greener where the reteach landed; completion counts correct; grading
+                                                   queue behaves
+
+  Anytime             Tester                       Language switch mid-flow; offline save + outbox sync; low-end device walkthrough;
+                                                   permission-wall negative probes all rejected
+
+
+   The pass condition: every row observed by a human who did not build it, in one continuous run, on the deployed URL.
+   Screenshots or it did not happen — they go next to the Part 10 ticks.
+
+
+
+                                                                      33
+  11.3 — Edge-Case Sweep (before calling anything "done")
+  Situation                                     Required behaviour
+
+  Student kills app mid-quiz                    Resume lands on the same question; no double-submit; timer state sane
+
+  Two tabs, same quiz                           One authoritative attempt; second tab gets a gentle "already in progress"
+
+  Session window missed entirely                No shame copy; item folds into tomorrow's plan; parent sees honest effort line
+
+  Midnight streak boundary                      Idempotent touch survives; timezone set by school, not device
+
+  Flaky network during submit                   Outbox holds the attempt; sync marks it late; teacher sees "synced late" tag, not
+                                                silence
+
+  AI provider down / timeout                    Companion shows honest error state + retry; queue suggestion; never a fake answer
+
+  Teacher publishes empty session               Validation blocks publish naming exactly what is missing
+
+  Student activates with wrong DOB thrice       Friendly lock with "ask your class teacher" path; no account lockout spiral
+
+  Parent link revoked mid-week                  Parent world closes immediately; audit entry; child experience unchanged
+
+  Hindi toggle mid-session                      In-place switch; no lost progress; question text language matches choice
+
+  Rapid session re-opens                        Completion rule still enforced; no XP/badge double-award
+
+
+  11.4 — The Two Fix Rounds
+After the acceptance script, the calendar holds exactly two fix rounds — Round 1 for everything that broke the script or the
+checklist (severity first: data integrity, security, then flows, then polish), and Round 2 for the fallout of Round 1 plus the triage
+decisions from 9.4 made real (deferred items moved to the backlog properly, half-built features either finished or hidden,
+never left dangling). After Round 2 the build freezes: the remaining hours go to rehearsal and rest, because a tired demo of a
+working app loses to a fresh demo of a slightly-less-working one, every single time.
+
+
+PA R T 1 2
+
+The Moat — Why This Compounds
+What is deliberately never built, what the flywheel becomes after launch, and the order of the backlog that follows.
+
+  12.1 — What We Deliberately Never Build
+Strategy is what you say no to, so the cuts are recorded as product law, not as TODOs in disguise: no public leaderboards or
+any classmate-vs-classmate comparison (motivation here is personal — streaks, badges, beaten enemies); no coaching-
+institute integrations or ERP/fees/transport modules (the school's learning world is the boundary); no camera or microphone
+emotion detection (cut forever — creepy, unreliable, and it would poison the trust the privacy wall exists to build); no AR/VR
+in this horizon. Every one of these was weighed and refused with reasons; when someone requests them in month three, this
+section is the answer.
+
+  12.2 — What the Flywheel Becomes
+After the four days, the app is not finished — it is armed. Every night it learns the school a little better: which concepts
+produce which confusions in this section, which explanations rescue which kinds of errors, which students are quietly afraid
+of which chapters. Six months of that is a dataset no competitor can buy and a rapport no generic app can fake — teachers'
+reteaches get pre-suggested, parents' conversations get grounded, students' plans get personal. The features were never
+the moat; the compounding knowledge of each child, inside one trusted school is. That is why Part 3's evidence trail was
+
+
+
+                                                                  34
+built before any beautiful screen, and why every new idea must answer "which station of the loop does this serve?" before it
+earns an hour.
+
+  12.3 — Post-Launch Backlog (in priority order, after real usage)
+ 1. Signature AI suite completion — the deeper doubt tooling and assistive surfaces that were consciously deferred so the core loop
+    shipped honest and fast.
+ 2. Recordings pipeline — class-recording segments with school permission controls, closing the last content gap for absent students.
+ 3. PIN profiles for shared phones — because many households share one device, and the streak must survive it.
+ 4. WhatsApp fallback notifications — meeting parents where they already live, with the same two-notices-a-week discipline.
+ 5. Advanced teacher tooling — deeper analytics exports, co-teaching views, department rollups.
+ 6. Second school — only when the first one runs itself for a month. Multi-tenancy before repeatability is how pilots die.
+
+  12.4 — The Sentence to Remember
+
+    "VidhyaSaathy removes the chaos: it tests before it teaches, adapts to the four kinds of learner in every
+    classroom, answers doubts at 11 pm without judgement, and turns every answer into evidence that
+    helps the teacher tomorrow and the parent on Sunday. The app is the moat — and it starts
+    compounding the first night it is used."
+    PRODUCT MASTER F I LE · CLOSI NG DEF I NI TI ON
+
+
+Print that sentence, tape it to the monitor, and check the build against it every evening. When all twelve parts of this file are
+true in the deployed app — every flow working, every checklist ticked honestly, every band routing a real child differently —
+VidhyaSaathy stops being beautiful HTML pages and becomes what it was always meant to be: the calm, honest learning
+companion that an Indian classroom can finally rely on.
+
+
+
+
+                                                                   35
+V I D H YA S A AT H Y · P R O D U C T M A S T E R F I L E
+
+
+
+Small steps make big progress.
+One loop, four bands, four worlds, four days — and every answer a child gives
+becomes the evidence that makes tomorrow's lesson smarter. That is the product.
+That is the moat.
+
+
+   12 parts             7 flows              5 study surfaces                 170 checks                4 days
+
+
+
+
+V E RSI ON 1 . 0 — D E F I NI TI V E   SC OPE — NC E RT C LA SS 9 & C OM PA NI ON — BU I LD                            OW NE R — F OU ND I NG TE A M
+                                       10                           PROM PTS 01 -1 0
+
+
+
+
+V I D H YA S A A T H Y · T H E P R O D U C T M A S T E R F I L E · E N G L I S H E D I T I O N · 2 0 2 6 — A P P K A
+F L O W, A P P K A S A C H
+

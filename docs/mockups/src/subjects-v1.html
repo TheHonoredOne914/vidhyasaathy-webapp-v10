@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>VidhyaSaathy — My subjects v1</title>
+<style>
+@font-face{font-family:'Kalam';font-weight:700;src:url('file:///workspace/mockups/fonts/kalam-700.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-weight:400;src:url('file:///workspace/mockups/fonts/inter-400.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-weight:500;src:url('file:///workspace/mockups/fonts/inter-500.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-weight:600;src:url('file:///workspace/mockups/fonts/inter-600.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-weight:700;src:url('file:///workspace/mockups/fonts/inter-700.woff2') format('woff2')}
+@font-face{font-family:'Caveat';font-weight:400;src:url('file:///workspace/mockups/fonts/caveat-400.woff2') format('woff2')}
+@font-face{font-family:'Caveat';font-weight:600;src:url('file:///workspace/mockups/fonts/caveat-600.woff2') format('woff2')}
+@font-face{font-family:'Caveat';font-weight:700;src:url('file:///workspace/mockups/fonts/caveat-700.woff2') format('woff2')}
+:root{
+  --cream:#F4EEE4; --creamSoft:#FAF6EF; --paper:#FFFDF8; --navy:#1B2A4A;
+  --navyMuted:#3A4A6B; --inkSoft:#6B7280; --gold:#E8B84A; --goldDeep:#C9962E;
+  --border:#DDD4C4; --ok:#2F9E6B; --okSoft:#D9EFE3; --bad:#C9433A; --badSoft:#F8DADA;
+  --sky:#DCEAF6; --orange:#D9823B; --orangeSoft:#F8E6D4;
+  --pinkSoft:#F6E0DC; --violet:#6B5CA5; --violetSoft:#E8E2F4; --leaf:#5A9A62; --leafSoft:#DCEBDD;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--cream);color:var(--navy);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.app{display:flex;min-height:100vh}
+.sketch{border:1.5px solid var(--navy);border-radius:18px 16px 20px 14px/16px 20px 14px 18px;background:var(--paper);box-shadow:3px 3px 0 rgb(27 42 74 / 6%)}
+
+.side{width:188px;flex-shrink:0;position:sticky;top:0;height:100vh;background:var(--creamSoft);border-right:1.5px solid var(--border);display:flex;flex-direction:column;padding:14px 8px}
+.brand{display:flex;align-items:center;gap:8px;padding:6px 8px 18px}
+.brand-mark{width:30px;height:30px;border-radius:9px;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px}
+.brand-name{font-family:'Caveat',cursive;font-weight:700;font-size:18px;line-height:1}
+.brand-tag{font-size:10px;color:var(--inkSoft);font-weight:500}
+.nav{display:flex;flex-direction:column;gap:2px;flex:1}
+.nav a{display:flex;align-items:center;gap:8px;height:36px;padding:0 10px;border-radius:10px;color:var(--navyMuted);text-decoration:none;font-family:'Caveat',cursive;font-weight:600;font-size:17px}
+.nav a svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.nav a.active{background:#E8DFD0;color:var(--navy);font-weight:700}
+.nav .sec{margin:14px 10px 4px;font-family:'Caveat',cursive;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#9AA3B2}
+.side-foot{padding:10px 6px 2px;border-top:1.5px dashed var(--border)}
+.profile{display:flex;align-items:center;gap:8px}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--gold);border:1.5px solid var(--navy);display:grid;place-items:center;font-weight:700;font-size:12px}
+.profile b{display:block;font-family:'Caveat',cursive;font-size:16px;font-weight:700}
+.profile span{font-size:10px;color:var(--inkSoft)}
+
+.main{flex:1;display:flex;flex-direction:column;min-width:0;background:radial-gradient(ellipse at 82% 0%,#E8F0F8 0%,transparent 42%),radial-gradient(ellipse at 8% 95%,#F3EADB 0%,transparent 38%),var(--cream)}
+.top{height:52px;flex-shrink:0;display:flex;align-items:center;gap:10px;padding:0 20px;border-bottom:1.5px solid var(--border)}
+.search{flex:1;max-width:480px;height:34px;display:flex;align-items:center;gap:8px;padding:0 12px;border-radius:999px;background:var(--paper);border:1.5px solid var(--navy);font-family:'Caveat',cursive;font-size:16px;color:var(--inkSoft)}
+.search svg{width:14px;height:14px;stroke:var(--navy);fill:none;stroke-width:1.8}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.pill{display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 11px;border-radius:999px;background:var(--paper);border:1.5px solid var(--navy);font-family:'Caveat',cursive;font-weight:700;font-size:15px}
+.pill svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round}
+.pill.fire{color:#C45C1A}.pill.xp{color:#8A6A10}
+.bell{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--navy);background:var(--paper);display:grid;place-items:center;position:relative}
+.bell svg{width:14px;height:14px;stroke:var(--navy);fill:none;stroke-width:1.8}
+.bell .dot{position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--bad);border:1px solid #fff}
+
+/* ---- My subjects v1 ---- */
+:root{--rule:30px;--ruleInk:rgb(110 150 200 / 34%);--margin:rgb(208 110 110 / 38%);
+  --eng:#C9962E;--engSoft:#FBF0D6;--sst:#C9433A;--sstSoft:#F8DADA;--hin:#3A4A6B;--hinSoft:#E3E7EF;--phy:#3D6FB8}
+.body{flex:1;position:relative;padding:14px 18px 22px 46px;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px 16px;align-content:start;
+  --ruleOffset:16px;
+  background:
+    linear-gradient(90deg,transparent 28px,var(--margin) 28px,var(--margin) 29px,transparent 29px) 0 0/100% 100% no-repeat,
+    repeating-linear-gradient(180deg,transparent 0,transparent calc(var(--rule) - 1px),var(--ruleInk) calc(var(--rule) - 1px),var(--ruleInk) var(--rule)) 0 var(--ruleOffset)/100% var(--rule);}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.rail{display:flex;flex-direction:column;gap:12px;min-width:0;position:sticky;top:12px;align-self:start}
+.hw{font-family:'Caveat',cursive}
+
+/* header */
+.phead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
+.phead .date{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;background:var(--sky);border:1.5px solid var(--navy);font-family:'Caveat',cursive;font-weight:700;font-size:14px;margin-bottom:4px}
+.phead h1{font-family:'Caveat',cursive;font-weight:700;font-size:44px;line-height:.95}
+.phead p{font-family:'Caveat',cursive;font-weight:600;font-size:17px;color:var(--navyMuted);margin-top:7px}
+.stats{display:flex;gap:8px;flex-shrink:0}
+.stat{padding:7px 12px 8px;min-width:116px}
+.stat .k{font-family:'Caveat',cursive;font-weight:700;font-size:13px;color:var(--inkSoft);text-transform:uppercase;letter-spacing:.04em}
+.stat .v{font-family:'Caveat',cursive;font-weight:700;font-size:26px;line-height:1;display:flex;align-items:center;gap:6px}
+.stat .v small{font-size:15px;color:var(--navyMuted);font-weight:600}
+.stat .mini{height:5px;border-radius:999px;background:#E8E0D2;overflow:hidden;margin-top:5px}
+.stat .mini i{display:block;height:100%;width:49%;background:var(--phy);border-radius:999px}
+.stat .flame{width:18px;height:18px;stroke:#C45C1A;fill:#F8E6D4;stroke-width:1.8}
+
+/* filter row */
+.filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.seg{display:inline-flex;padding:3px;border-radius:999px;background:var(--paper);border:1.5px solid var(--navy);gap:2px}
+.seg a{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 13px;border-radius:999px;font-family:'Caveat',cursive;font-weight:700;font-size:16px;color:var(--navyMuted);text-decoration:none}
+.seg a .n{font-size:13px;min-width:20px;height:18px;border-radius:999px;background:#EFE8DA;display:inline-grid;place-items:center;padding:0 5px;color:var(--navy)}
+.seg a.on{background:var(--navy);color:#fff}
+.seg a.on .n{background:rgb(255 255 255 / 22%);color:#fff}
+.seg a .due{background:var(--orangeSoft);color:#8A4A10}
+.sort{margin-left:auto;display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 13px;border-radius:999px;background:var(--paper);border:1.5px solid var(--navy);font-family:'Caveat',cursive;font-weight:700;font-size:16px}
+.sort span{color:var(--inkSoft);font-weight:600}
+.sort svg{width:12px;height:12px;stroke:var(--navy);fill:none;stroke-width:2}
+
+/* subject cards */
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding-top:6px}
+.sc{--acc:var(--phy);--soft:var(--sky);padding:12px 14px 12px;display:flex;flex-direction:column;gap:9px;position:relative;min-width:0}
+.sc.phy{--acc:#3D6FB8;--soft:var(--sky)}
+.sc.chem{--acc:var(--orange);--soft:var(--pinkSoft)}
+.sc.bio{--acc:var(--leaf);--soft:var(--leafSoft)}
+.sc.math{--acc:var(--violet);--soft:var(--violetSoft)}
+.sc.eng{--acc:var(--eng);--soft:var(--engSoft)}
+.sc.sst{--acc:var(--sst);--soft:var(--sstSoft)}
+.sc.hin{--acc:var(--hin);--soft:var(--hinSoft)}
+.sc::before{content:'';position:absolute;left:14px;right:14px;top:-1.5px;height:4px;border-radius:0 0 4px 4px;background:var(--acc);opacity:.85}
+.sc-head{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center}
+.ico{width:44px;height:44px;border-radius:12px;border:1.5px solid var(--navy);background:var(--soft);display:grid;place-items:center;transform:rotate(-2deg)}
+.ico svg{width:26px;height:26px}
+.ico .deva{font-family:'Kalam',cursive;font-weight:700;font-size:25px;line-height:1;color:var(--navy);margin-top:4px}
+.sc-name{font-family:'Caveat',cursive;font-weight:700;font-size:24px;line-height:1}
+.sc-book{display:block;font-family:'Caveat',cursive;font-weight:600;font-size:14px;color:var(--inkSoft);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tag{font-family:'Caveat',cursive;font-weight:700;font-size:13px;padding:1px 9px;border-radius:999px;border:1.25px solid;white-space:nowrap}
+.tag.today{background:var(--orangeSoft);border-color:var(--orange);color:#8A4A10}
+.tag.late{background:var(--badSoft);border-color:var(--bad);color:#9B2C2C}
+.tag.new{background:var(--sky);border-color:#3D6FB8;color:#234C86}
+.tag.soon{background:#EFE8DA;border-color:#C4B59A;color:#6B5A3A}
+.tag.calm{background:var(--okSoft);border-color:var(--ok);color:#1F6B47}
+
+.now{display:flex;align-items:baseline;gap:8px;min-width:0}
+.now .lbl{font-family:'Caveat',cursive;font-weight:700;font-size:13px;color:var(--inkSoft);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+.now h3{font-family:'Caveat',cursive;font-weight:700;font-size:21px;line-height:1.05}
+
+.mast .row{display:flex;justify-content:space-between;align-items:baseline;font-family:'Caveat',cursive;font-weight:600;font-size:15px;color:var(--navyMuted);margin-bottom:4px}
+.mast .row b{font-size:17px;color:var(--navy)}
+.bar{height:8px;border-radius:999px;background:#E8E0D2;border:1px solid var(--border);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--acc);border-radius:999px}
+
+.dots{display:flex;align-items:center;gap:0;padding:2px 0}
+.dots .d{position:relative;width:16px;height:16px;border-radius:50%;flex-shrink:0;display:grid;place-items:center}
+.dots .d + .d{margin-left:12px}
+.dots .d + .d::before{content:'';position:absolute;right:16px;top:7px;width:12px;border-top:1.5px solid #CFC5B3}
+.dots .done{background:var(--acc);border:1.5px solid var(--navy)}
+.dots .done svg{width:9px;height:9px;stroke:#fff;fill:none;stroke-width:3.2}
+.dots .cur{background:var(--paper);border:2.5px solid var(--acc);box-shadow:0 0 0 3px rgb(232 184 74 / 40%)}
+.dots .lock{background:#EDE6D9;border:1.5px dashed #B8AE9C}
+.dots .cap{margin-left:10px;font-family:'Caveat',cursive;font-weight:600;font-size:14px;color:var(--inkSoft);white-space:nowrap}
+.dots.many .d{width:13px;height:13px}
+.dots.many .d + .d{margin-left:7px}
+.dots.many .d + .d::before{right:13px;top:5px;width:7px}
+
+.next{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:center;padding:7px 9px;border-radius:12px;background:var(--creamSoft);border:1.25px dashed #C9BFAE}
+.next .ni{width:28px;height:28px;border-radius:9px;background:var(--soft);border:1.25px solid var(--navy);display:grid;place-items:center}
+.next .ni svg{width:15px;height:15px;stroke:var(--navy);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.next b{display:block;font-family:'Caveat',cursive;font-weight:700;font-size:16px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.next span{display:block;font-family:'Caveat',cursive;font-weight:600;font-size:14px;color:var(--navyMuted);line-height:1.15}
+
+.foot{display:flex;align-items:center;gap:8px;margin-top:auto;padding-top:2px}
+.who{display:flex;align-items:center;gap:6px;min-width:0;font-family:'Caveat',cursive;font-weight:700;font-size:15px;color:var(--navyMuted);white-space:nowrap;overflow:hidden}
+.who .tav{width:24px;height:24px;border-radius:50%;border:1.25px solid var(--navy);background:var(--soft);display:grid;place-items:center;font-family:'Inter';font-weight:700;font-size:9px;color:var(--navy);flex-shrink:0}
+.who em{font-style:normal;color:var(--inkSoft);font-weight:600}
+.btns{margin-left:auto;display:flex;gap:6px;flex-shrink:0}
+.cta{height:32px;padding:0 14px;border-radius:999px;background:var(--navy);border:1.5px solid var(--navy);color:#fff;font-family:'Caveat',cursive;font-weight:700;font-size:16px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;box-shadow:2px 2px 0 rgb(27 42 74 / 18%)}
+.cta svg{width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2.4}
+.ghost{height:32px;padding:0 12px;border-radius:999px;background:var(--paper);border:1.5px solid var(--navy);color:var(--navy);font-family:'Caveat',cursive;font-weight:700;font-size:16px;display:inline-flex;align-items:center;gap:5px;cursor:pointer}
+.ghost svg{width:12px;height:12px;stroke:var(--navy);fill:none;stroke-width:2.2}
+.ghost.on{background:var(--soft)}
+
+/* expanded card */
+.sc.open{grid-column:1 / -1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:14px;box-shadow:5px 5px 0 rgb(27 42 74 / 10%)}
+.sc.open .left{display:flex;flex-direction:column;gap:9px;min-width:0}
+.state-note{position:absolute;right:16px;top:-13px;z-index:3;background:#FFF3B8;border:1.25px solid #C9A93A;padding:1px 10px;font-family:'Caveat',cursive;font-weight:700;font-size:14px;color:#6B5410;transform:rotate(1.5deg);box-shadow:2px 2px 0 rgb(27 42 74 / 8%)}
+.chlist{border-left:1.5px dashed var(--border);padding-left:14px;display:flex;flex-direction:column;gap:0;min-width:0}
+.chlist h4{font-family:'Caveat',cursive;font-weight:700;font-size:19px;display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.chlist h4 span{font-size:14px;color:var(--inkSoft);font-weight:600}
+.chrow{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--border)}
+.chrow:last-child{border-bottom:0}
+.chrow .num{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--navy);display:grid;place-items:center;font-family:'Inter';font-weight:700;font-size:10px;background:var(--paper)}
+.chrow.cur .num{background:var(--acc);color:#fff}
+.chrow.lock .num{background:#EDE6D9;border-style:dashed;border-color:#B8AE9C;color:#8A8274}
+.chrow b{display:block;font-family:'Caveat',cursive;font-weight:700;font-size:16px;line-height:1.1}
+.chrow.lock b{color:var(--navyMuted)}
+.chrow span.s{display:block;font-family:'Caveat',cursive;font-weight:600;font-size:13px;color:var(--inkSoft);line-height:1.15}
+.chrow .r{font-family:'Caveat',cursive;font-weight:700;font-size:14px;color:var(--inkSoft);white-space:nowrap}
+.ideas{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.idea{display:inline-flex;align-items:center;gap:4px;height:21px;padding:0 8px;border-radius:999px;border:1.25px solid #CFC5B3;background:var(--paper);font-family:'Caveat',cursive;font-weight:700;font-size:13px;color:var(--navyMuted)}
+.idea.m{background:var(--okSoft);border-color:var(--ok);color:#1F6B47}
+.idea.l{background:var(--orangeSoft);border-color:var(--orange);color:#8A4A10}
+.idea svg{width:9px;height:9px;stroke:currentColor;fill:none;stroke-width:3}
+
+/* rail */
+.panel{padding:11px 13px}
+.panel .ht{font-family:'Caveat',cursive;font-weight:700;font-size:21px;display:flex;align-items:baseline;justify-content:space-between}
+.panel .ht a{font-size:14px;color:#3D6FB8;text-decoration:none}
+.underline{display:block;height:3px;width:44px;background:var(--navy);border-radius:2px;margin:3px 0 6px;opacity:.3;transform:rotate(-1deg)}
+.drow{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:8px;align-items:start;padding:7px 0;border-bottom:1px dashed var(--border)}
+.drow:last-child{border-bottom:0;padding-bottom:2px}
+.drow .sd{width:10px;height:10px;border-radius:50%;border:1.25px solid var(--navy);margin-top:4px}
+.drow b{display:block;font-family:'Caveat',cursive;font-weight:700;font-size:16px;line-height:1.12}
+.drow span{display:block;font-family:'Caveat',cursive;font-weight:600;font-size:13px;color:var(--inkSoft)}
+.daygrp{font-family:'Caveat',cursive;font-weight:700;font-size:13px;color:#9AA3B2;text-transform:uppercase;letter-spacing:.05em;margin-top:6px}
+
+.suggest{padding:11px 13px;position:relative}
+.suggest .top-s{display:grid;grid-template-columns:64px minmax(0,1fr);gap:8px;align-items:center}
+.suggest img{width:64px;filter:drop-shadow(0 5px 9px rgb(27 42 74 / 12%))}
+.suggest .bub{position:relative;background:var(--paper);border:1.5px solid var(--navy);border-radius:14px 16px 16px 4px;padding:5px 10px;font-family:'Caveat',cursive;font-weight:700;font-size:16px;line-height:1.15;transform:rotate(-1.5deg)}
+.weak{margin-top:9px;padding:9px 10px;border-radius:12px;background:var(--pinkSoft);border:1.5px solid var(--navy)}
+.weak .k{font-family:'Caveat',cursive;font-weight:700;font-size:12px;color:#8A4A10;text-transform:uppercase;letter-spacing:.05em}
+.weak b{display:block;font-family:'Caveat',cursive;font-weight:700;font-size:20px;line-height:1.05}
+.weak span{display:block;font-family:'Caveat',cursive;font-weight:600;font-size:14px;color:var(--navyMuted);line-height:1.2;margin-top:2px}
+.weak .bar{margin-top:6px;height:7px}
+.weak .bar i{width:40%;background:var(--orange)}
+.suggest .acts{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+.suggest .also{margin-top:8px;font-family:'Caveat',cursive;font-weight:600;font-size:14px;color:var(--inkSoft)}
+.suggest .also b{color:var(--navy)}
+.sp{position:absolute;width:11px;fill:#E8B84A}
+
+.game{padding:11px 13px}
+.grow{display:grid;grid-template-columns:62px minmax(0,1fr);gap:9px;align-items:center}
+.game-thumb{width:62px;height:62px;border-radius:12px;background:var(--navy);border:1.5px solid var(--navy);position:relative;overflow:hidden}
+.game-thumb .pitch{position:absolute;left:5px;right:5px;bottom:8px;height:12px;background:#3d6a2a;border-radius:2px;transform:perspective(50px) rotateX(40deg)}
+.game-thumb .bat{position:absolute;left:13px;top:9px;width:7px;height:34px;background:var(--goldDeep);border-radius:2px;transform:rotate(-28deg)}
+.game-thumb .ball{position:absolute;left:36px;top:15px;width:12px;height:12px;border-radius:50%;background:var(--gold)}
+.game-thumb.atom{background:#1E2F55}
+.game-thumb.atom .nuc{position:absolute;left:24px;top:24px;width:14px;height:14px;border-radius:50%;background:#F08A5D;box-shadow:5px 3px 0 -1px #F5C15A}
+.game-thumb.atom .orbit{position:absolute;left:8px;top:20px;width:46px;height:22px;border:1.5px solid #7FA8E8;border-radius:50%;transform:rotate(-18deg)}
+.game b{display:block;font-family:'Caveat',cursive;font-weight:700;font-size:18px;line-height:1.05}
+.game span{display:block;font-family:'Caveat',cursive;font-weight:600;font-size:14px;color:var(--navyMuted);line-height:1.2}
+.play-mini{margin-top:4px;display:inline-flex;height:24px;padding:0 10px;border-radius:999px;background:var(--navy);color:#fff;font-family:'Caveat',cursive;font-weight:700;font-size:13px;align-items:center}
+.recent{margin-top:9px;padding-top:9px;border-top:1px dashed var(--border)}
+.recent .grow{grid-template-columns:44px minmax(0,1fr)}
+.recent .game-thumb{width:44px;height:44px;border-radius:10px}
+.recent .game-thumb.atom .nuc{left:15px;top:15px;width:11px;height:11px}
+.recent .game-thumb.atom .orbit{left:4px;top:12px;width:34px;height:17px}
+.recent b{font-size:16px}
+.stars{color:#C9962E;letter-spacing:1px}
+
+.mobile-nav{display:none}
+
+@media (max-width:1300px){
+  .side{width:164px}
+  .body{grid-template-columns:minmax(0,1fr) 256px;padding:10px 12px 18px 40px;gap:10px 12px;--ruleOffset:6px}
+  .col,.rail{gap:10px}
+  .phead h1{font-size:38px}
+  .phead p{font-size:15px}
+  .stat{min-width:96px;padding:6px 9px 7px}
+  .stat .v{font-size:22px}
+  .grid{gap:10px}
+  .sc{padding:10px 11px;gap:8px}
+  .sc-name{font-size:21px}
+  .sc-head{grid-template-columns:38px minmax(0,1fr) auto;gap:8px}
+  .ico{width:38px;height:38px}
+  .ico svg{width:22px;height:22px}
+  .now h3{font-size:18px}
+  .cta,.ghost{height:30px;font-size:15px;padding:0 10px}
+  .who .nm-full{display:none}
+  .dots .d + .d{margin-left:9px}
+  .dots .d + .d::before{width:9px}
+  .dots.many .d + .d{margin-left:5px}
+  .dots.many .d + .d::before{width:5px}
+  .dots.many .d{width:12px;height:12px}
+  .dots.many .d + .d::before{right:12px}
+  .panel,.suggest,.game{padding:9px 11px}
+  .top{height:46px}
+  .sc.open{gap:10px}
+  .seg a{padding:0 10px;font-size:15px}
+}
+
+@media (max-width:480px){
+  .side{display:none}
+  .top{padding:0 10px;height:48px}
+  .search{max-width:none}
+  .search span{display:none}
+  .pill{font-size:13px;padding:0 8px;height:28px}
+  .bell{display:none}
+  .body{display:flex;flex-direction:column;padding:12px 10px 76px;gap:10px;--ruleOffset:3px;
+    background:repeating-linear-gradient(180deg,transparent 0,transparent calc(var(--rule) - 1px),var(--ruleInk) calc(var(--rule) - 1px),var(--ruleInk) var(--rule)) 0 var(--ruleOffset)/100% var(--rule)}
+  .col,.rail{display:contents}
+  .phead{flex-direction:column;align-items:stretch;gap:10px;order:1}
+  .phead h1{font-size:34px}
+  .stats{gap:6px}
+  .stat{flex:1;min-width:0;padding:6px 8px}
+  .stat .v{font-size:20px}
+  .stat .k{font-size:11px}
+  .filters{order:2;flex-wrap:nowrap;overflow:hidden}
+  .seg a{padding:0 8px;font-size:14px;gap:4px}
+  .seg a .n{min-width:16px;font-size:11px}
+  .sort{display:none}
+  .grid{order:4;grid-template-columns:1fr}
+  .suggest{order:3}
+  .panel.due{order:5}
+  .game{order:6}
+  .sc.open{grid-template-columns:1fr}
+  .chlist{border-left:0;border-top:1.5px dashed var(--border);padding:8px 0 0}
+  .rail{position:static}
+  .mobile-nav{display:flex;position:fixed;left:0;right:0;bottom:0;height:56px;background:var(--creamSoft);border-top:1.5px solid var(--border);z-index:20;align-items:center;justify-content:space-around}
+  .mobile-nav a{display:flex;flex-direction:column;align-items:center;gap:1px;font-family:'Caveat',cursive;font-weight:700;font-size:12px;color:var(--navyMuted);text-decoration:none}
+  .mobile-nav a.active{color:var(--navy)}
+  .mobile-nav svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+}
+
+.app{background:linear-gradient(90deg,var(--creamSoft) 0 188px,var(--border) 188px 189.5px,transparent 189.5px)}
+.side{border-right:0}
+.recap{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.recap div{padding:6px 8px;border-radius:10px;background:var(--creamSoft);border:1.25px solid var(--border)}
+.recap .k{display:block;font-family:'Caveat',cursive;font-weight:700;font-size:12px;color:var(--inkSoft);text-transform:uppercase;letter-spacing:.04em}
+.recap b{display:block;font-family:'Caveat',cursive;font-weight:700;font-size:18px;line-height:1.05}
+.recap span{display:block;font-family:'Caveat',cursive;font-weight:600;font-size:12px;color:var(--navyMuted);line-height:1.1}
+.last{font-family:'Caveat',cursive;font-weight:600;font-size:14px;color:var(--navyMuted)}
+.last b{color:var(--navy)}
+.week .wrow{display:grid;grid-template-columns:74px minmax(0,1fr) 40px;gap:8px;align-items:center;margin:4px 0;font-family:'Caveat',cursive;font-weight:700;font-size:14px}
+.week .wrow .wb{height:8px;border-radius:999px;background:#EFE8DA;overflow:hidden}
+.week .wrow .wb i{display:block;height:100%;border-radius:999px}
+.week .wrow em{font-style:normal;text-align:right;color:var(--inkSoft)}
+.week .tot{font-family:'Caveat',cursive;font-weight:600;font-size:14px;color:var(--navyMuted);margin-top:6px;padding-top:6px;border-top:1px dashed var(--border)}
+.exam{display:grid;grid-template-columns:46px minmax(0,1fr);gap:10px;align-items:center;padding:10px 13px}
+.exam .cal{width:46px;height:50px;border-radius:9px;border:1.5px solid var(--navy);background:var(--paper);overflow:hidden;text-align:center;transform:rotate(-2deg)}
+.exam .cal i{display:block;font-style:normal;background:var(--bad);color:#fff;font-family:'Caveat',cursive;font-weight:700;font-size:12px;line-height:16px}
+.exam .cal b{display:block;font-family:'Caveat',cursive;font-weight:700;font-size:24px;line-height:32px}
+.exam strong{display:block;font-family:'Caveat',cursive;font-weight:700;font-size:18px;line-height:1.05}
+.exam span{display:block;font-family:'Caveat',cursive;font-weight:600;font-size:14px;color:var(--navyMuted);line-height:1.2}
+@media (max-width:1300px){
+  .app{background:linear-gradient(90deg,var(--creamSoft) 0 164px,var(--border) 164px 165.5px,transparent 165.5px)}
+  .recap b{font-size:16px}
+  .week .wrow{grid-template-columns:66px minmax(0,1fr) 36px}
+}
+@media (max-width:480px){
+  .app{background:none}
+  .dots.many .d{width:11px;height:11px}
+  .dots.many .d + .d{margin-left:5px}
+  .dots.many .d + .d::before{right:11px;top:4px;width:5px}
+  .dots .cap{margin-left:6px}
+  .week{order:7}
+  .exam{order:8}
+  .recap{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+</style></head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <div class="brand-mark">V</div>
+      <div><div class="brand-name">VidhyaSaathy</div><div class="brand-tag">Class 9 · NCERT</div></div>
+    </div>
+    <nav class="nav">
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>Home</a>
+      <a class="active" href="#"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>My subjects</a>
+      <a href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>Study sessions</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M7 4h10v16l-5-3-5 3V4z"/></svg>Homework</a>
+      <div class="sec">Play</div>
+      <a href="#"><svg viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2"/><path d="M12 4v3M12 17v3M4 12h3M17 12h3"/></svg>Games</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M12 4c3.5 1.5 6 4.2 6 7.5S15 18 12 20c-3-2-6-4.2-6-8.5S8.5 5.5 12 4z"/></svg>Ask Saathy</a>
+      <div class="sec">You</div>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>Notifications</a>
+      <a href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M3 12h2M19 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Settings</a>
+    </nav>
+    <div class="side-foot">
+      <div class="profile"><div class="avatar">A</div><div><b>Aarav</b><span>IX-A · Roll 17</span></div></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="top">
+      <div class="search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search lessons, notes, questions, games…</span>
+      </div>
+      <div class="top-right">
+        <span class="pill fire"><svg viewBox="0 0 24 24"><path d="M12 3c2 3 3 5 3 7a3 3 0 1 1-6 0c0-2 1-4 3-7z"/></svg>5 streak</span>
+        <span class="pill xp"><svg viewBox="0 0 24 24"><path d="M12 3l2.2 6.5H21l-5.4 3.9 2.1 6.6L12 16.8 6.3 20l2.1-6.6L3 9.5h6.8z"/></svg>340 XP</span>
+        <button class="bell" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M10 19a2 2 0 0 0 4 0"/></svg><i class="dot"></i></button>
+      </div>
+    </header>
+
+    <div class="body">
+      <div class="col">
+        <div class="phead">
+          <div><div class="date">Wednesday, 28 Oct</div><h1>Your subjects</h1><p>Class 9-A · pick up where you left off, or open any chapter.</p></div>
+          <div class="stats">
+            <div class="stat sketch"><div class="k">Subjects</div><div class="v">7 <small>this term</small></div></div>
+            <div class="stat sketch"><div class="k">Ideas mastered</div><div class="v">49% <small>20 / 41</small></div><div class="mini"><i style="width:49%"></i></div></div>
+            <div class="stat sketch"><div class="k">Streak</div><div class="v"><svg class="flame" viewBox="0 0 24 24"><path d="M12 3c2 3 3 5 3 7a3 3 0 1 1-6 0c0-2 1-4 3-7z"/></svg>5 <small>days</small></div></div>
+          </div>
+        </div>
+        <div class="filters">
+          <div class="seg"><a class="on" href="#">All <span class="n">7</span></a><a href="#">In progress <span class="n">5</span></a><a href="#">Due soon <span class="n due">4</span></a></div>
+          <div class="sort"><span>Sort:</span> Recently studied <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></div>
+        </div>
+        <div class="grid"><article class="sc sketch phy open"><span class="state-note">Expanded · tapped “All chapters”</span>
+<div class="left"><header class="sc-head"><div class="ico"><svg viewBox="0 0 32 32" fill="none" stroke="#1B2A4A" stroke-width="1.6" stroke-linecap="round"><circle cx="16" cy="16" r="2.5" fill="#3D6FB8" stroke="none"/><ellipse cx="16" cy="16" rx="11" ry="5"/><ellipse cx="16" cy="16" rx="11" ry="5" transform="rotate(60 16 16)"/><ellipse cx="16" cy="16" rx="11" ry="5" transform="rotate(120 16 16)"/></svg></div><div style="min-width:0"><b class="sc-name">Physics</b><span class="sc-book">Science · Physics chapters</span></div><span class="tag today">Due today</span></header>
+<div class="now"><span class="lbl">Now</span><h3>Ch 8 · Motion</h3></div>
+<div class="mast"><div class="row"><span>Ideas mastered</span><b>3 / 8</b></div><div class="bar"><i style="width:38%"></i></div></div>
+<div class="dots"><i class="d cur"></i><i class="d lock"></i><i class="d lock"></i><i class="d lock"></i><i class="d lock"></i><span class="cap">1st of 5 chapters</span></div>
+<div class="next"><div class="ni"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="12" rx="2"/><path d="M10 9v4l3.5-2z"/><path d="M8 20h8"/></svg></div><div style="min-width:0"><b>Session 3 · Motion diagnostic</b><span>From Sharma Ma'am · 12 min left · due 9 pm</span></div></div>
+<div class="recap"><div><span class="k">Last studied</span><b>Yesterday</b><span>Speed vs velocity · 18 min</span></div><div><span class="k">Last check</span><b>85%</b><span>Speed &amp; velocity quiz</span></div><div><span class="k">This week</span><b>52 min</b><span>3 sessions · 1 game</span></div></div>
+<p class="last">Saathy's tip: the <b>Acceleration</b> slides end with a 3-question check. Finish it to open the <b>Equations of motion</b> idea.</p><footer class="foot"><div class="who"><span class="tav">SM</span>Sharma Ma'am</div><div class="btns"><button class="cta">Continue <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button><button class="ghost on">Hide chapters <svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></button></div></footer></div>
+<div class="chlist"><h4>Physics chapters <span>5 in your book · 3 of 32 ideas</span></h4><div class="chrow cur"><span class="num">8</span><div style="min-width:0"><b>Motion</b><span class="s">In progress · Session 3 of 4 released</span><div class="ideas"><span class="idea m"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>Distance &amp; displacement</span><span class="idea m"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>Uniform &amp; non-uniform motion</span><span class="idea m"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>Speed &amp; velocity</span><span class="idea l">Acceleration · learning</span><span class="idea">Distance–time graphs</span><span class="idea">Velocity–time graphs</span><span class="idea">Equations of motion</span><span class="idea">Uniform circular motion</span></div></div><span class="r">3 / 8</span></div><div class="chrow lock"><span class="num">9</span><div style="min-width:0"><b>Force and Laws of Motion</b><span class="s">Opens after the Motion check</span></div><span class="r">0 / 7</span></div><div class="chrow lock"><span class="num">10</span><div style="min-width:0"><b>Gravitation</b><span class="s">Locked · Sharma Ma'am releases it next</span></div><span class="r">0 / 6</span></div><div class="chrow lock"><span class="num">11</span><div style="min-width:0"><b>Work and Energy</b><span class="s">Locked</span></div><span class="r">0 / 6</span></div><div class="chrow lock"><span class="num">12</span><div style="min-width:0"><b>Sound</b><span class="s">Locked</span></div><span class="r">0 / 5</span></div></div></article><article class="sc sketch chem"><header class="sc-head"><div class="ico"><svg viewBox="0 0 32 32" fill="none" stroke="#1B2A4A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4h8v6l5 14H7l5-14V4z"/><path d="M12 10h8" stroke="#D9823B"/><circle cx="14" cy="20" r="1.2" fill="#D9823B" stroke="none"/><circle cx="19" cy="22" r="1.5" fill="#E8B84A" stroke="none"/></svg></div><div style="min-width:0"><b class="sc-name">Chemistry</b><span class="sc-book">Science · Chemistry chapters</span></div><span class="tag late">Overdue</span></header>
+<div class="now"><span class="lbl">Now</span><h3>Ch 3 · Atoms and Molecules</h3></div>
+<div class="mast"><div class="row"><span>Ideas mastered</span><b>2 / 5</b></div><div class="bar"><i style="width:40%"></i></div></div>
+<div class="dots"><i class="d done"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></i><i class="d done"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></i><i class="d cur"></i><i class="d lock"></i><span class="cap">2 of 4 done</span></div>
+<div class="next"><div class="ni"><svg viewBox="0 0 24 24"><path d="M7 4h10v16l-5-3-5 3V4z"/></svg></div><div style="min-width:0"><b>Atoms and Molecules worksheet</b><span>Was due Mon 26 Oct · 6 of 10 answered</span></div></div>
+<footer class="foot"><div class="who"><span class="tav">RI</span>Mr. Iyer</div><div class="btns"><button class="cta">Continue <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button><button class="ghost">All chapters <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button></div></footer></article><article class="sc sketch bio"><header class="sc-head"><div class="ico"><svg viewBox="0 0 32 32" fill="none" stroke="#1B2A4A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 22c0-8 6-16 16-16-2 8-2 14-8 18"/><path d="M10 20c4-2 8-6 10-12" stroke="#5A9A62"/></svg></div><div style="min-width:0"><b class="sc-name">Biology</b><span class="sc-book">Science · Biology chapters</span></div><span class="tag new">New session</span></header>
+<div class="now"><span class="lbl">Now</span><h3>Ch 5 · The Fundamental Unit of Life</h3></div>
+<div class="mast"><div class="row"><span>Ideas mastered</span><b>1 / 4</b></div><div class="bar"><i style="width:25%"></i></div></div>
+<div class="dots"><i class="d cur"></i><i class="d lock"></i><i class="d lock"></i><i class="d lock"></i><i class="d lock"></i><i class="d lock"></i><span class="cap">1st of 6 chapters</span></div>
+<div class="next"><div class="ni"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="12" rx="2"/><path d="M10 9v4l3.5-2z"/><path d="M8 20h8"/></svg></div><div style="min-width:0"><b>New: Cell organelles walk-through</b><span>Posted today by Ms. Fernandes · 15 min</span></div></div>
+<footer class="foot"><div class="who"><span class="tav">AF</span>Ms. Fernandes</div><div class="btns"><button class="cta">Continue <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button><button class="ghost">All chapters <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button></div></footer></article><article class="sc sketch math"><header class="sc-head"><div class="ico"><svg viewBox="0 0 32 32" fill="none" stroke="#1B2A4A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="14" r="3"/><path d="M16 17 L10 28"/><path d="M16 17 L24 26"/><path d="M8 8h4M20 6h5" stroke="#6B5CA5"/><circle cx="16" cy="14" r="1.2" fill="#6B5CA5" stroke="none"/></svg></div><div style="min-width:0"><b class="sc-name">Maths</b><span class="sc-book">NCERT Mathematics · 15 chapters</span></div><span class="tag soon">Quiz Fri</span></header>
+<div class="now"><span class="lbl">Now</span><h3>Ch 2 · Polynomials</h3></div>
+<div class="mast"><div class="row"><span>Ideas mastered</span><b>4 / 5</b></div><div class="bar"><i style="width:80%"></i></div></div>
+<div class="dots many"><i class="d done"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></i><i class="d cur"></i><i class="d lock"></i><i class="d lock"></i><i class="d lock"></i><i class="d lock"></i><i class="d lock"></i><i class="d lock"></i><i class="d lock"></i><i class="d lock"></i><i class="d lock"></i><i class="d lock"></i><i class="d lock"></i><i class="d lock"></i><i class="d lock"></i><span class="cap">1 of 15 done</span></div>
+<div class="next"><div class="ni"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.5M12 16.5v.01"/></svg></div><div style="min-width:0"><b>Polynomials quiz · 10 questions</b><span>Fri 30 Oct, in class · practice set ready</span></div></div>
+<footer class="foot"><div class="who"><span class="tav">NK</span>Mr. Khan</div><div class="btns"><button class="cta">Continue <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button><button class="ghost">All chapters <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button></div></footer></article><article class="sc sketch eng"><header class="sc-head"><div class="ico"><svg viewBox="0 0 32 32" fill="none" stroke="#1B2A4A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9c4-1.5 7-1.2 11 1 4-2.2 7-2.5 11-1v15c-4-1.3-7-1-11 1-4-2-7-2.3-11-1z"/><path d="M16 10v15"/><path d="M8.5 14c2-.5 3.5-.4 5 .3M8.5 18c2-.5 3.5-.4 5 .3" stroke="#C9962E"/></svg></div><div style="min-width:0"><b class="sc-name">English</b><span class="sc-book">Beehive · 11 chapters</span></div><span class="tag soon">Due Mon</span></header>
+<div class="now"><span class="lbl">Now</span><h3>Ch 4 · A Truly Beautiful Mind</h3></div>
+<div class="mast"><div class="row"><span>Ideas mastered</span><b>2 / 6</b></div><div class="bar"><i style="width:33%"></i></div></div>
+<div class="dots many"><i class="d done"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></i><i class="d done"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></i><i class="d done"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></i><i class="d cur"></i><i class="d lock"></i><i class="d lock"></i><i class="d lock"></i><i class="d lock"></i><i class="d lock"></i><i class="d lock"></i><i class="d lock"></i><span class="cap">3 of 11 done</span></div>
+<div class="next"><div class="ni"><svg viewBox="0 0 24 24"><path d="M4 6c3-1 5-1 8 1 3-2 5-2 8-1v12c-3-1-5-1-8 1-3-2-5-2-8-1z"/><path d="M12 7v12"/></svg></div><div style="min-width:0"><b>Read and answer Q1–Q5</b><span>Due Mon 2 Nov · 2 pages left to read</span></div></div>
+<footer class="foot"><div class="who"><span class="tav">RD</span>Ms. D'Souza</div><div class="btns"><button class="cta">Continue <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button><button class="ghost">All chapters <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button></div></footer></article><article class="sc sketch sst"><header class="sc-head"><div class="ico"><svg viewBox="0 0 32 32" fill="none" stroke="#1B2A4A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="15" r="9.5"/><path d="M8 11c3 1 4 3 3 5.5S12 21 14 23M18 6.5c-1 2.5 1 3.5 3 3.5s2.5 2.5 1 4.5-1 4 1 5" stroke="#C9433A"/><path d="M11 28h10M16 24.5V28"/></svg></div><div style="min-width:0"><b class="sc-name">Social Science</b><span class="sc-book">History · Contemporary World I</span></div><span class="tag calm">All caught up</span></header>
+<div class="now"><span class="lbl">Now</span><h3>Ch 2 · Socialism in Europe and the Russian Revolution</h3></div>
+<div class="mast"><div class="row"><span>Ideas mastered</span><b>5 / 7</b></div><div class="bar"><i style="width:71%"></i></div></div>
+<div class="dots"><i class="d done"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></i><i class="d cur"></i><i class="d lock"></i><i class="d lock"></i><i class="d lock"></i><span class="cap">1 of 5 done</span></div>
+<div class="next"><div class="ni"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></div><div style="min-width:0"><b>Nothing due</b><span>Next class Thu 29 Oct · map work on Russia</span></div></div>
+<footer class="foot"><div class="who"><span class="tav">PB</span>Mr. Banerjee</div><div class="btns"><button class="cta">Continue <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button><button class="ghost">All chapters <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button></div></footer></article><article class="sc sketch hin"><header class="sc-head"><div class="ico"><span class="deva">अ</span></div><div style="min-width:0"><b class="sc-name">Hindi</b><span class="sc-book">Kshitij · Part 1</span></div><span class="tag soon">Due Tue</span></header>
+<div class="now"><span class="lbl">Now</span><h3>Ch 3 · Upbhoktavad ki Sanskriti</h3></div>
+<div class="mast"><div class="row"><span>Ideas mastered</span><b>3 / 6</b></div><div class="bar"><i style="width:50%"></i></div></div>
+<div class="dots"><i class="d done"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></i><i class="d done"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></i><i class="d cur"></i><i class="d lock"></i><i class="d lock"></i><span class="cap">2 of 5 done</span></div>
+<div class="next"><div class="ni"><svg viewBox="0 0 24 24"><path d="M7 4h10v16l-5-3-5 3V4z"/></svg></div><div style="min-width:0"><b>Write a 120-word reply to the lesson</b><span>Due Tue 3 Nov · draft saved</span></div></div>
+<footer class="foot"><div class="who"><span class="tav">MV</span>Mrs. Verma</div><div class="btns"><button class="cta">Continue <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button><button class="ghost">All chapters <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button></div></footer></article></div>
+      </div>
+      <aside class="rail"><div class="panel sketch due"><div class="ht">Due soon <a href="#">Homework →</a></div><i class="underline"></i>
+<div class="daygrp">Overdue</div>
+<div class="drow"><i class="sd" style="background:var(--orange)"></i><div style="min-width:0"><b>Atoms and Molecules worksheet</b><span>Chemistry · was due Mon 26 Oct</span></div><span class="tag late">2 days late</span></div>
+<div class="daygrp">Today · Wed 28 Oct</div>
+<div class="drow"><i class="sd" style="background:#3D6FB8"></i><div style="min-width:0"><b>Session 3 · Motion diagnostic</b><span>Physics · 12 min left</span></div><span class="tag today">By 9 pm</span></div>
+<div class="drow"><i class="sd" style="background:var(--leaf)"></i><div style="min-width:0"><b>Cell organelles walk-through</b><span>Biology · new from Ms. Fernandes</span></div><span class="tag new">New</span></div>
+<div class="daygrp">This week</div>
+<div class="drow"><i class="sd" style="background:var(--violet)"></i><div style="min-width:0"><b>Polynomials quiz</b><span>Maths · in class</span></div><span class="tag soon">Fri 30</span></div>
+<div class="drow"><i class="sd" style="background:var(--eng)"></i><div style="min-width:0"><b>A Truly Beautiful Mind · Q1–Q5</b><span>English</span></div><span class="tag soon">Mon 2</span></div>
+<div class="drow"><i class="sd" style="background:var(--hin)"></i><div style="min-width:0"><b>Upbhoktavad ki Sanskriti · reply</b><span>Hindi · draft saved</span></div><span class="tag soon">Tue 3</span></div>
+</div><div class="suggest sketch"><svg class="sp" style="right:12px;top:10px" viewBox="0 0 24 24"><path d="M12 2l1.2 6.2L19 12l-5.8 1.8L12 22l-1.2-8.2L5 12l5.8-3.8z"/></svg>
+<div class="ht hw" style="font-weight:700;font-size:21px">Saathy suggests</div><i class="underline"></i>
+<div class="top-s"><img src="../saathy-cut.png" alt="Saathy"/><div class="bub">Fix this one first, it unlocks your Chemistry worksheet.</div></div>
+<div class="weak"><div class="k">Weakest idea · Chemistry Ch 3</div><b>Writing chemical formulae</b><span>2 of 5 checks right. You mixed up the valency of sulphate twice on Monday.</span><div class="bar"><i></i></div></div>
+<div class="acts"><button class="cta">Revise in 6 min <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button><button class="ghost">Ask Saathy</button></div>
+<div class="also">Next weakest: <b>Acceleration</b> · Physics, 3 of 6</div></div><div class="game sketch"><div class="ht hw" style="font-weight:700;font-size:21px;display:flex;justify-content:space-between;align-items:baseline">Today's game <a href="#" style="font-size:14px;color:#3D6FB8;text-decoration:none">All games →</a></div><i class="underline"></i>
+<div class="grow"><div class="game-thumb"><div class="pitch"></div><div class="bat"></div><div class="ball"></div></div><div><b>Cricket Lab</b><span>Feel acceleration on a real pitch · Physics Ch 8</span><div class="play-mini">Play · ~8 min</div></div></div>
+<div class="recent"><div class="grow"><div class="game-thumb atom"><div class="orbit"></div><div class="nuc"></div></div><div><b>Atom Forge <span class="stars" style="display:inline">★★☆</span></b><span>Played yesterday · built 3 of 5 shells</span></div></div></div></div><div class="panel sketch week"><div class="ht">Time this week <a href="#">Progress →</a></div><i class="underline"></i><div class="wrow"><span>Physics</span><div class="wb"><i style="width:100%;background:#3D6FB8"></i></div><em>52m</em></div><div class="wrow"><span>Chemistry</span><div class="wb"><i style="width:73%;background:var(--orange)"></i></div><em>38m</em></div><div class="wrow"><span>Maths</span><div class="wb"><i style="width:87%;background:var(--violet)"></i></div><em>45m</em></div><div class="wrow"><span>Biology</span><div class="wb"><i style="width:27%;background:var(--leaf)"></i></div><em>14m</em></div><div class="wrow"><span>English</span><div class="wb"><i style="width:42%;background:var(--eng)"></i></div><em>22m</em></div><div class="wrow"><span>Hindi</span><div class="wb"><i style="width:19%;background:var(--hin)"></i></div><em>10m</em></div><div class="wrow"><span>SST</span><div class="wb"><i style="width:35%;background:var(--sst)"></i></div><em>18m</em></div><div class="tot">199 min since Monday · Biology could use a session</div></div><div class="exam sketch"><div class="cal"><i>NOV</i><b>23</b></div><div><strong>Half-yearly exams in 26 days</strong><span>Physics Ch 8 and Chemistry Ch 3 are on the paper.</span></div></div></aside>
+    </div>
+  </div>
+</div>
+<nav class="mobile-nav">
+  <a href="#"><svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>Home</a>
+  <a class="active" href="#"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>Subjects</a>
+  <a href="#"><svg viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2"/><path d="M12 4v3M12 17v3M4 12h3M17 12h3"/></svg>Games</a>
+  <a href="#"><svg viewBox="0 0 24 24"><path d="M12 4c3.5 1.5 6 4.2 6 7.5S15 18 12 20c-3-2-6-4.2-6-8.5S8.5 5.5 12 4z"/></svg>Saathy</a>
+  <a href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="10" r="3.5"/><path d="M5 20c1.5-3 4-4.5 7-4.5S17.5 17 19 20"/></svg>You</a>
+</nav>
+</body></html>

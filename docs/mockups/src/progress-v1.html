@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>VidhyaSaathy — My progress v1</title>
+<style>
+@font-face{font-family:'Kalam';font-weight:700;src:url('file:///workspace/mockups/fonts/kalam-700.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-weight:400;src:url('file:///workspace/mockups/fonts/inter-400.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-weight:500;src:url('file:///workspace/mockups/fonts/inter-500.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-weight:600;src:url('file:///workspace/mockups/fonts/inter-600.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-weight:700;src:url('file:///workspace/mockups/fonts/inter-700.woff2') format('woff2')}
+@font-face{font-family:'Caveat';font-weight:400;src:url('file:///workspace/mockups/fonts/caveat-400.woff2') format('woff2')}
+@font-face{font-family:'Caveat';font-weight:600;src:url('file:///workspace/mockups/fonts/caveat-600.woff2') format('woff2')}
+@font-face{font-family:'Caveat';font-weight:700;src:url('file:///workspace/mockups/fonts/caveat-700.woff2') format('woff2')}
+:root{
+  --cream:#F4EEE4; --creamSoft:#FAF6EF; --paper:#FFFDF8; --navy:#1B2A4A;
+  --navyMuted:#3A4A6B; --inkSoft:#6B7280; --gold:#E8B84A; --goldDeep:#C9962E;
+  --border:#DDD4C4; --ok:#2F9E6B; --okSoft:#D9EFE3; --bad:#C9433A; --badSoft:#F8DADA;
+  --sky:#DCEAF6; --orange:#D9823B; --orangeSoft:#F8E6D4;
+  --pinkSoft:#F6E0DC; --violet:#6B5CA5; --violetSoft:#E8E2F4; --leaf:#5A9A62; --leafSoft:#DCEBDD;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--cream);color:var(--navy);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.app{display:flex;min-height:100vh}
+.sketch{border:1.5px solid var(--navy);border-radius:18px 16px 20px 14px/16px 20px 14px 18px;background:var(--paper);box-shadow:3px 3px 0 rgb(27 42 74 / 6%)}
+
+.side{width:188px;flex-shrink:0;position:sticky;top:0;height:100vh;background:var(--creamSoft);border-right:1.5px solid var(--border);display:flex;flex-direction:column;padding:14px 8px}
+.brand{display:flex;align-items:center;gap:8px;padding:6px 8px 18px}
+.brand-mark{width:30px;height:30px;border-radius:9px;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px}
+.brand-name{font-family:'Caveat',cursive;font-weight:700;font-size:18px;line-height:1}
+.brand-tag{font-size:10px;color:var(--inkSoft);font-weight:500}
+.nav{display:flex;flex-direction:column;gap:2px;flex:1}
+.nav a{display:flex;align-items:center;gap:8px;height:36px;padding:0 10px;border-radius:10px;color:var(--navyMuted);text-decoration:none;font-family:'Caveat',cursive;font-weight:600;font-size:17px}
+.nav a svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.nav a.active{background:#E8DFD0;color:var(--navy);font-weight:700}
+.nav .sec{margin:14px 10px 4px;font-family:'Caveat',cursive;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#9AA3B2}
+.side-foot{padding:10px 6px 2px;border-top:1.5px dashed var(--border)}
+.profile{display:flex;align-items:center;gap:8px}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--gold);border:1.5px solid var(--navy);display:grid;place-items:center;font-weight:700;font-size:12px}
+.profile b{display:block;font-family:'Caveat',cursive;font-size:16px;font-weight:700}
+.profile span{font-size:10px;color:var(--inkSoft)}
+
+.main{flex:1;display:flex;flex-direction:column;min-width:0;background:radial-gradient(ellipse at 82% 0%,#E8F0F8 0%,transparent 42%),radial-gradient(ellipse at 8% 95%,#F3EADB 0%,transparent 38%),var(--cream)}
+.top{height:52px;flex-shrink:0;display:flex;align-items:center;gap:10px;padding:0 20px;border-bottom:1.5px solid var(--border)}
+.search{flex:1;max-width:480px;height:34px;display:flex;align-items:center;gap:8px;padding:0 12px;border-radius:999px;background:var(--paper);border:1.5px solid var(--navy);font-family:'Caveat',cursive;font-size:16px;color:var(--inkSoft)}
+.search svg{width:14px;height:14px;stroke:var(--navy);fill:none;stroke-width:1.8}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.pill{display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 11px;border-radius:999px;background:var(--paper);border:1.5px solid var(--navy);font-family:'Caveat',cursive;font-weight:700;font-size:15px}
+.pill svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round}
+.pill.fire{color:#C45C1A}.pill.xp{color:#8A6A10}
+.bell{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--navy);background:var(--paper);display:grid;place-items:center;position:relative}
+.bell svg{width:14px;height:14px;stroke:var(--navy);fill:none;stroke-width:1.8}
+.bell .dot{position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--bad);border:1px solid #fff}
+
+
+:root{--rule:30px;--ruleInk:rgb(110 150 200 / 30%);--margin:rgb(208 110 110 / 38%);--phy:#3D6FB8;--phySoft:#E1EAF6;
+ --eng:#C9962E;--engSoft:#FBF0D6;--sst:#C9433A;--sstSoft:#F8DADA}
+.app{background:linear-gradient(90deg,var(--creamSoft) 0 188px,var(--border) 188px 189.5px,transparent 189.5px)}
+.side{border-right:0}
+.body{flex:1;position:relative;padding:28px 32px 40px 64px;--ruleOffset:20px;
+  background:
+    linear-gradient(90deg,transparent 28px,var(--margin) 28px,var(--margin) 29px,transparent 29px) 0 0/100% 100% no-repeat,
+    repeating-linear-gradient(180deg,transparent 0,transparent calc(var(--rule) - 1px),var(--ruleInk) calc(var(--rule) - 1px),var(--ruleInk) var(--rule)) 0 var(--ruleOffset)/100% var(--rule);}
+.hw{font-family:'Caveat',cursive}
+.mobile-nav{display:none}
+.tag{display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:999px;font-family:'Caveat',cursive;font-weight:700;font-size:14px;border:1.25px solid currentColor;white-space:nowrap}
+.tag.today{color:#B5651D;background:var(--orangeSoft)}
+.tag.late{color:#B23A32;background:var(--badSoft)}
+.tag.soon{color:#6B5A2E;background:#F3EAD2}
+.ulink{font-family:'Caveat',cursive;font-weight:700;font-size:15px;color:var(--phy);text-decoration:none}
+@media (max-width:1300px){
+  .app{background:linear-gradient(90deg,var(--creamSoft) 0 164px,var(--border) 164px 165.5px,transparent 165.5px)}
+  .side{width:164px}
+}
+@media (max-width:480px){
+  .app{background:none}
+  .side{display:none}
+  .top{padding:0 12px;height:48px}
+  .search{max-width:none}.search span{display:none}
+  .pill{font-size:13px;padding:0 8px;height:28px}
+  .bell{display:none}
+  .body{padding:18px 16px 84px;--ruleOffset:8px;
+    background:repeating-linear-gradient(180deg,transparent 0,transparent calc(var(--rule) - 1px),var(--ruleInk) calc(var(--rule) - 1px),var(--ruleInk) var(--rule)) 0 var(--ruleOffset)/100% var(--rule)}
+  .mobile-nav{display:flex;position:fixed;left:0;right:0;bottom:0;height:58px;background:var(--creamSoft);border-top:1.5px solid var(--border);z-index:30;align-items:center;justify-content:space-around}
+  .mobile-nav a{display:flex;flex-direction:column;align-items:center;gap:1px;font-family:'Caveat',cursive;font-weight:700;font-size:13px;color:var(--navyMuted);text-decoration:none}
+  .mobile-nav a.active{color:var(--navy)}
+  .mobile-nav svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+}
+
+.head{margin:8px 0 24px}
+.head h1{font-family:'Caveat',cursive;font-weight:700;font-size:52px;line-height:1}
+.head p{margin-top:8px;font-family:'Caveat',cursive;font-weight:600;font-size:19px;color:var(--navyMuted)}
+.h3{font-family:'Caveat',cursive;font-weight:700;font-size:23px;line-height:1.1}
+.hw{font-family:'Caveat',cursive;font-weight:700}
+.muted{color:var(--navyMuted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 18px;border-radius:12px;background:var(--navy);color:#fff;border:0;font-family:'Caveat',cursive;font-weight:700;font-size:19px;box-shadow:0 3px 0 #0E1830;white-space:nowrap}
+.btn svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.btn.ghost{background:var(--paper);color:var(--navy);border:1.5px solid var(--navy);box-shadow:none}
+.btn.sm{height:32px;padding:0 13px;font-size:16px;border-radius:10px}
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.pills a{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 14px;border-radius:999px;border:1.5px solid var(--border);background:var(--paper);font-family:'Caveat',cursive;font-weight:700;font-size:17px;color:var(--navyMuted);text-decoration:none;white-space:nowrap}
+.pills a .n{font-size:13px;color:var(--inkSoft)}
+.pills a.on{background:var(--navy);border-color:var(--navy);color:#fff}.pills a.on .n{color:#C9D2E3}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--c,var(--phy));flex-shrink:0}
+.ic{width:40px;height:40px;flex-shrink:0;border-radius:12px 11px 13px 10px;background:var(--soft,var(--creamSoft));border:1.25px solid var(--navy);display:grid;place-items:center}
+.ic svg{width:27px;height:27px}
+.phy{--soft:var(--phySoft);--c:var(--phy)}.chem{--soft:var(--orangeSoft);--c:var(--orange)}.bio{--soft:var(--leafSoft);--c:var(--leaf)}.math{--soft:var(--violetSoft);--c:var(--violet)}.eng{--soft:var(--engSoft);--c:var(--eng)}.sst{--soft:var(--sstSoft);--c:var(--sst)}
+.ulink{white-space:nowrap}
+
+.body{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:22px 32px;align-content:start}
+.head{grid-column:1/-1;margin:8px 0 2px}
+.card{padding:20px 24px}
+.card .h3{margin-bottom:14px;display:flex;align-items:baseline;gap:10px}
+.card .h3 small{font-family:'Caveat',cursive;font-weight:600;font-size:16px;color:var(--inkSoft)}
+.rings{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;text-align:center}
+.ring{position:relative;width:86px;height:86px;margin:0 auto}
+.ring svg{width:86px;height:86px;transform:rotate(-90deg)}
+.ring .pc{position:absolute;inset:0;display:grid;place-items:center;font-family:'Caveat',cursive;font-weight:700;font-size:22px}
+.ring .ico{position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);width:24px;height:24px;border-radius:8px;background:var(--soft);border:1.25px solid var(--navy);display:grid;place-items:center}
+.ring .ico svg{width:17px;height:17px;transform:none}
+.rings b{display:block;margin-top:14px;font-family:'Caveat',cursive;font-weight:700;font-size:18px}
+.rings span.s{display:block;font-size:12px;color:var(--navyMuted)}
+.note{margin-top:22px;padding-top:14px;border-top:1px dashed var(--border);font-family:'Caveat',cursive;font-weight:600;font-size:18px;line-height:1.25;color:var(--navyMuted)}
+.cal{display:grid;grid-template-columns:repeat(7,30px);gap:7px 9px;justify-content:start}
+.cal i{font-style:normal;font-family:'Caveat',cursive;font-weight:700;font-size:14px;color:var(--inkSoft);text-align:center}
+.cal span{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:12px;color:var(--inkSoft);border:1.25px dashed #D5D0C6}
+.cal span.y{background:var(--phySoft);border:1.25px solid var(--phy);color:var(--navy)}
+.cal span.st{background:var(--phy);border:1.25px solid var(--navy);color:#fff;font-weight:600}
+.cal span.t{background:var(--phy);border:2.5px solid var(--gold);color:#fff;font-weight:600}
+.cal span.f{border-color:transparent;color:#C6C0B4}
+.cal span.e{border:0}
+.streak{display:flex;gap:18px;align-items:center}
+.streak .big{font-family:'Caveat',cursive;font-weight:700;font-size:44px;line-height:1}
+.streak .big small{display:block;font-size:17px;color:var(--navyMuted);font-weight:600}
+.cols{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.li{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed var(--border)}
+.li:last-child{border-bottom:0}
+.li .t{flex:1;min-width:0}
+.li b{display:block;font-weight:500;font-size:14.5px}
+.li small{display:block;font-family:'Caveat',cursive;font-weight:600;font-size:15px;color:var(--inkSoft)}
+.star{font-family:'Caveat',cursive;font-weight:700;font-size:18px;color:var(--goldDeep)}
+.bars{display:flex;align-items:flex-end;gap:12px;height:96px;margin-top:6px}
+.bars div{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+.bars i{width:100%;max-width:26px;border-radius:7px 7px 3px 3px;background:var(--phySoft);border:1.25px solid var(--phy)}
+.bars i.t{background:var(--gold);border-color:var(--goldDeep)}
+.bars i.z{height:3px!important;border:0;background:#E3DDD1}
+.bars span{font-family:'Caveat',cursive;font-weight:700;font-size:14px;color:var(--inkSoft)}
+.tot{font-family:'Caveat',cursive;font-weight:700;font-size:30px;line-height:1}
+.tot small{font-size:16px;color:var(--navyMuted);font-weight:600}
+@media (max-width:1300px){.body{gap:20px 24px;padding:24px 24px 32px 56px}.ring,.ring svg{width:76px;height:76px}}
+@media (max-width:480px){
+  .body{display:flex;flex-direction:column;padding:18px 16px 84px;gap:18px}
+  .head h1{font-size:42px}.head p{font-size:17px}
+  .card{padding:16px}.card .h3 small,.rings span.s{display:none}.rings b{font-size:17px}
+  .rings{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px 6px}
+  .ring,.ring svg{width:76px;height:76px}
+  .cal{grid-template-columns:repeat(7,28px);gap:6px 7px}.cal span{width:28px;height:28px}
+  .streak{flex-direction:column;align-items:flex-start;gap:12px}.streak .big{display:flex;align-items:baseline;gap:8px}
+  .cols{display:flex;flex-direction:column;gap:18px}
+}
+
+</style></head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <div class="brand-mark">V</div>
+      <div><div class="brand-name">VidhyaSaathy</div><div class="brand-tag">Class 9 · NCERT</div></div>
+    </div>
+    <nav class="nav">
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>Home</a>
+      <a href="#"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>My subjects</a>
+      <a href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>Study sessions</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M7 4h10v16l-5-3-5 3V4z"/></svg>Homework</a>
+      <div class="sec">Play</div>
+      <a href="#"><svg viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2"/><path d="M12 4v3M12 17v3M4 12h3M17 12h3"/></svg>Games</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M12 4c3.5 1.5 6 4.2 6 7.5S15 18 12 20c-3-2-6-4.2-6-8.5S8.5 5.5 12 4z"/></svg>Ask Saathy</a>
+      <div class="sec">You</div>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>Notifications</a>
+      <a href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M3 12h2M19 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Settings</a>
+    </nav>
+    <div class="side-foot">
+      <div class="profile"><div class="avatar">A</div><div><b>Aarav</b><span>IX-A · Roll 17</span></div></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="top">
+      <div class="search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search lessons, notes, questions, games…</span>
+      </div>
+      <div class="top-right">
+        <span class="pill fire"><svg viewBox="0 0 24 24"><path d="M12 3c2 3 3 5 3 7a3 3 0 1 1-6 0c0-2 1-4 3-7z"/></svg>5 streak</span>
+        <span class="pill xp"><svg viewBox="0 0 24 24"><path d="M12 3l2.2 6.5H21l-5.4 3.9 2.1 6.6L12 16.8 6.3 20l2.1-6.6L3 9.5h6.8z"/></svg>340 XP</span>
+        <button class="bell" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M10 19a2 2 0 0 0 4 0"/></svg><i class="dot"></i></button>
+      </div>
+    </header>
+
+    <div class="body">
+      <div class="head"><h1>My progress</h1><p>Small steps, every day. Here's how you're growing, Aarav.</p></div>
+      <section class="card sketch"><div class="h3">How much you've mastered <small>this term's chapters</small></div><div class="rings"><div><div class="ring phy"><svg viewBox="0 0 86 86"><circle cx="43" cy="43" r="36" fill="none" stroke="#ECE4D6" stroke-width="7"/><circle cx="43" cy="43" r="36" fill="none" stroke="var(--c)" stroke-width="7" stroke-linecap="round" stroke-dasharray="86.0 226.2"/></svg><span class="pc">38%</span><span class="ico"><svg viewBox="0 0 32 32" fill="none" stroke="#1B2A4A" stroke-width="1.6" stroke-linecap="round"><circle cx="16" cy="16" r="2.5" fill="#3D6FB8" stroke="none"/><ellipse cx="16" cy="16" rx="11" ry="5"/><ellipse cx="16" cy="16" rx="11" ry="5" transform="rotate(60 16 16)"/><ellipse cx="16" cy="16" rx="11" ry="5" transform="rotate(120 16 16)"/></svg></span></div><b>Physics</b><span class="s">Ch 8 Motion</span></div><div><div class="ring chem"><svg viewBox="0 0 86 86"><circle cx="43" cy="43" r="36" fill="none" stroke="#ECE4D6" stroke-width="7"/><circle cx="43" cy="43" r="36" fill="none" stroke="var(--c)" stroke-width="7" stroke-linecap="round" stroke-dasharray="90.5 226.2"/></svg><span class="pc">40%</span><span class="ico"><svg viewBox="0 0 32 32" fill="none" stroke="#1B2A4A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4h8v6l5 14H7l5-14V4z"/><path d="M12 10h8" stroke="#D9823B"/><circle cx="14" cy="20" r="1.2" fill="#D9823B" stroke="none"/><circle cx="19" cy="22" r="1.5" fill="#E8B84A" stroke="none"/></svg></span></div><b>Chemistry</b><span class="s">Ch 3 Atoms</span></div><div><div class="ring bio"><svg viewBox="0 0 86 86"><circle cx="43" cy="43" r="36" fill="none" stroke="#ECE4D6" stroke-width="7"/><circle cx="43" cy="43" r="36" fill="none" stroke="var(--c)" stroke-width="7" stroke-linecap="round" stroke-dasharray="56.5 226.2"/></svg><span class="pc">25%</span><span class="ico"><svg viewBox="0 0 32 32" fill="none" stroke="#1B2A4A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 22c0-8 6-16 16-16-2 8-2 14-8 18"/><path d="M10 20c4-2 8-6 10-12" stroke="#5A9A62"/></svg></span></div><b>Biology</b><span class="s">Ch 5 The cell</span></div><div><div class="ring math"><svg viewBox="0 0 86 86"><circle cx="43" cy="43" r="36" fill="none" stroke="#ECE4D6" stroke-width="7"/><circle cx="43" cy="43" r="36" fill="none" stroke="var(--c)" stroke-width="7" stroke-linecap="round" stroke-dasharray="181.0 226.2"/></svg><span class="pc">80%</span><span class="ico"><svg viewBox="0 0 32 32" fill="none" stroke="#1B2A4A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="14" r="3"/><path d="M16 17 L10 28"/><path d="M16 17 L24 26"/><path d="M8 8h4M20 6h5" stroke="#6B5CA5"/><circle cx="16" cy="14" r="1.2" fill="#6B5CA5" stroke="none"/></svg></span></div><b>Maths</b><span class="s">Ch 2 Polynomials</span></div><div><div class="ring eng"><svg viewBox="0 0 86 86"><circle cx="43" cy="43" r="36" fill="none" stroke="#ECE4D6" stroke-width="7"/><circle cx="43" cy="43" r="36" fill="none" stroke="var(--c)" stroke-width="7" stroke-linecap="round" stroke-dasharray="74.6 226.2"/></svg><span class="pc">33%</span><span class="ico"><svg viewBox="0 0 32 32" fill="none" stroke="#1B2A4A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9c4-1.5 7-1.2 11 1 4-2.2 7-2.5 11-1v15c-4-1.3-7-1-11 1-4-2-7-2.3-11-1z"/><path d="M16 10v15"/><path d="M8.5 14c2-.5 3.5-.4 5 .3M8.5 18c2-.5 3.5-.4 5 .3" stroke="#C9962E"/></svg></span></div><b>English</b><span class="s">Ch 4</span></div><div><div class="ring sst"><svg viewBox="0 0 86 86"><circle cx="43" cy="43" r="36" fill="none" stroke="#ECE4D6" stroke-width="7"/><circle cx="43" cy="43" r="36" fill="none" stroke="var(--c)" stroke-width="7" stroke-linecap="round" stroke-dasharray="160.6 226.2"/></svg><span class="pc">71%</span><span class="ico"><svg viewBox="0 0 32 32" fill="none" stroke="#1B2A4A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="15" r="9.5"/><path d="M8 11c3 1 4 3 3 5.5S12 21 14 23M18 6.5c-1 2.5 1 3.5 3 3.5s2.5 2.5 1 4.5-1 4 1 5" stroke="#C9433A"/><path d="M11 28h10M16 24.5V28"/></svg></span></div><b>Social Sci.</b><span class="s">Ch 2</span></div></div><p class="note">Maths is your strongest right now. Biology has the most left to discover, and Ms. Fernandes just shared a session for it.</p></section>
+      <section class="card sketch"><div class="h3">October <small>days you studied</small></div>
+        <div class="streak"><div class="cal"><i>M</i><i>T</i><i>W</i><i>T</i><i>F</i><i>S</i><i>S</i><span class="e"></span><span class="e"></span><span class="e"></span><span class="">1</span><span class="">2</span><span class="">3</span><span class="">4</span><span class="y">5</span><span class="y">6</span><span class="y">7</span><span class="y">8</span><span class="y">9</span><span class="">10</span><span class="">11</span><span class="y">12</span><span class="y">13</span><span class="y">14</span><span class="y">15</span><span class="">16</span><span class="">17</span><span class="">18</span><span class="y">19</span><span class="y">20</span><span class="y">21</span><span class="">22</span><span class="">23</span><span class="st">24</span><span class="st">25</span><span class="st">26</span><span class="st">27</span><span class="t">28</span><span class="f">29</span><span class="f">30</span><span class="f">31</span></div><div class="big">5<small>day streak</small></div></div></section>
+      <div class="cols">
+        <section class="card sketch"><div class="h3">You're strong at</div><div class="li phy"><span class="dot"></span><div class="t"><b>Distance and displacement</b><small>Physics · quiz 90%</small></div><span class="star">★★★</span></div><div class="li phy"><span class="dot"></span><div class="t"><b>Speed and velocity</b><small>Physics · quiz 85%</small></div><span class="star">★★★</span></div><div class="li math"><span class="dot"></span><div class="t"><b>Zeroes of a polynomial</b><small>Maths · check 3/3</small></div><span class="star">★★☆</span></div></section>
+        <section class="card sketch"><div class="h3">Needs a little work</div><div class="li chem"><span class="dot"></span><div class="t"><b>Valency</b><small>Chemistry · 1 of 3 on Mon</small></div><button class="btn sm">Revise</button></div><div class="li bio"><span class="dot"></span><div class="t"><b>Cell wall vs membrane</b><small>Biology · from your homework</small></div><button class="btn ghost sm">Revise</button></div><div class="li phy"><span class="dot"></span><div class="t"><b>Writing units</b><small>Physics · 2 answers missed units</small></div><button class="btn ghost sm">Revise</button></div></section>
+        <section class="card sketch"><div class="h3">Time this week</div><div class="tot">1 h 11 min <small>· goal 15 min a day</small></div><div class="bars"><div><i class="" style="height:57px"></i><span>M</span></div><div><i class="" style="height:81px"></i><span>T</span></div><div><i class="t" style="height:47px"></i><span>W</span></div><div><i class=" z" style="height:0px"></i><span>T</span></div><div><i class=" z" style="height:0px"></i><span>F</span></div><div><i class=" z" style="height:0px"></i><span>S</span></div><div><i class=" z" style="height:0px"></i><span>S</span></div></div></section>
+      </div>
+    </div>
+  </div>
+</div>
+<nav class="mobile-nav">
+  <a href="#"><svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>Home</a>
+  <a href="#"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>Subjects</a>
+  <a href="#"><svg viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2"/><path d="M12 4v3M12 17v3M4 12h3M17 12h3"/></svg>Games</a>
+  <a href="#"><svg viewBox="0 0 24 24"><path d="M12 4c3.5 1.5 6 4.2 6 7.5S15 18 12 20c-3-2-6-4.2-6-8.5S8.5 5.5 12 4z"/></svg>Saathy</a>
+  <a class="active" href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="10" r="3.5"/><path d="M5 20c1.5-3 4-4.5 7-4.5S17.5 17 19 20"/></svg>You</a>
+</nav>
+</body></html>

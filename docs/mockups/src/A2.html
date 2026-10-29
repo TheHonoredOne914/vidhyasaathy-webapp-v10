@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>A2 — Desktop path islands</title>
+<style>
+@font-face{font-family:'Inter';font-weight:400;src:url('file:///workspace/mockups/fonts/inter-400.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-weight:500;src:url('file:///workspace/mockups/fonts/inter-500.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-weight:600;src:url('file:///workspace/mockups/fonts/inter-600.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-weight:700;src:url('file:///workspace/mockups/fonts/inter-700.woff2') format('woff2')}
+:root{
+  --cream:#F7F1E8; --creamSoft:#FBF7F0; --navy:#1B2A4A; --navyMuted:#3A4A6B;
+  --inkSoft:#6B7280; --gold:#E8B84A; --goldDeep:#C9962E; --border:#E6DFD2;
+  --ok:#2F9E6B; --okDeep:#217A52; --warn:#D97706; --bad:#C9433A; --sky:#E8F2FB; --steel:#517dab;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--cream);color:var(--navy);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.app{display:flex;height:100vh;overflow:hidden}
+svg.ico{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+
+/* slim nav */
+.side{width:200px;flex-shrink:0;background:var(--creamSoft);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:16px 8px}
+.brand{display:flex;align-items:center;gap:8px;padding:8px 8px 24px}
+.brand-mark{width:32px;height:32px;border-radius:8px;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px}
+.brand-name{font-size:13px;font-weight:700}.brand-tag{font-size:10px;color:var(--inkSoft);font-weight:500}
+.nav{display:flex;flex-direction:column;gap:2px;flex:1}
+.nav a{display:flex;align-items:center;gap:10px;height:40px;padding:0 12px;border-radius:8px;color:var(--navyMuted);text-decoration:none;font-size:13px;font-weight:500}
+.nav a.active{background:#EDE6DA;color:var(--navy);font-weight:600}
+.nav .sec{margin:16px 12px 6px;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--inkSoft)}
+.side-foot{padding:12px 8px 4px;border-top:1px solid var(--border)}
+.profile{display:flex;align-items:center;gap:8px}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--gold);display:grid;place-items:center;font-weight:700;font-size:12px;color:var(--navy)}
+.profile b{display:block;font-size:12px}.profile span{font-size:10px;color:var(--inkSoft)}
+
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.top{height:56px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--border);background:var(--creamSoft)}
+.top-left{font-size:13px;color:var(--inkSoft);font-weight:500}
+.top-right{display:flex;align-items:center;gap:12px}
+.stat-pill{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:8px;background:#fff;border:1px solid var(--border);font-size:12px;font-weight:600;color:var(--navy)}
+.stat-pill svg{width:16px;height:16px}
+.bell{position:relative;width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:#fff;display:grid;place-items:center;color:var(--navyMuted)}
+.bell .dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:var(--bad)}
+
+.body{flex:1;display:flex;overflow:hidden;min-height:0}
+.stage{flex:1;overflow:auto;padding:24px;min-width:0}
+.stage-inner{min-width:720px}
+
+.unit-bar{display:flex;align-items:center;justify-content:space-between;background:var(--navy);color:#fff;border-radius:16px;padding:16px 20px;margin-bottom:24px}
+.unit-bar .eyebrow{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;opacity:.65;margin-bottom:4px}
+.unit-bar h1{font-size:20px;font-weight:700;letter-spacing:-.02em}
+.unit-bar .sub{font-size:12px;opacity:.75;margin-top:2px}
+.unit-actions{display:flex;gap:8px}
+.btn-ghost{height:36px;padding:0 14px;border-radius:8px;background:rgb(255 255 255 / 10%);border:1px solid rgb(255 255 255 / 18%);color:#fff;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;font-family:inherit}
+.btn-ghost svg{width:14px;height:14px}
+
+/* serpentine islands */
+.islands{display:flex;flex-direction:column;gap:32px;position:relative}
+.island{position:relative;background:var(--creamSoft);border:1px solid var(--border);border-radius:16px;padding:24px 24px 32px;overflow:hidden}
+.island-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:20px}
+.island-head h2{font-size:15px;font-weight:700;letter-spacing:-.01em}
+.island-head .meta{font-size:12px;color:var(--inkSoft);font-weight:500}
+.island.active{border-color:#D4C4A0;box-shadow:0 0 0 1px #E8D9B0}
+.island.locked{opacity:.72}
+.island.locked .serpentine{filter:grayscale(.4)}
+
+.serpentine{position:relative;height:168px}
+.serp-svg{position:absolute;inset:0;width:100%;height:100%}
+.nodes{position:absolute;inset:0}
+.node{position:absolute;display:flex;flex-direction:column;align-items:center;width:96px;margin-left:-48px;z-index:2}
+.node .circle{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;box-shadow:0 4px 0 #C9C2B4;background:#ECE6DA;color:var(--inkSoft)}
+.node .circle svg{width:22px;height:22px}
+.node.done .circle{background:var(--ok);color:#fff;box-shadow:0 4px 0 var(--okDeep)}
+.node.active .circle{background:var(--gold);color:var(--navy);box-shadow:0 5px 0 var(--goldDeep);outline:3px solid #F7E7B8}
+.node.locked .circle{background:#E8E2D6;color:#A8A094;box-shadow:0 4px 0 #D4CEBF}
+.node.chest .circle{background:var(--gold);color:var(--navy);box-shadow:0 4px 0 var(--goldDeep)}
+.node .lbl{margin-top:8px;font-size:11px;font-weight:600;color:var(--navyMuted);text-align:center;line-height:1.25;max-width:96px}
+.node .lbl strong{display:block;color:var(--navy);font-size:12px}
+.start-tip{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(100% + 8px);background:var(--navy);color:#fff;font-size:10px;font-weight:700;letter-spacing:.05em;padding:4px 8px;border-radius:6px;white-space:nowrap}
+.start-tip::after{content:'';position:absolute;left:50%;top:100%;margin-left:-4px;border:4px solid transparent;border-top-color:var(--navy)}
+
+.cta-row{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:8px;padding-top:8px}
+.cta{height:48px;padding:0 24px;border-radius:12px;background:var(--gold);border:none;box-shadow:0 4px 0 var(--goldDeep);color:var(--navy);font-size:15px;font-weight:700;font-family:inherit;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.cta svg{width:16px;height:16px}
+.cta-note{font-size:12px;color:var(--inkSoft);font-weight:500}
+
+/* right rail */
+.rail{width:304px;flex-shrink:0;border-left:1px solid var(--border);background:var(--creamSoft);padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+.card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px}
+.card h3{font-size:12px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;letter-spacing:-.01em}
+.card h3 span{font-size:11px;font-weight:500;color:var(--inkSoft)}
+.streak-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.streak-cell{background:var(--cream);border-radius:8px;padding:12px;text-align:center}
+.streak-cell .n{font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.streak-cell .l{font-size:11px;color:var(--inkSoft);margin-top:4px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:4px}
+.streak-cell .l svg{width:12px;height:12px}
+
+.game-card{display:grid;grid-template-columns:72px 1fr;gap:12px;align-items:center}
+.thumb{width:72px;height:72px;border-radius:8px;background:var(--navy);position:relative;overflow:hidden}
+.thumb-atom{position:absolute;inset:0}
+.thumb-atom .nuc{position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px;border-radius:50%;background:var(--gold)}
+.thumb-atom .orb{position:absolute;left:50%;top:50%;width:48px;height:24px;margin:-12px -24px;border:1.5px solid rgb(127 179 255 / 55%);border-radius:50%}
+.thumb-atom .orb2{transform:rotate(60deg);border-color:rgb(232 184 74 / 45%)}
+.thumb-atom .e{position:absolute;width:6px;height:6px;border-radius:50%;background:#7fb3ff;left:12px;top:32px}
+.game-card b{display:block;font-size:13px;font-weight:650}
+.game-card span{display:block;font-size:11px;color:var(--inkSoft);margin-top:2px;line-height:1.35}
+.game-card .play{margin-top:8px;height:28px;padding:0 10px;border-radius:8px;background:var(--navy);color:#fff;font-size:11px;font-weight:600;border:none;font-family:inherit;display:inline-flex;align-items:center;gap:4px}
+
+.hw{display:flex;flex-direction:column}
+.hw-row{display:grid;grid-template-columns:8px 1fr auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+.hw-row:last-child{border-bottom:0;padding-bottom:0}
+.hw-row:first-child{padding-top:0}
+.hw-dot{width:8px;height:8px;border-radius:50%}
+.hw-dot.due{background:var(--gold)}
+.hw-dot.late{background:var(--bad)}
+.hw-row b{display:block;font-size:12px;font-weight:600}
+.hw-row span{font-size:11px;color:var(--inkSoft)}
+.hw-tag{font-size:10px;font-weight:600;padding:3px 8px;border-radius:999px}
+.hw-tag.due{background:#FBF0D6;color:#8A5A10}
+.hw-tag.late{background:#FDECEC;color:#9B2C2C}
+
+.tip{display:grid;grid-template-columns:48px 1fr;gap:10px;align-items:start}
+.tip img{width:48px;height:40px;object-fit:contain}
+.tip p{font-size:12px;line-height:1.4;color:var(--navyMuted)}
+.tip p b{color:var(--navy);display:block;margin-bottom:2px}
+
+.mmap{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.mmap i{display:block;height:28px;border-radius:6px;background:#E8E2D6;position:relative}
+.mmap i.pakka{background:var(--ok)}
+.mmap i.learn{background:var(--gold)}
+.mmap i.todo{background:#E8E2D6}
+.mmap-leg{display:flex;gap:10px;margin-top:10px;font-size:10px;color:var(--inkSoft);font-weight:500}
+.mmap-leg span{display:inline-flex;align-items:center;gap:4px}
+.mmap-leg u{width:8px;height:8px;border-radius:2px;display:inline-block;text-decoration:none}
+
+@media (max-width:1300px){
+  .side{width:176px}
+  .rail{width:272px;padding:10px;gap:8px}
+  .card{padding:12px}
+  .card h3{margin-bottom:8px}
+  .streak-cell{padding:8px}
+  .streak-cell .n{font-size:18px}
+  .game-card{grid-template-columns:56px 1fr;gap:8px}
+  .thumb{width:56px;height:56px}
+  .hw-row{padding:6px 0}
+  .tip{grid-template-columns:40px 1fr;gap:8px}
+  .tip img{width:40px;height:32px}
+  .mmap i{height:20px}
+  .mmap-leg{margin-top:6px}
+  .stage{padding:16px}
+  .serpentine{height:152px}
+  .node{width:88px;margin-left:-44px}
+  .node .circle{width:48px;height:48px}
+  .node .circle svg{width:18px;height:18px}
+  .unit-bar{padding:12px 16px;margin-bottom:16px}
+  .unit-bar h1{font-size:17px}
+  .islands{gap:20px}
+  .island{padding:16px 16px 24px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <div class="brand-mark">V</div>
+      <div><div class="brand-name">VidhyaSaathy</div><div class="brand-tag">Class 9 · NCERT</div></div>
+    </div>
+    <nav class="nav">
+      <a class="active" href="#"><svg class="ico" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>Home</a>
+      <a href="#"><svg class="ico" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>My subjects</a>
+      <a href="#"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>Study sessions</a>
+      <a href="#"><svg class="ico" viewBox="0 0 24 24"><path d="M7 4h10v16l-5-3-5 3V4z"/></svg>Homework</a>
+      <div class="sec">Play</div>
+      <a href="#"><svg class="ico" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2"/><path d="M12 4v3M12 17v3M4 12h3M17 12h3"/></svg>Games</a>
+      <a href="#"><svg class="ico" viewBox="0 0 24 24"><path d="M12 4c3.5 1.5 6 4.2 6 7.5S15 18 12 20c-3-2-6-4.2-6-8.5S8.5 5.5 12 4z"/></svg>Ask Saathy</a>
+      <div class="sec">You</div>
+      <a href="#"><svg class="ico" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>Notifications</a>
+      <a href="#"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M3 12h2M19 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Settings</a>
+    </nav>
+    <div class="side-foot">
+      <div class="profile"><div class="avatar">A</div><div><b>Aarav</b><span>IX-B · Roll 17</span></div></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="top">
+      <div class="top-left">Tuesday, 27 Oct · Learning path</div>
+      <div class="top-right">
+        <span class="stat-pill"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3c2 3 3 5 3 7a3 3 0 1 1-6 0c0-2 1-4 3-7z"/><path d="M8 16c1.5 2 2.5 3 4 4 1.5-1 2.5-2 4-4"/></svg>5 day streak</span>
+        <span class="stat-pill"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3l2.2 6.5H21l-5.4 3.9 2.1 6.6L12 16.8 6.3 20l2.1-6.6L3 9.5h6.8z"/></svg>340 XP</span>
+        <button class="bell" aria-label="Notifications"><svg class="ico" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M10 19a2 2 0 0 0 4 0"/></svg><i class="dot"></i></button>
+      </div>
+    </header>
+
+    <div class="body">
+      <div class="stage">
+        <div class="stage-inner">
+          <div class="unit-bar">
+            <div>
+              <div class="eyebrow">Class 9 · Science path</div>
+              <h1>Continue where you left off</h1>
+              <div class="sub">Physics · Motion · Session 3 · Acceleration</div>
+            </div>
+            <div class="unit-actions">
+              <button class="btn-ghost"><svg class="ico" viewBox="0 0 24 24"><path d="M6 4h12v16l-6-3-6 3V4z"/></svg>Guidebook</button>
+            </div>
+          </div>
+
+          <div class="islands">
+            <!-- Island 1: Motion -->
+            <section class="island active">
+              <div class="island-head">
+                <h2>Physics · Ch 8 · Motion</h2>
+                <div class="meta">3 of 6 nodes · 65% mastery</div>
+              </div>
+              <div class="serpentine">
+                <svg class="serp-svg" viewBox="0 0 900 168" preserveAspectRatio="none" aria-hidden="true">
+                  <path d="M60 90 C 160 90, 180 40, 280 40 S 400 140, 500 140 S 620 40, 720 40 S 820 90, 860 90" fill="none" stroke="#E6DFD2" stroke-width="6" stroke-linecap="round"/>
+                  <path d="M60 90 C 160 90, 180 40, 280 40 S 400 140, 480 140" fill="none" stroke="#E8B84A" stroke-width="6" stroke-linecap="round"/>
+                </svg>
+                <div class="nodes">
+                  <div class="node done" style="left:6.5%;top:52px">
+                    <div class="circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg></div>
+                    <div class="lbl"><strong>Distance</strong>vs Displacement</div>
+                  </div>
+                  <div class="node done" style="left:31%;top:2px">
+                    <div class="circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg></div>
+                    <div class="lbl"><strong>Speed</strong>&amp; Velocity</div>
+                  </div>
+                  <div class="node active" style="left:55.5%;top:102px">
+                    <div class="start-tip">START HERE</div>
+                    <div class="circle"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M8 5v14l12-7z"/></svg></div>
+                    <div class="lbl"><strong>Acceleration</strong>Session 3</div>
+                  </div>
+                  <div class="node locked" style="left:80%;top:2px">
+                    <div class="circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="6" y="10" width="12" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+                    <div class="lbl"><strong>Graphs</strong>Bus Stop Graphs</div>
+                  </div>
+                  <div class="node chest" style="left:95.5%;top:52px">
+                    <div class="circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M4 12h16M12 8v12"/></svg></div>
+                    <div class="lbl"><strong>Chest</strong>+50 XP</div>
+                  </div>
+                </div>
+              </div>
+              <div class="cta-row">
+                <button class="cta">Continue · Acceleration <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+                <span class="cta-note">~12 min · resumes where you stopped</span>
+              </div>
+            </section>
+
+            <!-- Island 2: Atoms -->
+            <section class="island">
+              <div class="island-head">
+                <h2>Chemistry · Ch 3 · Atoms and Molecules</h2>
+                <div class="meta">1 of 5 nodes · 42% mastery</div>
+              </div>
+              <div class="serpentine">
+                <svg class="serp-svg" viewBox="0 0 900 168" preserveAspectRatio="none" aria-hidden="true">
+                  <path d="M60 50 C 180 50, 200 130, 320 130 S 460 50, 560 50 S 680 130, 780 130 S 860 80, 860 80" fill="none" stroke="#E6DFD2" stroke-width="6" stroke-linecap="round"/>
+                  <path d="M60 50 C 140 50, 160 90, 200 110" fill="none" stroke="#E8B84A" stroke-width="6" stroke-linecap="round"/>
+                </svg>
+                <div class="nodes">
+                  <div class="node done" style="left:6.5%;top:12px">
+                    <div class="circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg></div>
+                    <div class="lbl"><strong>Laws</strong>of chemical comb.</div>
+                  </div>
+                  <div class="node locked" style="left:35.5%;top:92px">
+                    <div class="circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="3"/><ellipse cx="12" cy="12" rx="9" ry="4"/><ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(60 12 12)"/></svg></div>
+                    <div class="lbl"><strong>Atom Forge</strong>Structure of Atom</div>
+                  </div>
+                  <div class="node locked" style="left:62%;top:12px">
+                    <div class="circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="6" y="10" width="12" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+                    <div class="lbl"><strong>Mole concept</strong>Counting atoms</div>
+                  </div>
+                  <div class="node locked" style="left:86.5%;top:92px">
+                    <div class="circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 3l2.2 6.5H21l-5.4 3.9 2.1 6.6L12 16.8 6.3 20l2.1-6.6L3 9.5h6.8z"/></svg></div>
+                    <div class="lbl"><strong>Chapter quiz</strong>60% to pass</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Island 3: Biology -->
+            <section class="island locked">
+              <div class="island-head">
+                <h2>Biology · Ch 5 · The Fundamental Unit of Life</h2>
+                <div class="meta">Locked · finishes after Atoms</div>
+              </div>
+              <div class="serpentine">
+                <svg class="serp-svg" viewBox="0 0 900 168" preserveAspectRatio="none" aria-hidden="true">
+                  <path d="M60 90 C 200 40, 300 40, 400 90 S 600 140, 700 90 S 820 50, 860 50" fill="none" stroke="#E6DFD2" stroke-width="6" stroke-linecap="round"/>
+                </svg>
+                <div class="nodes">
+                  <div class="node locked" style="left:8%;top:52px">
+                    <div class="circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="6" y="10" width="12" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+                    <div class="lbl"><strong>Cell theory</strong>Who found it</div>
+                  </div>
+                  <div class="node locked" style="left:44%;top:52px">
+                    <div class="circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><ellipse cx="12" cy="12" rx="8" ry="10"/><circle cx="12" cy="12" r="3"/></svg></div>
+                    <div class="lbl"><strong>Bio Quest</strong>Organelles</div>
+                  </div>
+                  <div class="node locked" style="left:80%;top:52px">
+                    <div class="circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="6" y="10" width="12" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+                    <div class="lbl"><strong>Plasma membrane</strong>Selective wall</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+
+      <aside class="rail">
+        <div class="card">
+          <h3>Today</h3>
+          <div class="streak-row">
+            <div class="streak-cell"><div class="n">5</div><div class="l"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3c2 3 3 5 3 7a3 3 0 1 1-6 0c0-2 1-4 3-7z"/></svg>streak</div></div>
+            <div class="streak-cell"><div class="n">340</div><div class="l"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3l2.2 6.5H21l-5.4 3.9 2.1 6.6L12 16.8 6.3 20l2.1-6.6L3 9.5h6.8z"/></svg>XP</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Today’s game <span>Chemistry</span></h3>
+          <div class="game-card">
+            <div class="thumb"><div class="thumb-atom"><div class="orb"></div><div class="orb orb2"></div><div class="nuc"></div><div class="e"></div></div></div>
+            <div>
+              <b>Atom Forge</b>
+              <span>Build electron shells for Structure of the Atom.</span>
+              <button class="play">Play · ~8 min</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Homework due <span>2 open</span></h3>
+          <div class="hw">
+            <div class="hw-row">
+              <i class="hw-dot due"></i>
+              <div><b>Motion diagnostic</b><span>Physics · Session 3</span></div>
+              <span class="hw-tag due">Today</span>
+            </div>
+            <div class="hw-row">
+              <i class="hw-dot late"></i>
+              <div><b>Atoms worksheet</b><span>Chemistry · Ch 3</span></div>
+              <span class="hw-tag late">Mon</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Saathy</h3>
+          <div class="tip">
+            <img src="../saathy-cut.png" alt=""/>
+            <p><b>Tip for Acceleration</b>It is only how fast velocity changes. Finish Session 3, then open Cricket Lab to feel it on a ball.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Mastery · Motion</h3>
+          <div class="mmap">
+            <i class="pakka" title="Distance"></i>
+            <i class="pakka" title="Speed"></i>
+            <i class="learn" title="Acceleration"></i>
+            <i class="todo" title="Graphs"></i>
+            <i class="todo" title="Equations"></i>
+            <i class="todo" title="Circular"></i>
+          </div>
+          <div class="mmap-leg">
+            <span><u style="background:#2F9E6B"></u>Pakka</span>
+            <span><u style="background:#E8B84A"></u>Learning</span>
+            <span><u style="background:#E8E2D6"></u>Next</span>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+</body>
+</html>

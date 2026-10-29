@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Direction B — Today Card Stack</title>
+<style>
+@font-face{font-family:'Inter';font-weight:400;src:url('file:///workspace/mockups/fonts/inter-400.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-weight:500;src:url('file:///workspace/mockups/fonts/inter-500.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-weight:600;src:url('file:///workspace/mockups/fonts/inter-600.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-weight:700;src:url('file:///workspace/mockups/fonts/inter-700.woff2') format('woff2')}
+:root{
+  --cream:#F7F1E8; --creamSoft:#FBF7F0; --navy:#1B2A4A; --navyMuted:#3A4A6B;
+  --inkSoft:#6B7280; --gold:#E8B84A; --goldDeep:#C9962E; --border:#E6DFD2;
+  --ok:#2F9E6B; --sky:#E8F2FB; --white:#FFFEFB;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--cream);color:var(--navy);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.app{display:flex;height:100vh;overflow:hidden}
+.side{width:220px;flex-shrink:0;background:var(--creamSoft);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:16px 12px}
+.brand{display:flex;align-items:center;gap:10px;padding:8px 10px 20px}
+.brand-mark{width:32px;height:32px;border-radius:10px;background:linear-gradient(145deg,#28517c,#1B2A4A);display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px;box-shadow:0 2px 0 #0f1a30}
+.brand-name{font-size:14px;font-weight:700}.brand-tag{font-size:10px;color:var(--inkSoft)}
+.nav{display:flex;flex-direction:column;gap:2px;flex:1}
+.nav a{display:flex;align-items:center;gap:10px;height:36px;padding:0 12px;border-radius:8px;color:var(--navyMuted);text-decoration:none;font-size:13.5px;font-weight:500}
+.nav a.active{background:#EDE6DA;color:var(--navy);font-weight:600}
+.nav .sec{margin:14px 12px 6px;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--inkSoft)}
+.side-foot{padding:12px 10px 4px;border-top:1px solid var(--border)}
+.profile{display:flex;align-items:center;gap:10px}
+.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(145deg,#E8B84A,#C9962E);display:grid;place-items:center;font-weight:700;font-size:13px;color:#1B2A4A}
+.profile b{display:block;font-size:13px}.profile span{font-size:11px;color:var(--inkSoft)}
+
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.top{height:56px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 28px;border-bottom:1px solid var(--border);background:var(--creamSoft)}
+.top-left{font-size:13px;color:var(--inkSoft);font-weight:500}
+.top-right{display:flex;align-items:center;gap:12px}
+.chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;background:#fff;border:1px solid var(--border);font-size:12px;font-weight:600}
+.bell{position:relative;width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:#fff;display:grid;place-items:center}
+.bell .dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:#C9433A}
+
+.scroll{flex:1;overflow-y:auto;padding:18px 28px 24px}
+.wrap{max-width:1080px;margin:0 auto}
+
+.hello{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.hello h1{font-size:22px;font-weight:700;letter-spacing:-.03em}
+.hello p{font-size:14px;color:var(--navyMuted);margin-top:4px}
+.hello img{width:56px;height:56px;object-fit:contain;filter:drop-shadow(0 6px 12px rgb(27 42 74 / 12%))}
+
+.hero{display:grid;grid-template-columns:1fr 200px;gap:0;background:linear-gradient(135deg,#1B2A4A 0%,#28517c 55%,#3A5A8A 100%);border-radius:18px;overflow:hidden;color:#fff;box-shadow:0 12px 32px rgb(27 42 74 / 18%);margin-bottom:14px;min-height:168px}
+.hero-body{padding:22px 26px;display:flex;flex-direction:column;justify-content:center}
+.hero-eyebrow{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;opacity:.7;margin-bottom:8px}
+.hero h2{font-size:24px;font-weight:700;letter-spacing:-.03em;line-height:1.15;margin-bottom:6px}
+.hero .blurb{font-size:13px;opacity:.85;max-width:420px;line-height:1.4;margin-bottom:12px}
+.hero-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.btn-gold{height:42px;padding:0 18px;border-radius:12px;background:linear-gradient(180deg,#F0C85E,#E8B84A);box-shadow:0 4px 0 #C9962E;border:none;color:var(--navy);font-size:15px;font-weight:700;cursor:pointer}
+.btn-ghost{height:42px;padding:0 14px;border-radius:12px;background:rgb(255 255 255 / 12%);border:1px solid rgb(255 255 255 / 22%);color:#fff;font-size:14px;font-weight:600}
+.hero-ring{display:flex;align-items:center;justify-content:center;background:rgb(0 0 0 / 12%);padding:24px}
+.ring{position:relative;width:120px;height:120px}
+.ring svg{width:120px;height:120px;transform:rotate(-90deg)}
+.ring .pct{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;transform:none}
+.ring .pct b{font-size:26px;font-weight:700;letter-spacing:-.03em;line-height:1}
+.ring .pct span{font-size:11px;opacity:.75;margin-top:2px;font-weight:500}
+
+.stack-label{font-size:13px;font-weight:700;margin:8px 0 12px;display:flex;align-items:center;justify-content:space-between}
+.stack-label span{font-weight:500;color:var(--inkSoft);font-size:12px}
+
+.stack{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.scard{display:grid;grid-template-columns:48px 1fr auto;gap:12px;align-items:center;background:#fff;border:1px solid var(--border);border-radius:14px;padding:10px 14px;box-shadow:0 1px 2px rgb(27 42 74 / 4%)}
+.scard .ico{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;font-size:20px;position:relative;overflow:hidden}
+.scard .ico.phys{background:linear-gradient(145deg,#D6E8FB,#A8C8EE)}
+.scard .ico.chem{background:linear-gradient(145deg,#FDE8C8,#F5C97A)}
+.scard .ico.bio{background:linear-gradient(145deg,#D8F0E0,#8FCB9B)}
+.scard .ico.mat{background:linear-gradient(145deg,#E8DFF5,#C4B0E0)}
+.scard .meta b{display:block;font-size:14.5px;font-weight:650;letter-spacing:-.01em}
+.scard .meta span{font-size:12px;color:var(--inkSoft)}
+.scard .meta .tags{display:flex;gap:6px;margin-top:6px}
+.tag{height:22px;padding:0 8px;border-radius:999px;background:var(--cream);font-size:10.5px;font-weight:600;color:var(--navyMuted);display:inline-flex;align-items:center}
+.scard .go{height:36px;padding:0 14px;border-radius:10px;background:var(--navy);color:#fff;font-size:12.5px;font-weight:600;border:none;white-space:nowrap}
+
+.games-head{display:flex;align-items:end;justify-content:space-between;margin-bottom:10px}
+.games-head h3{font-size:15px;font-weight:700;letter-spacing:-.02em}
+.games-head p{font-size:13px;color:var(--navyMuted)}
+
+.games{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.game{background:#fff;border:1px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:0 2px 8px rgb(27 42 74 / 5%);display:flex;flex-direction:column}
+.stage{height:110px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.stage.atom{background:radial-gradient(circle at 50% 60%,#2a4068 0%,#1B2A4A 70%)}
+.stage.bio{background:radial-gradient(circle at 40% 40%,#3d7a55 0%,#1e4a32 70%)}
+.stage.part{background:radial-gradient(circle at 60% 50%,#8a5a2a 0%,#4a2e12 70%)}
+.stage.cricket{background:radial-gradient(circle at 50% 30%,#4a7a9a 0%,#1B2A4A 75%)}
+
+/* 3D-ish CSS illustrations */
+.ill-atom{position:relative;width:90px;height:90px}
+.ill-atom .nuc{position:absolute;left:50%;top:50%;width:22px;height:22px;margin:-11px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#F0C85E,#E8B84A 60%,#C9962E);box-shadow:0 0 16px rgb(232 184 74 / 55%)}
+.ill-atom .orbit{position:absolute;inset:8px;border:1.5px solid rgb(127 179 255 / 45%);border-radius:50%;transform:rotateX(66deg) rotateZ(20deg)}
+.ill-atom .orbit2{inset:0;transform:rotateX(66deg) rotateZ(-40deg);border-color:rgb(232 184 74 / 35%)}
+.ill-atom .e{position:absolute;width:10px;height:10px;border-radius:50%;background:#7fb3ff;box-shadow:0 0 8px #7fb3ff;left:8px;top:40px}
+.ill-atom .e2{left:72px;top:28px;background:#E8B84A;box-shadow:0 0 8px #E8B84A}
+
+.ill-cell{position:relative;width:80px;height:80px}
+.ill-cell .mem{position:absolute;inset:0;border-radius:50% 45% 55% 48%;background:radial-gradient(circle at 35% 35%,#8FCB9B,#2F9E6B);box-shadow:inset -8px -10px 20px rgb(0 0 0 / 25%),0 8px 16px rgb(0 0 0 / 2%)}
+.ill-cell .nuc{position:absolute;left:28px;top:26px;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#F5D78A,#C9962E);box-shadow:0 2px 8px rgb(0 0 0 / 25%)}
+
+.ill-part{position:relative;width:100px;height:80px}
+.ill-part i{position:absolute;border-radius:50%;background:radial-gradient(circle at 30% 30%,#fff,#E8B84A);box-shadow:0 2px 6px rgb(0 0 0 / 25%)}
+.ill-part i:nth-child(1){width:18px;height:18px;left:20px;top:30px}
+.ill-part i:nth-child(2){width:12px;height:12px;left:48px;top:18px;background:radial-gradient(circle at 30% 30%,#fff,#7fb3ff)}
+.ill-part i:nth-child(3){width:22px;height:22px;left:62px;top:36px}
+.ill-part i:nth-child(4){width:10px;height:10px;left:40px;top:48px;background:radial-gradient(circle at 30% 30%,#fff,#F5A97A)}
+.ill-part i:nth-child(5){width:14px;height:14px;left:10px;top:14px;opacity:.85}
+
+.ill-bat{position:relative;width:100px;height:80px}
+.ill-bat .pitch{position:absolute;left:10px;right:10px;bottom:8px;height:18px;background:linear-gradient(180deg,#6a9a4a,#3d6a2a);border-radius:4px;transform:perspective(80px) rotateX(50deg)}
+.ill-bat .ball{position:absolute;left:58px;top:18px;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#E8B84A 55%,#C9962E);box-shadow:0 4px 10px rgb(0 0 0 / 3%)}
+.ill-bat .bat{position:absolute;left:18px;top:10px;width:14px;height:55px;background:linear-gradient(90deg,#C9962E,#E8B84A 40%,#8a5a2a);border-radius:4px 4px 2px 2px;transform:rotate(-28deg);box-shadow:2px 2px 6px rgb(0 0 0 / 25%)}
+.ill-bat .handle{position:absolute;left:22px;top:52px;width:8px;height:18px;background:#5a3a1a;border-radius:2px;transform:rotate(-28deg)}
+
+.game-body{padding:10px 12px 12px}
+.game-body b{display:block;font-size:14px;font-weight:700;letter-spacing:-.01em}
+.game-body span{display:block;font-size:11.5px;color:var(--inkSoft);margin-top:3px;line-height:1.35}
+.game-body .play{margin-top:8px;height:30px;width:100%;border-radius:10px;background:var(--cream);border:1px solid var(--border);font-size:12.5px;font-weight:650;color:var(--navy);display:flex;align-items:center;justify-content:center;gap:6px}
+
+html.is-mobile .side{display:none}
+html.is-mobile .top{padding:0 10px}
+html.is-mobile .chip{font-size:11px;padding:0 8px}
+html.is-mobile .top-left{display:none}
+html.is-mobile .scroll{padding:16px 14px 90px}
+html.is-mobile .hello h1{font-size:20px}
+html.is-mobile .hello img{width:48px;height:48px}
+html.is-mobile .hero{grid-template-columns:1fr;min-height:0}
+html.is-mobile .hero-ring{display:none}
+html.is-mobile .ring{width:100px;height:100px}
+html.is-mobile .ring svg{width:100px;height:100px}
+html.is-mobile .ring .pct b{font-size:24px}
+html.is-mobile .hero-body{padding:18px}
+html.is-mobile .hero h2{font-size:20px}
+html.is-mobile .hero .blurb{font-size:13px;margin-bottom:14px}
+html.is-mobile .btn-gold,html.is-mobile .btn-ghost{height:42px;font-size:13px}
+html.is-mobile .scard{grid-template-columns:48px 1fr;gap:10px}
+html.is-mobile .scard .go{grid-column:2;justify-self:start;margin-top:4px}
+html.is-mobile .games{grid-template-columns:1fr 1fr;gap:10px}
+html.is-mobile .stage{height:100px}
+html.is-mobile .mobile-dock{display:flex !important}
+.mobile-dock{display:none;position:fixed;left:0;right:0;bottom:0;height:64px;background:var(--creamSoft);border-top:1px solid var(--border);align-items:center;justify-content:space-around;z-index:20}
+.mobile-dock a{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;font-weight:600;color:var(--inkSoft);text-decoration:none}
+.mobile-dock a.active{color:var(--navy)}
+.mobile-dock a span{font-size:18px}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <div class="brand-mark">V</div>
+      <div><div class="brand-name">VidhyaSaathy</div><div class="brand-tag">Class 9 · NCERT</div></div>
+    </div>
+    <nav class="nav">
+      <a class="active" href="#">🏠 Home</a>
+      <a href="#">📚 My subjects</a>
+      <a href="#">⏱️ Study sessions</a>
+      <a href="#">📝 Homework</a>
+      <div class="sec">Play</div>
+      <a href="#">🎮 Games</a>
+      <a href="#">☁️ Ask Saathy</a>
+      <div class="sec">You</div>
+      <a href="#">🔔 Notifications</a>
+      <a href="#">⚙️ Settings</a>
+    </nav>
+    <div class="side-foot">
+      <div class="profile">
+        <div class="avatar">A</div>
+        <div><b>Aarav</b><span>IX-B · Roll 17</span></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="top">
+      <div class="top-left">Tuesday, 27 Oct · Your desk</div>
+      <div class="top-right">
+        <span class="chip">🔥 5 streak</span>
+        <span class="chip">★ 340 XP</span>
+        <button class="bell">🔔<i class="dot"></i></button>
+      </div>
+    </header>
+
+    <div class="scroll">
+      <div class="wrap">
+        <div class="hello">
+          <div>
+            <h1>Namaste, Aarav</h1>
+            <p>Saathy ne aaj ka plan ready kiya — ek lesson, phir ek game.</p>
+          </div>
+          <img src="../saathy-cut.png" alt="Saathy"/>
+        </div>
+
+        <section class="hero">
+          <div class="hero-body">
+            <div class="hero-eyebrow">Today’s lesson · Physics</div>
+            <h2>Acceleration</h2>
+            <p class="blurb">Speed badalne ki rate — Cricket Lab se pehle yeh concept pakka karo. 12 min · Session 3 · 65% chapter done.</p>
+            <div class="hero-actions">
+              <button class="btn-gold">Continue learning →</button>
+              <button class="btn-ghost">Preview</button>
+            </div>
+          </div>
+          <div class="hero-ring">
+            <div class="ring">
+              <svg viewBox="0 0 140 140">
+                <circle cx="70" cy="70" r="58" fill="none" stroke="rgb(255 255 255 / 15%)" stroke-width="12"/>
+                <circle cx="70" cy="70" r="58" fill="none" stroke="#E8B84A" stroke-width="12" stroke-linecap="round" stroke-dasharray="364" stroke-dashoffset="127"/>
+              </svg>
+              <div class="pct"><b>65%</b><span>chapter</span></div>
+            </div>
+          </div>
+        </section>
+
+        <div class="stack-label">Up next <span>2 waiting</span></div>
+        <div class="stack">
+          <div class="scard">
+            <div class="ico phys">📈</div>
+            <div class="meta">
+              <b>Bus Stop Graphs</b>
+              <span>Physics · Motion · interactive video</span>
+              <div class="tags"><span class="tag">Game</span><span class="tag">~8 min</span></div>
+            </div>
+            <button class="go">Open</button>
+          </div>
+          <div class="scard">
+            <div class="ico chem">⚛️</div>
+            <div class="meta">
+              <b>Atoms and Molecules · shell check</b>
+              <span>Chemistry · homework due Thu</span>
+              <div class="tags"><span class="tag">Homework</span><span class="tag">Due Thu</span></div>
+            </div>
+            <button class="go">Open</button>
+          </div>
+
+        </div>
+
+        <div class="games-head">
+          <div>
+            <h3>Learning games</h3>
+            <p>Interactive videos — play to learn, not quiz spam.</p>
+          </div>
+        </div>
+        <div class="games">
+          <div class="game">
+            <div class="stage atom">
+              <div class="ill-atom">
+                <div class="orbit"></div>
+                <div class="orbit orbit2"></div>
+                <div class="nuc"></div>
+                <div class="e"></div>
+                <div class="e e2"></div>
+              </div>
+            </div>
+            <div class="game-body">
+              <b>Atom Forge</b>
+              <span>Build shells. Chemistry · Structure of the Atom</span>
+              <div class="play">▶ Play</div>
+            </div>
+          </div>
+          <div class="game">
+            <div class="stage bio">
+              <div class="ill-cell"><div class="mem"></div><div class="nuc"></div></div>
+            </div>
+            <div class="game-body">
+              <b>Bio Quest</b>
+              <span>Explore the cell. Biology · Unit of Life</span>
+              <div class="play">▶ Play</div>
+            </div>
+          </div>
+          <div class="game">
+            <div class="stage part">
+              <div class="ill-part"><i></i><i></i><i></i><i></i><i></i></div>
+            </div>
+            <div class="game-body">
+              <b>Particle Party</b>
+              <span>Matter states dance. Chemistry · Matter</span>
+              <div class="play">▶ Play</div>
+            </div>
+          </div>
+          <div class="game">
+            <div class="stage cricket">
+              <div class="ill-bat">
+                <div class="pitch"></div>
+                <div class="bat"></div>
+                <div class="handle"></div>
+                <div class="ball"></div>
+              </div>
+            </div>
+            <div class="game-body">
+              <b>Cricket Lab</b>
+              <span>Feel acceleration. Physics · Motion</span>
+              <div class="play">▶ Play</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<nav class="mobile-dock">
+  <a class="active" href="#"><span>🏠</span>Home</a>
+  <a href="#"><span>📚</span>Subjects</a>
+  <a href="#"><span>🎮</span>Games</a>
+  <a href="#"><span>💬</span>Saathy</a>
+  <a href="#"><span>👤</span>You</a>
+</nav>
+</body>
+</html>
