@@ -14,6 +14,7 @@ export function masteryKey(level: string): string {
 }
 
 export function MasteryChip({ level }: { level: string }) {
+  if (level === 'Up next') return <span className="nb-mastery nb-mastery--new">Up next</span>;
   const known = level in MASTERY;
   return <span className={`nb-mastery nb-mastery--${masteryKey(level)}`}>{known ? level : 'New'}</span>;
 }

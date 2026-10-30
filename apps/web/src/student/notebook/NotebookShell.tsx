@@ -1,4 +1,4 @@
-import { NotificationListSchema, ProgressSchema, StreakSchema, StudentEnrollmentSchema, TeacherDashboardSchema, type Me, type Role } from '@vidhyasaathy/contracts';
+import { NotificationListSchema, ProgressSchema, StudentEnrollmentSchema, StudentHomeSchema, TeacherDashboardSchema, type Me, type Role } from '@vidhyasaathy/contracts';
 import { createContext, useContext, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useRemote } from '../../setup/useRemote';
@@ -108,7 +108,7 @@ export function NotebookShell({ me, children }: { me: Me; children: ReactNode })
   const active = activeKey(role, pathname, search, hash);
   const student = role === 'student';
   const enrollment = useRemote(student ? '/student/enrollment' : null, StudentEnrollmentSchema);
-  const streak = useRemote(student ? '/practice/streak' : null, StreakSchema);
+  const desk = useRemote(student ? '/student/home' : null, StudentHomeSchema);
   const progress = useRemote(student ? '/progress' : null, ProgressSchema);
   const notes = useRemote('/notifications', NotificationListSchema);
   const teacherDesk = useRemote(role === 'teacher' ? '/dashboard/teacher' : null, TeacherDashboardSchema);
@@ -116,7 +116,6 @@ export function NotebookShell({ me, children }: { me: Me; children: ReactNode })
   const nav = role === 'teacher' ? TEACHER : role === 'parent' ? PARENT : STUDENT;
   const unread = (notes.data?.notifications ?? []).filter((item) => item.readAt === null).length;
   const homeworkOpen = (progress.data?.assignments ?? []).filter((item) => item.score?.status !== 'completed' && item.score?.status !== 'pending_review').length;
-  const xp = (progress.data?.evidence.correct ?? 0) * 10;
   const tag = role === 'teacher' ? 'Teacher desk' : role === 'parent' ? 'Parent view' : enrollment.data?.className ? `Class ${enrollment.data.className} · NCERT` : me.school.name;
   const line = student ? enrollmentLine(enrollment.data?.className, enrollment.data?.sectionName, enrollment.data?.rollNumber) : role === 'teacher' ? me.school.name : 'Parent';
   const home = role === 'teacher' ? '/teacher' : role === 'parent' ? '/parent' : '/student';
@@ -140,8 +139,8 @@ export function NotebookShell({ me, children }: { me: Me; children: ReactNode })
         <Link className="nb-brand nb-show-m" to={home}><div className="nb-brand__mark">V</div></Link>
         <form className="nb-search" onSubmit={submitSearch}><Icon name="search" /><input value={query} onChange={(event) => { setQuery(event.target.value); }} placeholder="Search lessons, notes, questions, games…" aria-label="Search lessons, notes, questions, games" /><kbd>/</kbd></form>
         <div className="nb-top__right">
-          {student ? <span className="nb-pill nb-pill--streak"><Icon name="flame" />{streak.data ? `${streak.data.currentDays} day streak` : 'Streak'}</span> : null}
-          {student ? <span className="nb-pill nb-pill--xp"><Icon name="star" />{progress.data ? `${xp} XP` : 'XP'}</span> : null}
+          {student ? <span className="nb-pill nb-pill--streak"><Icon name="flame" />{desk.data ? `${desk.data.streak.currentDays} day streak` : 'Streak'}</span> : null}
+          {student ? <span className="nb-pill nb-pill--xp"><Icon name="star" />{desk.data ? `${desk.data.xp} XP` : 'XP'}</span> : null}
           <Link className="nb-bell" to={`/${role}/notifications`} aria-label="Notifications"><Icon name="bell" />{unread > 0 ? <i /> : null}</Link>
         </div>
       </header>

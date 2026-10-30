@@ -1,4 +1,7 @@
 /* Carren sizing fix. Loaded after the notebook sheets so these rules win. */
+.nb-app { height: 100dvh; width: 100%; }
+.nb-main { height: 100%; min-height: 0; }
+.nb-sheet { flex: 1 1 auto; min-height: 0; width: 100%; }
 .nb-app > *,
 .nb-app .nb-grid > *,
 .nb-app .nb-col > *,
