@@ -12,3 +12,10 @@
 - Added the supplied source in the existing Motion lesson format, linked to the existing concept and prerequisites. Three checkpoints, six flashcards, worked/faded examples and existing interactive block types; no new game or schema change.
 - Added API coverage for loading, Hindi terms, answer-key redaction and server checking. No demo database modified; tests use isolated databases.
 - Verification: `npm run typecheck` passed; `npm run test:unit` passed (288 passed, 1 skipped).
+
+## 2b. Lesson notebook
+
+- Rebuilt the student ConceptPage around the lesson mockup: real style tabs, bridge, checkpoints, worked/faded examples, misconception, contents rail and page-scoped Ask. Teacher view retained.
+- Preserved server checking, simpler explanations, explain-back, flashcard ratings and revision scheduling. Empty video card does not invent a video ID.
+- Scoped the landing graph-paper background out of notebook grids; landing page is unchanged.
+- Verification: `npm run typecheck` passed; `npm run test:unit` passed (288 passed, 1 skipped). Lesson viewport checks: 360/360, 1024/1024, 1280/1280, 1440/1440, 1920/1920 (scrollWidth/innerWidth). Final screenshots will be refreshed after all screens.
