@@ -19,3 +19,9 @@
 - Preserved server checking, simpler explanations, explain-back, flashcard ratings and revision scheduling. Empty video card does not invent a video ID.
 - Scoped the landing graph-paper background out of notebook grids; landing page is unchanged.
 - Verification: `npm run typecheck` passed; `npm run test:unit` passed (288 passed, 1 skipped). Lesson viewport checks: 360/360, 1024/1024, 1280/1280, 1440/1440, 1920/1920 (scrollWidth/innerWidth). Final screenshots will be refreshed after all screens.
+
+## 3. Diagnostic notebook
+
+- Rebuilt the question sheet and rail from the diagnostic mockup, using only the API's prerequisite questions and source references. No marks or inferred correctness before submission.
+- The not-taught option hides confidence and records `not_taught` through the existing no-penalty API. Back preserves answers; submission stays server-scored. Loading, unavailable, empty, retry and denied states retained.
+- Verification: `npm run typecheck` passed; `npm run test:unit` passed (288 passed, 1 skipped). Diagnostic viewport checks: 360/360, 1024/1024, 1280/1280, 1440/1440, 1920/1920. Inspected populated 1440 and 360 screenshots; rail stacks rather than disappearing.
