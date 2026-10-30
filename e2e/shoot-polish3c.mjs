@@ -1,0 +1,55 @@
+import { mkdir } from 'node:fs/promises';
+import { createRequire } from 'node:module';
+import { chromium } from 'playwright';
+
+const require = createRequire(new URL('../apps/api/package.json', import.meta.url));
+const Sqlite = require('better-sqlite3');
+const baseURL = 'http://127.0.0.1:5181';
+const [screen = 'games', person = 'Aarav'] = process.argv.slice(2);
+const routes = {
+  games: '/student?panel=games', notifications: '/student/notifications', settings: '/student/settings',
+  'teacher-home': '/teacher', 'parent-home': '/parent',
+  'signin-student': '/signin/student', 'signin-teacher': '/signin?role=teacher', 'signin-parent': '/signin?role=parent',
+};
+if (!routes[screen]) throw new Error(`Unknown screen: ${screen}`);
+const browser = await chromium.launch();
+try {
+  const context = await browser.newContext({ baseURL, reducedMotion: 'reduce' });
+  if (!screen.startsWith('signin-')) {
+    let body;
+    let path = '/auth/login';
+    if (screen === 'teacher-home' || screen === 'parent-home') {
+      body = { email: `${screen === 'teacher-home' ? 'teacher' : 'parent'}@demo.invalid`, password: 'Saathy@2026!' };
+    } else {
+      const db = new Sqlite(new URL('../apps/api/data/vidhyasaathy.db', import.meta.url).pathname.replace(/^\/(\w:)/, '$1'), { readonly: true });
+      const profile = db.prepare('SELECT id FROM profile WHERE role = ? AND name = ?').get('student', person);
+      db.close();
+      if (!profile) throw new Error(`No student named ${person}`);
+      path = '/auth/pin-login';
+      const pins = { Aarav: '2468', Priya: '5791' };
+      if (!pins[person]) throw new Error('Use Aarav or Priya for the screenshot comparison.');
+      body = { profileId: profile.id, pin: pins[person] };
+    }
+    const response = await context.request.post(`/api${path}`, { data: body, headers: { origin: baseURL } });
+    if (!response.ok()) throw new Error(`Login failed: ${response.status()} ${await response.text()}`);
+  }
+  const page = await context.newPage();
+  page.on('pageerror', (error) => { console.error(error.message); });
+  await mkdir(new URL('./screenshots/polish3c/', import.meta.url), { recursive: true });
+  for (const width of [360, 1024, 1280, 1440, 1920]) {
+    await page.setViewportSize({ width, height: 1080 });
+    await page.goto(routes[screen]);
+    await page.waitForLoadState('networkidle');
+    await page.locator('.nb-skel').waitFor({ state: 'detached' });
+    await page.evaluate(() => document.fonts.ready);
+    const measurement = await page.evaluate(() => ({ width: innerWidth, scrollWidth: document.documentElement.scrollWidth }));
+    if (measurement.scrollWidth > measurement.width) throw new Error(`${screen} overflow: ${JSON.stringify(measurement)}`);
+    console.log(`${screen}/${person}: ${measurement.width}/${measurement.scrollWidth}`);
+    if ([360, 1440, 1920].includes(width)) {
+      const suffix = person === 'Aarav' ? '' : `-${person.toLowerCase()}`;
+      await page.screenshot({ path: new URL(`./screenshots/polish3c/${screen}${suffix}-${width}.png`, import.meta.url).pathname.replace(/^\/(\w:)/, '$1'), fullPage: true });
+    }
+  }
+} finally {
+  await browser.close();
+}
