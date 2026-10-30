@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { StudentHomeSchema } from '@vidhyasaathy/contracts';
 import { getJson } from '../../../api/client';
+import { GAME_REGISTRY } from '../../../games/engine/registry';
 import { ChapterListSchema } from '../../../content/schemas';
 import { SubjectListSchema } from '../../../setup/schemas';
 import { useRemote } from '../../../setup/useRemote';
 import { Chip, PageHead, Tabs } from '../ui';
 import { Saathy } from '../Saathy';
+import { ScreenState } from './polish3c/ScreenState';
 import '../pages/games.css';
 
 const CATALOG = [
@@ -21,7 +24,7 @@ const CATALOG = [
   { id: 'poly', title: 'Polynomial Factory', topic: 'Polynomials', words: ['polynomial'] },
 ] as const;
 
-type Chapter = { id: string; title: string; subjectId: string };
+type Chapter = { id: string; title: string; subjectId: string; status: string };
 
 function GameArt({ id }: { id: string }) {
   if (id === 'newton') return <svg viewBox="0 0 100 100"><path d="M20 80l40-50M55 25l10 10" /><circle cx="72" cy="70" r="7" /><path d="M15 88h70" strokeDasharray="4 5" /></svg>;
@@ -38,50 +41,61 @@ function GameArt({ id }: { id: string }) {
 
 export function GamesBoard() {
   const subjects = useRemote('/student/subjects', SubjectListSchema);
+  const home = useRemote('/student/home', StudentHomeSchema);
   const [tab, setTab] = useState('all');
   const [chapters, setChapters] = useState<Chapter[] | null>(null);
+  const [chapterError, setChapterError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
   const ids = subjects.data?.map((subject) => subject.id).join(',') ?? '';
   useEffect(() => {
-    if (!ids) return;
     const controller = new AbortController();
-    void Promise.all(ids.split(',').map((id) => getJson(`/subjects/${id}/chapters`, ChapterListSchema, controller.signal).catch(() => [])))
-      .then((lists) => { if (!controller.signal.aborted) setChapters(lists.flat()); });
+    setChapters(null);
+    setChapterError(null);
+    void Promise.all(ids ? ids.split(',').map((id) => getJson(`/subjects/${id}/chapters`, ChapterListSchema, controller.signal)) : [])
+      .then((lists) => { if (!controller.signal.aborted) setChapters(lists.flat()); })
+      .catch(() => { if (!controller.signal.aborted) setChapterError('Could not open your game shelf.'); });
     return () => { controller.abort(); };
-  }, [ids]);
+  }, [ids, attempt]);
 
   const subjectId = tab === 'all' ? null : tab;
   const pool = (chapters ?? []).filter((chapter) => !subjectId || chapter.subjectId === subjectId);
   function match(words: readonly string[]) {
     return pool.find((chapter) => words.some((word) => chapter.title.toLowerCase().includes(word))) ?? null;
   }
-  const playable = CATALOG.filter((game) => !('paused' in game && game.paused) && match(game.words));
-  const featured = playable[0] ?? CATALOG[0];
-  const featuredChapter = match(featured.words);
+  const recommendation = home.data?.todaysGame;
+  const featured = recommendation && !/atom/i.test(`${recommendation.gameId} ${recommendation.title}`)
+    ? CATALOG.find((game) => game.id === recommendation.gameId) : null;
+  const catalog = CATALOG.filter((game) => tab === 'all' || match(game.words) || (game.id === featured?.id && pool.some((chapter) => recommendation?.href.includes(chapter.id))));
+  const retry = () => { subjects.reload(); home.reload(); setAttempt((value) => value + 1); };
+  if ((subjects.status === 'error' && !subjects.data) || (home.status === 'error' && !home.data) || chapterError) return <ScreenState error={chapterError ?? subjects.message ?? home.message} retry={retry} />;
+  if (!subjects.data || !home.data || !chapters) return <ScreenState loading retry={retry} />;
 
-  return <div className="nb-col">
-    <PageHead eyebrow="Play" title="Games" sub="A short game after the idea it belongs to." />
-    <Tabs tabs={[{ id: 'all', label: 'All' }, ...(subjects.data ?? []).map((subject) => ({ id: subject.id, label: subject.name }))]} active={tab} onChange={setTab} />
+  return <div className="nb-col p3c-games">
+    <div className="gm-head"><PageHead title="Games" sub="Each one is a real idea from your chapters, played instead of read." />
+    <Tabs tabs={[{ id: 'all', label: `All ${CATALOG.length}` }, ...subjects.data.map((subject) => ({ id: subject.id, label: subject.name }))]} active={tab} onChange={setTab} /></div>
     <section className="nb-card feat">
-      <div className="art" aria-hidden="true"><GameArt id={featured.id} /></div>
+      <span className="nb-tape" />
+      <div className="gm gm-feature-art"><div className="art" aria-hidden="true"><GameArt id={featured?.id ?? 'newton'} /></div></div>
       <div>
-        <span className="nb-label">Today's game · {featured.title}</span>
-        <h2 className="nb-h2">{featured.topic}</h2>
-        <p className="nb-text">{featuredChapter ? 'This chapter is open.' : 'Opens when that chapter is on your list.'}</p>
+        <Chip tone="orange">Today's game</Chip>
+        <h2 className="nb-h2">{featured ? recommendation?.title : 'Your next game is on its way'}</h2>
+        <p className="nb-text">{featured ? <>{GAME_REGISTRY.find((game) => game.id === featured.id)?.detail} Goes with {recommendation?.conceptName}.</> : 'Keep going with your chapters. Your game will land here.'}</p>
       </div>
-      <div>{featuredChapter && !('paused' in featured && featured.paused) ? <Link className="nb-btn nb-btn--primary" to={`/student/chapters/${featuredChapter.id}/practice/engine/${featured.id}`}>Play · 5 min</Link> : <Saathy mood="think" size="4rem" />}</div>
+      <div className="gm-feature-action"><Saathy mood="cheer" size="4.6rem" />{featured && recommendation?.href.startsWith('/student/') ? <Link className="nb-btn nb-btn--primary nb-btn--lg" to={recommendation.href}>Play · {recommendation.estMinutes} min</Link> : null}</div>
     </section>
-    <div className="gm-grid">{CATALOG.map((game) => {
-      const chapter = match(game.words);
+    <div className="gm-grid">{catalog.map((game) => {
+      const chapter = game.id === featured?.id ? chapters.find((item) => recommendation?.href.includes(item.id)) ?? match(game.words) : match(game.words);
       const paused = 'paused' in game && game.paused;
-      const locked = paused || !chapter;
-      const className = `nb-card gm${locked ? ' lock' : ''}${game.id === featured.id && !locked ? ' today' : ''}`;
+      const locked = !paused && (!chapter || (chapter.status === 'not_started' && game.id !== featured?.id));
+      const className = `nb-card gm${locked ? ' lock' : ''}${game.id === featured?.id && !locked ? ' today' : ''}`;
       const body = <>
         <div className="art" aria-hidden="true"><GameArt id={game.id} /></div>
-        <b>{game.title}</b>
-        <span className="nb-meta">{game.topic}</span>
-        <div className="foot">{paused ? <Chip tone="sand">Coming back soon</Chip> : locked ? <span className="nb-meta">Opens after the chapter is added</span> : <span className="nb-link">Play</span>}</div>
+        <b>{paused ? 'Atom Forge' : GAME_REGISTRY.find((item) => item.id === game.id)?.title}</b>
+        <span className="nb-meta">{chapter?.title ?? 'A chapter game'}</span>
+        <div className="foot">{paused ? <Chip tone="sand">Coming back soon</Chip> : locked ? <span className="nb-meta">Opens after {chapter?.title ?? 'its chapter'}</span> : <><span className="nb-meta">{game.id === featured?.id ? 'Today' : ''}</span><Link className={`nb-btn nb-btn--${game.id === featured?.id ? 'primary' : 'ghost'} nb-btn--sm`} to={game.id === featured?.id && recommendation ? recommendation.href : `/student/chapters/${chapter!.id}/practice/engine/${game.id}`}>Play</Link></>}</div>
       </>;
-      return paused || !chapter ? <article className={className} key={game.id}>{body}</article> : <Link className={className} key={game.id} to={`/student/chapters/${chapter.id}/practice/engine/${game.id}`}>{body}</Link>;
+      return <article className={className} key={game.id}>{body}</article>;
     })}</div>
+    {!catalog.length ? <p className="nb-empty">No games for this subject yet.</p> : null}
   </div>;
 }
