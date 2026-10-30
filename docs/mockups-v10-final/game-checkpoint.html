@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>VidhyaSaathy · Race Track</title>
+<link rel="stylesheet" href="tokens.css"/><link rel="stylesheet" href="components.css"/>
+<style>
+
+.p45{display:grid;grid-template-columns:minmax(0,1fr) clamp(260px,22vw,340px);gap:var(--nb-s5) var(--nb-s6);align-items:start}
+.p45 > .nb-col, .p45 > aside{min-width:0;display:flex;flex-direction:column;gap:var(--nb-s4)}
+@media (max-width:1179px){.p45{grid-template-columns:minmax(0,1fr)}}
+.ex-tag{position:fixed;right:.8rem;bottom:.7rem;z-index:80;font-family:var(--nb-font-hand);font-weight:700;font-size:.95rem;color:var(--nb-ink-soft);background:var(--nb-paper);border:1.5px dashed var(--nb-border);border-radius:999px;padding:.1rem .7rem;transform:rotate(-1.5deg)}
+@media print{.ex-tag{display:none}}
+.lined{background:repeating-linear-gradient(180deg,transparent 0,transparent calc(var(--nb-rule) - 1px),var(--nb-rule-ink) calc(var(--nb-rule) - 1px),var(--nb-rule-ink) var(--nb-rule));line-height:var(--nb-rule);font-family:var(--nb-font-note);font-size:1.2rem;color:var(--nb-navy)}
+.hand{font-family:var(--nb-font-hand);font-weight:700}
+.note{font-family:var(--nb-font-note)}
+.chk{width:1.35rem;height:1.35rem;border:2px solid var(--nb-navy);border-radius:5px;display:inline-grid;place-items:center;flex-shrink:0;background:var(--nb-paper)}
+.chk.on{background:var(--nb-navy)} .chk.on svg{stroke:#fff;width:1rem;height:1rem;stroke-width:3}
+.row-x{display:flex;align-items:center;gap:var(--nb-s3);flex-wrap:wrap}
+.spread{display:flex;align-items:center;justify-content:space-between;gap:var(--nb-s3);flex-wrap:wrap}
+
+.g-top{display:flex;align-items:center;gap:var(--nb-s4);flex-wrap:wrap;margin-bottom:var(--nb-s4)}
+.g-top .back{display:inline-flex;align-items:center;gap:6px;font-family:var(--nb-font-hand);font-weight:700;font-size:1.15rem;color:var(--nb-navy-muted)}
+.g-title{font-family:var(--nb-font-hand);font-weight:700;font-size:2.2rem;line-height:1;color:var(--nb-navy)}
+.timer{margin-left:auto;display:flex;align-items:center;gap:.6rem;background:var(--nb-navy);color:#fff;border-radius:14px;padding:.35rem 1rem .35rem .8rem;box-shadow:3px 3px 0 var(--nb-gold)}
+.timer svg{width:1.3rem;height:1.3rem;stroke:#fff}
+.timer b{font-family:var(--nb-font-hand);font-size:1.9rem;line-height:1;letter-spacing:.02em}
+.timer small{font-family:var(--nb-font-hand);font-weight:700;font-size:1rem;color:var(--nb-gold)}
+.best{font-family:var(--nb-font-hand);font-weight:700;font-size:1.2rem;color:var(--nb-ink-soft);display:inline-flex;gap:.35rem;align-items:center}
+.flags{display:flex;gap:.4rem;align-items:center}
+.flags span{display:inline-grid;place-items:center;width:2rem;height:2rem;border-radius:50%;border:2px dashed var(--nb-border);font-family:var(--nb-font-hand);font-weight:700;color:var(--nb-ink-faint)}
+.flags .r{border:2px solid var(--nb-ok);background:var(--nb-ok-soft);color:var(--nb-ok)}
+.flags .w{border:2px solid var(--nb-redpen);background:#FFF1EE;color:var(--nb-redpen)}
+.flags .c{border:2px solid var(--nb-navy);background:var(--nb-gold);color:var(--nb-navy)}
+.flags svg{width:1rem;height:1rem;stroke-width:3}
+.stage{position:relative;border:2px solid var(--nb-navy);border-radius:6px 20px 8px 18px;overflow:hidden;background:#EAF4E4;box-shadow:4px 5px 0 rgb(27 42 74 / 12%)}
+.stage svg{display:block;width:100%;height:auto}
+.stage .paused{position:absolute;left:1rem;top:1rem;background:var(--nb-paper);border:1.75px solid var(--nb-navy);border-radius:999px;padding:.15rem .8rem;font-family:var(--nb-font-hand);font-weight:700;font-size:1.15rem;display:flex;gap:.4rem;align-items:center}
+.stage .paused svg{width:1rem;height:1rem}
+.cp-card{margin-top:-2.2rem;margin-inline:clamp(.5rem,2vw,2rem);z-index:2}
+.cp-card .nb-q__text{font-size:clamp(1.6rem,2vw,2.1rem)}
+.counts{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;font-family:var(--nb-font-hand);font-weight:700;font-size:1.1rem;color:var(--nb-ink-soft)}
+.cp-foot{display:flex;align-items:center;justify-content:space-between;gap:var(--nb-s4);flex-wrap:wrap;padding-top:var(--nb-s4);border-top:1.5px dashed var(--nb-border)}
+.cl{display:flex;flex-direction:column;gap:.6rem}
+.cl .it{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.2rem .6rem;align-items:center}
+.cl .it small{grid-column:1 / -1;color:var(--nb-ink-soft);font-size:.85rem}
+
+</style></head>
+<body class=""><div id="root">
+<div class="nb-app">
+  <aside class="nb-side">
+    <div class="nb-brand"><div class="nb-brand__mark">V</div><div><div class="nb-brand__name">VidhyaSaathy</div><div class="nb-brand__tag">Class 9 · NCERT</div></div></div>
+    <nav class="nb-nav">
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>Home</a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>My subjects</a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>Study sessions</a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M7 4h10v16l-5-3-5 3V4z"/></svg>Homework<span class="nb-nav__badge">2</span></a>
+<div class="nb-nav__sec">Play</div>
+<a class="nb-nav__item is-active" href="#"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="10" rx="4"/><path d="M8 11v4M6 13h4"/><circle cx="16" cy="12" r=".8"/><circle cx="18" cy="14" r=".8"/></svg>Games</a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M5 6h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-8l-4 3v-3H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z"/><path d="M8 11h8M8 14h5"/></svg>Ask Saathy</a>
+<div class="nb-nav__sec">You</div>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 16v-4M12 16V8M17 16v-7"/></svg>My progress</a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>Notifications<span class="nb-nav__badge">2</span></a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M3 12h2M19 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Settings</a>
+    </nav>
+    
+    <div class="nb-side__foot"><div class="nb-profile"><div class="nb-avatar">A</div><div><b>Aarav</b><span>IX-B · Roll 17</span></div></div></div>
+  </aside>
+  <div class="nb-main">
+    <header class="nb-top">
+      <div class="nb-brand nb-show-m"><div class="nb-brand__mark">V</div></div>
+      <div class="nb-search"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>Search lessons, notes, questions, games…</span><kbd>/</kbd></div>
+      <div class="nb-top__right"><span class="nb-pill nb-pill--streak"><svg class="i" viewBox="0 0 24 24"><path d="M12 3c2 3 4 5 4 9a4 4 0 1 1-8 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 0-8z"/></svg>5 day streak</span><span class="nb-pill nb-pill--xp"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l2.2 6.5H21l-5.4 3.9 2.1 6.6L12 16.8 6.3 20l2.1-6.6L3 9.5h6.8z"/></svg>340 XP</span><button class="nb-bell" aria-label="Notifications"><svg class="i" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M10 19a2 2 0 0 0 4 0"/></svg><i></i></button></div>
+    </header>
+    <main class="nb-sheet">
+
+<div class="g-top"><a class="back" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Games</a><span class="g-title">Race Track</span><span class="nb-chip nb-chip--sky">Motion · speed</span>
+ <div class="flags" aria-label="Checkpoints"><span class="r"><svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span><span class="c">2</span><span>3</span></div>
+ <span class="best nb-hide-m"><svg class="" viewBox="0 0 24 24" style="width:1.1rem;height:1.1rem;"><path class="nb-star" d="M12 2.5l2.6 6 6.4.6-4.9 4.3 1.5 6.3L12 16.4 6.4 19.7l1.5-6.3L3 9.1l6.4-.6z"/></svg> Your best 42 s</span>
+ <div class="timer"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg><b>18.4 s</b><small>paused</small></div></div>
+<div class="p45">
+ <div class="nb-col" style="gap:0">
+  <div class="stage"><svg viewBox="0 0 1000 300" role="img" aria-label="Race track, car approaching checkpoint 2">
+<rect width="1000" height="300" fill="#DCEFF7"/>
+<path d="M0 150 Q120 110 250 140 T520 130 T800 140 T1000 120 V300 H0z" fill="#CDE7C6"/>
+<path d="M0 175 Q160 150 330 170 T700 165 T1000 160 V300 H0z" fill="#B9DDB1"/>
+<g fill="none" stroke="#1B2A4A" stroke-width="2"><circle cx="880" cy="60" r="26" fill="#FFF1A6"/><path d="M120 70q20-18 40 0q18-10 30 6h-80z" fill="#fff"/><path d="M620 52q16-14 32 0q14-8 24 5h-62z" fill="#fff"/></g>
+<rect x="0" y="196" width="1000" height="74" fill="#5D6577"/>
+<path d="M0 196H1000M0 270H1000" stroke="#1B2A4A" stroke-width="3"/>
+<path d="M0 233H1000" stroke="#FFFDF8" stroke-width="4" stroke-dasharray="34 26"/>
+<g font-family="Caveat" font-weight="700" font-size="22" fill="#1B2A4A">
+ <text x="30" y="292">0 m</text><text x="230" y="292">50 m</text><text x="430" y="292">100 m</text><text x="630" y="292">150 m</text><text x="830" y="292">200 m</text></g>
+<g stroke="#1B2A4A" stroke-width="2.4">
+ <path d="M300 196V110"/><path d="M300 110h46l-10 12 10 12h-46" fill="#5FB58A"/>
+ <path d="M620 196V96"/><path d="M620 96h52l-11 14 11 14h-52" fill="#E8B84A"/>
+ <path d="M900 196V110"/><path d="M900 110h46l-10 12 10 12h-46" fill="#FFFDF8"/></g>
+<g font-family="Caveat" font-weight="700" font-size="20" fill="#1B2A4A"><text x="306" y="127">1</text><text x="628" y="116">2</text><text x="906" y="127">3</text></g>
+<g transform="translate(470 0)">
+ <path d="M-120 212h-60M-110 226h-80M-125 240h-50" stroke="#E8B84A" stroke-width="5" stroke-linecap="round"/>
+ <g stroke="#1B2A4A" stroke-width="2.6" stroke-linejoin="round"><path d="M-95 248v-22l26-18h60l26 18h26v22z" fill="#C9433A"/><path d="M-64 212l14-12h40l14 12z" fill="#DCEAF6"/>
+ <circle cx="-62" cy="250" r="13" fill="#FFFDF8"/><circle cx="20" cy="250" r="13" fill="#FFFDF8"/><circle cx="-62" cy="250" r="4" fill="#1B2A4A"/><circle cx="20" cy="250" r="4" fill="#1B2A4A"/></g>
+ <text x="-40" y="238" font-family="Caveat" font-weight="700" font-size="20" fill="#fff" text-anchor="middle">17</text></g>
+<path d="M480 150 q60 -40 130 -30" stroke="#3D6FB8" stroke-width="2" fill="none" stroke-dasharray="5 5"/>
+<text x="452" y="172" font-family="Caveat" font-weight="700" font-size="24" fill="#3D6FB8">150 m in 6 s</text>
+</svg><span class="paused"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg> Clock stops while you answer</span></div>
+  <section class="nb-qcard cp-card">
+   <span class="nb-tape nb-tape--pink" style="left:auto;right:3rem"></span>
+   <div class="nb-q__label"><span class="nb-q__num">2</span><span class="nb-label">Checkpoint 2 of 3</span><span class="nb-mastery nb-mastery--almost">Almost there</span></div>
+   <h1 class="nb-q__text">Your car covers <span class="nb-hl">150 m</span> in <span class="nb-hl nb-hl--blue">6 s</span>. What is its average speed?</h1>
+   <div class="nb-opts"><button class="nb-opt is-selected"><span class="nb-opt__key">a</span><span class="nb-opt__body">25 m/s</span><span class="nb-opt__mark"></span></button><button class="nb-opt "><span class="nb-opt__key">b</span><span class="nb-opt__body">900 m/s</span><span class="nb-opt__mark"></span></button><button class="nb-opt "><span class="nb-opt__key">c</span><span class="nb-opt__body">0.04 m/s</span><span class="nb-opt__mark"></span></button><button class="nb-opt "><span class="nb-opt__key">d</span><span class="nb-opt__body">144 m/s</span><span class="nb-opt__mark"></span></button></div>
+   <div class="nb-conf"><div class="spread"><span class="nb-conf__q">How sure are you?</span><span class="nb-meta">It shapes what Saathy gives you next. It doesn't change your time.</span></div><div class="nb-conf__row"><button class="nb-confbtn nb-confbtn--sure is-selected"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></svg><span>Sure<small>I know this</small></span></button><button class="nb-confbtn nb-confbtn--unsure"><svg viewBox="0 0 24 24"><path d="M4 12c2-3 4-3 6 0s4 3 6 0 2-2 4-1"/><circle cx="12" cy="18.5" r=".6"/><path d="M12 4v4"/></svg><span>Unsure<small>I think so</small></span></button><button class="nb-confbtn nb-confbtn--guess"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1"/><circle cx="15" cy="15" r="1"/><circle cx="15" cy="9" r="1"/><circle cx="9" cy="15" r="1"/></svg><span>Guess<small>Picked one</small></span></button></div></div>
+   <div class="cp-foot"><div class="counts"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".8"/></svg> This answer counts toward <span style="color:var(--nb-navy)">Speed &amp; velocity</span></div><button class="nb-btn nb-btn--primary nb-btn--lg">Lock it in and drive <svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
+  </section>
+ </div>
+ <aside>
+  <section class="nb-card"><div class="nb-saathy-tip"><svg class="nb-saathy" viewBox="0 0 120 90" style="width:3.6rem;height:auto;" role="img" aria-label="Saathy"><path class="body" d="M30 76C15 76 8 63 15 53C8 42 18 29 31 32C34 18 52 11 63 21C73 11 93 16 95 32C108 33 115 48 107 58C111 69 102 77 92 76Z"/><path class="shade" d="M22 64q4 6 12 6"/><path class="shade" d="M98 40q5 3 5 9"/><ellipse class="blush" cx="40" cy="59" rx="5.5" ry="3.2"/><ellipse class="blush" cx="80" cy="59" rx="5.5" ry="3.2"/><circle cx="49" cy="50" r="2.6" fill="#1B2A4A"/><circle cx="71" cy="50" r="2.6" fill="#1B2A4A"/><path class="face" d="M55 61q5-2 10 0"/></svg><div><div class="nb-h3" style="font-size:1.3rem">Take your time</div><div class="nb-text" style="font-size:.95rem">The clock is stopped. Speed is distance divided by time.</div></div></div></section>
+  <section class="nb-card"><div class="nb-card__head"><h3 class="nb-h3">This race practises</h3></div>
+   <div class="cl">
+    <div class="it"><span>Distance &amp; displacement</span><span class="nb-mastery nb-mastery--mastered">Mastered</span><small>Checkpoint 1 · done</small></div>
+    <div class="it"><span>Speed &amp; velocity</span><span class="nb-mastery nb-mastery--almost">Almost there</span><small>Checkpoint 2 · now</small></div>
+    <div class="it"><span>km/h ↔ m/s</span><span class="nb-mastery nb-mastery--fix">Let's fix this</span><small>Checkpoint 3 · next</small></div>
+   </div></section>
+  <section class="nb-sticky nb-sticky--green" style="margin:.4rem .3rem"><span class="nb-tape nb-tape--green" style="width:4.5rem;top:-.6rem"></span><span class="nb-sticky__who">Your best</span>
+   <div class="hand" style="font-size:2.2rem;line-height:1.1">42 s</div><div>Beat it by reaching the finish faster. Right answers keep the car moving.</div></section>
+ </aside>
+</div><span class="ex-tag">Example data</span>
+    </main>
+  </div>
+</div>
+<nav class="nb-mnav"><a class="" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>Home</a><a class="" href="#"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>Subjects</a><a class="is-active" href="#"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="10" rx="4"/><path d="M8 11v4M6 13h4"/><circle cx="16" cy="12" r=".8"/><circle cx="18" cy="14" r=".8"/></svg>Games</a><a class="" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M5 6h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-8l-4 3v-3H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z"/><path d="M8 11h8M8 14h5"/></svg>Saathy</a><a class="" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 16v-4M12 16V8M17 16v-7"/></svg>Me</a></nav>
+</div></body></html>

@@ -24,7 +24,7 @@ art={'cricket':'<path d="M20 80l40-50M55 25l10 10"/><circle cx="72" cy="70" r="7
 'echo':'<path d="M20 50h8"/><path d="M38 35q10 15 0 30M52 26q16 24 0 48M66 17q22 33 0 66"/>'}
 G=[('cricket','Cricket Lab','Motion · acceleration','#DCEAF6','open','Today'),('race','Race Track','Motion · speed','#FFF1A6','played','Best 42 s'),('bus','Bus Stop Graphs','Motion · d-t graphs','#E4F1E2','open','New'),
    ('atom','Atom Forge','Chemistry · atoms','#FBE3D6','pause',''),('particle','Particle Party','Chemistry · matter','#ECE6FA','played','3 stars'),
-   ('bio','Bio Quest','Biology · the cell','#E4F1E2','open',''),('poly','Polynomial Factory','Maths · factorising','#ECE6FA','played','Lvl 4'),
+   ('bio','Bio Quest','Biology · the cell','#E4F1E2','open',''),('poly','Polynomial Factory','Maths · factorising','#ECE6FA','played','2 stars'),
    ('float','Float or Sink','Physics · Ch 10','#DCEAF6','lock','after Gravitation'),('energy','Energy Slide','Physics · Ch 11','#FFF1A6','lock','after Work &amp; Energy'),('echo','Echo Corridor','Physics · Ch 12','#FBE3D6','lock','after Sound')]
 def gcard(k,n,s,bg,st,tag):
     cls='gm nb-card'+(' lock' if st=='lock' else '')+(' today' if tag=='Today' else '')
