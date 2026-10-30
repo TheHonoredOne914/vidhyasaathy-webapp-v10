@@ -52,6 +52,64 @@ try {
       await page.screenshot({ path: new URL(`./screenshots/polish3c/${screen}${suffix}-${width}.png`, import.meta.url).pathname.replace(/^\/(\w:)/, '$1'), fullPage: true });
     }
   }
+  if (screen === 'parent-home' && process.argv.includes('--verify')) {
+    const selector = page.getByRole('combobox', { name: 'Child' });
+    const options = await selector.locator('option').evaluateAll((items) => items.map((item) => ({ value: item.value, name: item.textContent })));
+    for (const child of options) {
+      await selector.selectOption(child.value);
+      await page.getByRole('heading', { name: `${child.name}'s week`, exact: true }).waitFor();
+      await page.locator('.ph-concepts').waitFor();
+    }
+    console.log(`parent-home: switched between ${options.length} actual linked children`);
+  }
+  if (screen.startsWith('signin-') && process.argv.includes('--verify')) {
+    const paste = async (label, text) => page.getByRole('textbox', { name: label, exact: true }).evaluate((input, value) => {
+      const clipboardData = new DataTransfer();
+      clipboardData.setData('text/plain', value);
+      input.dispatchEvent(new ClipboardEvent('paste', { clipboardData, bubbles: true, cancelable: true }));
+    }, text);
+    if (screen === 'signin-student') {
+      const db = new Sqlite(new URL('../apps/api/data/vidhyasaathy.db', import.meta.url).pathname.replace(/^\/(\w:)/, '$1'), { readonly: true });
+      const profile = db.prepare('SELECT id FROM profile WHERE role = ? AND name = ?').get('student', person);
+      db.close();
+      const response = await context.request.post('/api/auth/pin-login', { data: { profileId: profile.id, pin: '2468' }, headers: { origin: baseURL } });
+      if (!response.ok()) throw new Error('Cannot read actual student identity for saved-browser sign-in.');
+      const me = await response.json();
+      await context.request.post('/api/auth/logout', { headers: { origin: baseURL } });
+      await page.evaluate((identity) => localStorage.setItem('vidhyasaathy.studentProfiles', JSON.stringify([{ id: identity.profile.id, name: identity.profile.name, school: identity.school.name }])), me);
+      await page.reload();
+      await page.getByLabel('Your name', { exact: true }).fill(me.profile.name);
+      const pin = page.getByLabel('PIN', { exact: true });
+      await pin.evaluate((input) => {
+        const clipboardData = new DataTransfer();
+        clipboardData.setData('text/plain', '2468');
+        input.dispatchEvent(new ClipboardEvent('paste', { clipboardData, bubbles: true, cancelable: true }));
+      });
+      await page.getByRole('button', { name: 'Open my notebook' }).click();
+      await page.waitForURL('**/student');
+    } else if (screen === 'signin-teacher') {
+      await page.getByLabel('School email', { exact: true }).fill('teacher@demo.invalid');
+      await page.getByRole('checkbox', { name: 'Remember my school email' }).check();
+      await page.reload();
+      if (await page.getByLabel('School email', { exact: true }).inputValue() !== 'teacher@demo.invalid') throw new Error('Remembered school email did not survive reload.');
+      await page.getByLabel('Password', { exact: true }).fill('Saathy@2026!');
+      await page.getByRole('button', { name: 'Go to my classes' }).click();
+      await page.waitForURL('**/teacher');
+    } else {
+      const db = new Sqlite(new URL('../apps/api/data/vidhyasaathy.db', import.meta.url).pathname.replace(/^\/(\w:)/, '$1'), { readonly: true });
+      const profile = db.prepare('SELECT phone FROM profile WHERE role = ? AND phone IS NOT NULL LIMIT 1').get('parent');
+      db.close();
+      await page.getByLabel('Phone number', { exact: true }).fill(profile.phone);
+      await page.getByRole('button', { name: 'See the progress report' }).click();
+      const code = (await page.getByRole('status').filter({ hasText: 'Dev code' }).textContent()).match(/\d{6}/)?.[0];
+      if (!code) throw new Error('Demo OTP not returned.');
+      await paste('OTP', code);
+      await page.getByRole('button', { name: 'See the progress report' }).click();
+      await page.waitForURL('**/parent');
+    }
+    if (pageErrors.length) throw new Error(pageErrors.join('\n'));
+    console.log(`${screen}: real sign-in and digit-box paste passed`);
+  }
   if (screen === 'settings' && process.argv.includes('--verify')) {
     for (const [name, attribute] of [['Bigger text', 'biggerText'], ['Plain font for notes', 'plainFont']]) {
       const toggle = page.getByRole('switch', { name, exact: true });

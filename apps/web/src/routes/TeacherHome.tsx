@@ -1,94 +1,77 @@
-import { TeacherDashboardSchema } from '@vidhyasaathy/contracts';
+import { AttemptSchema, TeacherDashboardSchema } from '@vidhyasaathy/contracts';
+import { Fragment } from 'react';
 import { Link } from 'react-router-dom';
-import { PageHead, Chip } from '../student/notebook/ui';
-import '../student/notebook/pages/teacher-home.css';
+import { z } from 'zod';
 import { PAGE } from '../pages';
 import { usePageMeta } from '../meta';
 import { useSession } from '../session';
-import { StaleNote } from '../ui/StaleNote';
 import { CatalogGate } from '../setup/CatalogGate';
-import { classLabel } from '../setup/labels';
 import { useCatalog } from '../setup/useCatalog';
 import { useRemote } from '../setup/useRemote';
-import '../dashboard/dashboard.css';
-import '../theme/vs-theme.css';
-import './teacher.css';
+import { StaleNote } from '../ui/StaleNote';
+import { Scribble } from '../student/notebook/icons';
+import { Chip } from '../student/notebook/ui';
+import { LineIcon } from '../student/notebook/screens/polish3c/LineIcon';
+import { ScreenState } from '../student/notebook/screens/polish3c/ScreenState';
+import '../student/notebook/pages/teacher-home.css';
+
+const AttemptsSchema = z.array(AttemptSchema);
+const tint = (rate: number) => rate >= .85 ? '#C6E6CF' : rate >= .7 ? '#DDEFD9' : rate >= .55 ? '#FFF4CF' : rate >= .4 ? '#FCE7B8' : '#F5D3CE';
 
 export function TeacherHome() {
   usePageMeta(PAGE.teacher.title, PAGE.teacher.description);
   const session = useSession();
   const catalog = useCatalog();
   const dashboard = useRemote('/dashboard/teacher', TeacherDashboardSchema);
+  const review = useRemote('/attempts?pendingOnly=true', AttemptsSchema);
   const me = session.me;
   if (!me) return null;
+  const desk = dashboard.data;
   const classes = catalog.classes.data ?? [];
   const sections = catalog.sections.data ?? [];
   const subjects = catalog.subjects.data ?? [];
-  const desk = dashboard.data;
-  const students = desk?.classes.reduce((sum, row) => sum + row.students, 0) ?? 0;
-  const needing = desk?.classes.reduce((sum, row) => sum + row.concepts.reduce((inner, concept) => inner + concept.needingPractice, 0), 0) ?? 0;
-  return (
-    <div className="nb-grid nb-grid--wide-rail">
-      <div className="nb-col">
-      <PageHead eyebrow={me.school.name} title={me.profile.name} sub="Your classes for today." />
+  const concepts = [...new Map((desk?.classes ?? []).flatMap((row) => row.concepts).map((row) => [row.conceptId, row])).values()];
+  const focus = [...concepts].sort((a, b) => b.needingPractice - a.needingPractice).find((row) => row.needingPractice > 0);
+  const nudges = [...new Map((desk?.bands ?? []).filter((row) => row.band === '0-25' || row.band === '25-50').map((row) => [row.profileId, row])).values()];
+  const today = new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'long', day: 'numeric', month: 'short' }).format(new Date());
+  const hour = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', hour: 'numeric', hourCycle: 'h23' }).format(new Date()));
+  return <div className="nb-grid nb-grid--wide-rail p3c-teacher">
+    <div className="nb-col">
+      <div className="th-head"><header className="nb-head"><div className="nb-head__eyebrow">{today} · {me.school.name}</div><h1 className="nb-h1">Good {hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening'}, {me.profile.name}</h1><Scribble /></header><div className="th-actions"><Link className="nb-btn nb-btn--ghost" to="/teacher/homework">New homework</Link><Link className="nb-btn nb-btn--primary" to={desk?.sessions[0] ? `/teacher/sessions/${desk.sessions[0].id}` : '/teacher/subjects'}>{desk?.sessions[0] ? 'Open session' : 'Plan a session'}</Link></div></div>
       <StaleNote stale={session.stale} updatedAt={session.updatedAt} message={session.message} testId="updated-at" />
-      {dashboard.status === 'loading' && !desk ? <div className="nb-skel" /> : null}
-      {dashboard.status === 'error' && !desk ? <p className="nb-empty" role="alert">Could not load today's desk. <button type="button" className="nb-btn nb-btn--ghost nb-btn--sm" onClick={dashboard.reload}>Try again</button></p> : null}
+      <ScreenState loading={!desk && dashboard.status === 'loading'} error={!desk ? dashboard.message : null} retry={dashboard.reload} />
       {desk ? <div className="kpis">
-        <section className="nb-card kpi"><span className="nb-label">Students</span><b>{students}</b></section>
-        <section className="nb-card kpi"><span className="nb-label">To review</span><b>{desk.reviewQueue}</b></section>
-        <section className="nb-card kpi"><span className="nb-label">Sessions</span><b>{desk.sessions.length}</b></section>
-        <section className="nb-card kpi"><span className="nb-label">Need practice</span><b>{needing}</b></section>
+        <section className="nb-card kpi"><span className="nb-label">Students</span><b>{desk.classes.reduce((sum, row) => sum + row.students, 0)}</b><div className="nb-meta">In your assigned sections</div></section>
+        <section className="nb-card kpi"><span className="nb-label">Sessions completed</span><b>{desk.classes.reduce((sum, row) => sum + row.completedSessions, 0)}</b><div className="nb-meta">Recorded learning sessions</div></section>
+        <section className="nb-card kpi"><span className="nb-label">To review</span><b>{desk.reviewQueue}</b><div className="nb-meta">Answers waiting for you</div></section>
+        <section className="nb-card kpi th-revisit"><span className="nb-label">Concepts to revisit</span><b>{concepts.filter((row) => row.needingPractice > 0).length}</b><div className="nb-meta">From recorded practice</div></section>
       </div> : null}
-      <CatalogGate catalog={catalog}>
-        {classes.length === 0 ? (
-          <div className="vs-card" id="classes">
-            <h2 className="vs-card-heading">No class is assigned to you.</h2>
-            <div className="vs-card-body">
-              <p>An administrator assigns a class by inviting you to a section and subject.</p>
-            </div>
-          </div>
-        ) : (
-          <ul id="classes" aria-label="Classes" className="vs-class-grid">
-            {classes.map((item) => (
-              <li key={item.id} className="vs-card">
-                <h2 className="vs-card-heading">
-                  <Link className="vs-class-link" to={`/teacher/classes/${item.id}`}>{/^class\b/i.test(item.name.trim()) ? item.name : `Class ${item.name}`} <span aria-hidden="true">→</span></Link>
-                </h2>
-                <div className="vs-card-body vs-class-details">
-                  <div>
-                    <h3>Sections</h3>
-                    <ul aria-label={`${item.name} sections`}>
-                      {sections.filter((section) => section.classId === item.id).map((section) => (
-                        <li key={section.id}>{/^class\b/i.test(classLabel(classes, section.classId).trim()) ? classLabel(classes, section.classId) : `Class ${classLabel(classes, section.classId)}`} - Section {section.name}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div>
-                    <h3>Subjects</h3>
-                    <ul aria-label={`${item.name} subjects`}>
-                      {subjects.filter((subject) => subject.classId === item.id).map((subject) => (
-                        <li key={subject.id}><Link className="text-link" to={`/teacher/subjects/${subject.id}`}>{subject.name}</Link></li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </CatalogGate>
-      </div>
-      <aside className="nb-col">
-        <section className="nb-card"><div className="nb-card__head"><h3 className="nb-h3">Review</h3></div>
-          {desk && desk.reviewQueue > 0 ? <Link className="nb-btn nb-btn--primary" to="/teacher/review">{desk.reviewQueue} to check</Link> : <p className="nb-empty">Nothing is waiting.</p>}
-        </section>
-        <section className="nb-card nb-grow"><div className="nb-card__head"><h3 className="nb-h3">Homework</h3></div>
-          {(desk?.assignments ?? []).slice(0, 6).map((item) => <div className="nb-row" key={item.id}><div className="nb-row__t">{item.title}</div><Chip tone="sand">Open</Chip></div>)}
-          {desk && desk.assignments.length === 0 ? <p className="nb-empty">No homework is out.</p> : null}
-          <Link className="nb-link" to="/teacher/notes">Publish notes</Link>
-        </section>
-      </aside>
+      <section className="nb-card"><div className="nb-card__head"><h2 className="nb-h3">Class mastery</h2><div className="nb-tabs"><span className="nb-tab is-active">By section</span><button className="nb-tab" type="button" disabled title="Individual mastery is not available in this summary">By student</button></div></div>
+        <div className="nb-meta th-caption">Recorded answer accuracy · unassessed concepts stay New</div>
+        {desk && concepts.length && desk.classes.length ? <div className="th-heat-scroll"><div className="heat" aria-label="Concept accuracy by section" style={{ gridTemplateColumns: `minmax(8rem, 2fr) repeat(${desk.classes.length}, minmax(4rem, 1fr))` }}>
+          <div>Concept</div>{desk.classes.map((group) => { const section = sections.find((row) => row.id === group.sectionId); return <div className="h" key={group.sectionId}>{section ? `${classes.find((row) => row.id === section.classId)?.name ?? ''} · ${section.name}` : 'Assigned section'}</div>; })}
+          {concepts.map((concept) => <Fragment key={concept.conceptId}><div className="n">{concept.title}</div>{desk.classes.map((group) => {
+            const rate = group.concepts.find((row) => row.conceptId === concept.conceptId)?.passRate ?? null;
+            return <div className={`c${rate === null ? ' is-new' : ''}`} key={group.sectionId} style={rate === null ? undefined : { background: tint(rate) }}>{rate === null ? 'New' : `${Math.round(rate * 100)}%`}</div>;
+          })}</Fragment>)}
+        </div></div> : <p className="nb-empty">Your class concepts will appear after learning begins.</p>}
+        <div className="nb-sticky th-suggestion"><span className="nb-sticky__who">Saathy suggests</span>{focus ? <>Revisit {focus.title}. {focus.needingPractice} student{focus.needingPractice === 1 ? '' : 's'} in this section could use more practice.</> : 'A teaching suggestion will appear when there is enough recorded practice.'}</div>
+      </section>
+      <section className="nb-card" id="classes"><div className="nb-card__head"><h2 className="nb-h3">Your classes</h2><Link className="nb-link" to="/teacher/subjects">Publish notes</Link></div><CatalogGate catalog={catalog}>
+        {classes.length ? classes.map((item) => <div className="th-class" key={item.id}><Link className="nb-row__t" to={`/teacher/classes/${item.id}`}>{item.name}</Link><div className="th-links">{sections.filter((row) => row.classId === item.id).map((row) => <Link key={row.id} to={`/teacher/sections/${row.id}`}>Section {row.name}</Link>)}{subjects.filter((row) => row.classId === item.id).map((row) => <Link key={row.id} to={`/teacher/subjects/${row.id}`}>{row.name}</Link>)}</div></div>) : <p className="nb-empty">No class is assigned to you. Ask your school administrator.</p>}
+      </CatalogGate></section>
     </div>
-  );
+    <aside className="nb-col">
+      <section className="nb-card"><div className="nb-card__head"><h2 className="nb-h3">Lesson review</h2>{review.data ? <Chip tone="orange">{review.data.length} waiting</Chip> : null}</div><div className="nb-meta">Student answers to check</div>
+        <ScreenState loading={!review.data && review.status === 'loading'} error={!review.data ? review.message : null} retry={review.reload} />
+        {review.data?.slice(0, 5).map((item) => <div className="rv" key={item.id}><span className="th-round"><LineIcon name="book" /></span><div><b>{desk?.assignments.find((row) => row.id === item.assignmentId)?.title ?? 'Student answer'}</b><span className="nb-meta">Waiting for teacher review</span></div><Link className="nb-btn nb-btn--ghost nb-btn--sm" to="/teacher/review">Review</Link></div>)}
+        {review.data?.length === 0 ? <p className="nb-empty">Nothing is waiting.</p> : null}<Link className="nb-link" to="/teacher/review">Open review queue</Link>
+      </section>
+      <section className="nb-card"><div className="nb-card__head"><h2 className="nb-h3">Could use a nudge</h2><span className="nb-meta">private to you</span></div>
+        {nudges.slice(0, 5).map((row) => <div className="stu" key={row.profileId}><span className="nb-avatar">{row.studentName.slice(0, 1)}</span><div><b className="nb-row__t">{row.studentName}</b><div className="nb-meta">Revisit {row.chapterTitle}</div></div><Link className="nb-btn nb-btn--quiet nb-btn--sm" to="/teacher/review">Review</Link></div>)}
+        {desk && nudges.length === 0 ? <p className="nb-empty">No private follow-up is flagged yet.</p> : null}<p className="nb-meta th-caption">Only you see this list. Private nudge delivery isn't available yet.</p>
+      </section>
+      <section className="nb-card"><div className="nb-card__head"><h2 className="nb-h3">Homework</h2><Link className="nb-link" to="/teacher/homework">See all</Link></div>{desk?.assignments.slice(0, 6).map((item) => <Link className="nb-row" key={item.id} to={`/teacher/assignments/${item.id}`}><span className="nb-row__t">{item.title}</span><Chip tone="sand">Open</Chip></Link>)}{desk?.assignments.length === 0 ? <p className="nb-empty">No homework is out.</p> : null}</section>
+    </aside>
+  </div>;
 }
