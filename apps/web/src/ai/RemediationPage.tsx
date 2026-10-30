@@ -32,7 +32,7 @@ export function RemediationPage() {
 
   if (remediation.denied) return <AccessDenied />;
   if (remediation.status === 'error' && !remediation.data) return <ErrorState title="Could not load this lesson" message={remediation.message ?? 'Try again.'} onRetry={remediation.reload} />;
-  if (!remediation.data) return <section className="lesson-shell"><Skeleton /></section>;
+  if (!remediation.data) return <section className="lesson-shell is-paper"><Skeleton /></section>;
 
   const view = remediation.data;
   const earlier = view.targetConceptId !== view.conceptId;
@@ -55,7 +55,7 @@ export function RemediationPage() {
       const outcome = await postJson(`/concepts/${conceptId}/remediation/check`, RemediationResultSchema, parsed.data);
       setResult(outcome.passed
         ? outcome.passedOnSecondAttempt ? 'Passed on the second check.' : 'You passed the check.'
-        : `${outcome.correct} of 2 correct. Both answers need to be correct.`);
+        : `${outcome.correct > 0 ? 'Almost there.' : "Let's fix this."} Both answers need to be correct.`);
       setAnswers({});
       remediation.reload();
     } catch (cause) {
@@ -66,7 +66,7 @@ export function RemediationPage() {
   }
 
   return (
-    <section className="lesson-shell">
+    <section className="lesson-shell is-paper">
       <p className="lesson-kicker">Short lesson</p>
       <h1>{view.title}</h1>
       <p className="lesson-hand">{earlier ? 'This is the earliest weak prerequisite.' : 'Two questions follow the lesson.'}</p>
@@ -74,7 +74,7 @@ export function RemediationPage() {
         {view.status === 'not_needed' ? 'Nothing to practise on this concept right now.' : null}
         {view.status === 'needs_teacher_material' ? 'Ask your teacher. The short lesson or the two questions are not published yet.' : null}
         {view.status === 'passed' ? view.passedOnSecondAttempt ? 'Passed on the second check.' : 'You passed the check.' : null}
-        {view.status === 'ready' ? `Check ${view.checkAttempts + 1}. Both answers need to be correct.` : null}
+        {view.status === 'ready' ? 'Both answers need to be correct.' : null}
       </p>
       {view.lesson ? (
         <article className="lesson-card">

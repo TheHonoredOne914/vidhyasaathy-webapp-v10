@@ -12,15 +12,20 @@ function Sparkline({ values }: { values: number[] }) {
   return <svg className="stat-sparkline" viewBox="0 0 100 28" role="img" aria-label="Recent activity trend"><polyline points={points} fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>;
 }
 
-export function TeacherDesk({ data, sections }: { data: Dashboard; sections: { id: string; name: string }[] }) {
+function classTitle(name: string) {
+  const trimmed = name.trim();
+  return /^class\b/i.test(trimmed) ? trimmed : `Class ${trimmed}`;
+}
+
+export function TeacherDesk({ data, sections }: { data: Dashboard; sections: { id: string; name: string; className: string }[] }) {
   return (
     <div className="dash">
       <p>Recorded {formatDue(data.updatedAt)}.</p>
       <div className="stat-grid" aria-label="Teacher overview">
-        <article className="stat-tile"><span>Students in view</span><strong>{data.classes.reduce((sum, group) => sum + group.students, 0)}</strong><Sparkline values={data.classes.map((group) => group.students)} /></article>
-        <article className="stat-tile"><span>Session checks</span><strong>{data.classes.reduce((sum, group) => sum + group.completedSessions, 0)}</strong><Sparkline values={data.classes.map((group) => group.completedSessions)} /></article>
-        <article className="stat-tile"><span>Review queue</span><strong>{data.reviewQueue}</strong><Sparkline values={[data.reviewQueue, data.reviewQueue, data.reviewQueue ? data.reviewQueue - 1 : 0]} /></article>
-        <article className="stat-tile stat-tile-warm"><span>Needs a closer look</span><strong>{data.classes.reduce((sum, group) => sum + group.concepts.reduce((inner, concept) => inner + concept.needingPractice, 0), 0)}</strong><Sparkline values={data.classes.map((group) => group.concepts.reduce((sum, concept) => sum + concept.needingPractice, 0))} /></article>
+        <article className="stat-tile"><span>Students</span><strong>{data.classes.reduce((sum, group) => sum + group.students, 0)}</strong><Sparkline values={data.classes.map((group) => group.students)} /></article>
+        <article className="stat-tile"><span>Checks finished</span><strong>{data.classes.reduce((sum, group) => sum + group.completedSessions, 0)}</strong><Sparkline values={data.classes.map((group) => group.completedSessions)} /></article>
+        <article className="stat-tile"><span>To review</span><strong>{data.reviewQueue}</strong><Sparkline values={[data.reviewQueue, data.reviewQueue, data.reviewQueue ? data.reviewQueue - 1 : 0]} /></article>
+        <article className="stat-tile stat-tile-warm"><span>Need a hand</span><strong>{data.classes.reduce((sum, group) => sum + group.concepts.reduce((inner, concept) => inner + concept.needingPractice, 0), 0)}</strong><Sparkline values={data.classes.map((group) => group.concepts.reduce((sum, concept) => sum + concept.needingPractice, 0))} /></article>
       </div>
       <article className="dash-panel">
         <h2>Today</h2>
@@ -42,11 +47,14 @@ export function TeacherDesk({ data, sections }: { data: Dashboard; sections: { i
       </article>
       <article className="dash-panel risk-panel">
         <div className="section-heading"><div><p className="dash-kicker">From the dashboard</p><h2>Students needing a closer look</h2></div><span>Names stay on the roster</span></div>
-        {data.classes.length ? <ul className="risk-list">{data.classes.map((group) => {
+        {data.classes.some((group) => group.concepts.some((concept) => concept.needingPractice > 0)) ? <ul className="risk-list">{data.classes.flatMap((group) => {
           const needsPractice = group.concepts.reduce((sum, concept) => sum + concept.needingPractice, 0);
+          if (!needsPractice) return [];
           const focus = group.concepts.filter((concept) => concept.needingPractice > 0).sort((a, b) => b.needingPractice - a.needingPractice).slice(0, 2).map((concept) => concept.title).join(' · ');
-          return <li key={group.sectionId}><span><strong>{needsPractice} learning flag{needsPractice === 1 ? '' : 's'}</strong><small>{focus || 'No concept is currently flagged.'}</small></span><Link className="text-link" to={`/teacher/sections/${group.sectionId}`}>Open roster</Link></li>;
-        })}</ul> : <div className="dash-placeholder"><strong>No class data is available yet.</strong><span>Class learning signals will appear here.</span></div>}
+          const section = sections.find((item) => item.id === group.sectionId);
+          const title = section ? `${classTitle(section.className)} - Section ${section.name}` : 'This class';
+          return [<li key={group.sectionId}><span><strong>{title}</strong><small>{focus}</small></span><Link className="text-link" to={`/teacher/sections/${group.sectionId}`}>Open roster</Link></li>];
+        })}</ul> : <p>Nothing needs a closer look right now.</p>}
       </article>
       <article className="dash-panel">
         <h2>Chapter bands</h2>
@@ -79,7 +87,7 @@ export function TeacherDesk({ data, sections }: { data: Dashboard; sections: { i
         const section = sections.find((item) => item.id === group.sectionId);
         return (
           <article className="dash-panel" key={group.sectionId}>
-            <h2>{section ? `Section ${section.name}` : 'Section'}</h2>
+            <h2>{section ? `${classTitle(section.className)} - Section ${section.name}` : 'Class'}</h2>
             <p>{group.students} students. {group.completedSessions} session checks finished. Names stay on the roster.</p>
             <HeatMap concepts={group.concepts} />
             {group.doubtBatches.length ? (

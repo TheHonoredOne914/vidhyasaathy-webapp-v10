@@ -44,6 +44,16 @@ export function scoreText(score: Assignment['score']): string {
   return `${score.correct} of ${score.total} correct`;
 }
 
+/** Student-facing status. Teachers and parents keep the counts in scoreText. */
+export function studentScore(score: Assignment['score']): string {
+  if (!score || score.status === 'not_started') return 'Not started.';
+  if (score.status === 'pending_review') return 'Waiting for your teacher.';
+  if (score.status === 'in_progress') return 'Keep going.';
+  if (score.total > 0 && score.correct === score.total) return 'Top form on this work.';
+  if (score.correct > 0) return 'Almost there.';
+  return "Let's fix this.";
+}
+
 export function formatDue(ms: number): string {
   return new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(ms));
 }

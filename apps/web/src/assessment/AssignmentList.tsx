@@ -8,7 +8,7 @@ import { ErrorState } from '../ui/ErrorState';
 import { Skeleton } from '../ui/Skeleton';
 import { StaleNote } from '../ui/StaleNote';
 import { AssignmentListSchema } from './schemas';
-import { formatDue, scoreText } from './present';
+import { formatDue, scoreText, studentScore } from './present';
 
 export function AssignmentList({ chapterId }: { chapterId?: string }) {
   const { pathname } = useLocation();
@@ -34,7 +34,7 @@ export function AssignmentList({ chapterId }: { chapterId?: string }) {
                 {' · Due '}
                 {formatDue(item.dueAt)}
                 {' · '}
-                {item.score ? <span data-testid="assignment-score">{scoreText(item.score)}</span> : contentStateLabel(item.status, null)}
+                {item.score ? <span data-testid="assignment-score">{audience === 'student' ? studentScore(item.score) : scoreText(item.score)}</span> : contentStateLabel(item.status, null)}
                 {' · '}
                 {item.teacherName}
               </span>

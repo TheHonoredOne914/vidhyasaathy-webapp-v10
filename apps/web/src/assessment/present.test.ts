@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { Assignment, SubmitAttempt, SyncResponse } from '@vidhyasaathy/contracts';
 import { enqueue } from '@vidhyasaathy/core/sync';
 import { applyFlush } from './outbox';
-import { dueNow, scoreText } from './present';
+import { dueNow, scoreText, studentScore } from './present';
 import { mergePull } from './pull';
 
 const event = {
@@ -76,5 +76,7 @@ describe('due work', () => {
     expect(rows.map((row) => row.id)).toEqual(['overdue', 'later']);
     expect(scoreText(rows[1]?.score ?? null)).toBe('Not started');
     expect(scoreText({ answered: 2, marked: 2, correct: 2, total: 2, status: 'completed' })).toBe('2 of 2 correct');
+    expect(studentScore({ answered: 2, marked: 2, correct: 1, total: 2, status: 'completed' })).toBe('Almost there.');
+    expect(studentScore({ answered: 2, marked: 2, correct: 2, total: 2, status: 'completed' })).toBe('Top form on this work.');
   });
 });

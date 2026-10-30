@@ -33,12 +33,12 @@ export function TeacherHome() {
       </header>
       <nav className="teacher-class-picker" aria-label="Choose a class">
         <span>Class view</span>
-        {classes.length ? classes.map((item) => <Link key={item.id} to={`/teacher/classes/${item.id}`}>{item.name}</Link>) : <span className="muted">Your class list will appear here.</span>}
+        {classes.length ? classes.map((item) => <Link key={item.id} to={`/teacher/classes/${item.id}`}>{/^class\b/i.test(item.name.trim()) ? item.name : `Class ${item.name}`}</Link>) : <span className="muted">Your class list will appear here.</span>}
       </nav>
       <StaleNote stale={session.stale} updatedAt={session.updatedAt} message={session.message} testId="updated-at" />
       <Link to="/teacher/notes">Publish notes and resources</Link>
       <RemoteBlock remote={dashboard} title="Could not load today's desk">
-        {(data) => <TeacherDesk data={data} sections={sections} />}
+        {(data) => <TeacherDesk data={data} sections={sections.map((section) => ({ id: section.id, name: section.name, className: classLabel(classes, section.classId) }))} />}
       </RemoteBlock>
       <CatalogGate catalog={catalog}>
         {classes.length === 0 ? (
@@ -53,14 +53,14 @@ export function TeacherHome() {
             {classes.map((item) => (
               <li key={item.id} className="vs-card">
                 <h2 className="vs-card-heading">
-                  <Link className="vs-class-link" to={`/teacher/classes/${item.id}`}>{item.name} <span aria-hidden="true">→</span></Link>
+                  <Link className="vs-class-link" to={`/teacher/classes/${item.id}`}>{/^class\b/i.test(item.name.trim()) ? item.name : `Class ${item.name}`} <span aria-hidden="true">→</span></Link>
                 </h2>
                 <div className="vs-card-body vs-class-details">
                   <div>
                     <h3>Sections</h3>
                     <ul aria-label={`${item.name} sections`}>
                       {sections.filter((section) => section.classId === item.id).map((section) => (
-                        <li key={section.id}>{classLabel(classes, section.classId)} section {section.name}</li>
+                        <li key={section.id}>{/^class\b/i.test(classLabel(classes, section.classId).trim()) ? classLabel(classes, section.classId) : `Class ${classLabel(classes, section.classId)}`} - Section {section.name}</li>
                       ))}
                     </ul>
                   </div>

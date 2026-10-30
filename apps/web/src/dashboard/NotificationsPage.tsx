@@ -34,7 +34,7 @@ export function NotificationsPage() {
     <section className="dash notifications-page">
       <header className="dash-banner">
         <h1>Notifications</h1>
-        <p>In-app delivery is sent. Email and WhatsApp stay failed until a channel is configured.</p>
+        <p>Notes from school land here.</p>
       </header>
       {actionError ? <p role="alert">{actionError}</p> : null}
       <RemoteBlock remote={list} title="Could not load notifications">

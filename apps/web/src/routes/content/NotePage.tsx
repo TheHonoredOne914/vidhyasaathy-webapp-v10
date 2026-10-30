@@ -73,7 +73,7 @@ export function NotePage() {
 
   if (note.denied || concepts.denied) return <AccessDenied />;
   if (note.status === 'error' && !note.data) return <ErrorState title="Could not open this note" message={note.message ?? 'Try again.'} onRetry={note.reload} />;
-  if (!current) return <LessonFrame kicker="Note" title="Note"><Skeleton /></LessonFrame>;
+  if (!current) return <LessonFrame paper kicker="Note" title="Note"><Skeleton /></LessonFrame>;
   const row = current;
 
   const draft = !student && current.status === 'draft';
@@ -144,7 +144,7 @@ export function NotePage() {
   }
 
   return (
-    <LessonFrame kicker="Note" title={current.title} script="From your teacher." stale={note}>
+    <LessonFrame paper kicker="Note" title={current.title} script="From your teacher." stale={note}>
       <p className="lesson-actions"><Link to={`/${audience}/chapters/${current.chapterId}`}>Back to the chapter</Link></p>
       <article className="lesson-card">
         <p className="lesson-note">{current.body}</p>

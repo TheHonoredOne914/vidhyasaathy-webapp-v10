@@ -174,7 +174,7 @@ test('ask, plan, concept map, remediation and unapproved drafts', async ({ page,
   await studentPage.getByRole('group', { name: 'How many equal parts are in one half?' }).getByRole('radio', { name: 'three' }).check();
   await studentPage.getByRole('group', { name: 'Are the parts equal?' }).getByRole('radio', { name: 'no' }).check();
   await studentPage.getByRole('button', { name: 'Submit both answers' }).click();
-  await expect(studentPage.getByText('0 of 2 correct. Both answers need to be correct.')).toBeVisible();
+  await expect(studentPage.getByText("Let's fix this. Both answers need to be correct.")).toBeVisible();
   await studentPage.getByRole('group', { name: 'How many equal parts are in one half?' }).getByRole('radio', { name: 'two' }).check();
   await studentPage.getByRole('group', { name: 'Are the parts equal?' }).getByRole('radio', { name: 'yes' }).check();
   await studentPage.getByRole('button', { name: 'Submit both answers' }).click();

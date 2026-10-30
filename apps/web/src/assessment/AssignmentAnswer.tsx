@@ -11,11 +11,11 @@ import { AccessDenied } from '../routes/AccessDenied';
 import { LessonFrame } from '../routes/content/LessonFrame';
 import { useAttemptSync } from './AttemptSync';
 import { AttemptListSchema } from './schemas';
-import { formatDue, questionView, scoreText, type QuestionView } from './present';
+import { formatDue, questionView, studentScore, type QuestionView } from './present';
 
 function markLabel(correct: boolean | null, needsReview: boolean): string {
   if (needsReview || correct === null) return 'Waiting for your teacher';
-  return correct ? 'Correct' : 'Not correct';
+  return correct ? 'That is the one.' : 'That choice misses the idea.';
 }
 
 export function AssignmentAnswerPage() {
@@ -41,7 +41,7 @@ export function AssignmentAnswerPage() {
     if (assignment.status === 'error' || attempts.status === 'error') {
       return <ErrorState title="Could not load this assignment" message={assignment.message ?? attempts.message ?? 'Try again.'} onRetry={() => { assignment.reload(); attempts.reload(); }} />;
     }
-    return <LessonFrame kicker="Assignment" title="Assignment"><Skeleton /></LessonFrame>;
+    return <LessonFrame paper kicker="Assignment" title="Assignment"><Skeleton /></LessonFrame>;
   }
 
   const detail = assignment.data;
@@ -81,10 +81,10 @@ export function AssignmentAnswerPage() {
   }
 
   return (
-    <LessonFrame kicker={detail.kind === 'quiz' ? 'Quiz' : 'Homework'} title={detail.title} script="Save it on this device." stale={assignment}>
+    <LessonFrame paper kicker={detail.kind === 'quiz' ? 'Quiz' : 'Homework'} title={detail.title} script="Save it on this device." stale={assignment}>
       <p className="lesson-actions"><Link to="/student?panel=homework">Back to homework</Link></p>
       <p>Due {formatDue(detail.dueAt)}. {detail.teacherName}.</p>
-      <p data-testid="assignment-score">{scoreText(detail.score)}</p>
+      <p data-testid="assignment-score">{studentScore(detail.score)}</p>
       {sync.notice ? <p role="alert">{sync.notice}</p> : null}
       {detail.items.map((item) => {
         const view = questionView(item);

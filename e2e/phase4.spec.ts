@@ -160,7 +160,7 @@ test('offline homework answer syncs once and the score is visible', async ({ pag
   await expect(studentPage.getByRole('heading', { level: 1, name: 'Homework and quizzes' })).toBeVisible();
   await shot(studentPage, 'homework');
   await studentPage.getByRole('link', { name: 'Numerator homework' }).click();
-  await expect(studentPage.getByTestId('assignment-score')).toHaveText('Not started');
+  await expect(studentPage.getByTestId('assignment-score')).toHaveText('Not started.');
   const results = await new AxeBuilder({ page: studentPage }).analyze();
   expect(results.violations.map((violation) => `${violation.id}: ${violation.help}`)).toEqual([]);
 
@@ -171,14 +171,14 @@ test('offline homework answer syncs once and the score is visible', async ({ pag
   await expect(mcq.getByText('Saved on this device.')).toBeVisible();
   await shot(studentPage, 'answering');
   await studentContext.setOffline(false);
-  await expect(studentPage.getByTestId('assignment-score')).toHaveText('1 correct, 1 of 2 answered');
+  await expect(studentPage.getByTestId('assignment-score')).toHaveText('Keep going.');
   const attempts = await api<{ itemId: string }[]>(studentPage, 'GET', `/assignments/${assignmentId}/attempts`);
   expect(attempts).toHaveLength(1);
 
   const short = studentPage.getByRole('group', { name: 'Where is the numerator?' });
   await short.getByLabel('Your answer').fill('the upper part');
   await short.getByRole('button', { name: 'Save answer' }).click();
-  await expect(studentPage.getByTestId('assignment-score')).toHaveText('1 correct of 2. Waiting for your teacher.');
+  await expect(studentPage.getByTestId('assignment-score')).toHaveText('Waiting for your teacher.');
   await shot(studentPage, 'score');
 
   await teacherPage.goto('/teacher/review');
@@ -187,7 +187,7 @@ test('offline homework answer syncs once and the score is visible', async ({ pag
   await teacherPage.getByRole('button', { name: 'Mark not correct' }).click();
   await expect(teacherPage.getByText('No answers are waiting for a mark.')).toBeVisible();
   await studentPage.reload();
-  await expect(studentPage.getByTestId('assignment-score')).toHaveText('1 of 2 correct');
+  await expect(studentPage.getByTestId('assignment-score')).toHaveText('Almost there.');
   const graded = await api<{ id: string }[]>(studentPage, 'GET', `/assignments/${assignmentId}/attempts`);
   expect(graded).toHaveLength(2);
 
@@ -210,11 +210,11 @@ test('offline homework answer syncs once and the score is visible', async ({ pag
   await pairs.getByLabel('Numerator', { exact: true }).selectOption({ label: 'Top' });
   await pairs.getByLabel('Denominator', { exact: true }).selectOption({ label: 'Bottom' });
   await pairs.getByRole('button', { name: 'Save answer' }).click();
-  await expect(studentPage.getByTestId('assignment-score')).toHaveText('1 correct, 1 of 2 answered');
+  await expect(studentPage.getByTestId('assignment-score')).toHaveText('Keep going.');
   const flashcard = studentPage.getByRole('group', { name: 'Name the top part of a fraction.' });
   await flashcard.getByLabel('Your answer').fill('Numerator');
   await flashcard.getByRole('button', { name: 'Save answer' }).click();
-  await expect(studentPage.getByTestId('assignment-score')).toHaveText('2 of 2 correct');
+  await expect(studentPage.getByTestId('assignment-score')).toHaveText('Top form on this work.');
   await shot(studentPage, 'quiz-score');
 
   const ignore = (error: string) => error.includes('net::ERR_') || error.includes('status of 401') || error.includes('status of 403') || error.includes('status of 404');
