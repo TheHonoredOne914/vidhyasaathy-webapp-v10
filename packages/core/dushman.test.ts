@@ -8,12 +8,14 @@ function rows(conceptId: string, pattern: readonly { correct: boolean; confidenc
 it('picks the three weakest taught concepts and retires at mastered', () => {
   const states: DushmanState[] = [
     { conceptId: 'new', name: 'New', level: null },
+    { conceptId: 'mastered', name: 'Mastered', level: 3 },
     { conceptId: 'speed', name: 'Speed', level: 1 },
     { conceptId: 'distance', name: 'Distance', level: 2 },
     { conceptId: 'graphs', name: 'Graphs', level: 2 },
     { conceptId: 'units', name: 'Units', level: 1 },
   ];
   const evidence = [
+    ...rows('mastered', [{ correct: true, confidence: 'sure' }, { correct: true, confidence: 'sure' }, { correct: true, confidence: 'sure' }]),
     ...rows('speed', [{ correct: false, confidence: 'sure' }, { correct: false, confidence: 'sure' }, { correct: true, confidence: 'unsure' }], 10),
     ...rows('distance', [{ correct: true, confidence: 'sure' }, { correct: false, confidence: 'unsure' }, { correct: true, confidence: 'sure' }], 1),
     ...rows('graphs', [{ correct: false, confidence: 'unsure' }, { correct: false, confidence: 'unsure' }, { correct: false, confidence: 'guess' }], 20),
