@@ -6,3 +6,9 @@
 - Subjects retain the Time this week card with an honest empty line; measured weekly minutes are unavailable (see data-gaps-polish3a.md).
 - Path header explicitly labels completed ideas, distinct from the next station's ordinal, using the same concepts/mastery source.
 - Verification: `npm run typecheck` passed; `npm run test:unit` passed (287 passed, 1 skipped). Screenshots/viewport checks follow the learn-flow rebuilds.
+
+## 2a. Distance & Displacement lesson data
+
+- Added the supplied source in the existing Motion lesson format, linked to the existing concept and prerequisites. Three checkpoints, six flashcards, worked/faded examples and existing interactive block types; no new game or schema change.
+- Added API coverage for loading, Hindi terms, answer-key redaction and server checking. No demo database modified; tests use isolated databases.
+- Verification: `npm run typecheck` passed; `npm run test:unit` passed (288 passed, 1 skipped).
