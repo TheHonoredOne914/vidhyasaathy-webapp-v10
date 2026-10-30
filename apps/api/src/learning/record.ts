@@ -4,6 +4,8 @@ import {
   BRIDGE_ON_DROP, chapterBand, clampLevel, classifyError, diagnosticEntry, initialLadder, isNotTaughtAnswer,
   masteryFromEvents, stepLadder, type Confidence, type DiagnosticRoute, type ErrorFamily, type LearningEvent, type Level,
 } from '@vidhyasaathy/core/learning';
+import { applyLearningAwards } from '../daily/awards.ts';
+import { actForSource, touchStreak } from '../daily/streak-store.ts';
 import type { Db } from '../db/index.ts';
 import { answerEvidence, bandEvents, chapterBands, conceptLadders, concepts, diagnosticResults } from '../db/schema.ts';
 
@@ -82,7 +84,14 @@ export function recordAnswer(db: Db, input: {
         target: [conceptLadders.profileId, conceptLadders.conceptId], set: state,
       }).run();
       refreshChapterBand(db, input.schoolId, input.profileId, input.chapterId, timestamp);
+      applyLearningAwards(db, {
+        schoolId: input.schoolId, profileId: input.profileId, conceptId: input.conceptId, evidenceId: input.id,
+        fromLevel: prior?.masteryLevel ?? null, toLevel: mastery.level, now: timestamp,
+      });
     }
+  }
+  if (!(existing?.notTaught ?? notTaught)) {
+    touchStreak(db, input.profileId, input.schoolId, actForSource(input.source), input.id, timestamp);
   }
   const saved = db.select().from(conceptLadders).where(and(eq(conceptLadders.profileId, input.profileId), eq(conceptLadders.conceptId, input.conceptId))).get();
   const errorType = (existing?.errorType ?? db.select().from(answerEvidence).where(eq(answerEvidence.id, input.id)).get()?.errorType ?? null) as ErrorFamily | null;
