@@ -15,6 +15,7 @@ import { fieldClass } from '../../ui/Field';
 import { ConceptLearn } from '../../learn/ConceptLearn';
 import { AccessDenied } from '../AccessDenied';
 import { LessonFrame } from './LessonFrame';
+import { StudentLessonPage } from '../../student/notebook/screens/polish3a/StudentLessonPage';
 import '../../student/notebook/pages/lesson.css';
 
 function toggle(list: string[], id: string): string[] {
@@ -22,6 +23,12 @@ function toggle(list: string[], id: string): string[] {
 }
 
 export function ConceptPage() {
+  const { pathname } = useLocation();
+  const { conceptId } = useParams();
+  return audienceFrom(pathname) === 'student' ? <StudentLessonPage key={conceptId} /> : <ContentConceptPage />;
+}
+
+function ContentConceptPage() {
   const { pathname } = useLocation();
   const { chapterId = '', conceptId = '' } = useParams();
   const audience = audienceFrom(pathname);

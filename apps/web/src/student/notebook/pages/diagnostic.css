@@ -26,10 +26,24 @@
 .ww-box h4{font-family:var(--nb-font-hand);font-weight:700;font-size:1.3rem;margin-bottom:var(--nb-s1)}
 .redmark{position:absolute;font-family:var(--nb-font-hand);font-weight:700;color:var(--nb-redpen);font-size:1.15rem;transform:rotate(-4deg)}
 .diag-why{display:flex;gap:var(--nb-s3);align-items:flex-start}
+.pg-quiz .nb-quiz{grid-template-columns:minmax(0,1fr) clamp(260px,22vw,340px);align-items:start}
+.pg-quiz .qz-figure{grid-template-columns:minmax(0,1fr)}
+.pg-quiz .qz-tape{left:auto;right:3rem}
+.pg-quiz .nb-q__hint{margin-top:.4rem}
+.pg-quiz .nb-opt__mark{font-size:.8rem;font-weight:500}
+.pg-quiz .nb-opt__body{overflow-wrap:anywhere;min-width:0}
+.pg-quiz .qz-answer{grid-template-columns:auto minmax(0,1fr)}
+.pg-quiz .qz-answer .nb-row__t{font-size:1.1rem}
+.pg-quiz .is-answered{background:var(--nb-sky);border-color:var(--nb-blue)}
+.pg-quiz .qz-foot .left{flex-wrap:wrap;min-width:0}
+.pg-quiz .qz-rail>.nb-sticky{margin:.5rem .3rem}
+.pg-quiz .qz-rail .nb-saathy-tip+button{margin-top:var(--nb-s3)}
+@media(max-width:1179px){.pg-quiz .nb-quiz{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.pg-quiz .qz-top{gap:var(--nb-s2)}.pg-quiz .strip-cap{flex-wrap:wrap;gap:.2rem}.pg-quiz .nb-q__label{flex-wrap:wrap}.pg-quiz .nb-opt{min-width:0}.pg-quiz .nb-opt.is-notyet{grid-template-columns:2rem minmax(0,1fr)}.pg-quiz .nb-opt.is-notyet .nb-opt__mark{grid-column:2}.pg-quiz .nb-conf__row{flex-wrap:wrap}.pg-quiz .nb-confbtn{min-width:0;flex:1 1 6rem}}
 @media (max-width:1023px){
   .qz-top{flex-wrap:wrap;gap:var(--nb-s2)} .qz-top .strip-wrap{order:3;flex-basis:100%}
   .qz-figure{grid-template-columns:1fr}
   .qz-foot{flex-wrap:wrap}
   .nb-strip__node{width:1.7rem;height:1.7rem;font-size:.9rem}.nb-strip__node.is-current{width:2.1rem;height:2.1rem}
-  .qz-rail .nb-card:not(.keep-m){display:none}
+  .pg-quiz .qz-rail .nb-card{display:block}
 }

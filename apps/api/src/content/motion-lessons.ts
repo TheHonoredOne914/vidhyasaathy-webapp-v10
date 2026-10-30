@@ -343,12 +343,58 @@ const VELOCITY_GRAPH = lesson({
   ],
 });
 
+const DISTANCE_DISPLACEMENT = lesson({
+  bridge: {
+    prereqTitle: 'Motion and Time',
+    link: 'In Class 7, you measured distance along a route. Now compare that route with the change from start to finish.',
+    repair: 'Mark a starting point on a line. Walk 5 m east, then 2 m west. Add both leg lengths for the route, then mark the finish relative to the start.',
+  },
+  notes: {
+    simple: 'Distance (दूरी) is how much ground you cover along your route. Displacement (विस्थापन) is how far and which way you end from where you began. Walk 5 m east, then 2 m west: distance is 7 m, but displacement is 3 m east. Going back to your start makes displacement zero, even though you walked some distance. Always keep the route total separate from the start-to-finish change.',
+    standard: 'Distance is the complete length of the route travelled. It is a scalar, measured in metres, and never has a direction. Displacement is the change from initial to final position: final position minus initial position. It is a vector, so include a direction or a sign chosen from a stated axis. On a straight journey that turns back, distance keeps increasing but displacement can shrink to zero. The magnitude of displacement cannot exceed distance. For a journey with several legs, add leg lengths for distance, then combine signed position changes for displacement. Draw a simple line and mark the starting and ending points before calculating.',
+    stretch: 'Distance adds every leg length. Displacement joins the initial and final positions and includes direction. Its magnitude cannot exceed distance; equality holds for a straight journey without reversing direction. With east positive, a westward change is negative. A negative displacement describes the final position relative to the start, not a negative distance travelled.',
+  },
+  steps: [
+    { body: 'Returning to the start makes the final and initial positions the same. The route still has length.', checkpoint: { id: uid(1901), prompt: 'A walker goes 9 m forward and then 9 m back to the starting point. What is the displacement?', options: ['0 m', '9 m', '18 m', '-18 m'], answer: '0 m', explanation: 'The final position is the start, so displacement is zero. The distance travelled is 18 m.' } },
+    { body: 'Distance follows the whole route. Displacement compares the initial and final positions.', checkpoint: { id: uid(1902), prompt: 'Which quantity depends on the full route taken?', options: ['Distance', 'Displacement', 'Velocity', 'Acceleration'], answer: 'Distance', explanation: 'Distance adds all the route lengths. Displacement uses only the initial and final positions.' } },
+    { body: 'Add leg lengths for distance; combine signed position changes for displacement.', checkpoint: { id: uid(1903), prompt: 'A cart moves 7 m west and then 2 m east. What is its displacement?', options: ['5 m west', '9 m west', '5 m east', '9 m east'], answer: '5 m west', explanation: 'The cart finishes 5 m west of its start: 7 m west minus 2 m east. Its distance is 9 m, without a direction.' } },
+  ],
+  worked: {
+    prompt: 'During school assembly, a student walks 30 m east from the classroom towards the stage, then 10 m west. Find distance and displacement, taking east as positive.',
+    hinted: ['Mark the classroom at 0 m and choose east as positive.', 'Distance = 30 m + 10 m = 40 m. Add both route lengths.', 'Displacement = final position - initial position = (+30 m - 10 m) - 0 m = +20 m, or 20 m east.'],
+    unhinted: 'The route totals 40 m, but the student finishes 20 m east of the classroom. Distance has no direction; displacement includes east.',
+  },
+  faded: { itemId: uid(1904), prompt: 'Walk 5 m east, then 2 m west. What is the displacement? Include direction.', hint: 'Take east as positive. Subtract the westward change from the eastward change.', answers: ['3 m east', '3 metres east', '+3 m'] },
+  misconceptions: [
+    { slip: 'Distance and displacement are always equal.', fix: 'They are equal in magnitude only on a straight journey without turning back. Returning to the start gives zero displacement but a non-zero distance.' },
+    { slip: 'Displacement can be greater than distance.', fix: 'The straight start-to-finish separation cannot exceed the complete route length.' },
+  ],
+  explainBack: { itemId: uid(1905), ownWords: 'Explain why a walk back to the start can have distance but zero displacement.', gap: 'The complete length of the route travelled is called ___.', gapAnswers: ['distance'] },
+  summary: {
+    lines: ['Distance is the total path length: a scalar measured in metres.', 'Displacement is the change from initial to final position, with sign or direction.', 'Returning to the start gives zero displacement, not zero distance.', 'Displacement magnitude cannot exceed distance.'],
+    formulas: ['Distance = sum of leg lengths', 'Displacement = final position - initial position'],
+  },
+  flashcards: [
+    { id: uid(1906), front: 'What is distance?', back: 'The total path length travelled, measured in metres.' },
+    { id: uid(1907), front: 'What is displacement?', back: 'Final position minus initial position, with a sign or direction.' },
+    { id: uid(1908), front: 'Can a moving object have zero displacement?', back: 'Yes, by returning to its starting point after travelling some distance.' },
+    { id: uid(1909), front: 'Can displacement magnitude exceed distance?', back: 'No. The straight start-to-finish separation cannot exceed the full path length.' },
+    { id: uid(1910), front: 'Which is a scalar: distance or displacement?', back: 'Distance is a scalar. Displacement includes direction and is a vector.' },
+    { id: uid(1911), front: 'Walk 3 m east and 3 m west. Distance and displacement?', back: 'Distance is 6 m. Displacement is zero because you return to the start.' },
+  ],
+  blocks: [
+    { kind: 'drag_label', title: 'Route or position change?', prompt: 'Match each quantity to its meaning.', labels: [{ id: 'distance', text: 'Distance' }, { id: 'displacement', text: 'Displacement' }], targets: [{ id: 'route', text: 'Full route length' }, { id: 'change', text: 'Start-to-finish change with direction' }], pairs: [{ labelId: 'distance', targetId: 'route' }, { labelId: 'displacement', targetId: 'change' }], fix: 'Distance follows the whole route. Displacement compares the starting and ending positions.' },
+    { kind: 'predict_reveal', title: 'Back to the classroom', prompt: 'A student walks to the stage and back to the classroom. What is zero?', choices: ['Displacement only', 'Distance only', 'Both distance and displacement'], reveal: 'Displacement is zero because the final position is the start. Distance still adds the outward and return paths.' },
+  ],
+});
+
 const PAGES: { title: string; id: string | null; description: string; prereqs: string[]; lesson: ConceptLesson }[] = [
   { title: 'Uniform and non-uniform motion', id: uid(210), description: 'Class 9: uniform motion covers equal distances in equal times. Non-uniform motion does not.', prereqs: ['Motion and Time'], lesson: UNIFORM },
   { title: 'Speed & Velocity', id: null, description: 'Class 9 Physics: Speed & Velocity.', prereqs: ['Units and ratios', 'Motion and Time'], lesson: SPEED },
   { title: 'Acceleration', id: null, description: 'Class 9 Physics: Acceleration.', prereqs: ['Units and ratios'], lesson: ACCEL },
   { title: 'Distance-time graphs', id: uid(211), description: 'Class 9: the slope of a distance-time graph is the speed.', prereqs: ['Reading graphs'], lesson: DISTANCE_GRAPH },
   { title: 'Velocity-time graphs', id: uid(212), description: 'Class 9: the slope of a velocity-time graph is the acceleration, and the area is the displacement.', prereqs: ['Reading graphs'], lesson: VELOCITY_GRAPH },
+  { title: 'Distance & Displacement', id: null, description: 'Separate route length from the change in position.', prereqs: ['Motion and Time', 'Reading graphs'], lesson: DISTANCE_DISPLACEMENT },
 ];
 
 export function ensureMotionLessons(db: Db, schoolId: string, chapterId: string, now: number) {

@@ -2,6 +2,8 @@
 .nb-app { height: 100dvh; width: 100%; }
 .nb-main { height: 100%; min-height: 0; }
 .nb-sheet { flex: 1 1 auto; min-height: 0; width: 100%; }
+/* The landing page also uses nb-grid; keep its white graph paper out of the notebook. */
+.nb-app .nb-grid { background: transparent; }
 .nb-app > *,
 .nb-app .nb-grid > *,
 .nb-app .nb-col > *,
