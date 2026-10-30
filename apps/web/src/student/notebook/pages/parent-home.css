@@ -1,0 +1,7 @@
+
+.pk{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--nb-s4)}
+.pk .nb-card b{display:block;font-family:var(--nb-font-hand);font-weight:700;font-size:2.4rem;line-height:1}
+.sb{display:grid;grid-template-columns:auto 8rem minmax(0,1fr) 8.5rem;gap:var(--nb-s3);align-items:center;padding:.55rem 0;border-bottom:1px dashed var(--nb-border)}
+.sb>.nb-mastery{justify-self:end}.sb:last-child{border:0}.sb b{font-family:var(--nb-font-hand);font-size:1.2rem;font-weight:700}
+.rem{padding:.7rem 0;border-bottom:1px dashed var(--nb-border)}.rem:last-child{border:0}
+@media (max-width:1023px){.pk{grid-template-columns:1fr}.sb{grid-template-columns:auto 1fr auto}.sb .nb-bar{display:none}}

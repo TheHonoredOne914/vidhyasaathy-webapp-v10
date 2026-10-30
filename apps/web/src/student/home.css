@@ -1,5 +1,4 @@
 /* Student home: a ruled notebook page. Cards stay plain, like slips pasted onto the sheet. */
-.app-main:has(.vs-home) { max-width: none; background-image: none; }
 .student-screen.student-screen--home { width: 100%; max-width: none; margin: 0; padding: 0; }
 
 .vs-home {

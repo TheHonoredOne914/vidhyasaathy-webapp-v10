@@ -1737,7 +1737,7 @@
   }
   /* p3ux topbar */
 
-  .app-main { max-width: 1280px; padding: 36px 40px 72px; }
+  .app-main { padding: 0; }
   .screen-header,
   .vs-page-header { margin-bottom: 32px; }
   .screen-header h1,

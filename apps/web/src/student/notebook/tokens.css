@@ -1,0 +1,59 @@
+/* VidhyaSaathy notebook tokens (v10 final). Copy verbatim to apps/web/src/student/notebook/tokens.css */
+@font-face{font-family:'Caveat';font-weight:400;font-display:swap;src:url('fonts/caveat-400.woff2') format('woff2')}
+@font-face{font-family:'Caveat';font-weight:600;font-display:swap;src:url('fonts/caveat-600.woff2') format('woff2')}
+@font-face{font-family:'Caveat';font-weight:700;font-display:swap;src:url('fonts/caveat-700.woff2') format('woff2')}
+@font-face{font-family:'Patrick Hand';font-weight:400;font-display:swap;src:url('fonts/patrick-hand-400.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-weight:400;font-display:swap;src:url('fonts/inter-400.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-weight:500;font-display:swap;src:url('fonts/inter-500.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-weight:600;font-display:swap;src:url('fonts/inter-600.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-weight:700;font-display:swap;src:url('fonts/inter-700.woff2') format('woff2')}
+
+:root{
+  /* palette: identical to the approved 2026-10-29 mockups (home-v4 etc.) */
+  --nb-paper:#FFFDF8; --nb-cream:#F4EEE4; --nb-cream-soft:#FAF6EF; --nb-cream-deep:#E8DFD0;
+  --nb-navy:#1B2A4A; --nb-navy-muted:#3A4A6B; --nb-ink-soft:#6B7280; --nb-ink-faint:#9AA3B2;
+  --nb-gold:#E8B84A; --nb-gold-deep:#C9962E; --nb-border:#DDD4C4; --nb-track:#E8E0D2;
+  --nb-blue:#3D6FB8; --nb-sky:#DCEAF6;
+  --nb-ok:#2F9E6B; --nb-ok-soft:#D9EFE3; --nb-bad:#C9433A; --nb-bad-soft:#F8DADA;
+  --nb-orange:#D9823B; --nb-orange-soft:#F8E6D4; --nb-pink-soft:#F6E0DC;
+  --nb-violet:#6B5CA5; --nb-violet-soft:#E8E2F4; --nb-leaf:#5A9A62; --nb-leaf-soft:#DCEBDD;
+  /* notebook extras */
+  --nb-amber:#D99A12; --nb-amber-soft:#FCEFCF;
+  --nb-purple:#7B61C9; --nb-purple-soft:#ECE6FB;
+  --nb-redpen:#D0342C;
+  --nb-sticky-yellow:#FFF1A6; --nb-sticky-pink:#FFDCD3; --nb-sticky-blue:#D7E9FB; --nb-sticky-green:#DDF1D6; --nb-sticky-lilac:#E9E1FA;
+  --nb-hl-yellow:rgb(255 222 80 / 62%); --nb-hl-green:rgb(120 214 140 / 50%); --nb-hl-pink:rgb(255 150 175 / 45%); --nb-hl-blue:rgb(120 180 255 / 40%);
+  --nb-tape-gold:rgb(232 184 74 / 55%); --nb-tape-sky:rgb(120 170 225 / 45%); --nb-tape-pink:rgb(230 140 150 / 45%); --nb-tape-green:rgb(110 180 120 / 45%);
+  --nb-rule-ink:rgb(110 150 200 / 34%); --nb-margin-ink:rgb(208 110 110 / 48%);
+  /* mastery words (never bands) */
+  --nb-m-fix:var(--nb-bad);   --nb-m-fix-soft:var(--nb-bad-soft);
+  --nb-m-almost:var(--nb-amber); --nb-m-almost-soft:var(--nb-amber-soft);
+  --nb-m-mastered:var(--nb-ok); --nb-m-mastered-soft:var(--nb-ok-soft);
+  --nb-m-top:var(--nb-violet); --nb-m-top-soft:var(--nb-violet-soft);
+  --nb-m-new:var(--nb-blue);  --nb-m-new-soft:var(--nb-sky);
+  /* confidence */
+  --nb-c-sure:var(--nb-ok); --nb-c-sure-soft:var(--nb-ok-soft);
+  --nb-c-unsure:var(--nb-amber); --nb-c-unsure-soft:var(--nb-amber-soft);
+  --nb-c-guess:var(--nb-purple); --nb-c-guess-soft:var(--nb-purple-soft);
+
+  /* type */
+  --nb-font-hand:'Caveat',cursive;          /* headings, labels, nav, buttons */
+  --nb-font-note:'Patrick Hand',cursive;    /* notes body, teacher remarks, Saathy speech */
+  --nb-font-ui:'Inter',system-ui,sans-serif;/* dense reading text, options, numbers */
+  --nb-fs-display:2.9rem; --nb-fs-h1:2.6rem; --nb-fs-h2:1.65rem; --nb-fs-h3:1.35rem; --nb-fs-lead:1.15rem;
+  --nb-fs-body:1rem; --nb-fs-small:.875rem; --nb-fs-tiny:.75rem;
+
+  /* spacing (rem so the whole UI scales with the viewport, see html font-size) */
+  --nb-s1:.25rem; --nb-s2:.5rem; --nb-s3:.75rem; --nb-s4:1rem; --nb-s5:1.25rem; --nb-s6:1.5rem; --nb-s8:2rem; --nb-s10:2.5rem;
+  --nb-radius-sketch:18px 16px 20px 14px / 16px 20px 14px 18px;
+  --nb-radius-sm:10px; --nb-radius-pill:999px;
+  --nb-line:1.5px; --nb-line-strong:2px;
+  --nb-shadow:3px 3px 0 rgb(27 42 74 / 7%);
+  --nb-shadow-lift:4px 5px 0 rgb(27 42 74 / 10%);
+  --nb-rule:1.875rem; /* ruled-line pitch (30px at 16px) */
+
+  /* shell */
+  --nb-sidebar-w:14.5rem; --nb-rail-w:20rem; --nb-top-h:3.5rem; --nb-gutter:1.5rem; --nb-margin-x:3rem;
+}
+/* Fluid root size: 15.3px @1280, 16px @1440, 18px @1920. Everything is rem, so 1920 fills instead of floating. */
+html{font-size:clamp(14px, calc(0.4167vw + 10px), 19px)}
