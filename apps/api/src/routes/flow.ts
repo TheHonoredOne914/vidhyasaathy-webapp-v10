@@ -60,7 +60,7 @@ export function registerFlowRoutes(app: FastifyInstance, db: Db, auth: AuthServi
   });
   app.get('/student/enrollment', { preHandler: requireRole('student') }, async (request) => {
     const me = requireAuth(request);
-    const row = db.select({ className: classes.name, sectionName: sections.name }).from(profiles)
+    const row = db.select({ className: classes.name, sectionName: sections.name, rollNumber: profiles.rollNumber }).from(profiles)
       .leftJoin(sections, and(eq(sections.id, profiles.sectionId), eq(sections.schoolId, me.school.id)))
       .leftJoin(classes, and(eq(classes.id, sections.classId), eq(classes.schoolId, me.school.id)))
       .where(scope(profiles, me.school.id, me.profile.id)).get();

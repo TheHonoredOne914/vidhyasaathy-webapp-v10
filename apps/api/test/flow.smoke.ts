@@ -81,7 +81,7 @@ test('teacher roster and student subjects use server-side assignment and school 
   const claimed = await h.post('/auth/claim', { code: entry.code, pin: PIN });
   assert.equal(claimed.statusCode, 200, claimed.body);
   const cookie = cookieFrom(claimed.headers);
-  assert.deepEqual((await get('/student/enrollment', cookie)).json(), { className: 'Class 6', sectionName: 'A' });
+  assert.deepEqual((await get('/student/enrollment', cookie)).json(), { className: 'Class 6', sectionName: 'A', rollNumber: '01' });
   const subjects = (await get('/student/subjects', cookie)).json();
   assert.equal(subjects.length, 1);
   assert.equal(subjects[0].id, assigned.subjectId);
@@ -91,7 +91,7 @@ test('teacher roster and student subjects use server-side assignment and school 
   assert.deepEqual((await get('/admin/summary', owner.cookie)).json(), { classes: 1, teachers: 1, students: 1, activated: 1, parentLinks: 0 });
   const unassigned = h.roleCookie(owner.me.school.id, 'student');
   assert.deepEqual((await get('/student/subjects', unassigned.cookie)).json(), []);
-  assert.deepEqual((await get('/student/enrollment', unassigned.cookie)).json(), { className: null, sectionName: null });
+  assert.deepEqual((await get('/student/enrollment', unassigned.cookie)).json(), { className: null, sectionName: null, rollNumber: null });
 });
 
 test('parent reads only linked children; cross-school links and other role endpoints are denied', async () => {
