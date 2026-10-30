@@ -8,7 +8,9 @@ const slider = { kind: 'slider_graph' as const, title: 'Velocity-time', axis: 'v
 
 describe('learn block validator', () => {
   it('accepts acceleration that matches (v - u) / t and rejects a mismatch', () => {
-    expect(parseLearnBlock(slider).a).toBe(2);
+    const parsed = parseLearnBlock(slider);
+    expect(parsed.kind).toBe('slider_graph');
+    if (parsed.kind === 'slider_graph') expect(parsed.a).toBe(2);
     expect(SliderGraphBlockSchema.safeParse({ ...slider, a: 9 }).success).toBe(false);
   });
 
