@@ -113,9 +113,9 @@ export function studentProgress(db: Db, request: FastifyRequest, student: typeof
     evidence: summarizeEvidence(conceptViews.reduce((sum, row) => sum + row.attempts, 0),
       conceptViews.reduce((sum, row) => sum + row.correct, 0), conceptViews.reduce((sum, row) => sum + row.pendingReview, 0)),
     completedSessions: completed.length, concepts: conceptViews, assignments: work.map((row) => assignmentView(db, request, row, student.id)),
-    masteryWords: visible.map(({ concept }) => {
+    masteryWords: visible.map(({ concept, chapter }) => {
       const ladder = ladders.find((row) => row.conceptId === concept.id);
-      return { conceptId: concept.id, title: concept.title, word: levelWord((ladder?.masteryLevel ?? null) as Level | null) };
+      return { conceptId: concept.id, chapterId: chapter.id, title: concept.title, word: levelWord((ladder?.masteryLevel ?? null) as Level | null) };
     }) };
 }
 

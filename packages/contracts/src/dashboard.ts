@@ -40,7 +40,7 @@ export const MasteryWordSchema = z.enum(["Let's fix this", 'Almost there', 'Mast
 export const ProgressSchema = z.object({
   profileId: Id, updatedAt: Time, evidence: EvidenceSummarySchema, completedSessions: Count,
   concepts: z.array(ConceptInsightSchema), assignments: z.array(AssignmentSchema),
-  masteryWords: z.array(z.object({ conceptId: Id, title: z.string(), word: MasteryWordSchema }).strict()),
+  masteryWords: z.array(z.object({ conceptId: Id, chapterId: Id, title: z.string(), word: MasteryWordSchema }).strict()),
 }).strict();
 export const NotificationChannelSchema = z.enum(['in_app', 'email', 'whatsapp']);
 export const SaveNotificationSettingsSchema = z.object({

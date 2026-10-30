@@ -6,8 +6,8 @@
   margin-inline: auto;
   color: #041d3d;
   font-family: "Patrick Hand", cursive;
-  font-size: 16px;
-  line-height: 1.5;
+  font-size: 18px;
+  line-height: 1.45;
 }
 .teacher-class-picker { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: -4px 0 8px; color: #517dab; }
 .teacher-class-picker a { padding: 6px 12px; border: 1px solid #517dab; border-radius: 999px; color: #193e69; background: #f9f6ee; text-decoration: none; }
@@ -99,10 +99,10 @@
 }
 
 .dash-banner {
-  padding: 20px 24px;
-  border-radius: 10px;
-  background: #041d3d;
-  color: #f9f6ee;
+  padding: 4px 0 8px;
+  border-radius: 0;
+  background: transparent;
+  color: #041d3d;
 }
 
 .dash-banner p {
@@ -111,9 +111,9 @@
 
 .dash-hand {
   margin: 8px 0 0;
-  color: #ffb38a;
-  font-size: 28px;
-  line-height: 1.2;
+  color: #28517c;
+  font-size: 18px;
+  line-height: 1.45;
 }
 
 .dash-panel {
@@ -125,7 +125,7 @@
 
 .stat-grid { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .stat-tile { position: relative; min-height: 124px; padding: 18px; border: 1.5px solid #28517c; border-radius: 18px; background: #f9f6ee; box-shadow: 0 6px 0 #d6e2e6; }
-.stat-tile span { display: block; color: #517dab; font-size: 16px; }
+.stat-tile span { display: block; color: #28517c; font-size: 20px; line-height: 1.3; }
 .stat-tile strong { display: block; margin-top: 8px; color: #041d3d; font-size: 38px; font-weight: 400; line-height: 1; }
 .stat-tile-warm { background: #ffd8c2; }
 .stat-sparkline { position: absolute; right: 14px; bottom: 14px; width: 76px; height: 28px; color: #28517c; }
@@ -204,10 +204,62 @@ html[data-motion='reduce'] .dash * {
 }
 
 /* p3ux settings */
-.dash-banner { padding: 16px 20px; min-height: 0; max-height: 72px; display: flex; flex-direction: column; justify-content: center; }
-.dash-banner h1 { margin: 0; font-size: 28px; line-height: 1.1; }
+.dash-banner { padding: 4px 0 8px; min-height: 0; max-height: none; display: flex; flex-direction: column; justify-content: center; background: transparent; color: #041d3d; }
+.dash-banner h1 { margin: 0; color: #041d3d; font-size: 40px; font-weight: 400; line-height: 1.1; }
 .dash-banner p { margin: 4px 0 0; }
 .dash-panel label[for="quiet-start"],
 .dash-panel label[for="quiet-end"] { display: block; margin-top: 12px; font-weight: 600; }
 .dash-panel input[type="time"] { display: block; width: min(100%, 220px); min-height: 44px; margin-top: 6px; padding: 8px 12px; }
 .notifications-page .error-card, .dash .error-card { margin-top: 20px; }
+
+.progress-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+  margin: 0 0 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.progress-card {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 8px 12px;
+  align-items: center;
+  min-height: 108px;
+  padding: 14px 16px;
+  border: 1.5px solid #193e69;
+  border-radius: 16px 14px 18px 12px;
+  background: #fffdf8;
+  box-shadow: 3px 3px 0 rgb(4 29 61 / 6%);
+}
+
+.progress-icon {
+  display: grid;
+  grid-row: 1 / span 2;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 1.5px solid #193e69;
+  border-radius: 12px;
+}
+
+.progress-icon svg { width: 26px; height: 26px; }
+.progress-card.is-fix { background: #ffd9c2; }
+.progress-card.is-fix .progress-icon { color: #9b2c2c; background: #f9f6ee; }
+.progress-card.is-almost { background: #fff4d2; }
+.progress-card.is-almost .progress-icon { color: #a15c00; background: #f9f6ee; }
+.progress-card.is-mastered { background: #d3e4d4; }
+.progress-card.is-mastered .progress-icon { color: #2f6e48; background: #f9f6ee; }
+.progress-card.is-top { background: #d6e2e6; }
+.progress-card.is-top .progress-icon { color: #193e69; background: #f9f6ee; }
+.progress-card.is-new .progress-icon { color: #517dab; background: #f9f6ee; }
+.progress-copy { display: grid; min-width: 0; }
+.progress-copy strong { font-size: 20px; font-weight: 400; line-height: 1.2; }
+.progress-copy em { color: #28517c; font-size: 16px; font-style: normal; }
+.progress-card a { grid-column: 2; color: #193e69; font-size: 17px; }
+
+@media (max-width: 480px) {
+  .progress-cards { grid-template-columns: 1fr; }
+  .dash-banner h1 { font-size: 32px; }
+}
