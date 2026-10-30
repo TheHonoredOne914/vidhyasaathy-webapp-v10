@@ -51,28 +51,66 @@ try {
       if (!(await options.count())) break;
       console.log('QUESTION', await page.locator('.qz-question').textContent().catch(() => page.locator('.qz-figure').textContent()), await options.allTextContents());
       await options.nth(answers[i] ?? 0).click();
-      await page.getByRole('button', { name: 'Sure', exact: true }).click();
+      await page.getByRole('button', { name: /^Sure\b/ }).click();
       await page.getByRole('button', { name: 'Check answer', exact: true }).click();
-      await page.locator('.nb-feedback').waitFor();
+      await page.locator('.nb-feedback').waitFor({ timeout: 60000 });
       const state = await page.locator('.nb-feedback--right').count() ? 'quiz-right' : 'quiz-wrong';
       if (!found.has(state)) { await capture(page, state); found.add(state); }
       if (found.size === 2) break;
-      await page.getByRole('button', { name: /^(Next question|Finish round)$/ }).click();
+      await page.getByRole('button', { name: /^(Next question|Finish practice)$/ }).click();
     }
     console.log('FEEDBACK', [...found]);
   }
   for (const [name, path] of [['progress', '/student/progress'], ['homework', '/student?panel=homework'], ['ask', '/student?panel=ask']]) {
     if (only && only !== name) continue;
     await page.goto(`${base}${path}`);
+    if (name === 'progress') {
+      await page.locator('.pr-ring').first().waitFor();
+      await page.locator('.cal .d').first().waitFor();
+    } else if (name === 'homework') {
+      await page.locator('.pg-homework .hw').first().waitFor();
+      await page.locator('.ws .wq').waitFor();
+    } else {
+      await page.locator('.ask-select select').last().waitFor();
+      await page.getByRole('textbox', { name: 'Your doubt' }).fill(`Help me understand ${chapter.title}.`);
+      await page.getByRole('button', { name: 'Send', exact: true }).click();
+      await page.getByTestId('ai-state').first().waitFor();
+      if (await page.getByTestId('ai-state').textContent().then((text) => text.includes('AI not configured'))) throw new Error('Raw AI configuration error is visible');
+    }
     await capture(page, name, undefined, name === 'progress' ? [360, 1440, 1920] : [1440]);
   }
   if (!only || only === 'homework') {
     const homework = await data(context, '/student/homework?tab=all');
-    if (homework.items[0]) { await page.goto(`${base}/student/assignments/${homework.items[0].id}`); await capture(page, 'worksheet'); }
+    const sheet = homework.items.find((row) => row.status === 'todo' || row.status === 'overdue') ?? homework.items[0];
+    if (!sheet) throw new Error('No real worksheet to verify');
+    await page.goto(`${base}/student/assignments/${sheet.id}`);
+    await page.locator('.ws .wq').waitFor();
+    await capture(page, 'worksheet');
+    for (let i = 0; i < sheet.count && !(await page.getByRole('button', { name: 'Save draft', exact: true }).count()); i++) {
+      const next = page.getByRole('button', { name: 'Next question', exact: true });
+      if (await next.isDisabled()) break;
+      await next.click();
+    }
+    if (await page.getByRole('button', { name: 'Save draft', exact: true }).count()) {
+      const options = page.locator('.ws-option');
+      if (await options.count()) await options.first().click();
+      else await page.locator('.ws textarea.ans').first().fill('I will show my working step by step.');
+      const draft = page.waitForResponse((response) => response.url().includes(`/student/homework/${sheet.id}/draft`) && response.request().method() === 'PUT');
+      await page.getByRole('button', { name: 'Save draft', exact: true }).click();
+      const saved = await draft;
+      if (!saved.ok()) throw new Error(`Draft save: ${saved.status()}`);
+      const attempt = page.waitForResponse((response) => response.url().endsWith('/api/attempts') && response.request().method() === 'POST');
+      await page.getByRole('button', { name: 'Submit answer', exact: true }).click();
+      const submitted = await attempt;
+      if (!submitted.ok()) throw new Error(`Worksheet submit: ${submitted.status()}`);
+      console.log('WORKSHEET draft PUT and evidence POST passed');
+    } else console.log('WORKSHEET has no unanswered items; existing work kept');
   }
   if (!only || only === 'progress') {
     const second = await student('Priya');
     await second.page.goto(`${base}/student/progress`);
+    await second.page.locator('.pr-ring').first().waitFor();
+    await second.page.locator('.cal .d').first().waitFor();
     await capture(second.page, 'progress-priya', [1440]);
     await second.context.close();
   }

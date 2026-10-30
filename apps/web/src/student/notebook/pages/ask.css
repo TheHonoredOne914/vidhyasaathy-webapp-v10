@@ -10,3 +10,24 @@
 .chat .nb-tabs{flex-wrap:nowrap;white-space:nowrap}
 .composer{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:var(--nb-s3);align-items:center;background:var(--nb-paper);border:2px solid var(--nb-navy);border-radius:var(--nb-radius-sketch);padding:var(--nb-s3) var(--nb-s4);box-shadow:var(--nb-shadow)}
 .doubt{padding:.6rem 0;border-bottom:1px dashed var(--nb-border)}.doubt:last-child{border:0}.doubt b{font-family:var(--nb-font-hand);font-size:1.15rem;font-weight:700;display:block;line-height:1.1}
+
+.pg-ask{grid-template-columns:minmax(0,1fr) clamp(260px,22vw,340px);align-items:start}
+.pg-ask :is(.chat,.nb-col,.msg,.msg>div,.b,.composer,.ask-input){min-width:0}
+.pg-ask .chat{gap:var(--nb-s4)}
+.pg-ask .thread{gap:var(--nb-s5)}
+.pg-ask .ask-turn{display:flex;flex-direction:column;gap:var(--nb-s4);min-width:0}
+.pg-ask .msg{width:100%;overflow-wrap:anywhere}
+.pg-ask .msg.me{width:auto;max-width:85%}
+.pg-ask .b p{margin:0;white-space:pre-wrap}
+.pg-ask .ask-you{display:grid;place-items:center;border:1.5px solid var(--nb-navy);border-radius:50%;width:2.5rem;aspect-ratio:1;background:var(--nb-sticky-yellow);font-family:var(--nb-font-hand)}
+.pg-ask .ask-suggestions{display:flex;gap:.5rem;flex-wrap:wrap}
+.pg-ask .ask-suggestions button{white-space:normal;text-align:left}
+.pg-ask .ask-input{display:flex;flex-direction:column;gap:.2rem}
+.pg-ask textarea{width:100%;min-width:0;resize:vertical;border:0;background:transparent;color:var(--nb-ink);font-family:var(--nb-font-note);font-size:1.15rem;line-height:1.4}
+.pg-ask .doubt{display:block;width:100%;text-align:left;background:none;border-width:0 0 1px;color:var(--nb-ink);overflow-wrap:anywhere}
+.pg-ask .ask-context{grid-template-columns:auto minmax(0,1fr);padding:0;margin-bottom:var(--nb-s3)}
+.pg-ask .ask-select{display:flex;flex-direction:column;gap:.2rem;font-family:var(--nb-font-hand);margin-top:.5rem;min-width:0}
+.pg-ask select{width:100%;min-width:0;background:var(--nb-paper);border:1.5px solid var(--nb-border);border-radius:.4rem;padding:.35rem;color:var(--nb-ink);font:inherit}
+.pg-ask .nb-sticky{margin:.4rem .3rem}
+@media(max-width:1179px){.pg-ask{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:1023px){.pg-ask .chat .nb-tabs{flex-wrap:wrap;white-space:normal}.pg-ask .composer{grid-template-columns:auto minmax(0,1fr);padding:var(--nb-s3)}.pg-ask .composer>button[type=submit]{grid-column:2;justify-self:end}.pg-ask .msg{gap:.5rem}.pg-ask .msg.me{max-width:95%}}
