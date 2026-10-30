@@ -38,7 +38,7 @@ export function DiagnosticPanel({ chapterId }: { chapterId: string }) {
   return (
     <div className="lesson-card">
       <h2>{offer.data.title}</h2>
-      <p>These questions are from earlier classes. Haven&apos;t learned this yet is a fair answer.</p>
+      <p>This is not a test. These questions are from earlier classes. Haven&apos;t learned this yet is a fair answer, and it does not lower you.</p>
       {questions.map((item) => item.type === 'mcq' ? (
         <fieldset key={item.id} className="grid gap-3">
           <legend className="font-semibold">{item.prompt}</legend>

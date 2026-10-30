@@ -110,7 +110,7 @@ export function ChapterPage() {
   }
 
   return (
-    <LessonFrame kicker="Chapter" title={current.title} script={student ? 'Read, then check.' : 'Tag a note before you publish.'} stale={chapter}>
+    <LessonFrame paper={student} kicker="Chapter" title={current.title} script={student ? 'Read, then check.' : 'Tag a note before you publish.'} stale={chapter}>
       <p className="lesson-actions"><Link to={`/${audience}/subjects/${current.subjectId}`}>Back to chapters</Link></p>
       {student ? null : (
         <form className="grid gap-4" noValidate aria-busy={chapterForm.pending} onSubmit={(event) => { void saveChapter(event); }}>

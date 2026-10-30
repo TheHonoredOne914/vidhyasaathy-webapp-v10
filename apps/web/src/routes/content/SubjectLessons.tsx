@@ -31,12 +31,24 @@ function ChapterList({ audience, chapters }: { audience: Audience; chapters: { i
       </div>
     );
   }
+  if (audience === 'student') {
+    return (
+      <ol className="learn-path" aria-label="Chapters">
+        {chapters.map((chapter, index) => (
+          <li key={chapter.id} className={chapter.status === 'completed' ? 'is-done' : chapter.status === 'in_progress' ? 'is-current' : ''}>
+            <span className="learn-path-n">{index + 1}</span>
+            <Link to={`/student/chapters/${chapter.id}`}>{chapter.title}</Link>
+            <span className="lesson-status" data-testid="chapter-status">{chapterStatusLabel(chapter.status)}</span>
+          </li>
+        ))}
+      </ol>
+    );
+  }
   return (
     <ul className="lesson-list" aria-label="Chapters">
       {chapters.map((chapter) => (
         <li key={chapter.id}>
           <Link to={`/${audience}/chapters/${chapter.id}`}>{chapter.title}</Link>
-          {audience === 'student' ? <span className="lesson-status" data-testid="chapter-status">{chapterStatusLabel(chapter.status)}</span> : null}
         </li>
       ))}
     </ul>
@@ -56,7 +68,7 @@ export function StudentSubject() {
   }
   if (!subjects.data || !chapters.data || !subject) return <LessonFrame kicker="Subject" title="Chapters"><Skeleton /></LessonFrame>;
   return (
-    <LessonFrame kicker={subject.name} title="Chapters" script="Past chapters stay open." stale={chapters}>
+    <LessonFrame paper kicker={subject.name} title="Your path" script="Open a chapter and keep going." stale={chapters}>
       <ChapterList audience="student" chapters={chapters.data} />
       <p className="lesson-actions"><Link to="/student?panel=subjects">All subjects</Link></p>
     </LessonFrame>

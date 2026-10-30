@@ -6,16 +6,18 @@ export function LessonFrame({
   title,
   script,
   stale = null,
+  paper = false,
   children,
 }: {
   kicker: string;
   title: string;
   script?: string;
   stale?: { stale: boolean; updatedAt: string | null; message: string | null } | null;
+  paper?: boolean;
   children: ReactNode;
 }) {
   return (
-    <section className="lesson-shell">
+    <section className={paper ? 'lesson-shell is-paper' : 'lesson-shell'}>
       <header className="lesson-banner">
         <p className="lesson-kicker">{kicker}</p>
         <h1>{title}</h1>

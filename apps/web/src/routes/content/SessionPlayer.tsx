@@ -120,9 +120,13 @@ export function SessionPlayer() {
   }
 
   return (
-    <section className={done ? 'session-stage is-done' : 'session-stage'}>
+    <section className={done ? 'session-stage is-paper is-done' : 'session-stage is-paper'}>
       <div className="session-stage-inner">
         <p className="lesson-kicker">{session.data.title}</p>
+        <div className="learn-dots" aria-hidden="true">
+          {slides.map((item, index) => <i key={item.id} className={index === cursor ? 'is-current' : index < viewed ? 'is-done' : ''} />)}
+          {progress.checkAvailable || done ? <i className="is-check" /> : null}
+        </div>
         {done ? (
           <>
             <h1>Session complete</h1>

@@ -1,0 +1,38 @@
+.learn-page { display: grid; gap: 16px; max-width: 760px; }
+.learn-page h3 { margin: 12px 0 4px; font-size: 22px; font-weight: 400; }
+.learn-block, .learn-card {
+  margin-top: 12px;
+  padding: 16px;
+  border: 1.5px solid #193e69;
+  border-radius: 16px 14px 18px 12px;
+  background: #fffdf8;
+  color: #041d3d;
+}
+.learn-block svg { width: 100%; height: auto; }
+.learn-block svg line, .learn-block svg path { stroke: #193e69; fill: none; stroke-width: 2; }
+.learn-block svg circle { fill: #c9962e; stroke: #041d3d; }
+.learn-block label, .learn-page label { display: grid; gap: 6px; margin-top: 8px; }
+.learn-block input[type="range"] { width: 100%; }
+.learn-track { position: relative; height: 72px; margin: 12px 0; border-bottom: 2px solid #193e69; }
+.learn-vehicle {
+  position: absolute; bottom: 8px; max-width: 46%; padding: 6px 10px;
+  border: 1.5px solid #041d3d; border-radius: 12px; background: #d6e2e6; font-size: 16px;
+}
+.learn-vehicle.is-car { background: #bfe3f5; }
+.learn-vehicle.is-ball { border-radius: 999px; background: #e8b84a; }
+.learn-vehicle.is-auto-rickshaw { background: #f8e6d4; }
+.learn-labels, .learn-targets, .learn-page .lesson-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.learn-labels button, .learn-targets button, .learn-card {
+  min-height: 44px; padding: 8px 12px; border: 1.5px solid #193e69; background: #fff; color: #041d3d; font: inherit; cursor: pointer;
+}
+.learn-labels button.is-on { background: #041d3d; color: #f9f6ee; }
+.learn-card { width: 100%; text-align: left; font-size: 22px; }
+.learn-summary { break-inside: avoid; }
+.is-paper .player-btn, .learn-page .player-btn {
+  background: #041d3d; color: #f9f6ee; border: 0; border-radius: 12px; min-height: 44px; padding: 0 16px; font: inherit; cursor: pointer;
+}
+.is-paper .player-btn.secondary, .learn-page .player-btn.secondary { background: #fffdf8; color: #041d3d; border: 1.5px solid #193e69; }
+@media print {
+  .app-aside, .app-mobilebar, .learn-hide-print, .player-btn { display: none !important; }
+  .learn-summary { border: 1px solid #041d3d; }
+}

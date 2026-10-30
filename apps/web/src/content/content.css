@@ -378,3 +378,94 @@
     transform: none;
   }
 }
+
+.lesson-shell.is-paper,
+.session-stage.is-paper {
+  color: #041d3d;
+  background:
+    linear-gradient(90deg, transparent 28px, rgb(217 83 79 / 32%) 28px, rgb(217 83 79 / 32%) 29px, transparent 29px),
+    repeating-linear-gradient(180deg, transparent 0 31px, rgb(81 125 171 / 28%) 31px 32px),
+    #f4eee4;
+}
+
+.lesson-shell.is-paper h1,
+.session-stage.is-paper h1,
+.lesson-shell.is-paper .lesson-kicker,
+.session-stage.is-paper .lesson-kicker,
+.lesson-shell.is-paper .lesson-hand,
+.session-stage.is-paper .lesson-hand,
+.lesson-shell.is-paper a,
+.session-stage.is-paper a {
+  color: #041d3d;
+}
+
+.app-main:has(.lesson-shell.is-paper),
+.app-main:has(.session-stage.is-paper) {
+  background: #f4eee4;
+}
+
+.app-shell:has(.session-stage.is-paper) {
+  display: flex;
+  background: transparent;
+}
+
+.app-shell:has(.session-stage.is-paper) .app-aside {
+  display: flex !important;
+}
+
+.learn-path {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.learn-path li {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-height: 64px;
+  padding: 8px 12px;
+  border: 1.5px solid #193e69;
+  border-radius: 18px 16px 20px 14px;
+  background: #fffdf8;
+}
+
+.learn-path .is-current {
+  background: #fff4d2;
+  box-shadow: 3px 3px 0 #193e69;
+}
+
+.learn-path-n {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1.5px solid #193e69;
+  border-radius: 50%;
+  background: #d6e2e6;
+}
+
+.learn-dots {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0 16px;
+}
+
+.learn-dots i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ddd5c6;
+}
+
+.learn-dots i.is-done { background: #517dab; }
+.learn-dots i.is-current { width: 28px; border-radius: 999px; background: #041d3d; }
+.learn-dots i.is-check { transform: rotate(45deg); border-radius: 2px; background: #e8b84a; }
+
+.is-paper .concept-map li {
+  padding: 8px 0;
+  border-bottom: 1px dashed rgb(81 125 171 / 40%);
+}

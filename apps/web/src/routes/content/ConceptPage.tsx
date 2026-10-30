@@ -1,4 +1,4 @@
-import { ConceptSchema, SaveConceptSchema } from '@vidhyasaathy/contracts';
+import { ConceptSchema, LessonViewSchema, SaveConceptSchema } from '@vidhyasaathy/contracts';
 import { type FormEvent, useEffect, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { putJson } from '../../api/client';
@@ -12,6 +12,7 @@ import { ErrorState } from '../../ui/ErrorState';
 import { Field } from '../../ui/Field';
 import { Skeleton } from '../../ui/Skeleton';
 import { fieldClass } from '../../ui/Field';
+import { ConceptLearn } from '../../learn/ConceptLearn';
 import { AccessDenied } from '../AccessDenied';
 import { LessonFrame } from './LessonFrame';
 
@@ -30,7 +31,9 @@ export function ConceptPage() {
   const [description, setDescription] = useState('');
   const [prereqs, setPrereqs] = useState<string[]>([]);
   const [hydrated, setHydrated] = useState('');
+  const [simpler, setSimpler] = useState(false);
   const student = audience === 'student';
+  const lesson = useRemote(student && conceptId ? `/concepts/${conceptId}/lesson${simpler ? '?simpler=1' : ''}` : null, LessonViewSchema);
   const concept = (concepts.data ?? []).find((item) => item.id === conceptId) ?? null;
   usePageMeta(concept ? `${concept.title} — VidhyaSaathy` : 'Concept — VidhyaSaathy', 'One concept, its prerequisites, and the notes tagged with it.');
 
@@ -42,11 +45,21 @@ export function ConceptPage() {
     setPrereqs(concept.prerequisiteIds);
   }, [concept, hydrated]);
 
-  if (concepts.denied || notes.denied || (concepts.data && !concept)) return <AccessDenied />;
+  if (concepts.denied || notes.denied || lesson.denied || (concepts.data && !concept)) return <AccessDenied />;
   if ((concepts.status === 'error' && !concepts.data) || (notes.status === 'error' && !notes.data)) {
     return <ErrorState title="Could not load this concept" message={concepts.message ?? notes.message ?? 'Try again.'} onRetry={() => { concepts.reload(); notes.reload(); }} />;
   }
-  if (!concept || !concepts.data || !notes.data) return <LessonFrame kicker="Concept" title="Concept"><Skeleton /></LessonFrame>;
+  if (!concept || !concepts.data || !notes.data || (student && !lesson.data && lesson.status !== 'error')) {
+    return <LessonFrame paper={student} kicker="Concept" title="Concept"><Skeleton /></LessonFrame>;
+  }
+  if (student && lesson.data?.found) {
+    return (
+      <LessonFrame paper kicker="Idea" title={concept.title} script="Read it at your depth." stale={concepts}>
+        <p className="lesson-actions"><Link to={`/${audience}/chapters/${chapterId}`}>Back to the chapter</Link></p>
+        <ConceptLearn lesson={lesson.data} onSimpler={() => { setSimpler(true); }} />
+      </LessonFrame>
+    );
+  }
   const selected = concept;
 
   const names = new Map(concepts.data.map((item) => [item.id, item.title]));
@@ -62,7 +75,7 @@ export function ConceptPage() {
   }
 
   return (
-    <LessonFrame kicker="Concept" title={concept.title} script="The idea this chapter teaches." stale={concepts}>
+    <LessonFrame paper={student} kicker="Concept" title={concept.title} script="The idea this chapter teaches." stale={concepts}>
       <p className="lesson-actions">
         <Link to={`/${audience}/chapters/${chapterId}`}>Back to the chapter</Link>
         {student ? <Link to={`/student/concepts/${concept.id}/remediation`}>Short lesson and check</Link> : null}
