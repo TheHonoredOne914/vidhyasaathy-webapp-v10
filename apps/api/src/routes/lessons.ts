@@ -7,7 +7,7 @@ import { pickNoteVariant, prereqIsWeak } from '@vidhyasaathy/core/learn';
 import { clampLevel, type Confidence } from '@vidhyasaathy/core/learning';
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { requireAuth, requireRole } from '../auth/middleware.ts';
 import { chapterAccess, resourceId } from '../content/access.ts';
 import type { Db } from '../db/index.ts';
@@ -35,7 +35,7 @@ function storedLesson(db: Db, schoolId: string, conceptId: string) {
 export function registerLessonRoutes(app: FastifyInstance, db: Db, now: () => number) {
   const student = { preHandler: requireRole('student') };
 
-  app.get('/concepts/:id/lesson', student, async (request) => {
+  const readLesson = (request: FastifyRequest) => {
     const { school, profile } = requireAuth(request);
     const concept = conceptFor(db, request, resourceId(request));
     const lesson = storedLesson(db, school.id, concept.id);
@@ -53,6 +53,26 @@ export function registerLessonRoutes(app: FastifyInstance, db: Db, now: () => nu
       ...toPublicLesson(lesson, { conceptId: concept.id, title: concept.title, variant, weakPrereq: weak }),
       found: true,
     });
+  };
+  app.get('/concepts/:id/lesson', student, async (request) => readLesson(request));
+  app.get('/concepts/:id/notebook-lesson', student, async (request) => {
+    const lesson = readLesson(request);
+    if (!lesson.found) return lesson;
+    const { school } = requireAuth(request);
+    const edges = db.select().from(conceptPrereqs).where(and(eq(conceptPrereqs.schoolId, school.id), eq(conceptPrereqs.conceptId, lesson.conceptId))).all();
+    const prior = edges.map((edge) => db.select().from(concepts).where(scope(concepts, school.id, edge.prereqId)).get())
+      .find((concept) => concept?.sourceClass !== null && concept?.sourceClass !== undefined);
+    return { ...lesson,
+      styles: {
+        notes: { text: lesson.note }, story: { steps: lesson.steps },
+        diagram: { blocks: lesson.blocks.filter((block) => ['slider_graph', 'moving_object', 'drag_label'].includes(block.kind)) },
+        exam: { worked: lesson.worked, summary: lesson.summary },
+      },
+      priorClassBridge: prior ? { conceptId: prior.id, title: prior.title, sourceClass: prior.sourceClass,
+        minutes: 3, repair: lesson.bridge.repair } : null,
+      outline: ['notes', ...(prior ? ['bridge'] : []), ...(lesson.steps.length ? ['checkpoint'] : []), 'worked', 'misconceptions', 'summary'],
+      video: null,
+    };
   });
 
   app.post('/concepts/:id/lesson/checkpoint', student, async (request) => mutate(() => {
