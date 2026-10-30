@@ -4,12 +4,14 @@ import { NOT_TAUGHT, classifyError, type Confidence } from '@vidhyasaathy/core/l
 import type { Db } from '../db/index.ts';
 import { answerEvidence, assignmentItems, assignments, conceptPrereqs, concepts, items, learningSessions, profiles, teacherAssignments } from '../db/schema.ts';
 import { rebuildLearner } from '../learning/record.ts';
+import { MOTION_EXTRA, type ExtraQuestion } from './motion-bank-extra.ts';
 import { ensureMotionLessons } from './motion-lessons.ts';
 import { MOTION_SLIPS } from './motion-slips.ts';
 
 const id = (n: number) => `d7000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
 const SKIP = NOT_TAUGHT;
 type Family = 'concept_gap' | 'careless' | 'method' | 'guess';
+export type MotionMistake = { option: string; errorType: Family; explanation: string; fix: string };
 type Question = {
   id: string; concept: string; level: 1 | 2 | 3 | 4; prompt: string; options: string[]; answer: string;
   explanation: string; mistakes?: { option: string; errorType: Family; explanation: string }[]; role: 'practice' | 'diagnostic';
@@ -93,6 +95,38 @@ export function motionContents() {
   return PRACTICE.map((question) => contentFor(question, SAMPLE_CONCEPT));
 }
 
+function extraContent(question: ExtraQuestion, conceptId: string): SaveItem {
+  return SaveItemSchema.parse({
+    type: 'mcq', conceptId, prompt: question.prompt, options: question.options, answer: question.answer,
+    difficulty: question.level, sourceRef: null, explanation: question.explanation, mistakes: question.mistakes, role: 'practice',
+  });
+}
+export const motionExtra = MOTION_EXTRA;
+export function motionExtraContents() {
+  return MOTION_EXTRA.map((question) => extraContent(question, SAMPLE_CONCEPT));
+}
+
+// Runs after ensureMotionLessons, which creates the uniform-motion and graph concepts these questions use.
+// Extra questions join the practice pool only; the 'Motion practice' homework keeps its original 30.
+function ensureMotionExtra(db: Db, schoolId: string, chapterId: string) {
+  const byTitle = new Map(db.select().from(concepts).where(and(eq(concepts.schoolId, schoolId), eq(concepts.chapterId, chapterId))).all()
+    .map((row) => [row.title, row.id]));
+  MOTION_EXTRA.forEach((question, index) => {
+    const conceptId = byTitle.get(question.concept);
+    if (!conceptId) return;
+    const itemId = id(question.n);
+    const content = extraContent(question, conceptId);
+    const existing = db.select().from(items).where(eq(items.id, itemId)).get();
+    if (!existing) {
+      db.insert(items).values({ id: itemId, schoolId, chapterId, sessionId: null, conceptId, position: 400 + index, content }).run();
+      return;
+    }
+    if (JSON.stringify(existing.content) !== JSON.stringify(content) || existing.conceptId !== conceptId) {
+      db.update(items).set({ content, conceptId }).where(eq(items.id, itemId)).run();
+    }
+  });
+}
+
 export function ensureMotionBank(db: Db, schoolId: string, now: number) {
   const chapter = db.select().from(concepts).where(eq(concepts.schoolId, schoolId)).all();
   const motion = db.select().from(learningSessions).where(eq(learningSessions.schoolId, schoolId)).all().find((row) => row.title.startsWith('Session 3'));
@@ -131,6 +165,7 @@ export function ensureMotionBank(db: Db, schoolId: string, now: number) {
     }
   });
   ensureMotionLessons(db, schoolId, chapterId, now);
+  ensureMotionExtra(db, schoolId, chapterId);
   const teacher = db.select().from(teacherAssignments).where(eq(teacherAssignments.schoolId, schoolId)).all()
     .find((row) => row.sectionId === motion.sectionId);
   if (!teacher) return;
