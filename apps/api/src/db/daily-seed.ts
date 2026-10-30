@@ -72,6 +72,10 @@ export function ensureDailyLoop(db: Db, schoolId: string, now: number) {
         schoolId, profileId: priya, conceptId: speedId, ladderLevel: 1, streakCorrect: 0, streakWrong: 2,
         masteryLevel: 1, masteryScore: 0.2, misconception: true, bridge: "Let's warm up with a simpler one", updatedAt: now,
       }).onConflictDoNothing().run();
+      // Speed & Velocity is Priya's weakest idea in the demo story. The motion history leaves every
+      // Motion ladder at the same score, so give Acceleration a slightly better state; otherwise the
+      // revision pick tie-breaks on random concept ids.
+      if (accelerationId) setReview(db, schoolId, priya, accelerationId, now + DAY_MS, 0.1, now);
     }
   }
 
