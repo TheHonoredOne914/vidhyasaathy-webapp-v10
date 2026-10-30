@@ -5,6 +5,7 @@ import { SaveItemSchema } from '@vidhyasaathy/contracts';
 import { hashCredential, hashToken } from '../auth/security.ts';
 import type { Db } from './index.ts';
 import { ensureMotionBank, ensureMotionHistories } from '../content/motion-bank.ts';
+import { ensureDailyLoop } from './daily-seed.ts';
 import { academicYears, assignmentItems, assignments, chapters, classes, conceptPrereqs, concepts, items,
   claimCodes, learningEvidence, learningSessions, noteConcepts, notes, parentLinks, profiles, schools, sections, sessionProgress,
   slides, studentConceptStates, subjects, syncChanges, teacherAssignments, users, attempts } from './schema.ts';
@@ -126,6 +127,7 @@ export async function seedDemo(db: Db, credentials: z.input<typeof Credentials>,
       ensureMotionContent(db, now);
       ensureMotionBank(db, DEMO_SCHOOL_ID, now);
       ensureMotionHistories(db, DEMO_SCHOOL_ID, now);
+      ensureDailyLoop(db, DEMO_SCHOOL_ID, now);
     });
     return { schoolId: existing.id, created: false };
   }
@@ -225,6 +227,7 @@ export async function seedDemo(db: Db, credentials: z.input<typeof Credentials>,
     ensureMotionContent(db, now);
     ensureMotionBank(db, schoolId, now);
     ensureMotionHistories(db, schoolId, now);
+    ensureDailyLoop(db, schoolId, now);
     if (options.rich) for (const [index, key] of (['student', 'student2', 'student3', 'student4'] as const).entries()) {
       const profileId = profileIds[key]!;
       db.insert(sessionProgress).values({ sessionId, profileId, schoolId, viewedSlides: index === 0 ? 2 : 1,

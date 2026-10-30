@@ -45,13 +45,11 @@ it('upgrades populated P6 attempts, preserving FKs, events, uniqueness and dashb
     sqlite.prepare('INSERT INTO concept (id, school_id, chapter_id, title, description) VALUES (?, ?, ?, ?, ?)').run(conceptId, schoolId, chapterId, 'Halves', 'Equal parts');
     const content = { type: 'mcq' as const, conceptId, prompt: 'Choose half', options: ['half', 'third'], answer: 'half', difficulty: 1, sourceRef: null };
     db.insert(schema.items).values({ id: itemId, schoolId, chapterId, conceptId, position: 0, content }).run();
-    db.insert(schema.assignments).values({
-      id: seededAssignmentId, schoolId, chapterId, sectionId, teacherId, title: 'Fractions', kind: 'homework',
-      dueAt: 10, status: 'published', publishedAt: 1, updatedAt: 1,
-    }).run();
+    sqlite.prepare(`INSERT INTO assignment (id, school_id, chapter_id, section_id, teacher_id, title, kind, due_at, status, published_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, 'Fractions', 'homework', 10, 'published', 1, 1)`).run(seededAssignmentId, schoolId, chapterId, sectionId, teacherId);
     db.insert(schema.assignmentItems).values({ assignmentId: seededAssignmentId, itemId, schoolId, chapterId, position: 0 }).run();
     const profileId = db.select().from(schema.profiles).all().find((row) => row.role === 'student')!.id;
-    const assignmentId = db.select().from(schema.assignments).get()!.id;
+    const assignmentId = seededAssignmentId;
     const fracChapter = db.select().from(schema.chapters).all().find((row) => row.title === 'Fractions')!;
     const item = db.select().from(schema.items).all().find((row) => row.position === 0 && row.chapterId === fracChapter.id)!;
     const row = db.insert(schema.attempts).values({ id: randomUUID(), clientEventId: randomUUID(), schoolId,

@@ -1,5 +1,6 @@
 import { openDatabase } from './index.ts';
-import { applyDemoAccess, canonicalDemoLogins, ensureDemoStudents, resetDemoLogins, seedDemo } from './demo.ts';
+import { ensureDailyLoop } from './daily-seed.ts';
+import { applyDemoAccess, canonicalDemoLogins, DEMO_SCHOOL_ID, ensureDemoStudents, resetDemoLogins, seedDemo } from './demo.ts';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -17,6 +18,7 @@ try {
     console.info(result.created ? 'Created Demo school.' : 'Demo school already exists; credentials unchanged (set DEMO_RESET_LOGINS=true to reset staff passwords).');
   }
   await ensureDemoStudents(database.db, process.env.DEMO_PIN, Date.now());
+  ensureDailyLoop(database.db, DEMO_SCHOOL_ID, Date.now());
   await applyDemoAccess(database.db);
   const logins = canonicalDemoLogins();
   console.info(logins);

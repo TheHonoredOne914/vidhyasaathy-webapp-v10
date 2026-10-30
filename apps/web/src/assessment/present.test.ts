@@ -19,7 +19,7 @@ function assignment(id: string, dueAt: number, status: NonNullable<Assignment['s
     id, schoolId: '44444444-4444-4444-8444-444444444444', chapterId: '55555555-5555-4555-8555-555555555555',
     teacherId: '66666666-6666-4666-8666-666666666666', teacherName: 'Kiran Das', sectionId: '77777777-7777-4777-8777-777777777777',
     title: id, kind: 'homework', dueAt, itemIds: ['33333333-3333-4333-8333-333333333333'], required: true,
-    status: 'published', publishedAt: 1, updatedAt: 1,
+    status: 'published', publishedAt: 1, updatedAt: 1, lateUntil: null,
     score: { answered: status === 'not_started' ? 0 : 1, marked: status === 'completed' ? 1 : 0, correct: status === 'completed' ? 1 : 0, total: 1, status },
   };
 }

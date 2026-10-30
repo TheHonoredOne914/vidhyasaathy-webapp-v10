@@ -1,6 +1,6 @@
 import { RoleSchema, type AiDraft, type Answer, type AskResponse, type ConceptLesson, type NotificationChannel, type RemediationResult, type SaveItem } from '@vidhyasaathy/contracts';
 import { sql } from 'drizzle-orm';
-import { check, foreignKey, index, integer, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { check, foreignKey, index, integer, primaryKey, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 export const schools = sqliteTable('school', {
   id: text('id').primaryKey(),
@@ -294,7 +294,7 @@ export const sessionProgress = sqliteTable('session_progress', {
 export const assignments = sqliteTable('assignment', {
   id: text('id').primaryKey(), schoolId: text('school_id').notNull(), chapterId: text('chapter_id').notNull(),
   sectionId: text('section_id').notNull(), teacherId: text('teacher_id').notNull(), title: text('title').notNull(),
-  kind: text('kind', { enum: ['homework', 'quiz'] }).notNull(), dueAt: integer('due_at').notNull(),
+  kind: text('kind', { enum: ['homework', 'quiz'] }).notNull(), dueAt: integer('due_at').notNull(), lateUntil: integer('late_until'),
   status: text('status', { enum: ['draft', 'published'] }).notNull().default('draft'),
   publishedAt: integer('published_at'), updatedAt: integer('updated_at').notNull(),
 }, (t) => [
@@ -568,6 +568,9 @@ export const notificationSettings = sqliteTable('notification_setting', {
   enabled: integer('enabled', { mode: 'boolean' }).notNull(), quietStart: integer('quiet_start').notNull(),
   quietEnd: integer('quiet_end').notNull(), utcOffsetMinutes: integer('utc_offset_minutes').notNull(),
   reducedMotion: integer('reduced_motion', { mode: 'boolean' }).notNull(), updatedAt: integer('updated_at').notNull(),
+  notifySessions: integer('notify_sessions').default(1), notifyHomework: integer('notify_homework').default(1),
+  notifyStreak: integer('notify_streak').default(1), notifyParentView: integer('notify_parent_view').default(1),
+  notifyGame: integer('notify_game').default(1), quietAfter21: integer('quiet_after_21').default(1),
 }, (t) => [
   foreignKey({ columns: [t.profileId, t.schoolId], foreignColumns: [profiles.id, profiles.schoolId] }),
   check('notification_setting_valid', sql`${t.quietStart} between 0 and 1439 and ${t.quietEnd} between 0 and 1439 and ${t.utcOffsetMinutes} between -720 and 840 and ${t.enabled} in (0,1) and ${t.reducedMotion} in (0,1)`),
@@ -577,6 +580,7 @@ export const notifications = sqliteTable('notification', {
   id: text('id').primaryKey(), schoolId: text('school_id').notNull(), profileId: text('profile_id').notNull(),
   announcementId: text('announcement_id'), dedupeKey: text('dedupe_key').notNull().unique(),
   kind: text('kind', { enum: ['announcement', 'parent_summary', 'content_publish'] }).notNull(),
+  topic: text('topic'),
   title: text('title').notNull(), body: text('body').notNull(), href: text('href').notNull(),
   channel: text('channel', { enum: ['in_app', 'email', 'whatsapp'] }).notNull(),
   status: text('status', { enum: ['queued', 'delivered', 'failed'] }).notNull(), failure: text('failure'),
@@ -590,4 +594,139 @@ export const notifications = sqliteTable('notification', {
   check('notification_kind_valid', sql`${t.kind} in ('announcement', 'parent_summary', 'content_publish')`),
   check('notification_channel_valid', sql`${t.channel} in ('in_app', 'email', 'whatsapp')`),
   check('notification_status_valid', sql`(${t.status} = 'queued' and ${t.deliveredAt} is null and ${t.failure} is null) or (${t.status} = 'delivered' and ${t.deliveredAt} is not null and ${t.failure} is null) or (${t.status} = 'failed' and ${t.deliveredAt} is null and ${t.failure} is not null)`),
+]);
+
+const streakAct = ['session_part', 'game_round', 'warmup', 'daily_challenge', 'homework_submit', 'catchup', 'dushman'] as const;
+const badgeId = ['fixed_it', 'comeback_king', 'dushman_slayer', 'boss_buster'] as const;
+
+export const streakTouches = sqliteTable('streak_touch', {
+  profileId: text('profile_id').notNull(), schoolId: text('school_id').notNull(), day: text('day').notNull(),
+  act: text('act', { enum: streakAct }).notNull(), sourceEventId: text('source_event_id'), createdAt: integer('created_at').notNull(),
+}, (t) => [
+  primaryKey({ columns: [t.profileId, t.day] }),
+  index('streak_touch_school_idx').on(t.schoolId, t.profileId),
+  foreignKey({ columns: [t.profileId, t.schoolId], foreignColumns: [profiles.id, profiles.schoolId] }),
+]);
+
+export const streakStates = sqliteTable('streak_state', {
+  profileId: text('profile_id').primaryKey(), schoolId: text('school_id').notNull(),
+  currentDays: integer('current_days').notNull().default(0), longestDays: integer('longest_days').notNull().default(0),
+  lastDay: text('last_day'), freezesHeld: integer('freezes_held').notNull().default(0), updatedAt: integer('updated_at').notNull(),
+}, (t) => [
+  foreignKey({ columns: [t.profileId, t.schoolId], foreignColumns: [profiles.id, profiles.schoolId] }),
+  check('streak_state_valid', sql`${t.currentDays} >= 0 and ${t.longestDays} >= 0 and ${t.freezesHeld} between 0 and 2`),
+]);
+
+export const streakFreezeLedger = sqliteTable('streak_freeze_ledger', {
+  id: text('id').primaryKey(), profileId: text('profile_id').notNull(), schoolId: text('school_id').notNull(),
+  kind: text('kind', { enum: ['earned', 'consumed'] }).notNull(), day: text('day').notNull(),
+  reason: text('reason').notNull(), createdAt: integer('created_at').notNull(),
+}, (t) => [
+  index('streak_freeze_ledger_profile_idx').on(t.schoolId, t.profileId, t.day),
+  foreignKey({ columns: [t.profileId, t.schoolId], foreignColumns: [profiles.id, profiles.schoolId] }),
+]);
+
+export const dailyChallenges = sqliteTable('daily_challenge', {
+  id: text('id').primaryKey(), profileId: text('profile_id').notNull(), schoolId: text('school_id').notNull(),
+  day: text('day').notNull(), itemIds: text('item_ids', { mode: 'json' }).notNull().$type<string[]>(),
+  status: text('status', { enum: ['served', 'completed', 'expired'] }).notNull(),
+  correct: integer('correct').notNull().default(0), total: integer('total').notNull().default(0),
+  startedAt: integer('started_at'), completedAt: integer('completed_at'),
+}, (t) => [
+  uniqueIndex('daily_challenge_profile_day_unique').on(t.profileId, t.day),
+  index('daily_challenge_school_idx').on(t.schoolId, t.profileId, t.day),
+  foreignKey({ columns: [t.profileId, t.schoolId], foreignColumns: [profiles.id, profiles.schoolId] }),
+  check('daily_challenge_counts', sql`${t.correct} >= 0 and ${t.total} >= 0 and json_valid(${t.itemIds})`),
+]);
+
+export const dushmanEntries = sqliteTable('dushman_entry', {
+  id: text('id').primaryKey(), profileId: text('profile_id').notNull(), schoolId: text('school_id').notNull(),
+  conceptId: text('concept_id').notNull(), status: text('status', { enum: ['active', 'retired'] }).notNull(),
+  queuedAt: integer('queued_at').notNull(), retiredAt: integer('retired_at'), reason: text('reason'),
+}, (t) => [
+  index('dushman_entry_active_idx').on(t.schoolId, t.profileId, t.status),
+  foreignKey({ columns: [t.profileId, t.schoolId], foreignColumns: [profiles.id, profiles.schoolId] }),
+  foreignKey({ columns: [t.conceptId, t.schoolId], foreignColumns: [concepts.id, concepts.schoolId] }),
+]);
+
+export const dushmanEvents = sqliteTable('dushman_event', {
+  id: text('id').primaryKey(), profileId: text('profile_id').notNull(), schoolId: text('school_id').notNull(),
+  conceptId: text('concept_id').notNull(), kind: text('kind', { enum: ['queued', 'faced', 'victory', 'retired'] }).notNull(),
+  evidenceId: text('evidence_id'), createdAt: integer('created_at').notNull(),
+}, (t) => [
+  index('dushman_event_profile_idx').on(t.schoolId, t.profileId, t.createdAt),
+  foreignKey({ columns: [t.profileId, t.schoolId], foreignColumns: [profiles.id, profiles.schoolId] }),
+  foreignKey({ columns: [t.conceptId, t.schoolId], foreignColumns: [concepts.id, concepts.schoolId] }),
+]);
+
+export const badgeCatalog = sqliteTable('badge_catalog', {
+  id: text('id', { enum: badgeId }).primaryKey(), nameEn: text('name_en').notNull(), nameHi: text('name_hi').notNull(),
+  descriptionEn: text('description_en').notNull(), descriptionHi: text('description_hi').notNull(), iconKey: text('icon_key').notNull(),
+});
+
+export const badgeAwards = sqliteTable('badge_award', {
+  id: text('id').primaryKey(), profileId: text('profile_id').notNull(), schoolId: text('school_id').notNull(),
+  badgeId: text('badge_id', { enum: badgeId }).notNull(), scopeKey: text('scope_key').notNull(),
+  triggerEventId: text('trigger_event_id').notNull(), awardedAt: integer('awarded_at').notNull(), seenAt: integer('seen_at'),
+}, (t) => [
+  uniqueIndex('badge_award_scope_unique').on(t.profileId, t.badgeId, t.scopeKey),
+  index('badge_award_profile_idx').on(t.schoolId, t.profileId, t.awardedAt),
+  foreignKey({ columns: [t.profileId, t.schoolId], foreignColumns: [profiles.id, profiles.schoolId] }),
+  foreignKey({ columns: [t.badgeId], foreignColumns: [badgeCatalog.id] }),
+]);
+
+export const studyPlans = sqliteTable('study_plan', {
+  id: text('id').primaryKey(), profileId: text('profile_id').notNull(), schoolId: text('school_id').notNull(),
+  goal: text('goal').notNull(), examDate: text('exam_date').notNull(),
+  minutesPerNight: integer('minutes_per_night').notNull().default(25),
+  status: text('status', { enum: ['active', 'archived'] }).notNull(),
+  createdAt: integer('created_at').notNull(), updatedAt: integer('updated_at').notNull(),
+}, (t) => [
+  uniqueIndex('study_plan_id_school_unique').on(t.id, t.schoolId),
+  foreignKey({ columns: [t.profileId, t.schoolId], foreignColumns: [profiles.id, profiles.schoolId] }),
+  check('study_plan_minutes', sql`${t.minutesPerNight} between 5 and 180`),
+]);
+
+export const studyPlanItems = sqliteTable('study_plan_item', {
+  id: text('id').primaryKey(), planId: text('plan_id').notNull(), schoolId: text('school_id').notNull(),
+  night: text('night').notNull(), conceptId: text('concept_id').notNull(),
+  kind: text('kind', { enum: ['repair', 'learn', 'revise', 'practice', 'warmup'] }).notNull(),
+  estMinutes: integer('est_minutes').notNull(), orderIdx: integer('order_idx').notNull(),
+  status: text('status', { enum: ['planned', 'done', 'folded', 'dropped'] }).notNull(),
+}, (t) => [
+  index('study_plan_item_night_idx').on(t.planId, t.night, t.orderIdx),
+  foreignKey({ columns: [t.planId, t.schoolId], foreignColumns: [studyPlans.id, studyPlans.schoolId] }),
+  foreignKey({ columns: [t.conceptId, t.schoolId], foreignColumns: [concepts.id, concepts.schoolId] }),
+]);
+
+export const planCompletionEvents = sqliteTable('plan_completion_event', {
+  id: text('id').primaryKey(), planItemId: text('plan_item_id').notNull(),
+  profileId: text('profile_id').notNull(), schoolId: text('school_id').notNull(),
+  kind: text('kind', { enum: ['done', 'missed', 'folded'] }).notNull(), createdAt: integer('created_at').notNull(),
+}, (t) => [
+  index('plan_completion_event_profile_idx').on(t.schoolId, t.profileId, t.createdAt),
+  foreignKey({ columns: [t.planItemId], foreignColumns: [studyPlanItems.id] }),
+  foreignKey({ columns: [t.profileId, t.schoolId], foreignColumns: [profiles.id, profiles.schoolId] }),
+]);
+
+export const learningEvents = sqliteTable('learning_event', {
+  id: text('id').primaryKey(), profileId: text('profile_id').notNull(), schoolId: text('school_id').notNull(),
+  kind: text('kind', { enum: ['recovery_offered', 'recovery_completed', 'warmup_offered', 'warmup_skipped', 'warmup_completed', 'frustration_flagged', 'absence_detected'] }).notNull(),
+  conceptId: text('concept_id'), payload: text('payload', { mode: 'json' }).notNull().$type<Record<string, unknown>>(),
+  createdAt: integer('created_at').notNull(),
+}, (t) => [
+  index('learning_event_profile_idx').on(t.schoolId, t.profileId, t.createdAt),
+  foreignKey({ columns: [t.profileId, t.schoolId], foreignColumns: [profiles.id, profiles.schoolId] }),
+  foreignKey({ columns: [t.conceptId, t.schoolId], foreignColumns: [concepts.id, concepts.schoolId] }),
+]);
+
+export const assignmentDrafts = sqliteTable('assignment_draft', {
+  profileId: text('profile_id').notNull(), schoolId: text('school_id').notNull(),
+  assignmentId: text('assignment_id').notNull(), itemId: text('item_id').notNull(),
+  answer: text('answer', { mode: 'json' }).notNull().$type<Answer>(), updatedAt: integer('updated_at').notNull(),
+}, (t) => [
+  primaryKey({ columns: [t.profileId, t.assignmentId, t.itemId] }),
+  foreignKey({ columns: [t.profileId, t.schoolId], foreignColumns: [profiles.id, profiles.schoolId] }),
+  foreignKey({ columns: [t.assignmentId, t.schoolId], foreignColumns: [assignments.id, assignments.schoolId] }),
+  check('assignment_draft_answer', sql`json_valid(${t.answer})`),
 ]);

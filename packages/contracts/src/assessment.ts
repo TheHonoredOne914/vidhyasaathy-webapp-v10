@@ -20,6 +20,7 @@ export const AssignmentScoreSchema = z.object({
 export const AssignmentSchema = SaveAssignmentSchema.extend({
   id: Id, schoolId: Id, chapterId: Id, teacherId: Id, teacherName: z.string(), required: z.literal(true),
   status: ContentStatusSchema, publishedAt: Timestamp.nullable(), updatedAt: Timestamp,
+  lateUntil: Timestamp.nullable(),
   score: AssignmentScoreSchema.nullable(),
 }).strict();
 export const AssignmentDetailSchema = AssignmentSchema.extend({
