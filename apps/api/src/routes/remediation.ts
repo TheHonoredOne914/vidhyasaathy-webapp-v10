@@ -10,7 +10,7 @@ import { requireAuth, requireRole } from '../auth/middleware.ts';
 import { resourceId } from '../content/access.ts';
 import { hasSlides, progressRow, sessionSlides } from '../content/sessions.ts';
 import type { Database } from '../db/index.ts';
-import { assignments, attempts, chapters, concepts, learningEvidence, learningSessions, profiles, remediationChecks, studentConceptStates } from '../db/schema.ts';
+import { assignments, attempts, chapters, concepts, learningEvidence, learningSessions, profiles, remediationChecks, revisionHooks, studentConceptStates } from '../db/schema.ts';
 import { ApiException, parseInput } from '../errors.ts';
 import { recordAnswer } from '../learning/record.ts';
 import { found, scope } from '../school/access.ts';
@@ -106,6 +106,15 @@ export function registerRemediationRoutes(app: FastifyInstance, database: Databa
           .get(concept.id, school.id, now());
         if (material) plan.push({ id: concept.id, chapterId: concept.chapterId, title: concept.title, kind: 'review', required: false, dueAt: state.nextReview, resumeAt: 0 });
       }
+    }
+    const dueHooks = db.select({ hook: revisionHooks, concept: concepts }).from(revisionHooks)
+      .innerJoin(concepts, eq(concepts.id, revisionHooks.conceptId))
+      .where(and(eq(revisionHooks.schoolId, school.id), eq(revisionHooks.profileId, profile.id), lte(revisionHooks.dueAt, now()))).all();
+    for (const { hook, concept } of dueHooks) {
+      plan.push({
+        id: `${concept.id}:d${hook.intervalDays}`, chapterId: concept.chapterId, title: concept.title,
+        kind: 'review', required: false, dueAt: hook.dueAt, resumeAt: 0,
+      });
     }
     return { ...buildStudyPlan(plan, now()), updatedAt: now() };
   });

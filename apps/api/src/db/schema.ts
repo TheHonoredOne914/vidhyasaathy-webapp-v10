@@ -1,4 +1,4 @@
-import { RoleSchema, type AiDraft, type AskResponse, type Answer, type NotificationChannel, type RemediationResult, type SaveItem } from '@vidhyasaathy/contracts';
+import { RoleSchema, type AiDraft, type Answer, type AskResponse, type ConceptLesson, type NotificationChannel, type RemediationResult, type SaveItem } from '@vidhyasaathy/contracts';
 import { sql } from 'drizzle-orm';
 import { check, foreignKey, index, integer, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
@@ -469,6 +469,24 @@ export const bandEvents = sqliteTable('band_event', {
   index('band_event_profile_idx').on(t.schoolId, t.profileId, t.chapterId, t.createdAt),
   foreignKey({ columns: [t.profileId, t.schoolId], foreignColumns: [profiles.id, profiles.schoolId] }),
   foreignKey({ columns: [t.chapterId, t.schoolId], foreignColumns: [chapters.id, chapters.schoolId] }),
+]);
+
+export const conceptLessons = sqliteTable('concept_lesson', {
+  conceptId: text('concept_id').primaryKey(), schoolId: text('school_id').notNull(),
+  body: text('body', { mode: 'json' }).notNull().$type<ConceptLesson>(), updatedAt: integer('updated_at').notNull(),
+}, (t) => [
+  foreignKey({ columns: [t.conceptId, t.schoolId], foreignColumns: [concepts.id, concepts.schoolId] }),
+]);
+
+export const revisionHooks = sqliteTable('revision_hook', {
+  schoolId: text('school_id').notNull(), profileId: text('profile_id').notNull(), conceptId: text('concept_id').notNull(),
+  intervalDays: integer('interval_days').notNull(), dueAt: integer('due_at').notNull(), createdAt: integer('created_at').notNull(),
+}, (t) => [
+  uniqueIndex('revision_hook_pk').on(t.profileId, t.conceptId, t.intervalDays),
+  index('revision_hook_due_idx').on(t.schoolId, t.profileId, t.dueAt),
+  foreignKey({ columns: [t.profileId, t.schoolId], foreignColumns: [profiles.id, profiles.schoolId] }),
+  foreignKey({ columns: [t.conceptId, t.schoolId], foreignColumns: [concepts.id, concepts.schoolId] }),
+  check('revision_hook_days', sql`${t.intervalDays} in (1, 3, 7) and ${t.dueAt} >= 0`),
 ]);
 
 export const diagnosticResults = sqliteTable('diagnostic_result', {

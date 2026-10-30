@@ -4,6 +4,7 @@ import { NOT_TAUGHT, classifyError, type Confidence } from '@vidhyasaathy/core/l
 import type { Db } from '../db/index.ts';
 import { answerEvidence, assignmentItems, assignments, conceptPrereqs, concepts, items, learningSessions, profiles, teacherAssignments } from '../db/schema.ts';
 import { rebuildLearner } from '../learning/record.ts';
+import { ensureMotionLessons } from './motion-lessons.ts';
 
 const id = (n: number) => `d7000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
 const SKIP = NOT_TAUGHT;
@@ -97,6 +98,7 @@ export function ensureMotionBank(db: Db, schoolId: string, now: number) {
       content: contentFor(question, concept.id),
     }).run();
   });
+  ensureMotionLessons(db, schoolId, chapterId, now);
   const teacher = db.select().from(teacherAssignments).where(eq(teacherAssignments.schoolId, schoolId)).all()
     .find((row) => row.sectionId === motion.sectionId);
   if (!teacher || db.select().from(assignments).where(eq(assignments.id, id(301))).get()) return;
