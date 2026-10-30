@@ -13,8 +13,14 @@ import '../student/notebook/pages/settings.css';
 import { clockFromMinutes, minutesFromClock } from './format';
 import { RemoteBlock } from './RemoteBlock';
 import './dashboard.css';
+import { StudentSettings } from '../student/notebook/screens/polish3c/StudentSettings';
 
 export function SettingsPage() {
+  const { me } = useSession();
+  return me?.profile.role === 'student' ? <StudentSettings /> : <AccountSettings />;
+}
+
+function AccountSettings() {
   usePageMeta(PAGE.alertSettings.title, PAGE.alertSettings.description);
   const session = useSession();
   const remote = useRemote('/notification-settings', NotificationSettingsSchema);
