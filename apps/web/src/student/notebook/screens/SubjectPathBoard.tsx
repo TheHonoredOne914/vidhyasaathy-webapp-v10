@@ -53,6 +53,7 @@ export function SubjectPathBoard({ subjectId }: { subjectId: string }) {
   const game = home.data?.todaysGame && !/atom/i.test(home.data.todaysGame.gameId) && !/atom/i.test(home.data.todaysGame.title) ? home.data.todaysGame : null;
   const due = (homework.data?.items ?? []).find((item) => item.subject === subject?.name && (item.status === 'todo' || item.status === 'overdue'));
   const fix = stations.find((station) => station.word === "Let's fix this");
+  const goal = home.data?.todaysGoal;
   const line = stations.map((station) => {
     const x = Number.parseFloat(station.spot.left);
     const y = (Number.parseFloat(station.spot.top) / height) * 100;
@@ -75,7 +76,7 @@ export function SubjectPathBoard({ subjectId }: { subjectId: string }) {
       <Link className="nb-link" to="/student?panel=subjects"><Icon name="back" /> All subjects</Link>
       <section className="nb-card">
         <div className="subj"><SubjectIcon subject={subject.name} large /><div><h2 className="nb-h2" style={{ fontSize: '1.8rem' }}>{subject.name}</h2></div></div>
-        {current ? <><div style={{ display: 'flex', justifyContent: 'space-between', margin: '.8rem 0 .3rem' }}><b className="nb-label" style={{ color: 'var(--nb-navy)' }}>{current.title}</b><span className="nb-meta">{doneCount} of {stations.length} ideas</span></div><ProgressBar value={stations.length ? (doneCount / stations.length) * 100 : 0} color="var(--nb-blue)" /></> : <p className="nb-empty">No chapter yet.</p>}
+        {current ? <><div style={{ display: 'flex', justifyContent: 'space-between', margin: '.8rem 0 .3rem' }}><b className="nb-label" style={{ color: 'var(--nb-navy)' }}>{current.title}</b><span className="nb-meta">{doneCount} of {stations.length} ideas completed</span></div><ProgressBar value={stations.length ? (doneCount / stations.length) * 100 : 0} color="var(--nb-blue)" /></> : <p className="nb-empty">No chapter yet.</p>}
       </section>
       <section className="nb-card nb-grow">
         <div className="nb-card__head"><h3 className="nb-h3">Jump to chapter</h3></div>
@@ -102,7 +103,11 @@ export function SubjectPathBoard({ subjectId }: { subjectId: string }) {
     <aside className="nb-col sp-right">
       <section className="nb-card">
         <div className="nb-card__head"><h3 className="nb-h3">Today's goal</h3></div>
-        <p className="nb-empty">Minutes studied today are not on this page yet.</p>
+          {home.status === 'loading' && !goal ? <div className="nb-skel" /> : home.status === 'error' && !goal ? <p className="nb-empty" role="alert">Could not load today's goal. <button className="nb-btn nb-btn--ghost nb-btn--sm" type="button" onClick={home.reload}>Try again</button></p> : goal?.total ? <>
+            <div className="nb-note">{goal.done} / {goal.total} steps completed</div>
+            <ProgressBar value={goal.done / goal.total * 100} />
+            {goal.items.map((item) => <Link className="nb-row" key={item.id} to={item.href}><Icon name={item.done ? 'check' : 'arrow'} /><span className="nb-row__t">{item.label}</span></Link>)}
+          </> : <p className="nb-empty">Nothing is lined up for today.</p>}
       </section>
       <section className="nb-card">
         <div className="nb-card__head"><h3 className="nb-h3">Next due</h3></div>

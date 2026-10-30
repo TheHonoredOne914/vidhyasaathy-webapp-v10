@@ -116,7 +116,7 @@ export function SubjectsBoard({ query }: { query: string }) {
       </section> : <section className="nb-sticky nb-sticky--pink" style={{ margin: '.4rem .3rem' }}><span className="nb-sticky__who">Saathy</span><p className="nb-note">Nothing needs a second look right now.</p></section>}
       <section className="nb-card nb-grow">
         <div className="nb-card__head"><h3 className="nb-h3">Time this week</h3></div>
-        <p className="nb-empty">Minutes by subject are not on this page yet.</p>
+          <p className="nb-empty">Study time will appear here when it is available.</p>
       </section>
     </aside>
   </div>;
