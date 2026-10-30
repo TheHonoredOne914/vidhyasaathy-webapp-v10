@@ -137,10 +137,10 @@ test('practice, streak, and shared-device profile chooser', async ({ page, brows
   await shot(studentPage, 'practice-play');
   await studentPage.getByRole('radio', { name: 'two', exact: true }).check();
   await studentPage.getByRole('button', { name: 'Check answer' }).click();
-  await expect(studentPage.getByText('Correct.')).toBeVisible();
+  await expect(studentPage.getByText('That is the one.')).toBeVisible();
   await studentPage.getByRole('radio', { name: 'yes', exact: true }).check();
   await studentPage.getByRole('button', { name: 'Check answer' }).click();
-  await expect(studentPage.getByTestId('practice-result')).toContainText('2 of 2 correct');
+  await expect(studentPage.getByTestId('practice-result')).toContainText('Top form on this set.');
   await shot(studentPage, 'practice-result');
 
   await studentPage.goto('/student');

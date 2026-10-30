@@ -44,7 +44,11 @@ const ItemBase = z.object({
 const Option = z.string().trim().min(1).max(1000);
 const Mcq = ItemBase.extend({
   type: z.literal('mcq'), options: z.array(Option).min(2).max(8), answer: Option,
-  mistakes: z.array(z.object({ option: Option, errorType: ErrorFamilySchema, explanation: z.string().trim().min(1).max(500) }).strict()).max(8).optional(),
+  mistakes: z.array(z.object({
+    option: Option, errorType: ErrorFamilySchema,
+    explanation: z.string().trim().min(1).max(500),
+    fix: z.string().trim().min(1).max(300).optional(),
+  }).strict()).max(8).optional(),
 }).strict();
 const Match = ItemBase.extend({
   type: z.literal('match_pairs'), pairs: z.array(z.object({ left: Option, right: Option }).strict()).min(2).max(12),

@@ -70,12 +70,13 @@ export function practiceNext(db: Db, request: FastifyRequest, chapterId: string,
 
 function presentPractice(db: Db, row: typeof attempts.$inferSelect) {
   const item = db.select().from(items).where(eq(items.id, row.itemId)).get();
-  const feedback = item ? mistakeFor(item.content, row.answer) : { errorType: null, explanation: null };
+  const feedback = item ? mistakeFor(item.content, row.answer) : { errorType: null, explanation: null, fix: null };
   const saved = db.select().from(answerEvidence).where(eq(answerEvidence.id, `practice:${row.clientEventId}`)).get();
   const ladder = db.select().from(conceptLadders).where(and(eq(conceptLadders.profileId, row.profileId), eq(conceptLadders.conceptId, row.conceptId))).get();
+  const correctOption = item?.content.type === 'mcq' ? item.content.answer : null;
   return {
     ...row, explanation: row.correct ? null : (feedback.explanation ?? 'Look at this idea again, then try a simpler question.'),
-    errorType: saved?.errorType ?? null, bridge: ladder?.bridge ?? null,
+    fix: row.correct ? null : feedback.fix, correctOption, errorType: saved?.errorType ?? feedback.errorType, bridge: ladder?.bridge ?? null,
   };
 }
 

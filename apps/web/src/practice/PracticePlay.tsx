@@ -1,4 +1,4 @@
-import { GameIdSchema, PracticeAttemptSchema, PracticeSetSchema, type PublicItem } from '@vidhyasaathy/contracts';
+import { GameIdSchema, PracticeAttemptSchema, PracticeSetSchema, type PracticeAttempt, type PublicItem } from '@vidhyasaathy/contracts';
 import { gameModules, type GameState } from '@vidhyasaathy/core/games';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
@@ -15,6 +15,34 @@ import { Skeleton } from '../ui/Skeleton';
 import { draftAnswer, gameCopy, kindLabel } from './games';
 import './practice.css';
 
+function resultLine(correct: boolean, errorType: PracticeAttempt['errorType']) {
+  if (correct) return 'That is the one.';
+  if (errorType === 'method') return 'The working slipped. The note below names the mix-up.';
+  if (errorType === 'careless') return 'Close. A detail slipped, and the note says which one.';
+  if (errorType === 'guess') return 'That guess does not match the idea.';
+  return 'That choice mixes up the idea.';
+}
+
+function PenMark({ kind }: { kind: 'tick' | 'cross' }) {
+  const label = kind === 'tick' ? 'Correct option' : 'Your choice';
+  return kind === 'tick' ? (
+    <svg className="pen-mark tick" viewBox="0 0 24 24" role="img" aria-label={label}>
+      <path d="M4 13.5c2.2 2 3.4 3.4 5 6.2C12 13 16 8 21 4" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+    </svg>
+  ) : (
+    <svg className="pen-mark cross" viewBox="0 0 24 24" role="img" aria-label={label}>
+      <path d="M5 5c5 4 9 8 14 14M19 5C14 9 10 14 5 19" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+      <ellipse cx="12" cy="12" rx="9" ry="7.5" fill="none" stroke="currentColor" strokeWidth="1.6" transform="rotate(-8 12 12)" />
+    </svg>
+  );
+}
+
+function practiceWords(correct: number, total: number) {
+  if (total > 0 && correct === total) return 'Top form on this set.';
+  if (correct > 0) return 'Almost there. The notes name what to fix.';
+  return 'Let\'s fix this. Read the note, then try again.';
+}
+
 export function PracticePlay() {
   const { chapterId = '', gameId = '' } = useParams();
   const parsed = GameIdSchema.safeParse(gameId);
@@ -26,7 +54,11 @@ export function PracticePlay() {
   const [pending, setPending] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<ConfidenceChoice | ''>('');
-  const [wrongs, setWrongs] = useState<{ prompt: string; explanation: string }[]>([]);
+  const [review, setReview] = useState<null | {
+    choice: string; correct: boolean; explanation: string | null; fix: string | null;
+    correctOption: string | null; errorType: PracticeAttempt['errorType'];
+    event: { clientEventId: string; itemId: string; answer: string | string[]; timeMs: number; clientTs: number; confidence: ConfidenceChoice };
+  }>(null);
   const [bridge, setBridge] = useState<string | null>(null);
   const [remediation, setRemediation] = useState<string | null>(null);
   const events = useRef<Record<string, string>>({});
@@ -46,7 +78,7 @@ export function PracticePlay() {
     setNotice(null);
     setRemediation(null);
     setConfidence('');
-    setWrongs([]);
+    setReview(null);
     setBridge(null);
     if (remote.data.items.length === 0) {
       setGame(null);
@@ -114,11 +146,17 @@ export function PracticePlay() {
     };
     try {
       const marked = await postJson('/practice/attempts', PracticeAttemptSchema, input);
-      setGame(gameModules[game.gameId].onAnswer(game, input, marked.correct));
-      setChoice('');
-      setPairs([]);
-      setNotice(marked.correct ? 'Correct.' : 'Not correct.');
-      if (!marked.correct && marked.explanation) setWrongs((current) => [...current, { prompt: currentPrompt, explanation: marked.explanation! }]);
+      const explanation = marked.explanation && marked.explanation !== currentPrompt ? marked.explanation : null;
+      setReview({
+        choice: typeof answer === 'string' ? answer : '',
+        correct: marked.correct === true,
+        explanation,
+        fix: marked.fix,
+        correctOption: marked.correctOption,
+        errorType: marked.errorType,
+        event: input,
+      });
+      setNotice(resultLine(marked.correct === true, marked.errorType));
       if (marked.bridge) setBridge(marked.bridge);
       setConfidence('');
     } catch (error) {
@@ -138,10 +176,11 @@ export function PracticePlay() {
       {back}
       <p className="practice-note">{copy.detail}</p>
       {set.bridge || bridge ? <p className="check-paper">{bridge ?? set.bridge}</p> : null}
-      {wrongs.length ? (
+      {review && !review.correct && (review.explanation || review.fix) ? (
         <div className="check-paper" data-testid="why-wrong">
           <h2>Why this was wrong</h2>
-          <ul>{wrongs.map((miss) => <li key={miss.prompt}><strong>{miss.prompt}</strong><p>{miss.explanation}</p></li>)}</ul>
+          {review.explanation ? <p>{review.explanation}</p> : null}
+          {review.fix ? <p className="why-fix">{review.fix}</p> : null}
         </div>
       ) : null}
       {set.items.length === 0 ? <p>No released questions match this game yet.</p> : null}
@@ -149,22 +188,40 @@ export function PracticePlay() {
       {done && result ? (
         <div className="lesson-card" data-testid="practice-result">
           <h2>Practice complete</h2>
-          <p>{result.correct} of {result.total} correct. {result.answered} answered.</p>
+          <p>{practiceWords(result.correct, result.total)}</p>
           <p>Correct answers count toward the practice run. A wrong answer does not.</p>
           <p className="lesson-actions"><Link to="/student">Go home</Link></p>
         </div>
       ) : null}
       {item && game ? (
-        <form className="lesson-card grid gap-3" onSubmit={(event) => { event.preventDefault(); void submit(item); }}>
+        <form className="lesson-card grid gap-3" onSubmit={(event) => {
+          event.preventDefault();
+          if (review && game) {
+            setGame(gameModules[game.gameId].onAnswer(game, review.event, review.correct));
+            setReview(null);
+            setChoice('');
+            setPairs([]);
+            setNotice(null);
+            return;
+          }
+          void submit(item);
+        }}>
           <p>{kindLabel(row?.kind ?? 'new')}. Question {index + 1} of {set.items.length}.</p>
-          <fieldset className="grid gap-3">
+          <fieldset className="practice-options">
             <legend className="font-semibold">{item.prompt}</legend>
-            {item.type === 'mcq' ? item.options.map((option) => (
-              <label key={option} className="lesson-check">
-                <input type="radio" name="practice-answer" checked={choice === option} onChange={() => { setChoice(option); }} />
-                {option}
-              </label>
-            )) : null}
+            {item.type === 'mcq' ? item.options.map((option) => {
+              const picked = review ? review.choice === option : choice === option;
+              const right = Boolean(review && review.correctOption === option);
+              const wrong = Boolean(review && !review.correct && review.choice === option);
+              return (
+                <label key={option} className={`practice-option${right ? ' is-right' : ''}${wrong ? ' is-wrong' : ''}`}>
+                  <input type="radio" name="practice-answer" checked={picked} disabled={Boolean(review)} onChange={() => { setChoice(option); }} />
+                  {option}
+                  {right ? <PenMark kind="tick" /> : null}
+                  {wrong ? <PenMark kind="cross" /> : null}
+                </label>
+              );
+            }) : null}
             {item.type === 'match_pairs' ? item.left.map((left, pairIndex) => (
               <label key={left} className="grid gap-1">
                 {left}
@@ -183,11 +240,11 @@ export function PracticePlay() {
                 <input id="practice-text" className={fieldClass} value={choice} onChange={(event) => { setChoice(event.target.value); }} />
               </label>
             ) : null}
-            <ConfidenceChips name="practice-confidence" value={confidence} onChange={setConfidence} />
+            {review ? null : <ConfidenceChips name="practice-confidence" value={confidence} onChange={setConfidence} />}
           </fieldset>
-          {notice ? <p role="status">{notice}</p> : null}
+          {notice ? <p className="practice-result" role="status">{notice}</p> : null}
           {remediation ? <p role="alert">{remediation} <Link to={`/student/concepts/${item.conceptId}/remediation`}>Open the lesson and check</Link></p> : null}
-          <Button type="submit" disabled={pending}>{pending ? 'Checking' : 'Check answer'}</Button>
+          <Button type="submit" disabled={pending}>{pending ? 'Checking' : review ? 'Next question' : 'Check answer'}</Button>
         </form>
       ) : notice && !done ? <p role="status">{notice}</p> : null}
       </div>

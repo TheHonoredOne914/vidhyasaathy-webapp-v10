@@ -44,6 +44,13 @@
   border: 0;
 }
 
+.practice-options legend {
+  grid-column: 1 / -1;
+  margin-bottom: 4px;
+  font-size: 20px;
+  line-height: 1.35;
+}
+
 @media (min-width: 720px) {
   .practice-options {
     grid-template-columns: 1fr 1fr;

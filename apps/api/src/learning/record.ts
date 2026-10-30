@@ -12,10 +12,14 @@ export type EvidenceSource = 'session' | 'quiz' | 'homework' | 'diagnostic' | 'f
 const FALLBACK = 'Look at this idea again, then try a simpler question.';
 
 export function mistakeFor(content: SaveItem, answer: unknown) {
-  const explanation = 'explanation' in content ? content.explanation ?? null : null;
-  if (content.type !== 'mcq' || typeof answer !== 'string') return { errorType: null as ErrorFamily | null, explanation };
+  const itemExplanation = 'explanation' in content ? content.explanation ?? null : null;
+  if (content.type !== 'mcq' || typeof answer !== 'string') {
+    return { errorType: null as ErrorFamily | null, explanation: itemExplanation, fix: null as string | null };
+  }
   const tagged = content.mistakes?.find((row) => row.option === answer);
-  return { errorType: tagged?.errorType ?? null, explanation: tagged?.explanation ?? explanation };
+  const explanation = tagged?.explanation ?? itemExplanation;
+  const fix = tagged?.fix ?? (itemExplanation && itemExplanation !== explanation ? itemExplanation : null);
+  return { errorType: tagged?.errorType ?? null, explanation, fix };
 }
 
 function asEvent(row: { correct: boolean; confidence: Confidence; level: number; timeMs: number; notTaught: boolean }): LearningEvent {

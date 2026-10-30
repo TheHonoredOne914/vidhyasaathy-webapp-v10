@@ -20,7 +20,8 @@ export const PracticeNextSchema = z.object({
 // Games emit the same answer event as assignments, without an assignment/deadline.
 export const SubmitPracticeAttemptSchema = SubmitAttemptSchema.omit({ assignmentId: true });
 export const PracticeAttemptSchema = AttemptSchema.omit({ assignmentId: true }).extend({
-  assignmentId: z.null(), explanation: z.string().nullable(), errorType: ErrorFamilySchema.nullable(), bridge: z.string().nullable(),
+  assignmentId: z.null(), explanation: z.string().nullable(), fix: z.string().nullable(),
+  correctOption: z.string().nullable(), errorType: ErrorFamilySchema.nullable(), bridge: z.string().nullable(),
 }).strict();
 export const StreakSchema = z.object({
   timezone: z.literal('Asia/Kolkata'), currentDays: z.number().int().nonnegative(), longestDays: z.number().int().nonnegative(),
