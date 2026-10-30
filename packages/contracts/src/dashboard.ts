@@ -47,14 +47,27 @@ export const SaveNotificationSettingsSchema = z.object({
   enabled: z.boolean(), quietStart: z.number().int().min(0).max(1439),
   quietEnd: z.number().int().min(0).max(1439), utcOffsetMinutes: z.number().int().min(-720).max(840),
   reducedMotion: z.boolean(),
+  notifySessions: z.boolean().optional(), notifyHomework: z.boolean().optional(),
+  notifyStreak: z.boolean().optional(), notifyParentView: z.boolean().optional(),
+  notifyGame: z.boolean().optional(), quietAfter21: z.boolean().optional(),
 }).strict();
-export const NotificationSettingsSchema = SaveNotificationSettingsSchema.extend({ updatedAt: Time }).strict();
+export const NotificationSettingsSchema = SaveNotificationSettingsSchema.extend({
+  updatedAt: Time,
+  notifySessions: z.boolean(), notifyHomework: z.boolean(), notifyStreak: z.boolean(),
+  notifyParentView: z.boolean(), notifyGame: z.boolean(), quietAfter21: z.boolean(),
+}).strict();
+export const NotificationActionSchema = z.enum(['open', 'continue', 'do_it', 'score']);
 export const NotificationSchema = z.object({
   id: Id, kind: z.enum(['announcement', 'parent_summary', 'content_publish']), title: z.string(), body: z.string(), href: z.string(),
   channel: NotificationChannelSchema, status: z.enum(['queued', 'delivered', 'failed']),
   failure: z.string().nullable(), createdAt: Time, deliverAfter: Time, deliveredAt: Time.nullable(), readAt: Time.nullable(),
+  topic: z.string().nullable(), action: NotificationActionSchema,
 }).strict();
-export const NotificationListSchema = z.object({ updatedAt: Time, notifications: z.array(NotificationSchema) }).strict();
+export const NotificationListSchema = z.object({
+  updatedAt: Time,
+  notifications: z.array(NotificationSchema),
+  groups: z.object({ today: z.array(NotificationSchema), earlier: z.array(NotificationSchema) }).strict(),
+}).strict();
 export const SaveAnnouncementSchema = z.object({
   sectionId: Id, title: z.string().trim().min(1).max(160), body: z.string().trim().min(1).max(4000),
   audience: z.enum(['students', 'parents', 'all']),

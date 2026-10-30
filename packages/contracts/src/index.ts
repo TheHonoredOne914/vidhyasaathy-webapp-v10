@@ -6,6 +6,7 @@ export * from './assessment.ts';
 export * from './ai.ts';
 export * from './dashboard.ts';
 export * from './practice.ts';
+export * from './daily.ts';
 
 export const RoleSchema = z.enum(['admin', 'teacher', 'student', 'parent']);
 export type Role = z.infer<typeof RoleSchema>;
@@ -109,7 +110,7 @@ export const SchoolDetailsSchema = SaveSchoolDetailsSchema.extend({
 }).strict();
 export const RosterListSchema = z.array(z.object({ id: IdSchema, name: NameSchema, rollNumber: z.string().nullable(), activated: z.boolean() }).strict());
 export const ChildListSchema = z.array(z.object({ id: IdSchema, name: NameSchema, className: z.string().nullable(), sectionName: z.string().nullable() }).strict());
-export const StudentEnrollmentSchema = z.object({ className: z.string().nullable(), sectionName: z.string().nullable() }).strict();
+export const StudentEnrollmentSchema = z.object({ className: z.string().nullable(), sectionName: z.string().nullable(), rollNumber: z.string().nullable() }).strict();
 export const SchoolSummarySchema = z.object({
   classes: z.number().int().nonnegative(),
   teachers: z.number().int().nonnegative(),

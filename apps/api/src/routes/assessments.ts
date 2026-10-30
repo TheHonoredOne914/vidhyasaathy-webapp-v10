@@ -3,6 +3,7 @@ import { AssignmentQuerySchema, GradeAttemptSchema, PublishAssignmentSchema, Pus
   SaveAssignmentSchema, SaveItemSchema, SubmitAttemptSchema, type SaveAssignment } from '@vidhyasaathy/contracts';
 import { and, eq, isNull } from 'drizzle-orm';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
+import { notifyGraded } from '../daily/notify.ts';
 import { assignmentAccess, assignmentDetail, assignmentFilter, assignmentQuestions, assignmentView, attemptChanged,
   bankItem, recordChange, submitAttempt } from '../assessment/service.ts';
 import { requireAuth, requireRole } from '../auth/middleware.ts';
@@ -144,6 +145,7 @@ export function registerAssessmentRoutes(app: FastifyInstance, db: Db, auth: Aut
       const updated = db.update(attempts).set({ correct: input.correct, needsReview: false,
         gradedBy: requireAuth(request).profile.id, gradedAt: timestamp, updatedAt: timestamp }).where(eq(attempts.id, row.id)).returning().get()!;
       attemptChanged(db, updated, timestamp);
+      if (updated.assignmentId) notifyGraded(db, updated.schoolId, updated.profileId, updated.assignmentId, timestamp);
       return updated;
     });
   });

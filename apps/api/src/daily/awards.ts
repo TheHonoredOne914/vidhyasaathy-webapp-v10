@@ -4,6 +4,7 @@ import { evaluateBadges, type BadgeHistoryRow } from '@vidhyasaathy/core/badges'
 import { dushmanRetirement } from '@vidhyasaathy/core/dushman';
 import type { Level } from '@vidhyasaathy/core/learning';
 import type { Db } from '../db/index.ts';
+import { notifyBadge } from './notify.ts';
 import { badgeAwards, dushmanEntries, dushmanEvents } from '../db/schema.ts';
 
 function asLevel(value: number | null): Level | null {
@@ -40,11 +41,12 @@ export function applyLearningAwards(db: Db, input: {
     }
   }
   for (const award of awards) {
-    db.insert(badgeAwards).values({
+    const inserted = db.insert(badgeAwards).values({
       id: `badge:${input.profileId}:${award.badgeId}:${award.scopeKey}`,
       profileId: input.profileId, schoolId: input.schoolId, badgeId: award.badgeId, scopeKey: award.scopeKey,
       triggerEventId: award.triggerEventId, awardedAt: input.now, seenAt: null,
     }).onConflictDoNothing().run();
+    if (inserted.changes) notifyBadge(db, input.schoolId, input.profileId, award.badgeId, award.scopeKey, input.now);
   }
   return awards;
 }

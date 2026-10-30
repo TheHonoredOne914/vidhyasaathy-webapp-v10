@@ -12,6 +12,7 @@ import { chapterAccess, requireDraft, resourceId } from '../content/access.ts';
 import { learningSessionAccess, progressRow, sessionItems, sessionSlides, sessionView, visibleSessions } from '../content/sessions.ts';
 import type { Db } from '../db/index.ts';
 import { concepts, items, learningEvidence, learningSessions, notes, sessionProgress, slides } from '../db/schema.ts';
+import { touchStreak } from '../daily/streak-store.ts';
 import { mistakeFor, recordAnswer } from '../learning/record.ts';
 import { ApiException, parseInput } from '../errors.ts';
 import { found, mutate, scope } from '../school/access.ts';
@@ -165,6 +166,7 @@ export function registerLearningSessionRoutes(app: FastifyInstance, db: Db, auth
           checkSubmittedAt: previous.checkSubmittedAt ?? now(), lastReview: JSON.stringify(review),
           ...(gate.passed ? { completedAt: now() } : {}),
         }).where(and(eq(sessionProgress.sessionId, session.id), eq(sessionProgress.profileId, profileId))).run();
+        if (gate.passed) touchStreak(db, profileId, session.schoolId, 'session_part', session.id, now());
       }
       if (gate.passed || previous.completedAt !== null) completeSession(allSlides.length, previous.viewedSlides, true);
       return sessionView(db, request, session);

@@ -5,6 +5,10 @@ import { streakFreezeLedger, streakStates, streakTouches } from '../db/schema.ts
 
 export function actForSource(source: string): StreakAct {
   if (source === 'homework') return 'homework_submit';
+  if (source === 'game:warmup') return 'warmup';
+  if (source === 'game:daily_challenge') return 'daily_challenge';
+  if (source === 'catchup') return 'catchup';
+  if (source === 'dushman' || source === 'game:dushman') return 'dushman';
   if (source.startsWith('game:')) return 'game_round';
   return 'session_part';
 }

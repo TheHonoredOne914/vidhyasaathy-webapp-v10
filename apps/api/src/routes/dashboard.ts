@@ -3,12 +3,13 @@ import { AnnouncementListSchema, AnnouncementSchema, AuditLogListSchema, AuditLo
   NotificationListSchema, NotificationSchema, NotificationSettingsSchema, ParentSummarySchema, ProgressSchema,
   ReteachDecisionInputSchema, ReteachDecisionSchema, SaveAnnouncementSchema, SaveNotificationSettingsSchema,
   SectionInsightsQuerySchema, TeacherDashboardSchema } from '@vidhyasaathy/contracts';
-import { and, desc, eq, lt } from 'drizzle-orm';
+import { and, desc, eq, isNull, lt } from 'drizzle-orm';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { requireAuth, requireRole } from '../auth/middleware.ts';
 import type { AuthService } from '../auth/service.ts';
 import { resourceId } from '../content/access.ts';
 import { runDashboardJobs } from '../dashboard/jobs.ts';
+import { dispatchStudent, groupInbox, notifyParentViewed } from '../daily/notify.ts';
 import { deliverNotifications, notificationView, queueNotification, settingsFor } from '../dashboard/notifications.ts';
 import { classInsights, parentSummary, sectionAccess, studentProgress, teacherDashboard, visibleAnnouncements } from '../dashboard/views.ts';
 import type { Database, Db } from '../db/index.ts';
@@ -87,7 +88,10 @@ export function registerDashboardRoutes(app: FastifyInstance, database: Database
   });
   app.get('/parents/children/:id/summary', { preHandler: requireRole('parent') }, async (request) => {
     const timestamp = refresh(request);
-    return ParentSummarySchema.parse(parentSummary(db, request, resourceId(request), timestamp));
+    const childId = resourceId(request);
+    const summary = parentSummary(db, request, childId, timestamp);
+    notifyParentViewed(db, requireAuth(request).school.id, childId, timestamp);
+    return ParentSummarySchema.parse(summary);
   });
   app.get('/announcements', async (request) => {
     const { sectionId } = parseInput(SectionInsightsQuerySchema, request.query);
@@ -118,10 +122,21 @@ export function registerDashboardRoutes(app: FastifyInstance, database: Database
   });
   app.get('/notifications', async (request) => {
     const { school, profile } = requireAuth(request);
-    deliverNotifications(db, now(), school.id);
+    const timestamp = now();
+    if (profile.role === 'student') dispatchStudent(db, school.id, profile.id, timestamp);
+    deliverNotifications(db, timestamp, school.id);
     const rows = db.select().from(notifications).where(and(eq(notifications.schoolId, school.id), eq(notifications.profileId, profile.id)))
-      .orderBy(desc(notifications.createdAt)).limit(100).all();
-    return NotificationListSchema.parse({ updatedAt: now(), notifications: rows.map(notificationView) });
+      .orderBy(desc(notifications.createdAt)).limit(100).all().map(notificationView);
+    return NotificationListSchema.parse({ updatedAt: timestamp, notifications: rows, groups: groupInbox(rows, timestamp) });
+  });
+  app.post('/notifications/read-all', async (request) => {
+    const { school, profile } = requireAuth(request);
+    const timestamp = now();
+    db.update(notifications).set({ readAt: timestamp }).where(and(
+      eq(notifications.schoolId, school.id), eq(notifications.profileId, profile.id), isNull(notifications.readAt),
+    )).run();
+    auth.audit(request, 'dashboard.notification-read-all');
+    return { updatedAt: timestamp };
   });
   app.post('/notifications/:id/read', async (request) => {
     const row = ownNotification(db, request);
@@ -146,11 +161,20 @@ export function registerDashboardRoutes(app: FastifyInstance, database: Database
   });
   app.put('/notification-settings', async (request) => {
     const input = parseInput(SaveNotificationSettingsSchema, request.body);
+    const { notifySessions, notifyHomework, notifyStreak, notifyParentView, notifyGame, quietAfter21, ...base } = input;
+    const flags = {
+      ...(notifySessions === undefined ? {} : { notifySessions: notifySessions ? 1 : 0 }),
+      ...(notifyHomework === undefined ? {} : { notifyHomework: notifyHomework ? 1 : 0 }),
+      ...(notifyStreak === undefined ? {} : { notifyStreak: notifyStreak ? 1 : 0 }),
+      ...(notifyParentView === undefined ? {} : { notifyParentView: notifyParentView ? 1 : 0 }),
+      ...(notifyGame === undefined ? {} : { notifyGame: notifyGame ? 1 : 0 }),
+      ...(quietAfter21 === undefined ? {} : { quietAfter21: quietAfter21 ? 1 : 0 }),
+    };
     const { school, profile } = requireAuth(request);
     const timestamp = now();
     const saved = mutate(() => db.transaction(() => {
-      db.insert(notificationSettings).values({ profileId: profile.id, schoolId: school.id, ...input, updatedAt: timestamp })
-        .onConflictDoUpdate({ target: notificationSettings.profileId, set: { ...input, schoolId: school.id, updatedAt: timestamp } }).run();
+      db.insert(notificationSettings).values({ profileId: profile.id, schoolId: school.id, ...base, ...flags, updatedAt: timestamp })
+        .onConflictDoUpdate({ target: notificationSettings.profileId, set: { ...base, ...flags, schoolId: school.id, updatedAt: timestamp } }).run();
       auth.audit(request, 'dashboard.settings');
       return settingsFor(db, school.id, profile.id);
     }));
