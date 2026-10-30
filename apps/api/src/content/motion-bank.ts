@@ -5,6 +5,7 @@ import type { Db } from '../db/index.ts';
 import { answerEvidence, assignmentItems, assignments, conceptPrereqs, concepts, items, learningSessions, profiles, teacherAssignments } from '../db/schema.ts';
 import { rebuildLearner } from '../learning/record.ts';
 import { ensureMotionLessons } from './motion-lessons.ts';
+import { MOTION_SLIPS } from './motion-slips.ts';
 
 const id = (n: number) => `d7000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
 const SKIP = NOT_TAUGHT;
@@ -38,6 +39,12 @@ const PRACTICE: Question[] = [
   { id: id(1206), concept: 'Acceleration', level: 3, role: 'practice', prompt: 'A train starts from rest and reaches 40 km/h in 10 minutes. Its acceleration is about', options: ['0.0185 m/s²', '4 m/s²', '0.67 m/s²', '0'], answer: '0.0185 m/s²', explanation: '40 km/h is about 11.1 m/s and 10 minutes is 600 s. a = 11.1 / 600, about 0.0185 m/s².', mistakes: [{ option: '4 m/s²', errorType: 'method', explanation: '40 / 10 forgets that 10 minutes is 600 s and that 40 km/h must be changed to m/s.' }] },
   { id: id(1207), concept: 'Acceleration', level: 4, role: 'practice', prompt: 'A car speeds up uniformly from 18 km/h to 36 km/h in 5 s. How far does it travel in that time?', options: ['37.5 m', '25 m', '135 m', '7.5 m'], answer: '37.5 m', explanation: '18 km/h is 5 m/s and 36 km/h is 10 m/s, so a = 1 m/s². s = ut + ½at² = 25 + 12.5 = 37.5 m.', mistakes: [{ option: '25 m', errorType: 'method', explanation: '25 m is only the ut part. Add ½at² as well.' }] },
   { id: id(1208), concept: 'Acceleration', level: 4, role: 'practice', prompt: 'A stone thrown straight up is at the top of its path. Its acceleration is', options: ['about 9.8 m/s² downward', 'zero', 'upward', 'equal to its speed'], answer: 'about 9.8 m/s² downward', explanation: 'Speed is zero for an instant at the top, but gravity still accelerates the stone downward at about 9.8 m/s².', mistakes: [{ option: 'zero', errorType: 'concept_gap', explanation: 'Zero at the top is the velocity, not the acceleration. Gravity has not switched off.' }] },
+  { id: id(1401), concept: 'Distance & Displacement', level: 2, role: 'practice', prompt: 'A distance-time graph is a straight line through the origin. It reads 0 m at 0 s and 60 m at 10 s. The speed is', options: ['6 m/s', '60 m/s', '10 m/s', '600 m/s'], answer: '6 m/s', explanation: 'The slope of a distance-time graph is the speed: 60 m / 10 s = 6 m/s.', mistakes: [] },
+  { id: id(1402), concept: 'Speed & Velocity', level: 3, role: 'practice', prompt: 'A velocity-time graph is a horizontal line at 8 m/s from 0 to 5 s. The distance covered is', options: ['40 m', '8 m', '13 m', '1.6 m'], answer: '40 m', explanation: 'The area under a velocity-time graph is the distance: 8 m/s × 5 s = 40 m.', mistakes: [] },
+  { id: id(1403), concept: 'Acceleration', level: 2, role: 'practice', prompt: 'The slope of a velocity-time graph gives the', options: ['acceleration', 'speed', 'distance', 'the time only'], answer: 'acceleration', explanation: 'Slope = change in velocity / time, which is the acceleration. The area under the same graph is the distance.', mistakes: [] },
+  { id: id(1404), concept: 'Acceleration', level: 3, role: 'practice', prompt: 'Using v² = u² + 2as, a body starts from rest and accelerates at 2 m/s² through 9 m. Its speed is', options: ['6 m/s', '36 m/s', '18 m/s', '4.5 m/s'], answer: '6 m/s', explanation: 'v² = 0 + 2×2×9 = 36, so v = 6 m/s.', mistakes: [] },
+  { id: id(1405), concept: 'Acceleration', level: 3, role: 'practice', prompt: 'Using s = ut + ½at² with u = 0, a = 4 m/s² and t = 3 s, the distance is', options: ['18 m', '12 m', '36 m', '6 m'], answer: '18 m', explanation: 's = 0 + ½×4×3² = 18 m.', mistakes: [] },
+  { id: id(1406), concept: 'Speed & Velocity', level: 4, role: 'practice', prompt: 'In uniform circular motion', options: ['the speed is constant and the direction keeps changing', 'speed and velocity are both constant', 'the acceleration is zero', 'the displacement equals the circumference'], answer: 'the speed is constant and the direction keeps changing', explanation: 'The speed stays the same, but the direction changes continuously, so the velocity changes and there is a centripetal acceleration.', mistakes: [] },
 ];
 
 const DIAGNOSTIC: Question[] = [
@@ -61,11 +68,29 @@ const CHAPTER_LINKS: Record<string, string[]> = {
   Acceleration: ['Units and ratios'],
 };
 
+function practiceMistakes(question: Question) {
+  const number = Number(question.id.slice(-12));
+  const slips = MOTION_SLIPS[number];
+  const wrong = question.options.filter((option) => option !== question.answer);
+  if (!slips || wrong.some((option) => !slips[option]?.explanation || !slips[option]?.fix)) {
+    throw new Error(`Motion practice is missing a misconception for ${question.id}.`);
+  }
+  return wrong.map((option) => ({ option, ...slips[option]! }));
+}
+
 function contentFor(question: Question, conceptId: string): SaveItem {
+  const mistakes = question.role === 'practice' ? practiceMistakes(question) : question.mistakes;
   return SaveItemSchema.parse({
     type: 'mcq', conceptId, prompt: question.prompt, options: question.options, answer: question.answer,
-    difficulty: question.level, sourceRef: null, explanation: question.explanation, mistakes: question.mistakes, role: question.role,
+    difficulty: question.level, sourceRef: null, explanation: question.explanation, mistakes, role: question.role,
   });
+}
+
+const SAMPLE_CONCEPT = 'd7000000-0000-4000-8000-000000000099';
+export const motionPractice = PRACTICE;
+export const motionDiagnostic = DIAGNOSTIC;
+export function motionContents() {
+  return PRACTICE.map((question) => contentFor(question, SAMPLE_CONCEPT));
 }
 
 export function ensureMotionBank(db: Db, schoolId: string, now: number) {
@@ -92,24 +117,34 @@ export function ensureMotionBank(db: Db, schoolId: string, now: number) {
   const bank = [...PRACTICE, ...DIAGNOSTIC];
   bank.forEach((question, position) => {
     const concept = byTitle.get(question.concept);
-    if (!concept || db.select().from(items).where(eq(items.id, question.id)).get()) return;
-    db.insert(items).values({
-      id: question.id, schoolId, chapterId, sessionId: null, conceptId: concept.id, position: 100 + position,
-      content: contentFor(question, concept.id),
-    }).run();
+    if (!concept) return;
+    const content = contentFor(question, concept.id);
+    const existing = db.select().from(items).where(eq(items.id, question.id)).get();
+    if (!existing) {
+      db.insert(items).values({
+        id: question.id, schoolId, chapterId, sessionId: null, conceptId: concept.id, position: 100 + position, content,
+      }).run();
+      return;
+    }
+    if (JSON.stringify(existing.content) !== JSON.stringify(content) || existing.conceptId !== concept.id) {
+      db.update(items).set({ content, conceptId: concept.id }).where(eq(items.id, question.id)).run();
+    }
   });
   ensureMotionLessons(db, schoolId, chapterId, now);
   const teacher = db.select().from(teacherAssignments).where(eq(teacherAssignments.schoolId, schoolId)).all()
     .find((row) => row.sectionId === motion.sectionId);
-  if (!teacher || db.select().from(assignments).where(eq(assignments.id, id(301))).get()) return;
-  db.insert(assignments).values({
-    id: id(301), schoolId, chapterId, sectionId: motion.sectionId, teacherId: teacher.teacherProfileId,
-    title: 'Motion practice', kind: 'homework', dueAt: now + 14 * 86400000, status: 'published', publishedAt: now, updatedAt: now,
-  }).run();
+  if (!teacher) return;
+  if (!db.select().from(assignments).where(eq(assignments.id, id(301))).get()) {
+    db.insert(assignments).values({
+      id: id(301), schoolId, chapterId, sectionId: motion.sectionId, teacherId: teacher.teacherProfileId,
+      title: 'Motion practice', kind: 'homework', dueAt: now + 14 * 86400000, status: 'published', publishedAt: now, updatedAt: now,
+    }).run();
+  }
   PRACTICE.forEach((question, position) => {
     const concept = byTitle.get(question.concept);
     if (!concept) return;
-    db.insert(assignmentItems).values({ assignmentId: id(301), itemId: question.id, schoolId, chapterId, position }).run();
+    const linked = db.select().from(assignmentItems).where(and(eq(assignmentItems.assignmentId, id(301)), eq(assignmentItems.itemId, question.id))).get();
+    if (!linked) db.insert(assignmentItems).values({ assignmentId: id(301), itemId: question.id, schoolId, chapterId, position }).run();
   });
 }
 
@@ -117,17 +152,15 @@ export function ensureMotionHistories(db: Db, schoolId: string, now: number) {
   const people = db.select().from(profiles).where(and(eq(profiles.schoolId, schoolId), eq(profiles.role, 'student'))).all();
   const byName = new Map(people.map((row) => [row.name, row.id]));
   const bank = new Map(PRACTICE.map((question) => [question.id, question]));
-  const conceptOf = new Map(db.select().from(concepts).where(eq(concepts.schoolId, schoolId)).all().map((row) => [row.title, row.id]));
-  const chapterOf = new Map(db.select().from(items).where(eq(items.schoolId, schoolId)).all().map((row) => [row.id, row.chapterId]));
+  const itemOf = new Map(db.select().from(items).where(eq(items.schoolId, schoolId)).all().map((row) => [row.id, row]));
   const add = (name: string, questionId: string, correct: boolean, confidence: Confidence, daysAgo: number, n: number) => {
     const profileId = byName.get(name);
     const question = bank.get(questionId);
-    const conceptId = question ? conceptOf.get(question.concept) : undefined;
-    const chapterId = chapterOf.get(questionId);
-    if (!profileId || !question || !conceptId || !chapterId) return;
+    const item = itemOf.get(questionId);
+    if (!profileId || !question || !item) return;
     const timeMs = 20_000;
     db.insert(answerEvidence).values({
-      id: `demo:motion:${name}:${questionId}:${n}`, schoolId, profileId, conceptId, itemId: questionId, level: question.level,
+      id: `demo:motion:${name}:${questionId}:${n}`, schoolId, profileId, conceptId: item.conceptId, itemId: questionId, level: question.level,
       correct, confidence, source: 'practice', timeMs, answer: correct ? question.answer : (question.mistakes?.[0]?.option ?? question.options.find((option) => option !== question.answer) ?? question.answer),
       errorType: classifyError({ correct, confidence, level: question.level, timeMs, notTaught: false }), notTaught: false, createdAt: Math.max(0, now - daysAgo * 86400000 - n),
     }).onConflictDoNothing().run();

@@ -13,6 +13,108 @@ export const DEMO_SCHOOL_ID = 'd7000000-0000-4000-8000-000000000001';
 const Credentials = z.object({ password: z.string().min(12).max(128), pin: z.string().regex(/^\d{4}$/) }).strict();
 export type SeedDemoOptions = { rich?: boolean };
 
+type MotionCheck = {
+  concept: 'Distance & Displacement' | 'Speed & Velocity' | 'Acceleration';
+  prompt: string;
+  options: [string, string, string, string];
+  answer: string;
+  explanation: string;
+  mistakes: { option: string; errorType: 'concept_gap' | 'method' | 'careless'; explanation: string; fix: string }[];
+};
+
+const SESSION_CHECKS: MotionCheck[] = [
+  {
+    concept: 'Distance & Displacement',
+    prompt: 'A girl walks 6 m east and then 8 m north. The magnitude of her displacement is',
+    options: ['10 m', '14 m', '2 m', '48 m'],
+    answer: '10 m',
+    explanation: 'Displacement is the straight line from start to finish. √(6² + 8²) = 10 m. The path length, 14 m, is the distance.',
+    mistakes: [
+      { option: '14 m', errorType: 'concept_gap', explanation: '14 m adds the two legs, so it is the distance, not the displacement.', fix: 'Displacement is the straight line: √(6² + 8²).' },
+      { option: '2 m', errorType: 'method', explanation: 'Subtracting the legs is not how a right angle combines.', fix: 'Use Pythagoras for two perpendicular parts of a journey.' },
+      { option: '48 m', errorType: 'careless', explanation: '6 × 8 is an area, not a length.', fix: 'Combine the two lengths with √(6² + 8²).' },
+    ],
+  },
+  {
+    concept: 'Distance & Displacement',
+    prompt: 'Which statement about distance is correct?',
+    options: ['It is never negative', 'It can be negative', 'It is always equal to displacement', 'Its SI unit is m/s'],
+    answer: 'It is never negative',
+    explanation: 'Distance is the length of the path. It has no direction, so it cannot be negative.',
+    mistakes: [
+      { option: 'It can be negative', errorType: 'concept_gap', explanation: 'A negative sign belongs to displacement when a direction is chosen, not to distance.', fix: 'Distance is a scalar path length and stays zero or positive.' },
+      { option: 'It is always equal to displacement', errorType: 'concept_gap', explanation: 'They match only for a straight path that never turns back.', fix: 'Distance is the whole path. Displacement is start to finish.' },
+      { option: 'Its SI unit is m/s', errorType: 'careless', explanation: 'm/s is a unit of speed. Distance is a length.', fix: 'Measure distance in metres.' },
+    ],
+  },
+  {
+    concept: 'Speed & Velocity',
+    prompt: 'A car travels 90 km in 1.5 h. Its average speed is',
+    options: ['60 km/h', '135 km/h', '90 km/h', '1.5 km/h'],
+    answer: '60 km/h',
+    explanation: 'Average speed = total distance / total time = 90 km / 1.5 h = 60 km/h.',
+    mistakes: [
+      { option: '135 km/h', errorType: 'method', explanation: '90 × 1.5 multiplies distance by time. Speed divides.', fix: 'Divide 90 km by 1.5 h.' },
+      { option: '90 km/h', errorType: 'careless', explanation: '90 km is the distance, not the speed.', fix: 'Divide the distance by the time taken.' },
+      { option: '1.5 km/h', errorType: 'method', explanation: '1.5 h is the time. Dividing time by distance is not speed.', fix: 'Speed is distance divided by time.' },
+    ],
+  },
+  {
+    concept: 'Speed & Velocity',
+    prompt: 'Velocity is different from speed because velocity',
+    options: ['has a direction', 'is always larger than speed', 'has no unit', 'measures mass'],
+    answer: 'has a direction',
+    explanation: 'Velocity is speed in a definite direction. Speed is the size of that velocity.',
+    mistakes: [
+      { option: 'is always larger than speed', errorType: 'concept_gap', explanation: 'The size of the velocity is the speed, so velocity is not a bigger number.', fix: 'Velocity adds a direction. Its magnitude is the speed.' },
+      { option: 'has no unit', errorType: 'careless', explanation: 'Velocity uses the same unit as speed.', fix: 'State the unit, such as m/s, and the direction.' },
+      { option: 'measures mass', errorType: 'concept_gap', explanation: 'Mass is not part of velocity.', fix: 'Velocity is displacement divided by time.' },
+    ],
+  },
+  {
+    concept: 'Acceleration',
+    prompt: 'A cyclist speeds up from 4 m/s to 10 m/s in 3 s. The acceleration is',
+    options: ['2 m/s²', '14 m/s²', '3.33 m/s²', '6 m/s'],
+    answer: '2 m/s²',
+    explanation: 'a = (v − u) / t = (10 − 4) / 3 = 2 m/s².',
+    mistakes: [
+      { option: '14 m/s²', errorType: 'method', explanation: 'Adding 10 and 4 ignores that acceleration uses the change in velocity.', fix: 'Subtract the first speed, then divide by the time.' },
+      { option: '3.33 m/s²', errorType: 'careless', explanation: '10 / 3 uses only the final speed.', fix: 'Use (10 − 4) / 3.' },
+      { option: '6 m/s', errorType: 'method', explanation: '6 m/s is the change in speed, and it is not yet divided by time.', fix: 'Divide that change by 3 s, and keep the unit m/s².' },
+    ],
+  },
+];
+
+const WEAK_SESSION_PROMPTS: Record<string, MotionCheck> = {
+  'Which quantity has direction?': SESSION_CHECKS[0]!,
+  'Distance is always…': SESSION_CHECKS[1]!,
+  'Speed is distance divided by…': SESSION_CHECKS[2]!,
+  'Velocity includes speed and…': SESSION_CHECKS[3]!,
+  'Acceleration measures change in…': SESSION_CHECKS[4]!,
+};
+
+function motionCheckContent(conceptId: string, check: MotionCheck) {
+  return SaveItemSchema.parse({
+    type: 'mcq', prompt: check.prompt, options: [...check.options], answer: check.answer,
+    difficulty: 2, explanation: check.explanation, mistakes: check.mistakes,
+    sourceRef: null, conceptId, role: 'check',
+  });
+}
+
+function refreshMotionChecks(db: Db, chapterId: string, conceptId: (title: string) => string | undefined) {
+  const session = db.select().from(learningSessions).where(eq(learningSessions.chapterId, chapterId)).all()
+    .find((row) => row.title.startsWith('Session 3'));
+  if (!session) return;
+  for (const row of db.select().from(items).where(eq(items.sessionId, session.id)).all()) {
+    if (row.content.type !== 'mcq') continue;
+    const check = WEAK_SESSION_PROMPTS[row.content.prompt];
+    if (!check) continue;
+    const linked = conceptId(check.concept);
+    if (!linked || linked !== row.conceptId) continue;
+    db.update(items).set({ content: motionCheckContent(row.conceptId, check) }).where(eq(items.id, row.id)).run();
+  }
+}
+
 // Explicit opt-in seed only. The records below cover every demo role and core loop.
 export async function seedDemo(db: Db, credentials: z.input<typeof Credentials>, now = Date.now(), options: SeedDemoOptions = {}) {
   const input = Credentials.parse(credentials);
@@ -113,18 +215,13 @@ export async function seedDemo(db: Db, credentials: z.input<typeof Credentials>,
     const session3Id = randomUUID();
     const opensAt = new Date(now); opensAt.setHours(18, 0, 0, 0);
     db.insert(learningSessions).values({ id: session3Id, schoolId, chapterId: motionChapterId, sectionId: section9aId, title: 'Session 3: Motion diagnostic', status: 'published', releaseAt: opensAt.getTime(), updatedAt: now }).run();
-    const diagnosticQuestions = [
-      ['Distance & Displacement', 'Which quantity has direction?', ['Distance', 'Displacement'], 'Displacement'],
-      ['Distance & Displacement', 'Distance is always…', ['Non-negative', 'Negative'], 'Non-negative'],
-      ['Speed & Velocity', 'Speed is distance divided by…', ['Time', 'Mass'], 'Time'],
-      ['Speed & Velocity', 'Velocity includes speed and…', ['Direction', 'Temperature'], 'Direction'],
-      ['Acceleration', 'Acceleration measures change in…', ['Velocity', 'Distance only'], 'Velocity'],
-    ] as const;
-    db.insert(items).values(diagnosticQuestions.map(([conceptTitle, prompt, options, answer], position) => ({
-      id: randomUUID(), schoolId, chapterId: motionChapterId, sessionId: session3Id, position,
-      conceptId: motionConcepts.find((concept) => concept.title === conceptTitle)!.id,
-      content: SaveItemSchema.parse({ type: 'mcq', prompt, options, answer, difficulty: 1, sourceRef: null, conceptId: motionConcepts.find((concept) => concept.title === conceptTitle)!.id }),
-    }))).run();
+    db.insert(items).values(SESSION_CHECKS.map((check, position) => {
+      const conceptId = motionConcepts.find((concept) => concept.title === check.concept)!.id;
+      return {
+        id: randomUUID(), schoolId, chapterId: motionChapterId, sessionId: session3Id, position, conceptId,
+        content: motionCheckContent(conceptId, check),
+      };
+    })).run();
     ensureMotionContent(db, now);
     ensureMotionBank(db, schoolId, now);
     ensureMotionHistories(db, schoolId, now);
@@ -204,6 +301,7 @@ export function ensureMotionContent(db: Db, now: number) {
     db.insert(noteConcepts).values({ noteId: id, schoolId: DEMO_SCHOOL_ID, chapterId: chapter.id, conceptId: conceptId(note.concept)! }).run();
     noteIds[note.concept] = id;
   }
+  refreshMotionChecks(db, chapter.id, conceptId);
   if (!session || db.select().from(slides).where(eq(slides.sessionId, session.id)).all().length > 0) return;
   db.insert(slides).values(MOTION_SLIDES.map((slide, position) => ({ id: randomUUID(), schoolId: DEMO_SCHOOL_ID, chapterId: chapter.id,
     sessionId: session.id, conceptId: conceptId(slide.concept)!, noteId: noteIds[slide.concept] ?? null, position, title: slide.title, body: slide.body }))).run();
