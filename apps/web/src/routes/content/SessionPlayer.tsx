@@ -10,6 +10,7 @@ import { Skeleton } from '../../ui/Skeleton';
 import { fieldClass } from '../../ui/Field';
 import { ConfidenceChips, type ConfidenceChoice } from '../../ui/ConfidenceChips';
 import { AccessDenied } from '../AccessDenied';
+import '../../student/notebook/pages/session-player.css';
 
 function WhyWrong({ review }: { review: NonNullable<ReturnType<typeof LearningSessionSchema.parse>['review']> }) {
   if (!review.misses.length && !review.bridge) return null;
@@ -120,7 +121,7 @@ export function SessionPlayer() {
   }
 
   return (
-    <section className={done ? 'session-stage is-paper is-done' : 'session-stage is-paper'}>
+    <section className={done ? 'sp-wrap session-stage is-paper is-done' : 'sp-wrap session-stage is-paper'}>
       <div className="session-stage-inner">
         <p className="lesson-kicker">{session.data.title}</p>
         <div className="learn-dots" aria-hidden="true">

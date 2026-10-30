@@ -7,10 +7,11 @@ import { usePageMeta } from '../meta';
 import { LessonFrame } from '../routes/content/LessonFrame';
 import { AccessDenied } from '../routes/AccessDenied';
 import { useRemote } from '../setup/useRemote';
-import { Button } from '../ui/Button';
 import { ErrorState } from '../ui/ErrorState';
 import { fieldClass } from '../ui/Field';
-import { ConfidenceChips, type ConfidenceChoice } from '../ui/ConfidenceChips';
+import type { ConfidenceChoice } from '../ui/ConfidenceChips';
+import { ConfidenceRow, DoodleStrip } from '../student/notebook/ui';
+import '../student/notebook/pages/quiz.css';
 import { Skeleton } from '../ui/Skeleton';
 import { draftAnswer, gameCopy, kindLabel } from './games';
 import './practice.css';
@@ -115,7 +116,6 @@ export function PracticePlay() {
   const index = game?.answers.length ?? 0;
   const row = set.items[index];
   const item: PublicItem | undefined = done ? undefined : row?.item;
-  const back = <p className="lesson-actions"><Link to={`/student/chapters/${chapterId}/practice`}>All games</Link></p>;
 
   async function submit(current: PublicItem) {
     if (!game || pending) return;
@@ -158,7 +158,6 @@ export function PracticePlay() {
       });
       setNotice(resultLine(marked.correct === true, marked.errorType));
       if (marked.bridge) setBridge(marked.bridge);
-      setConfidence('');
     } catch (error) {
       if (error instanceof ApiClientError && error.code === 'REMEDIATION_REQUIRED') {
         setRemediation(error.message);
@@ -170,84 +169,117 @@ export function PracticePlay() {
     }
   }
 
+  const quizState = review?.correct ? ' quiz-right' : review && !review.correct ? ' quiz-wrong' : '';
+  const strip = set.items.map((_, slot) => {
+    if (review && slot === index) return review.correct ? 'right' as const : 'wrong' as const;
+    const answer = game?.answers[slot];
+    if (answer) return answer.correct ? 'right' as const : 'wrong' as const;
+    if (slot === index) return 'current' as const;
+    return 'todo' as const;
+  });
+  const keys = 'abcdefghijklmnopqrstuvwxyz';
   return (
-    <LessonFrame paper kicker="Practice" title={copy.title} script="Optional. This does not change a deadline." stale={remote}>
-      <div className="practice-stage">
-      {back}
-      <p className="practice-note">{copy.detail}</p>
-      {set.bridge || bridge ? <p className="check-paper">{bridge ?? set.bridge}</p> : null}
-      {review && !review.correct && (review.explanation || review.fix) ? (
-        <div className="check-paper" data-testid="why-wrong">
-          <h2>Why this was wrong</h2>
-          {review.explanation ? <p>{review.explanation}</p> : null}
-          {review.fix ? <p className="why-fix">{review.fix}</p> : null}
+    <div className={`pg-quiz${quizState}`}>
+      <div className="nb-grid">
+        <div className="nb-col qz-main">
+          <div className="qz-top">
+            <Link className="back" to={`/student/chapters/${chapterId}/practice`}>All games</Link>
+            <div className="strip-wrap">
+              <DoodleStrip states={strip.length ? strip : ['current']} />
+              <div className="strip-cap"><span>{copy.title}</span><span>{done ? 'Set complete' : `Question ${index + 1} of ${set.items.length}`}</span></div>
+            </div>
+          </div>
+          {set.bridge || bridge ? <p className="nb-note">{bridge ?? set.bridge}</p> : null}
+          {set.items.length === 0 ? <p className="nb-empty">No released questions match this game yet.</p> : null}
+          {game?.deadline != null && !done ? <p className="nb-meta">Seconds left: {Math.max(0, Math.ceil((game.deadline - tick) / 1000))}</p> : null}
+          {done && result ? (
+            <section className="nb-card" data-testid="practice-result">
+              <h2 className="nb-h2">Practice complete</h2>
+              <p className="nb-note">{practiceWords(result.correct, result.total)}</p>
+              <p className="nb-text">Correct answers count toward the practice run. A wrong answer does not.</p>
+              <p><Link className="nb-btn nb-btn--primary" to="/student">Go home</Link></p>
+            </section>
+          ) : null}
+          {item && game ? (
+            <form onSubmit={(event) => {
+              event.preventDefault();
+              if (review && game) {
+                setGame(gameModules[game.gameId].onAnswer(game, review.event, review.correct));
+                setReview(null);
+                setChoice('');
+                setPairs([]);
+                setConfidence('');
+                setNotice(null);
+                return;
+              }
+              void submit(item);
+            }}>
+              <section className="nb-qcard">
+                <div className="nb-q__label"><span className="nb-q__num">{index + 1}</span><span className="nb-label">{kindLabel(row?.kind ?? 'new')}</span></div>
+                <h1 className="nb-q__text">{item.prompt}</h1>
+                {item.type === 'mcq' ? <div className="nb-opts">{item.options.map((option, optionIndex) => {
+                  const picked = review ? review.choice === option : choice === option;
+                  const right = Boolean(review && review.correctOption === option);
+                  const wrong = Boolean(review && !review.correct && review.choice === option);
+                  return (
+                    <button type="button" key={option} className={`nb-opt${picked ? ' is-selected' : ''}${right ? ' is-correct' : ''}${wrong ? ' is-wrong' : ''}`} disabled={Boolean(review)} onClick={() => { setChoice(option); }}>
+                      <span className="nb-opt__key">{keys[optionIndex] ?? optionIndex + 1}</span>
+                      <span className="nb-opt__body">{option}</span>
+                      <span className="nb-opt__mark">{right ? <PenMark kind="tick" /> : wrong ? <PenMark kind="cross" /> : null}</span>
+                    </button>
+                  );
+                })}</div> : null}
+                {item.type === 'match_pairs' ? item.left.map((left, pairIndex) => (
+                  <label key={left} className="nb-field">
+                    <span className="nb-label">{left}</span>
+                    <select className={fieldClass} value={pairs[pairIndex] ?? ''} onChange={(event) => {
+                      const next = item.left.map((_, slot) => pairs[slot] ?? '');
+                      next[pairIndex] = event.target.value;
+                      setPairs(next);
+                    }}>
+                      <option value="">Choose a match</option>
+                      {item.right.map((right) => <option key={right} value={right}>{right}</option>)}
+                    </select>
+                  </label>
+                )) : null}
+                {item.type === 'short_answer' || item.type === 'flashcard' ? (
+                  <label className="nb-field" htmlFor="practice-text"><span className="nb-label">Your answer</span>
+                    <input id="practice-text" className="nb-input nb-input--lined" value={choice} onChange={(event) => { setChoice(event.target.value); }} />
+                  </label>
+                ) : null}
+                {review?.correct ? (
+                  <div className="nb-feedback nb-feedback--right">
+                    <div><p className="nb-feedback__title">That is the one.</p>{review.explanation ? <p className="nb-feedback__body">{review.explanation}</p> : null}</div>
+                  </div>
+                ) : null}
+                {review && !review.correct ? (
+                  <div className="nb-feedback nb-feedback--wrong" data-testid="why-wrong">
+                    <div>
+                      <p className="nb-feedback__title">Let&apos;s fix this.</p>
+                      {review.explanation ? <p className="nb-feedback__body">{review.explanation}</p> : null}
+                      <div className="nb-whywrong">
+                        <div className="ww-box"><h4>What you did</h4><p className="nb-note">{review.choice}</p></div>
+                        <div className="ww-box"><h4>Fix it</h4><p className="nb-note">{review.fix || 'Read the idea again, then try the next one.'}</p></div>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+                {review ? <ConfidenceRow value={confidence} locked onChange={setConfidence} /> : <ConfidenceRow value={confidence} onChange={setConfidence} />}
+              </section>
+              {notice ? <p className="nb-empty" role="status">{notice}</p> : null}
+              {remediation ? <p role="alert">{remediation} <Link to={`/student/concepts/${item.conceptId}/remediation`}>Open the lesson and check</Link></p> : null}
+              <div className="qz-foot"><button type="submit" className="nb-btn nb-btn--primary nb-btn--lg" disabled={pending}>{pending ? 'Checking…' : review ? 'Next question' : 'Check'}</button></div>
+            </form>
+          ) : notice && !done ? <p className="nb-empty" role="status">{notice}</p> : null}
         </div>
-      ) : null}
-      {set.items.length === 0 ? <p>No released questions match this game yet.</p> : null}
-      {game?.deadline != null && !done ? <p className="practice-clock">Seconds left: {Math.max(0, Math.ceil((game.deadline - tick) / 1000))}</p> : null}
-      {done && result ? (
-        <div className="lesson-card" data-testid="practice-result">
-          <h2>Practice complete</h2>
-          <p>{practiceWords(result.correct, result.total)}</p>
-          <p>Correct answers count toward the practice run. A wrong answer does not.</p>
-          <p className="lesson-actions"><Link to="/student">Go home</Link></p>
-        </div>
-      ) : null}
-      {item && game ? (
-        <form className="lesson-card grid gap-3" onSubmit={(event) => {
-          event.preventDefault();
-          if (review && game) {
-            setGame(gameModules[game.gameId].onAnswer(game, review.event, review.correct));
-            setReview(null);
-            setChoice('');
-            setPairs([]);
-            setNotice(null);
-            return;
-          }
-          void submit(item);
-        }}>
-          <p>{kindLabel(row?.kind ?? 'new')}. Question {index + 1} of {set.items.length}.</p>
-          <fieldset className="practice-options">
-            <legend className="font-semibold">{item.prompt}</legend>
-            {item.type === 'mcq' ? item.options.map((option) => {
-              const picked = review ? review.choice === option : choice === option;
-              const right = Boolean(review && review.correctOption === option);
-              const wrong = Boolean(review && !review.correct && review.choice === option);
-              return (
-                <label key={option} className={`practice-option${right ? ' is-right' : ''}${wrong ? ' is-wrong' : ''}`}>
-                  <input type="radio" name="practice-answer" checked={picked} disabled={Boolean(review)} onChange={() => { setChoice(option); }} />
-                  {option}
-                  {right ? <PenMark kind="tick" /> : null}
-                  {wrong ? <PenMark kind="cross" /> : null}
-                </label>
-              );
-            }) : null}
-            {item.type === 'match_pairs' ? item.left.map((left, pairIndex) => (
-              <label key={left} className="grid gap-1">
-                {left}
-                <select className={fieldClass} value={pairs[pairIndex] ?? ''} onChange={(event) => {
-                  const next = item.left.map((_, slot) => pairs[slot] ?? '');
-                  next[pairIndex] = event.target.value;
-                  setPairs(next);
-                }}>
-                  <option value="">Choose a match</option>
-                  {item.right.map((right) => <option key={right} value={right}>{right}</option>)}
-                </select>
-              </label>
-            )) : null}
-            {item.type === 'short_answer' || item.type === 'flashcard' ? (
-              <label className="grid gap-1" htmlFor="practice-text">Your answer
-                <input id="practice-text" className={fieldClass} value={choice} onChange={(event) => { setChoice(event.target.value); }} />
-              </label>
-            ) : null}
-            {review ? null : <ConfidenceChips name="practice-confidence" value={confidence} onChange={setConfidence} />}
-          </fieldset>
-          {notice ? <p className="practice-result" role="status">{notice}</p> : null}
-          {remediation ? <p role="alert">{remediation} <Link to={`/student/concepts/${item.conceptId}/remediation`}>Open the lesson and check</Link></p> : null}
-          <Button type="submit" disabled={pending}>{pending ? 'Checking' : review ? 'Next question' : 'Check answer'}</Button>
-        </form>
-      ) : notice && !done ? <p role="status">{notice}</p> : null}
+        <aside className="nb-col qz-rail">
+          <section className="nb-card keep-m">
+            <h3 className="nb-h3">This round</h3>
+            <p className="nb-text">{review ? (review.correct ? 'That is right.' : review.explanation || 'Have another look.') : 'Pick an answer, then say how sure you are.'}</p>
+          </section>
+          {set.bridge || bridge ? <section className="nb-card"><h3 className="nb-h3">Hint</h3><p className="nb-note">{bridge ?? set.bridge}</p></section> : null}
+        </aside>
       </div>
-    </LessonFrame>
+    </div>
   );
 }

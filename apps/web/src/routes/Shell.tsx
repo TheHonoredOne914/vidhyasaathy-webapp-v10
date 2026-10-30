@@ -12,6 +12,7 @@ import { BellButton } from '../components/SchoolBackground';
 import { OfflineBanner } from '../ui/OfflineBanner';
 import { Avatar } from '../ui/Avatar';
 import { SaathyMascot } from '../ui/Saathy';
+import { NotebookActions, NotebookShell } from '../student/notebook/NotebookShell';
 
 type Item = { to: string; label: string };
 
@@ -119,7 +120,7 @@ export function Shell() {
   const [signOutError, setSignOutError] = useState<string | null>(null);
   const [narrow, setNarrow] = useState(() => window.matchMedia('(max-width: 1023px)').matches);
   const year = new Date().getFullYear();
-  const bare = ['/', '/signin', '/register-school', '/recover'].includes(pathname);
+  const bare = ['/', '/signin', '/signin/student', '/register-school', '/recover'].includes(pathname);
   const appPath = ['/admin', '/teacher', '/student', '/parent'].some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
   const me = session.me;
 
@@ -177,6 +178,19 @@ export function Shell() {
         <Outlet />
         {dialog}
       </>
+    );
+  }
+
+  if (appPath && me && (me.profile.role === 'student' || me.profile.role === 'teacher' || me.profile.role === 'parent')) {
+    return (
+      <NotebookActions.Provider value={{ requestSignOut: () => { setSignOutError(null); setOpen(true); } }}>
+        {skip}
+        <NotebookShell me={me}>
+          <OfflineBanner />
+          <Outlet />
+        </NotebookShell>
+        {dialog}
+      </NotebookActions.Provider>
     );
   }
 

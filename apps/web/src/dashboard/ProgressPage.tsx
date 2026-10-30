@@ -1,71 +1,51 @@
-import { ProgressSchema } from '@vidhyasaathy/contracts';
+import { ProgressSchema, StreakSchema } from '@vidhyasaathy/contracts';
 import { Link } from 'react-router-dom';
-import { formatDue } from '../assessment/present';
+import { useRemote } from '../setup/useRemote';
 import { usePageMeta } from '../meta';
 import { PAGE } from '../pages';
-import { useRemote } from '../setup/useRemote';
-import { RemoteBlock } from './RemoteBlock';
-import '../student/home.css';
-import './dashboard.css';
+import { Saathy } from '../student/notebook/Saathy';
+import { Chip, MasteryChip, PageHead, ProgressBar } from '../student/notebook/ui';
+import '../student/notebook/pages/progress.css';
+
+const WORDS = ["Let's fix this", 'Almost there', 'Mastered', 'Top form', 'New'] as const;
 
 function nextFor(word: string, chapterId: string, conceptId: string) {
-  if (word === "Let's fix this") return { href: `/student/chapters/${chapterId}/practice`, label: 'Practise this' };
-  if (word === 'Mastered' || word === 'Top form') return { href: `/student/chapters/${chapterId}/concepts/${conceptId}`, label: 'Review later' };
-  return { href: `/student/chapters/${chapterId}/concepts/${conceptId}`, label: 'Open the lesson' };
-}
-
-function StateIcon({ word }: { word: string }) {
-  const pen = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
-  if (word === "Let's fix this") return <svg viewBox="0 0 24 24" aria-hidden="true"><path {...pen} d="M6 16l4-8 4 5 2-3 3 6" /><path {...pen} d="M5 18h14" /></svg>;
-  if (word === 'Almost there') return <svg viewBox="0 0 24 24" aria-hidden="true"><circle {...pen} cx="12" cy="12" r="7" /><path {...pen} d="M12 8v4l3 2" /></svg>;
-  if (word === 'Mastered') return <svg viewBox="0 0 24 24" aria-hidden="true"><path {...pen} d="M6 12.5l4 4 8-9" /></svg>;
-  if (word === 'Top form') return <svg viewBox="0 0 24 24" aria-hidden="true"><path {...pen} d="M12 4l2 5h5l-4 3 2 5-5-3-5 3 2-5-4-3h5z" /></svg>;
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path {...pen} d="M6 5h12v14H6z" /><path {...pen} d="M9 9h6M9 13h6" /></svg>;
+  if (word === "Let's fix this") return { href: `/student/chapters/${chapterId}/concepts/${conceptId}`, label: 'Fix this' };
+  if (word === 'Almost there') return { href: `/student/chapters/${chapterId}/practice/quick_revision_quiz`, label: 'Try a few' };
+  if (word === 'New') return { href: `/student/chapters/${chapterId}/concepts/${conceptId}`, label: 'Start' };
+  return { href: `/student/chapters/${chapterId}`, label: 'Open' };
 }
 
 export function ProgressPage() {
   usePageMeta(PAGE.studentProgress.title, PAGE.studentProgress.description);
   const progress = useRemote('/progress', ProgressSchema);
-  return (
-    <section className="vs-home">
-      <header className="vs-home-hero">
-        <div className="vs-home-hero-copy">
-          <h1>My progress</h1>
-          <p>Each idea has a friendly word. Keep going.</p>
-        </div>
-      </header>
-      <RemoteBlock remote={progress} title="Could not load progress">
-        {(data) => (
-          <>
-            <ol className="progress-cards">
-              {data.masteryWords.map((row) => {
-                const next = nextFor(row.word, row.chapterId, row.conceptId);
-                return (
-                  <li key={row.conceptId} className={`progress-card is-${row.word === "Let's fix this" ? 'fix' : row.word === 'Almost there' ? 'almost' : row.word === 'Mastered' ? 'mastered' : row.word === 'Top form' ? 'top' : 'new'}`}>
-                    <span className="progress-icon"><StateIcon word={row.word} /></span>
-                    <span className="progress-copy"><strong>{row.title}</strong><em>{row.word}</em></span>
-                    <Link to={next.href}>{next.label}</Link>
-                  </li>
-                );
-              })}
-            </ol>
-            <article className="lesson-card">
-              <h2>Assignments</h2>
-              {data.assignments.length ? (
-                <ul className="dash-list">
-                  {data.assignments.map((item) => (
-                    <li key={item.id}>
-                      <Link className="text-link" to={`/student/assignments/${item.id}`}>{item.title}</Link>
-                      <p>Due {formatDue(item.dueAt)}. {item.teacherName}.</p>
-                    </li>
-                  ))}
-                </ul>
-              ) : <p>No assignment is published.</p>}
-            </article>
-          </>
-        )}
-      </RemoteBlock>
-      <Link className="text-link" to="/student">Home</Link>
-    </section>
-  );
+  const streak = useRemote('/practice/streak', StreakSchema);
+  const data = progress.data;
+  const words = data?.masteryWords ?? [];
+  const counts = WORDS.map((word) => ({ word, n: words.filter((row) => row.word === word).length }));
+  const focus = words.find((row) => row.word === "Let's fix this") ?? words.find((row) => row.word === 'Almost there') ?? words.find((row) => row.word === 'New');
+
+  if (progress.status === 'loading' && !data) return <div className="nb-skel" />;
+  if (progress.status === 'error' && !data) return <p className="nb-empty" role="alert">Could not load progress. <button type="button" className="nb-btn nb-btn--ghost nb-btn--sm" onClick={progress.reload}>Try again</button></p>;
+
+  return <div className="nb-grid">
+    <div className="nb-col">
+      <PageHead eyebrow="Progress" title="How you are doing" sub="Each idea has a friendly word." />
+      <div className="pr-rings">{counts.map((row) => <section className="nb-card" key={row.word}><MasteryChip level={row.word} /><b className="nb-h2">{row.n}</b><span className="nb-meta">ideas</span></section>)}</div>
+      <section className="nb-card"><div className="nb-card__head"><h3 className="nb-h3">Ideas</h3></div>
+        {words.length ? words.map((row) => { const next = nextFor(row.word, row.chapterId, row.conceptId); return <div className="nb-row" key={row.conceptId}><div><div className="nb-row__t">{row.title}</div><MasteryChip level={row.word} /></div><Link className="nb-btn nb-btn--ghost nb-btn--sm" to={next.href}>{next.label}</Link></div>; }) : <p className="nb-empty">No ideas yet.</p>}
+      </section>
+    </div>
+    <aside className="nb-col">
+      <section className="nb-card"><div className="nb-card__head"><h3 className="nb-h3">This week</h3></div>
+        <div className="cal">{(streak.data?.days ?? []).map((day) => <span className={`d${day.practiced ? ' s' : ''}`} key={day.date}>{new Date(`${day.date}T12:00:00+05:30`).getDate()}</span>)}</div>
+        <p className="nb-meta">{streak.data ? `${streak.data.currentDays} day streak` : ''}</p>
+      </section>
+      {focus ? <div className="nb-sticky nb-sticky--gold"><div className="nb-sticky__who">Keep going</div><p className="nb-note">{focus.title}</p><Link className="nb-link" to={nextFor(focus.word, focus.chapterId, focus.conceptId).href}>{nextFor(focus.word, focus.chapterId, focus.conceptId).label}</Link><Saathy mood="cheer" size="3.4rem" /></div> : null}
+      <section className="nb-card nb-grow"><div className="nb-card__head"><h3 className="nb-h3">Homework</h3></div>
+        {(data?.assignments ?? []).length ? data!.assignments.map((item) => <Link className="nb-row" key={item.id} to={`/student/assignments/${item.id}`}><div><div className="nb-row__t">{item.title}</div><div className="nb-row__s">{item.teacherName}</div></div><Chip tone={item.score?.status === 'completed' ? 'green' : 'sand'}>{item.score?.status === 'completed' ? 'Done' : 'Open'}</Chip></Link>) : <p className="nb-empty">Nothing assigned.</p>}
+        {data?.evidence?.passRate != null ? <ProgressBar value={data.evidence.passRate * 100} color="var(--nb-leaf)" /> : null}
+      </section>
+    </aside>
+  </div>;
 }

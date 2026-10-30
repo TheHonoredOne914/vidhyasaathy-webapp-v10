@@ -25,4 +25,8 @@ Demo seed (`ensureDailyLoop`) is additive and idempotent:
 
 `recordAnswer` touches the streak for a taught answer and awards Fixed It when mastery moves from L1 to L2. A dushman retirement hook is in `applyLearningAwards`. Home, warm-up, catch-up, challenge, and notification routes are Run 3B. `answer_evidence.source` cannot add `warmup` or `daily_challenge` without rebuilding the table, so that check stays deferred. Frustration flags are computed in core and are not written to `learning_event` until those routes exist. `npm run typecheck` and `npm run test:unit` passed (280 tests, 1 skipped).
 
+## Polish 2 sizing
+
+The notebook shell already filled the width. The right rail was still a fixed column beside the page below 1180px, so at 1024px the Due soon card and the streak and XP pills were clipped, and a single subject tile stretched to the full height of the sheet. The main grid is now `minmax(0, 1fr)` and `clamp(260px, 22vw, 340px)`, grid and flex children use `min-width: 0`, and below 1180px the rail stacks under the main column. Subject tiles use `repeat(auto-fill, minmax(min(220px, 100%), 1fr))` and cards align to the start. Practice uses the notebook question card, doodle strip, and Sure / Unsure / Guess buttons. Game tiles use the line drawings from the mockup. Screenshots are in `e2e/screenshots/polish2/`. Aarav and Priya home headings differ (Namaste, Aarav / Namaste, Priya). `document.documentElement.scrollWidth` stayed within the viewport at 360, 1024, 1280, 1440, and 1920 on the signed-in routes. `mascot.webp` remains only on the landing page. The emoji grep still matches existing landing, auth, and game-engine marks; those files were left alone. `npm run typecheck` and `npm run test:unit` passed (280 tests, 1 skipped).
+
 

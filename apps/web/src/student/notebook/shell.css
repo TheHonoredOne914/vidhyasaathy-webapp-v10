@@ -1,0 +1,9 @@
+.boxes input{width:3.1rem;height:3.6rem;border:2px solid var(--nb-navy);border-radius:12px;background:#fff;text-align:center;font-family:var(--nb-font-hand);font-weight:700;font-size:1.9rem;color:var(--nb-navy)}
+.boxes input.e{border-style:dashed;border-color:#B9AE9B}
+.boxes input.f{box-shadow:0 0 0 4px rgb(232 184 74 / 45%)}
+.nb-field .pen{font-family:var(--nb-font-hand);color:var(--nb-redpen);font-size:1.15rem}
+.nb-search input{flex:1;min-width:0;border:0;background:transparent;font:inherit;color:inherit;outline:none}
+.nb-search input::placeholder{color:var(--nb-ink-soft)}
+html[data-reduce-motion] *{transition:none !important;animation:none !important}
+.nb-sheet .nb-empty{font-family:var(--nb-font-note);color:var(--nb-navy-muted)}
+.nb-skel{height:8rem;border-radius:14px;background:repeating-linear-gradient(90deg,var(--nb-cream-deep),var(--nb-cream-deep) 12px,transparent 12px,transparent 20px);border:var(--nb-line) solid var(--nb-border)}

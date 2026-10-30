@@ -1,41 +1,46 @@
-import { ChildListSchema } from '@vidhyasaathy/contracts';
+import { ChildListSchema, ParentSummarySchema } from '@vidhyasaathy/contracts';
 import { Link } from 'react-router-dom';
-import { RemoteBlock } from '../dashboard/RemoteBlock';
-import '../dashboard/dashboard.css';
 import { usePageMeta } from '../meta';
-import { useSession } from '../session';
-import { useRemote } from '../setup/useRemote';
 import { PAGE } from '../pages';
+import { useRemote } from '../setup/useRemote';
+import { MasteryChip, PageHead } from '../student/notebook/ui';
+import '../student/notebook/pages/parent-home.css';
 
 export function ParentHome() {
   usePageMeta(PAGE.parent.title, PAGE.parent.description);
-  const { me } = useSession();
   const children = useRemote('/parent/children', ChildListSchema);
-  return <div className="dash">
-    <header className="parent-welcome">
-      <div>
-        <p className="dash-kicker">Your family learning desk</p>
-        <h1>Hello, {me?.profile.name ?? 'parent'}</h1>
-        <p>See the learning moments that matter, at a glance.</p>
+  const first = children.data?.[0]?.id ?? '';
+  const summary = useRemote(first ? `/parents/children/${first}/summary` : null, ParentSummarySchema);
+  const child = summary.data?.child ?? null;
+  const words = summary.data?.progress.masteryWords ?? [];
+  const fix = words.filter((row) => row.word === "Let's fix this").length;
+  const almost = words.filter((row) => row.word === 'Almost there').length;
+  const mastered = words.filter((row) => row.word === 'Mastered' || row.word === 'Top form').length;
+
+  if (children.status === 'loading' && !children.data) return <div className="nb-skel" />;
+  if (children.status === 'error' && !children.data) return <p className="nb-empty" role="alert">Could not load your children. <button type="button" className="nb-btn nb-btn--ghost nb-btn--sm" onClick={children.reload}>Try again</button></p>;
+  if ((children.data ?? []).length === 0) return <div className="nb-card"><h1 className="nb-h1">See how your child's doing</h1><p className="nb-text">No child is linked to this account. Contact your school to check the link.</p><Link className="nb-link" to="/recover">Get account help</Link></div>;
+
+  return <div className="nb-grid">
+    <div className="nb-col">
+      <PageHead eyebrow="Family" title="See how your child's doing" sub={child ? `${child.name}${child.className ? ` · ${child.className}` : ''}` : 'Loading the report.'} />
+      <div className="pk">
+        <section className="nb-card"><span className="nb-label">Let's fix this</span><b>{summary.data ? fix : '—'}</b></section>
+        <section className="nb-card"><span className="nb-label">Almost there</span><b>{summary.data ? almost : '—'}</b></section>
+        <section className="nb-card"><span className="nb-label">Mastered</span><b>{summary.data ? mastered : '—'}</b></section>
       </div>
-      <div className="parent-cloud" aria-hidden="true"><span>Saathy</span></div>
-    </header>
-    <RemoteBlock remote={children} title="Could not load your children">
-      {(data) => data.length === 0 ? (
-        <article className="dash-panel parent-empty"><p>No child is linked to this account. Contact your school to check your child’s link.</p><Link className="text-link" to="/recover">Get account help</Link></article>
-      ) : <>
-        <div className="section-heading"><div><p className="dash-kicker">Linked learners</p><h2>Choose a child</h2></div><span>{data.length} {data.length === 1 ? 'learner' : 'learners'}</span></div>
-        <div className="child-switcher" aria-label="Linked children">
-          {data.map((child, index) => (
-            <Link className={`child-card ${index === 0 ? 'is-featured' : ''}`} key={child.id} to={`/parent/children/${child.id}`}>
-              <span className="child-avatar" aria-hidden="true">{child.name.slice(0, 1)}</span>
-              <span className="child-card-copy"><strong>{child.name}</strong><small>{child.className ? `${child.className} · Section ${child.sectionName ?? '—'}` : 'Class not assigned yet.'}</small></span>
-              <span className="child-arrow" aria-hidden="true">↗</span>
-            </Link>
-          ))}
-        </div>
-      </>}
-    </RemoteBlock>
-    <aside className="privacy-note"><span aria-hidden="true">✦</span><p><strong>A calm view for families.</strong> Private student chats are never shown here. You’ll only see learning progress, assigned work and school updates.</p></aside>
+      <section className="nb-card"><div className="nb-card__head"><h3 className="nb-h3">Ideas</h3></div>
+        {words.length ? words.slice(0, 8).map((row) => <div className="sb" key={row.conceptId}><b>{row.title}</b><span /><span /><MasteryChip level={row.word} /></div>) : <p className="nb-empty">{summary.status === 'error' ? 'Could not load this report.' : 'No ideas yet.'}</p>}
+      </section>
+    </div>
+    <aside className="nb-col">
+      <section className="nb-card"><div className="nb-card__head"><h3 className="nb-h3">Children</h3></div>
+        {(children.data ?? []).map((item) => <Link className="nb-row" key={item.id} to={`/parent/children/${item.id}`}><div><div className="nb-row__t">{item.name}</div><div className="nb-row__s">{item.className ? `${item.className} · ${item.sectionName ?? ''}` : 'Class not assigned yet.'}</div></div></Link>)}
+      </section>
+      <section className="nb-card nb-grow"><div className="nb-card__head"><h3 className="nb-h3">From school</h3></div>
+        {(summary.data?.teacherUpdates ?? []).length ? summary.data!.teacherUpdates.map((note) => <div className="rem" key={note.id}><b>{note.title}</b><p className="nb-text">{note.body}</p></div>) : <p className="nb-empty">No school note yet.</p>}
+        {summary.data?.suggestedAction.status === 'available' ? <p className="nb-note">{summary.data.suggestedAction.text}</p> : null}
+      </section>
+    </aside>
   </div>;
 }

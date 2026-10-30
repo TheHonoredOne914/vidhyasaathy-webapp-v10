@@ -1,7 +1,7 @@
 import { TeacherDashboardSchema } from '@vidhyasaathy/contracts';
 import { Link } from 'react-router-dom';
-import { TeacherDesk } from '../dashboard/TeacherDesk';
-import { RemoteBlock } from '../dashboard/RemoteBlock';
+import { PageHead, Chip } from '../student/notebook/ui';
+import '../student/notebook/pages/teacher-home.css';
 import { PAGE } from '../pages';
 import { usePageMeta } from '../meta';
 import { useSession } from '../session';
@@ -24,22 +24,22 @@ export function TeacherHome() {
   const classes = catalog.classes.data ?? [];
   const sections = catalog.sections.data ?? [];
   const subjects = catalog.subjects.data ?? [];
+  const desk = dashboard.data;
+  const students = desk?.classes.reduce((sum, row) => sum + row.students, 0) ?? 0;
+  const needing = desk?.classes.reduce((sum, row) => sum + row.concepts.reduce((inner, concept) => inner + concept.needingPractice, 0), 0) ?? 0;
   return (
-    <section className="vs-page vs-role-page" aria-labelledby="teacher-title">
-      <header className="vs-page-header">
-        <p className="vs-eyebrow">Teacher home</p>
-        <h1 id="teacher-title">{me.school.name}</h1>
-        <p>{me.profile.name} is signed in as the teacher for {me.school.name}.</p>
-      </header>
-      <nav className="teacher-class-picker" aria-label="Choose a class">
-        <span>Class view</span>
-        {classes.length ? classes.map((item) => <Link key={item.id} to={`/teacher/classes/${item.id}`}>{/^class\b/i.test(item.name.trim()) ? item.name : `Class ${item.name}`}</Link>) : <span className="muted">Your class list will appear here.</span>}
-      </nav>
+    <div className="nb-grid nb-grid--wide-rail">
+      <div className="nb-col">
+      <PageHead eyebrow={me.school.name} title={me.profile.name} sub="Your classes for today." />
       <StaleNote stale={session.stale} updatedAt={session.updatedAt} message={session.message} testId="updated-at" />
-      <Link to="/teacher/notes">Publish notes and resources</Link>
-      <RemoteBlock remote={dashboard} title="Could not load today's desk">
-        {(data) => <TeacherDesk data={data} sections={sections.map((section) => ({ id: section.id, name: section.name, className: classLabel(classes, section.classId) }))} />}
-      </RemoteBlock>
+      {dashboard.status === 'loading' && !desk ? <div className="nb-skel" /> : null}
+      {dashboard.status === 'error' && !desk ? <p className="nb-empty" role="alert">Could not load today's desk. <button type="button" className="nb-btn nb-btn--ghost nb-btn--sm" onClick={dashboard.reload}>Try again</button></p> : null}
+      {desk ? <div className="kpis">
+        <section className="nb-card kpi"><span className="nb-label">Students</span><b>{students}</b></section>
+        <section className="nb-card kpi"><span className="nb-label">To review</span><b>{desk.reviewQueue}</b></section>
+        <section className="nb-card kpi"><span className="nb-label">Sessions</span><b>{desk.sessions.length}</b></section>
+        <section className="nb-card kpi"><span className="nb-label">Need practice</span><b>{needing}</b></section>
+      </div> : null}
       <CatalogGate catalog={catalog}>
         {classes.length === 0 ? (
           <div className="vs-card" id="classes">
@@ -78,6 +78,17 @@ export function TeacherHome() {
           </ul>
         )}
       </CatalogGate>
-    </section>
+      </div>
+      <aside className="nb-col">
+        <section className="nb-card"><div className="nb-card__head"><h3 className="nb-h3">Review</h3></div>
+          {desk && desk.reviewQueue > 0 ? <Link className="nb-btn nb-btn--primary" to="/teacher/review">{desk.reviewQueue} to check</Link> : <p className="nb-empty">Nothing is waiting.</p>}
+        </section>
+        <section className="nb-card nb-grow"><div className="nb-card__head"><h3 className="nb-h3">Homework</h3></div>
+          {(desk?.assignments ?? []).slice(0, 6).map((item) => <div className="nb-row" key={item.id}><div className="nb-row__t">{item.title}</div><Chip tone="sand">Open</Chip></div>)}
+          {desk && desk.assignments.length === 0 ? <p className="nb-empty">No homework is out.</p> : null}
+          <Link className="nb-link" to="/teacher/notes">Publish notes</Link>
+        </section>
+      </aside>
+    </div>
   );
 }

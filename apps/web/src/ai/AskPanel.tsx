@@ -6,12 +6,11 @@ import { ChapterListSchema } from '../content/schemas';
 import { usePageMeta } from '../meta';
 import { SubjectListSchema } from '../setup/schemas';
 import { useRemote } from '../setup/useRemote';
-import { Button } from '../ui/Button';
-import { SaathyMascot } from '../ui/Saathy';
+import { Saathy } from '../student/notebook/Saathy';
+import { PageHead } from '../student/notebook/ui';
+import '../student/notebook/pages/ask.css';
 import { ErrorState } from '../ui/ErrorState';
-import { fieldClass } from '../ui/Field';
 import { SelectField } from '../ui/SelectField';
-import { Skeleton } from '../ui/Skeleton';
 import { Citation } from './Citation';
 
 export function AskPanel() {
@@ -53,53 +52,39 @@ export function AskPanel() {
 
   if (subjects.denied || chapters.denied) return <ErrorState title="Ask Saathy is not available" message="This account cannot ask from these notes." onRetry={subjects.reload} />;
   if (subjects.status === 'error' && !subjects.data) return <ErrorState title="Could not load subjects" message={subjects.message ?? 'Try again.'} onRetry={subjects.reload} />;
-  if (!subjects.data) return <Skeleton />;
+  if (!subjects.data) return <div className="nb-skel" />;
 
   return (
-    <div className="stack">
-      <div className="greet">
-        <SaathyMascot size={48} alt="" />
-        <div>
-          <h1>Ask Saathy</h1>
-          <p>Answers use released notes for one chapter. A question outside those notes is left unanswered.</p>
-        </div>
-      </div>
-      <article className="lcard">
-        <div className="lcard-head"><h2>Question</h2></div>
-        <form className="lcard-body grid gap-4" onSubmit={(event) => { event.preventDefault(); void send(1, question, socratic); }}>
-          {subjects.data.length === 0 ? <p>No subjects assigned yet. Ask your teacher.</p> : (
+    <div className="chat">
+      <PageHead eyebrow="Saathy" title="Ask Saathy" sub="Answers use released notes for one chapter." />
+      <form className="composer" onSubmit={(event) => { event.preventDefault(); void send(1, question, socratic); }}>
+          {subjects.data.length === 0 ? <p className="nb-empty">No subjects assigned yet. Ask your teacher.</p> : (
             <SelectField id="ask-subject" label="Subject" name="subjectId" value={subjectId} placeholder="Choose a subject" options={subjectOptions} error={null} onChange={(value) => { setSubjectId(value); setChapterId(''); setTurns([]); }} />
           )}
-          {subjectId ? chapters.status === 'loading' && !chapters.data ? <Skeleton /> : chapters.status === 'error' && !chapters.data ? <ErrorState title="Could not load chapters" message={chapters.message ?? 'Try again.'} onRetry={chapters.reload} /> : (
+          {subjectId ? chapters.status === 'loading' && !chapters.data ? <div className="nb-skel" /> : chapters.status === 'error' && !chapters.data ? <p className="nb-empty" role="alert">Could not load chapters. <button type="button" className="nb-btn nb-btn--ghost nb-btn--sm" onClick={chapters.reload}>Try again</button></p> : (
             <SelectField id="ask-chapter" label="Chapter" name="chapterId" value={chapterId} placeholder="Choose a chapter" options={chapterOptions} error={null} onChange={(value) => { setChapterId(value); setTurns([]); }} />
           ) : null}
-          <div className="grid gap-1">
-            <label htmlFor="ask-question" className="font-semibold">Question</label>
-            <textarea id="ask-question" name="question" rows={3} maxLength={1000} className={`${fieldClass} min-h-24 py-2`} value={question} onChange={(event) => { setQuestion(event.target.value); }} />
-          </div>
-          <label className="lesson-check">
+          <label className="nb-meta" htmlFor="ask-question">Question</label>
+          <textarea id="ask-question" name="question" rows={2} maxLength={1000} className="nb-input" value={question} onChange={(event) => { setQuestion(event.target.value); }} />
+          <label className="nb-meta">
             <input type="checkbox" checked={socratic} onChange={() => { setSocratic((current) => !current); setTurns([]); }} />
-            Socratic mode
+            Step by step
           </label>
           {error ? <p role="alert">{error}</p> : null}
-          <Button type="submit" disabled={pending}>{pending ? 'Asking' : 'Ask Saathy'}</Button>
-        </form>
-      </article>
+          <button type="submit" className="nb-btn nb-btn--primary" disabled={pending}>{pending ? 'Asking' : 'Ask'}</button>
+      </form>
+      <div className="thread">
       {turns.map((turn, index) => (
-        <article key={`${turn.hintLevel}-${turn.updatedAt}-${index}`} className="lcard" data-testid={index === turns.length - 1 ? 'ai-state' : undefined}>
-          <div className="lcard-head"><h2>Reply</h2></div>
-          <div className="lcard-body grid gap-3">
-            <p>Hint {turn.hintLevel} of 3. Socratic mode is {turn.socratic ? 'on' : 'off'}.</p>
-            {index === 0 ? <p className="you-bubble"><strong>You: </strong>{asked}</p> : null}
-            <p className="bubble"><strong>Saathy: </strong>{turn.status === 'not_configured' ? 'AI not configured' : turn.message}</p>
-            {turn.citations.map((citation) => <Citation key={`${citation.noteId}-${citation.locator}`} citation={citation} />)}
-          </div>
-        </article>
+        <div key={`${turn.hintLevel}-${turn.updatedAt}-${index}`} data-testid={index === turns.length - 1 ? 'ai-state' : undefined}>
+          {index === 0 ? <div className="msg me"><div className="b"><div className="meta">You</div>{asked}</div></div> : null}
+          <div className="msg"><Saathy mood="think" size="2.6rem" /><div className="b"><div className="meta">Saathy</div>{turn.status === 'not_configured' ? 'AI not configured' : turn.message}{turn.citations.map((citation) => <Citation key={`${citation.noteId}-${citation.locator}`} citation={citation} />)}</div></div>
+        </div>
       ))}
+      </div>
       {last?.status === 'answered' && last.hintLevel < 3 ? (
-        <Button disabled={pending} onClick={() => { void send(last.hintLevel + 1, asked, last.socratic); }}>
+        <button type="button" className="nb-btn nb-btn--ghost" disabled={pending} onClick={() => { void send(last.hintLevel + 1, asked, last.socratic); }}>
           {pending ? 'Asking' : `Ask for hint ${last.hintLevel + 1}`}
-        </Button>
+        </button>
       ) : null}
     </div>
   );

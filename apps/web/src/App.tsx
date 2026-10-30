@@ -56,6 +56,7 @@ const NotificationsPage = lazy(() => import('./dashboard/NotificationsPage').the
 const ParentChild = lazy(() => import('./dashboard/ParentChild').then((module) => ({ default: module.ParentChild })));
 const ProgressPage = lazy(() => import('./dashboard/ProgressPage').then((module) => ({ default: module.ProgressPage })));
 const SettingsPage = lazy(() => import('./dashboard/SettingsPage').then((module) => ({ default: module.SettingsPage })));
+const DiagnosticPage = lazy(() => import('./student/notebook/screens/DiagnosticPage').then((module) => ({ default: module.DiagnosticPage })));
 const PracticeList = lazy(() => import('./practice/PracticeList').then((module) => ({ default: module.PracticeList })));
 const PracticePlay = lazy(() => import('./practice/PracticePlay').then((module) => ({ default: module.PracticePlay })));
 const EngineGamePage = lazy(() => import('./games/EngineGamePage').then((module) => ({ default: module.EngineGamePage })));
@@ -142,7 +143,8 @@ export function App() {
               <Route path="/student/subjects/:subjectId" element={<RoleGuard role="student"><StudentSubject /></RoleGuard>} />
               <Route path="/student/chapters/:chapterId/concepts/:conceptId" element={<RoleGuard role="student"><ConceptPage /></RoleGuard>} />
               <Route path="/student/chapters/:chapterId" element={<RoleGuard role="student"><ChapterPage /></RoleGuard>} />
-              <Route path="/student/chapters/:chapterId/practice" element={<RoleGuard role="student"><PracticeList /></RoleGuard>} />
+              <Route path="/student/chapters/:chapterId/diagnostic" element={<RoleGuard role="student"><DiagnosticPage /></RoleGuard>} />
+            <Route path="/student/chapters/:chapterId/practice" element={<RoleGuard role="student"><PracticeList /></RoleGuard>} />
               <Route path="/student/chapters/:chapterId/practice/:gameId" element={<RoleGuard role="student"><PracticePlay /></RoleGuard>} />
               <Route path="/student/notes/:noteId" element={<RoleGuard role="student"><NotePage /></RoleGuard>} />
               <Route path="/student/sessions/:sessionId" element={<RoleGuard role="student"><SessionPlayer /></RoleGuard>} />

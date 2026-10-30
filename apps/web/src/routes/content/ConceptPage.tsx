@@ -15,6 +15,7 @@ import { fieldClass } from '../../ui/Field';
 import { ConceptLearn } from '../../learn/ConceptLearn';
 import { AccessDenied } from '../AccessDenied';
 import { LessonFrame } from './LessonFrame';
+import '../../student/notebook/pages/lesson.css';
 
 function toggle(list: string[], id: string): string[] {
   return list.includes(id) ? list.filter((item) => item !== id) : [...list, id];
@@ -54,10 +55,11 @@ export function ConceptPage() {
   }
   if (student && lesson.data?.found) {
     return (
-      <LessonFrame paper kicker="Idea" title={concept.title} script="Read it at your depth." stale={concepts}>
-        <p className="lesson-actions"><Link to={`/${audience}/chapters/${chapterId}`}>Back to the chapter</Link></p>
-        <ConceptLearn lesson={lesson.data} onSimpler={() => { setSimpler(true); }} />
-      </LessonFrame>
+      <div className="ls-body">
+        <div className="ls-head"><div className="ls-crumb"><Link to={`/${audience}/chapters/${chapterId}`}>Back to the chapter</Link></div></div>
+        <h1 className="nb-h1">{concept.title}</h1>
+        <div className="ls-sheet"><ConceptLearn lesson={lesson.data} onSimpler={() => { setSimpler(true); }} /></div>
+      </div>
     );
   }
   const selected = concept;
