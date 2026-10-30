@@ -1,91 +1,88 @@
 import { AskResponseSchema, AskSchema, type AskResponse } from '@vidhyasaathy/contracts';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ApiClientError, postJson } from '../api/client';
+import { postJson } from '../api/client';
 import { ChapterListSchema } from '../content/schemas';
 import { usePageMeta } from '../meta';
 import { SubjectListSchema } from '../setup/schemas';
 import { useRemote } from '../setup/useRemote';
 import { Saathy } from '../student/notebook/Saathy';
-import { PageHead } from '../student/notebook/ui';
+import { Card, PageHead, Sticky, SubjectIcon, Tabs } from '../student/notebook/ui';
+import { NotebookState } from '../student/notebook/screens/polish3b/NotebookState';
+import { askMessage } from '../student/notebook/screens/polish3b/ask';
 import '../student/notebook/pages/ask.css';
-import { ErrorState } from '../ui/ErrorState';
-import { SelectField } from '../ui/SelectField';
 import { Citation } from './Citation';
+
+type Doubt = { id: string; question: string; chapterId: string; chapter: string; subject: string; replies: AskResponse[] };
 
 export function AskPanel() {
   const [params] = useSearchParams();
   const subjects = useRemote('/student/subjects', SubjectListSchema);
-  const [subjectId, setSubjectId] = useState('');
-  const chapters = useRemote(subjectId ? `/subjects/${subjectId}/chapters` : null, ChapterListSchema);
-  const [chapterId, setChapterId] = useState('');
+  const [chosenSubject, setSubject] = useState('');
+  const subject = subjects.data?.find((row) => row.id === chosenSubject) ?? subjects.data?.[0];
+  const chapters = useRemote(subject ? `/subjects/${subject.id}/chapters` : null, ChapterListSchema);
+  const [chosenChapter, setChapter] = useState('');
+  const chapter = chapters.data?.find((row) => row.id === chosenChapter) ?? chapters.data?.[0];
   const [question, setQuestion] = useState(params.get('q') ?? '');
-  const [socratic, setSocratic] = useState(false);
-  const [asked, setAsked] = useState('');
-  const [turns, setTurns] = useState<AskResponse[]>([]);
+  const [socratic, setSocratic] = useState(true);
+  const [doubts, setDoubts] = useState<Doubt[]>([]);
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  usePageMeta('Ask Saathy — VidhyaSaathy', 'Ask a question. Answers come only from released notes for the chapter you choose.');
+  const [error, setError] = useState('');
+  const input = useRef<HTMLTextAreaElement>(null);
+  usePageMeta('Ask Saathy — VidhyaSaathy', 'Hints first. Ask from the released notes for your chapter.');
+  const latest = doubts.at(-1);
+  const last = latest?.replies.at(-1);
 
-  const last = turns.at(-1) ?? null;
-  const subjectOptions = (subjects.data ?? []).map((subject) => ({ value: subject.id, label: subject.name }));
-  const chapterOptions = (chapters.data ?? []).map((chapter) => ({ value: chapter.id, label: chapter.title }));
-
-  async function send(hintLevel: number, text: string, mode: boolean) {
-    const parsed = AskSchema.safeParse({ chapterId, question: text, hintLevel, socratic: mode });
-    if (!parsed.success) {
-      setError(chapterId ? 'Enter a question of at least 2 characters.' : 'Choose a chapter.');
-      return;
-    }
-    setPending(true);
-    setError(null);
+  async function send(hintLevel = 1, previous?: Doubt) {
+    const text = previous?.question ?? question;
+    const parsed = AskSchema.safeParse({ chapterId: previous?.chapterId ?? chapter?.id, question: text, hintLevel, socratic: previous?.replies.at(-1)?.socratic ?? socratic });
+    if (!parsed.success) { setError(chapter ? 'Write a doubt of at least two characters.' : 'Choose a chapter first.'); return; }
+    setPending(true); setError('');
     try {
-      const response = await postJson('/ask', AskResponseSchema, parsed.data);
-      setAsked(text);
-      setTurns((current) => hintLevel === 1 ? [response] : [...current, response]);
-    } catch (cause) {
-      setError(cause instanceof ApiClientError ? cause.message : 'The request could not be completed.');
-    } finally {
-      setPending(false);
-    }
+      const reply = await postJson('/ask', AskResponseSchema, parsed.data);
+      setDoubts((current) => previous ? current.map((row) => row.id === previous.id ? { ...row, replies: [...row.replies, reply] } : row) : [...current, { id: crypto.randomUUID(), question: text, chapterId: parsed.data.chapterId, chapter: chapter?.title ?? '', subject: subject?.name ?? '', replies: [reply] }]);
+      if (reply.status === 'answered' || reply.status === 'not_in_notes') setQuestion('');
+    } catch { setError('Could not reach your notebook helper. Your question is still here. Try again.'); }
+    finally { setPending(false); }
   }
 
-  if (subjects.denied || chapters.denied) return <ErrorState title="Ask Saathy is not available" message="This account cannot ask from these notes." onRetry={subjects.reload} />;
-  if (subjects.status === 'error' && !subjects.data) return <ErrorState title="Could not load subjects" message={subjects.message ?? 'Try again.'} onRetry={subjects.reload} />;
-  if (!subjects.data) return <div className="nb-skel" />;
+  if (subjects.denied) return <NotebookState title="Ask Saathy" message="This notebook is not available. Ask your teacher to check your access." />;
+  if (subjects.status === 'error') return <NotebookState title="Ask Saathy" message="Could not open your subjects. Your question is still here." retry={subjects.reload} />;
+  if (!subjects.data) return <NotebookState title="Ask Saathy" loading />;
 
-  return (
+  return <div className="nb-grid pg-ask">
     <div className="chat">
-      <PageHead eyebrow="Saathy" title="Ask Saathy" sub="Answers use released notes for one chapter." />
-      <form className="composer" onSubmit={(event) => { event.preventDefault(); void send(1, question, socratic); }}>
-          {subjects.data.length === 0 ? <p className="nb-empty">No subjects assigned yet. Ask your teacher.</p> : (
-            <SelectField id="ask-subject" label="Subject" name="subjectId" value={subjectId} placeholder="Choose a subject" options={subjectOptions} error={null} onChange={(value) => { setSubjectId(value); setChapterId(''); setTurns([]); }} />
-          )}
-          {subjectId ? chapters.status === 'loading' && !chapters.data ? <div className="nb-skel" /> : chapters.status === 'error' && !chapters.data ? <p className="nb-empty" role="alert">Could not load chapters. <button type="button" className="nb-btn nb-btn--ghost nb-btn--sm" onClick={chapters.reload}>Try again</button></p> : (
-            <SelectField id="ask-chapter" label="Chapter" name="chapterId" value={chapterId} placeholder="Choose a chapter" options={chapterOptions} error={null} onChange={(value) => { setChapterId(value); setTurns([]); }} />
-          ) : null}
-          <label className="nb-meta" htmlFor="ask-question">Question</label>
-          <textarea id="ask-question" name="question" rows={2} maxLength={1000} className="nb-input" value={question} onChange={(event) => { setQuestion(event.target.value); }} />
-          <label className="nb-meta">
-            <input type="checkbox" checked={socratic} onChange={() => { setSocratic((current) => !current); setTurns([]); }} />
-            Step by step
-          </label>
-          {error ? <p role="alert">{error}</p> : null}
-          <button type="submit" className="nb-btn nb-btn--primary" disabled={pending}>{pending ? 'Asking' : 'Ask'}</button>
-      </form>
-      <div className="thread">
-      {turns.map((turn, index) => (
-        <div key={`${turn.hintLevel}-${turn.updatedAt}-${index}`} data-testid={index === turns.length - 1 ? 'ai-state' : undefined}>
-          {index === 0 ? <div className="msg me"><div className="b"><div className="meta">You</div>{asked}</div></div> : null}
-          <div className="msg"><Saathy mood="think" size="2.6rem" /><div className="b"><div className="meta">Saathy</div>{turn.status === 'not_configured' ? 'AI not configured' : turn.message}{turn.citations.map((citation) => <Citation key={`${citation.noteId}-${citation.locator}`} citation={citation} />)}</div></div>
-        </div>
-      ))}
+      <PageHead title="Ask Saathy" sub="Hints first. You do the thinking, I'll keep you on track." />
+      <Tabs tabs={[{ id: 'hints', label: 'Hints mode' }, { id: 'explain', label: 'Explain fully' }]} active={socratic ? 'hints' : 'explain'} onChange={(value) => { if (!pending) setSocratic(value === 'hints'); }} />
+      <div className="thread" aria-live="polite">
+        {!doubts.length ? <div className="msg"><Saathy mood="think" size="3rem" /><div><div className="meta">Saathy</div><div className="b">{subjects.data.length ? 'Choose what we are talking about, then write your doubt below. We will take it one step at a time.' : 'Your subjects will appear here when your teacher adds them.'}</div></div></div> : null}
+        {doubts.map((doubt) => <div className="ask-turn" key={doubt.id}>
+          <div className="msg me"><div><div className="meta">You · {doubt.chapter}</div><div className="b">{doubt.question}</div></div><span className="ask-you" aria-hidden="true">You</span></div>
+          {doubt.replies.map((reply, index) => <div className="msg" key={`${reply.updatedAt}-${index}`} data-testid="ai-state"><Saathy mood="think" size="3rem" /><div><div className="meta">Saathy</div><div className="b"><p>{askMessage(reply)}</p>{reply.citations.map((citation) => <Citation key={`${citation.noteId}-${citation.locator}`} citation={citation} />)}{reply.status === 'unavailable' || reply.status === 'not_configured' ? <button className="nb-btn nb-btn--ghost nb-btn--sm" disabled={pending} onClick={() => { void send(reply.hintLevel, doubt); }}>Try again</button> : null}</div></div></div>)}
+        </div>)}
+        {pending ? <div className="msg"><Saathy mood="think" size="3rem" /><div className="b" role="status">Looking through your chapter notes…</div></div> : null}
       </div>
-      {last?.status === 'answered' && last.hintLevel < 3 ? (
-        <button type="button" className="nb-btn nb-btn--ghost" disabled={pending} onClick={() => { void send(last.hintLevel + 1, asked, last.socratic); }}>
-          {pending ? 'Asking' : `Ask for hint ${last.hintLevel + 1}`}
-        </button>
-      ) : null}
+      <div className="ask-suggestions">
+        {last?.status === 'answered' && last.hintLevel < 3 && latest ? <button className="nb-chip nb-chip--sky" disabled={pending} onClick={() => { void send(last.hintLevel + 1, latest); }}>Ask for the next hint</button> : null}
+        {['Give me a hint', 'Explain this step', 'Show an example'].map((text) => <button className="nb-chip nb-chip--sky" disabled={pending || !chapter} key={text} onClick={() => { setQuestion(`${text}: `); input.current?.focus(); }}>{text}</button>)}
+      </div>
+      <form className="composer" onSubmit={(event) => { event.preventDefault(); void send(); }}>
+        <button type="button" className="nb-btn nb-btn--quiet nb-btn--sm" disabled aria-label="Photo attachments are not available yet" title="Photo attachments are not available yet"><svg className="i" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M8 7l2-3h4l2 3" /><circle cx="12" cy="13" r="3.5" /></svg></button>
+        <label className="ask-input"><span className="nb-label">Your doubt</span><textarea ref={input} rows={2} maxLength={1000} placeholder="Ask a doubt…" value={question} onChange={(event) => setQuestion(event.target.value)} disabled={pending} /></label>
+        <button type="submit" className="nb-btn nb-btn--primary" disabled={pending || !chapter || chapters.status !== 'ready'}><svg className="i" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6" /></svg>{pending ? 'Asking…' : 'Send'}</button>
+      </form>
+      {error ? <p className="nb-note" role="alert">{error} <button className="nb-btn nb-btn--ghost nb-btn--sm" disabled={pending} onClick={() => { void send(); }}>Try again</button></p> : null}
     </div>
-  );
+    <aside className="nb-col">
+      <Card title="Recent doubts">{doubts.length ? [...doubts].reverse().map((doubt) => <button className="doubt" key={doubt.id} disabled={pending} onClick={() => { setSubject(subjects.data?.find((row) => row.name === doubt.subject)?.id ?? ''); setChapter(doubt.chapterId); setQuestion(doubt.question); input.current?.focus(); }}><b>{doubt.question}</b><span className="nb-meta">{doubt.subject} · this visit</span></button>) : <p className="nb-note">Your doubts from this visit will appear here.</p>}</Card>
+      <Card title="Talking about">
+        {subject ? <><div className="nb-row ask-context"><SubjectIcon subject={subject.name} /><div><div className="nb-row__t">{chapter?.title ?? 'Choose a chapter'}</div><div className="nb-row__s">{subject.name}</div></div></div>
+          <label className="ask-select">Subject<select value={subject.id} disabled={pending} onChange={(event) => { setSubject(event.target.value); setChapter(''); }}>{subjects.data.map((row) => <option value={row.id} key={row.id}>{row.name}</option>)}</select></label>
+          {chapters.status === 'error' ? <p className="nb-note" role="alert">Could not open your chapters. <button className="nb-btn nb-btn--ghost nb-btn--sm" onClick={chapters.reload}>Try again</button></p> : chapters.denied ? <p className="nb-note">These chapters are not available.</p> : !chapters.data ? <p className="nb-note" role="status">Opening your chapters…</p> : chapters.data.length ? <label className="ask-select">Chapter<select value={chapter?.id ?? ''} disabled={pending} onChange={(event) => setChapter(event.target.value)}>{chapters.data.map((row) => <option value={row.id} key={row.id}>{row.title}</option>)}</select></label> : <p className="nb-note">No chapter is ready to ask about yet.</p>}
+        </> : <p className="nb-note">No subjects have been added yet.</p>}
+      </Card>
+      <Sticky color="lilac" who="How Saathy helps">1. Asks what you already know<br />2. Gives one hint at a time<br />3. Lets you finish the step<br /><br />Your chats stay private. Teachers and parents only see which topics you asked about.</Sticky>
+      <Card title="Saved explanations" grow><p className="nb-note">No saved explanations here yet.</p></Card>
+    </aside>
+  </div>;
 }

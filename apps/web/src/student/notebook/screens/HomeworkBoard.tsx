@@ -1,44 +1,39 @@
-import { ProgressSchema, StudyPlanSchema } from '@vidhyasaathy/contracts';
+import { HomeworkListSchema, StudyPlanSchema } from '@vidhyasaathy/contracts';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { planHref } from '../../../ai/plan';
 import { useRemote } from '../../../setup/useRemote';
-import { Chip, PageHead } from '../ui';
+import { Card, Chip, PageHead, Sticky, SubjectIcon, Tabs } from '../ui';
+import { NotebookState } from './polish3b/NotebookState';
+import { dueChip, Worksheet } from './polish3b/Worksheet';
 import '../pages/homework.css';
 
-function when(dueAt: number) {
-  const now = Date.now();
-  if (dueAt < now) return { text: 'Overdue', tone: 'red' as const };
-  const day = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date(dueAt));
-  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
-  if (day === today) return { text: 'Today', tone: 'orange' as const };
-  return { text: new Date(dueAt).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata' }), tone: 'sand' as const };
-}
-
 export function HomeworkBoard() {
-  const progress = useRemote('/progress', ProgressSchema);
+  const homework = useRemote('/student/homework?tab=all', HomeworkListSchema);
   const plan = useRemote('/study-plan', StudyPlanSchema);
-  const rows = [...(progress.data?.assignments ?? [])].sort((a, b) => a.dueAt - b.dueAt);
-  const todo = rows.filter((item) => item.score?.status !== 'completed' && item.score?.status !== 'pending_review');
-  const back = rows.filter((item) => item.score?.status === 'completed' || item.score?.status === 'pending_review');
-  const sessions = (plan.data?.items ?? []).filter((item) => item.kind === 'session');
-
-  if ((progress.status === 'loading' && !progress.data) || (plan.status === 'loading' && !plan.data)) return <div className="nb-skel" />;
-  if (progress.status === 'error' && !progress.data) return <p className="nb-empty" role="alert">Could not load homework. <button type="button" className="nb-btn nb-btn--ghost nb-btn--sm" onClick={progress.reload}>Try again</button></p>;
-
-  return <div className="nb-grid nb-grid--5-7">
+  const [tab, setTab] = useState('todo');
+  const [selected, setSelected] = useState('');
+  if (homework.denied) return <NotebookState title="Homework" message="This homework notebook is not available. Ask your teacher to check your access." />;
+  if (homework.status === 'error') return <NotebookState title="Homework" message="Could not open your homework. Your work is safe." retry={homework.reload} />;
+  if (!homework.data) return <NotebookState title="Homework" loading />;
+  const { counts, items } = homework.data;
+  const todo = items.filter((row) => row.status === 'todo' || row.status === 'overdue');
+  const back = items.filter((row) => row.status === 'graded');
+  const rows = tab === 'todo' ? todo : tab === 'graded' ? back : items.filter((row) => row.status === 'submitted');
+  const active = rows.find((row) => row.id === selected) ?? rows[0];
+  const sessions = plan.data?.items.filter((row) => row.kind === 'session') ?? [];
+  const rowTile = (row: typeof items[number]) => {
+    const due = dueChip(row.dueAt);
+    return <button className={`hw${active?.id === row.id ? ' on' : ''}`} key={row.id} onClick={() => { setSelected(row.id); if (row.status === 'graded') setTab('graded'); }} aria-pressed={active?.id === row.id}><SubjectIcon subject={row.subject} /><span><b>{row.title}</b><span className="nb-meta">{row.subject} · {row.teacher} · {row.count} questions</span></span>{row.score ? <span className="back-mark">{row.score.earned}/{row.score.outOf}</span> : <Chip tone={row.status === 'submitted' ? 'sky' : due.tone}>{row.status === 'submitted' ? 'Handed in' : due.text}</Chip>}</button>;
+  };
+  return <div className="nb-grid nb-grid--5-7 pg-homework">
     <div className="nb-col">
-      <PageHead eyebrow="Homework" title="To do" />
-      {todo.length ? todo.map((item) => { const tag = when(item.dueAt); return <Link className="nb-row" key={item.id} to={`/student/assignments/${item.id}`}><div><div className="nb-row__t">{item.title}</div><div className="nb-row__s">{item.teacherName}</div></div><Chip tone={tag.tone}>{tag.text}</Chip></Link>; }) : <p className="nb-empty">Nothing left to hand in.</p>}
-      <section className="nb-card"><div className="nb-card__head"><h3 className="nb-h3">Handed back</h3></div>
-        {back.length ? back.map((item) => <div className="nb-row" key={item.id}><div><div className="nb-row__t">{item.title}</div><div className="nb-row__s">{item.score?.status === 'pending_review' ? 'Being checked' : `${item.score?.correct ?? 0} / ${item.score?.total ?? 0}`}</div></div></div>) : <p className="nb-empty">Nothing has come back yet.</p>}
-      </section>
+      <PageHead title="Homework" sub={`${counts.todo} to do · ${counts.graded} handed back`} />
+      <Tabs tabs={[{ id: 'todo', label: `To do · ${counts.todo}` }, { id: 'graded', label: `Handed back · ${counts.graded}` }, { id: 'submitted', label: `Done · ${counts.submitted}` }]} active={tab} onChange={(value) => { setTab(value); setSelected(''); }} />
+      <Card title={tab === 'todo' ? 'To do' : tab === 'graded' ? 'Handed back' : 'Done'}>{rows.length ? rows.map(rowTile) : <p className="nb-note">{tab === 'todo' ? 'Nothing left to hand in.' : tab === 'graded' ? 'Nothing has come back yet.' : 'Your handed-in work will appear here.'}</p>}{active ? <Link className="nb-link" to={`/student/assignments/${active.id}`}>Open full worksheet</Link> : null}</Card>
+      {tab !== 'graded' ? <Card title="Handed back" grow>{back.length ? back.map(rowTile) : <p className="nb-note">Nothing has come back yet.</p>}{back.filter((row) => row.comment).map((row) => <Sticky color="blue" who={row.teacher} key={row.id}><b>{row.title}</b><br />{row.comment}</Sticky>)}</Card> : rows.filter((row) => row.comment).map((row) => <Sticky color="blue" who={row.teacher} key={row.id}>{row.comment}</Sticky>)}
+      <Card title="Study sessions">{sessions.length ? sessions.map((row) => <Link className="nb-row" key={row.id} to={planHref(row)}><span><b>{row.title}</b><span className="nb-meta">{row.resumeAt > 0 ? `Resume at slide ${row.resumeAt + 1}` : 'Not started'}</span></span></Link>) : <p className="nb-note">{plan.status === 'error' ? <>Could not open your study sessions. <button className="nb-btn nb-btn--ghost nb-btn--sm" onClick={plan.reload}>Try again</button></> : plan.denied ? 'Study sessions are not available.' : plan.status === 'loading' ? 'Opening your study sessions…' : 'No session is waiting.'}</p>}</Card>
     </div>
-    <div className="nb-col">
-      <section className="nb-card nb-grow">
-        <div className="nb-card__head"><h3 className="nb-h3">Study sessions</h3></div>
-        {sessions.length ? sessions.map((item) => <Link className="nb-row" key={item.id} to={planHref(item)}><div><div className="nb-row__t">{item.title}</div><div className="nb-row__s">{item.resumeAt > 0 ? `Resume at slide ${item.resumeAt + 1}` : 'Not started'}</div></div></Link>) : <p className="nb-empty">No session is waiting.</p>}
-        {todo[0] ? <p style={{ marginTop: 'var(--nb-s4)' }}><Link className="nb-btn nb-btn--primary" to={`/student/assignments/${todo[0].id}`}>Open {todo[0].title}</Link></p> : null}
-      </section>
-    </div>
+    {active ? <Worksheet key={active.id} assignmentId={active.id} subject={active.subject} /> : <NotebookState title="Your worksheet" message="Choose a homework sheet when your teacher adds one. Your own working goes here." />}
   </div>;
 }
