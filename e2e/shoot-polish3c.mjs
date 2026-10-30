@@ -50,6 +50,29 @@ try {
       await page.screenshot({ path: new URL(`./screenshots/polish3c/${screen}${suffix}-${width}.png`, import.meta.url).pathname.replace(/^\/(\w:)/, '$1'), fullPage: true });
     }
   }
+  if (screen === 'notifications' && process.argv.includes('--verify')) {
+    const toggle = page.getByRole('switch', { name: 'New games', exact: true });
+    const original = await toggle.getAttribute('aria-checked');
+    for (let index = 0; index < 2; index++) {
+      const saved = page.waitForResponse((response) => response.url().endsWith('/api/notification-settings') && response.request().method() === 'PUT');
+      await toggle.click();
+      const response = await saved;
+      if (!response.ok()) throw new Error(`Preference save failed: ${response.status()}`);
+      await page.reload();
+      await page.getByRole('switch', { name: 'New games', exact: true }).waitFor();
+      const value = await page.getByRole('switch', { name: 'New games', exact: true }).getAttribute('aria-checked');
+      if (value !== (index === 0 ? String(original !== 'true') : original)) throw new Error('Preference did not survive reload.');
+    }
+    const markAll = page.getByRole('button', { name: 'Mark all read' });
+    if (await markAll.isEnabled()) {
+      const marked = page.waitForResponse((response) => response.url().endsWith('/api/notifications/read-all'));
+      await markAll.click();
+      if (!(await marked).ok()) throw new Error('Mark all read failed.');
+      await page.reload();
+      await page.getByText("You're all caught up.", { exact: true }).waitFor();
+    }
+    console.log('notifications: preference round-trip restored; mark-all read persisted');
+  }
 } finally {
   await browser.close();
 }
