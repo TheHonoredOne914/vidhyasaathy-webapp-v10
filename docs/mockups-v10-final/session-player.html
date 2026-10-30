@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>VidhyaSaathy · Session 2</title>
+<link rel="stylesheet" href="tokens.css"/><link rel="stylesheet" href="components.css"/>
+<style>
+
+.sp-wrap{display:flex;flex-direction:column;gap:var(--nb-s4);min-height:100%}
+.sp-bar{display:flex;justify-content:space-between;align-items:center;gap:var(--nb-s4)}
+.slide{flex:1;position:relative;background:var(--nb-paper);border:2px solid var(--nb-navy);border-radius:var(--nb-radius-sketch);box-shadow:var(--nb-shadow);padding:var(--nb-s5) var(--nb-s6);display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:var(--nb-s6);align-items:center;
+ background-image:repeating-linear-gradient(0deg,transparent 0,transparent 1.45rem,rgb(110 150 200 / 14%) 1.45rem,rgb(110 150 200 / 14%) 1.5rem),repeating-linear-gradient(90deg,transparent 0,transparent 1.45rem,rgb(110 150 200 / 14%) 1.45rem,rgb(110 150 200 / 14%) 1.5rem)}
+.slide h2{font-family:var(--nb-font-hand);font-weight:700;font-size:2.6rem;line-height:1.05}
+.slide .pts{display:flex;flex-direction:column;gap:var(--nb-s3);margin-top:var(--nb-s4)}
+.slide .pt{display:grid;grid-template-columns:1.6rem 1fr;gap:var(--nb-s2);font-family:var(--nb-font-note);font-size:1.25rem;line-height:1.35}
+.slide .pt b{font-family:var(--nb-font-hand);color:var(--nb-gold-deep);font-size:1.4rem}
+.ctrl{display:flex;justify-content:space-between;align-items:center}
+.dots{display:flex;gap:.45rem}.dots i{width:.65rem;height:.65rem;border-radius:50%;background:var(--nb-track);border:1px solid var(--nb-border)}.dots i.d{background:var(--nb-navy-muted)}.dots i.c{width:1.8rem;border-radius:999px;background:var(--nb-gold);border-color:var(--nb-gold-deep)}
+.slist .s{display:grid;grid-template-columns:2rem 1fr auto;gap:.6rem;align-items:center;padding:.4rem .5rem;border-radius:10px;font-family:var(--nb-font-hand);font-weight:600;font-size:1.1rem}
+.slist .s b{font-family:var(--nb-font-ui);font-size:.75rem;width:1.7rem;height:1.7rem;border-radius:8px;display:grid;place-items:center;border:1.5px solid var(--nb-border);background:#fff}
+.slist .s.c{background:var(--nb-sticky-yellow)} .slist .s.c b{background:var(--nb-gold);border-color:var(--nb-navy)}
+.slist .s.d{color:var(--nb-ink-soft)} .slist .s.d svg{color:var(--nb-ok)}
+@media (max-width:1023px){.slide{grid-template-columns:1fr;padding:var(--nb-s4)}.slide h2{font-size:2rem}}
+
+</style></head>
+<body class=""><div id="root">
+<div class="nb-app">
+  <aside class="nb-side">
+    <div class="nb-brand"><div class="nb-brand__mark">V</div><div><div class="nb-brand__name">VidhyaSaathy</div><div class="nb-brand__tag">Class 9 · NCERT</div></div></div>
+    <nav class="nb-nav">
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>Home</a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>My subjects</a>
+<a class="nb-nav__item is-active" href="#"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>Study sessions</a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M7 4h10v16l-5-3-5 3V4z"/></svg>Homework<span class="nb-nav__badge">2</span></a>
+<div class="nb-nav__sec">Play</div>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="10" rx="4"/><path d="M8 11v4M6 13h4"/><circle cx="16" cy="12" r=".8"/><circle cx="18" cy="14" r=".8"/></svg>Games</a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M5 6h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-8l-4 3v-3H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z"/><path d="M8 11h8M8 14h5"/></svg>Ask Saathy</a>
+<div class="nb-nav__sec">You</div>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 16v-4M12 16V8M17 16v-7"/></svg>My progress</a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>Notifications<span class="nb-nav__badge">2</span></a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M3 12h2M19 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Settings</a>
+    </nav>
+    
+    <div class="nb-side__foot"><div class="nb-profile"><div class="nb-avatar">A</div><div><b>Aarav</b><span>IX-B · Roll 17</span></div></div></div>
+  </aside>
+  <div class="nb-main">
+    <header class="nb-top">
+      <div class="nb-brand nb-show-m"><div class="nb-brand__mark">V</div></div>
+      <div class="nb-search"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>Search lessons, notes, questions, games…</span><kbd>/</kbd></div>
+      <div class="nb-top__right"><span class="nb-pill nb-pill--streak"><svg class="i" viewBox="0 0 24 24"><path d="M12 3c2 3 4 5 4 9a4 4 0 1 1-8 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 0-8z"/></svg>5 day streak</span><span class="nb-pill nb-pill--xp"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l2.2 6.5H21l-5.4 3.9 2.1 6.6L12 16.8 6.3 20l2.1-6.6L3 9.5h6.8z"/></svg>340 XP</span><button class="nb-bell" aria-label="Notifications"><svg class="i" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M10 19a2 2 0 0 0 4 0"/></svg><i></i></button></div>
+    </header>
+    <main class="nb-sheet">
+<div class="nb-grid"><div class="sp-wrap">
+ <div class="sp-bar"><div><a class="nb-link" href="#" style="font-size:1.05rem"><svg class="i" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Study sessions</a><h1 class="nb-h1" style="font-size:2.4rem">Session 2 · Distance-time graphs</h1></div><div style="display:flex;gap:.5rem;align-items:center"><span class="nb-chip nb-chip--sky">Physics · Sharma Ma'am</span><span class="nb-chip nb-chip--sand">Slide 3 of 6</span></div></div>
+ <div class="nb-bar"><i style="width:50%"></i></div>
+ <section class="slide"><span class="nb-tape" style="left:2rem"></span><span class="nb-tape nb-tape--sky nb-tape--right"></span>
+  <div><svg viewBox="0 0 340 250" style="width:100%"><g stroke="#1B2A4A" stroke-width="2.2" fill="none" stroke-linecap="round"><path d="M40 215V20M40 215H325"/><path d="M34 28l6-8 6 8M317 209l8 6-8 6"/></g>
+<g font-family="Inter" font-size="11" fill="#3A4A6B"><text x="40" y="232" text-anchor="middle">0</text><path d="M40 215v5" stroke="#1B2A4A"/><text x="95" y="232" text-anchor="middle">2</text><path d="M95 215v5" stroke="#1B2A4A"/><text x="150" y="232" text-anchor="middle">4</text><path d="M150 215v5" stroke="#1B2A4A"/><text x="205" y="232" text-anchor="middle">6</text><path d="M205 215v5" stroke="#1B2A4A"/><text x="260" y="232" text-anchor="middle">8</text><path d="M260 215v5" stroke="#1B2A4A"/><text x="315" y="232" text-anchor="middle">10</text><path d="M315 215v5" stroke="#1B2A4A"/><text x="30" y="219" text-anchor="end">0</text><text x="30" y="183" text-anchor="end">12</text><text x="30" y="147" text-anchor="end">24</text><text x="30" y="111" text-anchor="end">36</text><text x="30" y="75" text-anchor="end">48</text><text x="30" y="39" text-anchor="end">60</text></g>
+<path d="M40 215 L315 35" stroke="#3D6FB8" stroke-width="3.5" stroke-linecap="round"/><path d="M40 215 L315 125" stroke="#D9823B" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="8 6"/>
+<circle cx="205" cy="107" r="5" fill="#3D6FB8"/><path d="M205 107V215" stroke="#C9433A" stroke-width="1.6" stroke-dasharray="4 4"/>
+<g font-family="Caveat" font-weight="700" font-size="19"><path d="M60 40h22" stroke="#3D6FB8" stroke-width="3.5"/><text x="88" y="46" fill="#3D6FB8">Bus A · 6 m/s</text><path d="M60 64h22" stroke="#D9823B" stroke-width="3.5" stroke-dasharray="6 4"/><text x="88" y="70" fill="#D9823B">Bus B · 3 m/s</text></g>
+<text x="150" y="243" font-family="Caveat" font-weight="700" font-size="17" fill="#1B2A4A">time (s)</text><text x="12" y="16" font-family="Caveat" font-weight="700" font-size="17" fill="#1B2A4A">distance (m)</text>
+<text x="214" y="128" font-family="Caveat" font-weight="700" font-size="17" fill="#C9433A" transform="rotate(-8 214 128)">steeper = faster</text></svg></div>
+  <div><span class="nb-label" style="color:var(--nb-gold-deep)">Slide 3</span><h2>Two buses, <span class="nb-hl">one graph</span></h2>
+   <div class="pts"><div class="pt"><b>1</b><span>Both buses leave the stop at t = 0.</span></div><div class="pt"><b>2</b><span>After 6 s, Bus A has gone <span class="nb-hl nb-hl--blue">36 m</span>, Bus B only 18 m.</span></div><div class="pt"><b>3</b><span>The <span class="nb-redpen">steeper line</span> is the faster bus.</span></div></div>
+   <div class="nb-sticky nb-sticky--pink" style="margin-top:1.4rem;transform:rotate(1.5deg)"><span class="nb-sticky__who">Sharma Ma'am</span>Cover the numbers and just look at the slopes. Can you still tell which bus is faster?</div></div>
+ </section>
+ <div class="ctrl"><button class="nb-btn nb-btn--ghost"><svg class="i" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Back</button><div class="dots"><i class="d"></i><i class="d"></i><i class="c"></i><i></i><i></i><i></i></div><button class="nb-btn nb-btn--primary nb-btn--lg">Next <svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
+</div>
+<aside class="nb-col">
+ <section class="nb-card"><div class="nb-saathy-tip"><svg class="nb-saathy" viewBox="0 0 120 90" style="width:3.8rem;height:auto;" role="img" aria-label="Saathy"><path class="body" d="M30 76C15 76 8 63 15 53C8 42 18 29 31 32C34 18 52 11 63 21C73 11 93 16 95 32C108 33 115 48 107 58C111 69 102 77 92 76Z"/><path class="shade" d="M22 64q4 6 12 6"/><path class="shade" d="M98 40q5 3 5 9"/><ellipse class="blush" cx="40" cy="59" rx="5.5" ry="3.2"/><ellipse class="blush" cx="80" cy="59" rx="5.5" ry="3.2"/><path class="face" d="M45 50q4-5 8 0"/><path class="face" d="M67 50q4-5 8 0"/><path class="face" d="M54 60q6 5 12 0"/></svg><div><div class="nb-h3" style="font-size:1.35rem">Ask Saathy about this slide</div><div class="nb-meta">I can see the graph you're on.</div></div></div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin:.8rem 0"><button class="nb-chip nb-chip--sky">Why is A steeper?</button><button class="nb-chip nb-chip--sky">What if they stop?</button><button class="nb-chip nb-chip--sky">Explain simpler</button></div>
+  <div class="nb-input nb-input--lined is-placeholder">Type a doubt about slide 3…</div></section>
+ <section class="nb-sticky" style="margin:.4rem .3rem"><span class="nb-tape nb-tape--green" style="width:4.5rem;top:-.6rem"></span><span class="nb-sticky__who">Your note</span>Slope = speed. Flat line = bus stopped!<div class="nb-meta" style="margin-top:.4rem">Saved · slide 3</div></section>
+ <section class="nb-card nb-grow slist"><div class="nb-card__head"><h3 class="nb-h3">In this session</h3><span class="nb-meta">~12 min</span></div><div class="s d"><b>1</b><span>Why graphs?</span><svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><div class="s d"><b>2</b><span>Reading the axes</span><svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><div class="s c"><b>3</b><span>Two buses, one graph</span></div><div class="s "><b>4</b><span>Slope means speed</span></div><div class="s "><b>5</b><span>Curved lines</span></div><div class="s "><b>6</b><span>Check: 3 questions</span></div>
+  <div class="nb-note" style="margin-top:.8rem;color:var(--nb-navy-muted)">After slide 6: a 3-question check, then Bus Stop Graphs unlocks.</div></section>
+</aside></div>
+    </main>
+  </div>
+</div>
+<nav class="nb-mnav"><a class="" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>Home</a><a class="" href="#"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>Subjects</a><a class="" href="#"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="10" rx="4"/><path d="M8 11v4M6 13h4"/><circle cx="16" cy="12" r=".8"/><circle cx="18" cy="14" r=".8"/></svg>Games</a><a class="" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M5 6h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-8l-4 3v-3H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z"/><path d="M8 11h8M8 14h5"/></svg>Saathy</a><a class="" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 16v-4M12 16V8M17 16v-7"/></svg>Me</a></nav>
+</div></body></html>

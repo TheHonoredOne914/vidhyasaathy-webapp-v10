@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>VidhyaSaathy · Notifications</title>
+<link rel="stylesheet" href="tokens.css"/><link rel="stylesheet" href="components.css"/>
+<style>
+
+.nt{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:var(--nb-s3);align-items:center;padding:var(--nb-s3);border-radius:14px;margin-bottom:.4rem}
+.nt.new{background:var(--nb-sticky-yellow);border:1.5px solid var(--nb-gold-deep)}
+.nt .ic{width:2.6rem;height:2.6rem;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--nb-navy);background:#fff}
+.nt b{font-family:var(--nb-font-hand);font-size:1.25rem;font-weight:700;line-height:1.1;display:block}
+.tg{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--nb-s3);align-items:center;padding:.65rem 0;border-bottom:1px dashed var(--nb-border)}
+.tg:last-child{border:0}.tg b{font-family:var(--nb-font-hand);font-size:1.2rem;font-weight:700;display:block;line-height:1}
+
+</style></head>
+<body class=""><div id="root">
+<div class="nb-app">
+  <aside class="nb-side">
+    <div class="nb-brand"><div class="nb-brand__mark">V</div><div><div class="nb-brand__name">VidhyaSaathy</div><div class="nb-brand__tag">Class 9 · NCERT</div></div></div>
+    <nav class="nb-nav">
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>Home</a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>My subjects</a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>Study sessions</a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M7 4h10v16l-5-3-5 3V4z"/></svg>Homework<span class="nb-nav__badge">2</span></a>
+<div class="nb-nav__sec">Play</div>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="10" rx="4"/><path d="M8 11v4M6 13h4"/><circle cx="16" cy="12" r=".8"/><circle cx="18" cy="14" r=".8"/></svg>Games</a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M5 6h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-8l-4 3v-3H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z"/><path d="M8 11h8M8 14h5"/></svg>Ask Saathy</a>
+<div class="nb-nav__sec">You</div>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 16v-4M12 16V8M17 16v-7"/></svg>My progress</a>
+<a class="nb-nav__item is-active" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>Notifications<span class="nb-nav__badge">2</span></a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M3 12h2M19 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Settings</a>
+    </nav>
+    
+    <div class="nb-side__foot"><div class="nb-profile"><div class="nb-avatar">A</div><div><b>Aarav</b><span>IX-B · Roll 17</span></div></div></div>
+  </aside>
+  <div class="nb-main">
+    <header class="nb-top">
+      <div class="nb-brand nb-show-m"><div class="nb-brand__mark">V</div></div>
+      <div class="nb-search"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>Search lessons, notes, questions, games…</span><kbd>/</kbd></div>
+      <div class="nb-top__right"><span class="nb-pill nb-pill--streak"><svg class="i" viewBox="0 0 24 24"><path d="M12 3c2 3 4 5 4 9a4 4 0 1 1-8 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 0-8z"/></svg>5 day streak</span><span class="nb-pill nb-pill--xp"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l2.2 6.5H21l-5.4 3.9 2.1 6.6L12 16.8 6.3 20l2.1-6.6L3 9.5h6.8z"/></svg>340 XP</span><button class="nb-bell" aria-label="Notifications"><svg class="i" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M10 19a2 2 0 0 0 4 0"/></svg><i></i></button></div>
+    </header>
+    <main class="nb-sheet">
+<div class="nb-grid">
+<div class="nb-col">
+ <div style="display:flex;justify-content:space-between;align-items:flex-end"><div class="nb-head" style="margin:0"><h1 class="nb-h1">Notifications</h1><svg class="nb-scribble" style="width:9rem" viewBox="0 0 140 10" preserveAspectRatio="none"><path d="M2 6c20-4 40 3 60-1s45-3 76 0" stroke="#E8B84A" stroke-width="3.5" fill="none" stroke-linecap="round"/></svg><p class="nb-sub">2 new since this morning</p></div><button class="nb-btn nb-btn--quiet"><svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg> Mark all read</button></div>
+ <section class="nb-card"><div class="nb-card__head"><h3 class="nb-h3">Today</h3></div>
+  <div class="nt new"><div class="ic" style="background:#FBE3D6"><svg class="i" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/></svg></div><div><b>Sharma Ma'am set Session 3 · Motion diagnostic</b><span class="nb-meta">Physics · 6 warm-up questions · no marks</span></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:.3rem"><span class="nb-meta">2:40 pm</span><button class="nb-btn nb-btn--primary nb-btn--sm">Start</button></div></div>
+  <div class="nt new"><div class="ic" style="background:#DCEAF6"><svg class="i" viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></svg></div><div><b>Mr. Khan handed back Number systems</b><span class="nb-meta">Maths · 9/10 · one note on Q7</span></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:.3rem"><span class="nb-meta">1:15 pm</span><a class="nb-link" style="font-size:1rem" href="#">See it</a></div></div>
+  <div class="nt"><div class="ic" style="background:#FFF1A6"><svg class="i" viewBox="0 0 24 24"><path d="M12 3c2 3 4 5 4 9a4 4 0 1 1-8 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 0-8z"/></svg></div><div><b>5 days in a row</b><span class="nb-meta">Your longest streak this month is 6. One more lesson ties it.</span></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:.3rem"><span class="nb-meta">8:00 am</span></div></div></section>
+ <section class="nb-card nb-grow"><div class="nb-card__head"><h3 class="nb-h3">Earlier</h3></div>
+  <div class="nt"><div class="ic" style="background:#FBE3D6"><svg class="i" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.5-4.5L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.5 4.5L20 16"/><path d="M20 20v-4h-4"/></svg></div><div><b>Valency needs a quick look</b><span class="nb-meta">Chemistry · Saathy made you a 6-minute recap</span></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:.3rem"><span class="nb-meta">Mon</span></div></div>
+  <div class="nt"><div class="ic" style="background:#ECE6FA"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="10" rx="4"/><path d="M8 11v4M6 13h4"/><circle cx="16" cy="12" r=".8"/><circle cx="18" cy="14" r=".8"/></svg></div><div><b>Bus Stop Graphs is open</b><span class="nb-meta">Finish Session 2 to play</span></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:.3rem"><span class="nb-meta">Sun</span></div></div>
+  <div class="nt"><div class="ic" style="background:#E4F1E2"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l2.2 6.5H21l-5.4 3.9 2.1 6.6L12 16.8 6.3 20l2.1-6.6L3 9.5h6.8z"/></svg></div><div><b>Polynomials reached Top form</b><span class="nb-meta">Maths · 10/10 on the last check</span></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:.3rem"><span class="nb-meta">Sat</span></div></div>
+  <div class="nt"><div class="ic" style="background:#DCEAF6"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></div><div><b>Chemistry worksheet due Wednesday</b><span class="nb-meta">Atoms and Molecules · sheet 2</span></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:.3rem"><span class="nb-meta">Mon</span></div></div>
+  <div class="nt"><div class="ic" style="background:#FFF1A6"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div><div><b>Message from school</b><span class="nb-meta">Unit test timetable for November is out</span></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:.3rem"><span class="nb-meta">Fri</span></div></div></section>
+</div>
+<aside class="nb-col">
+ <section class="nb-card"><div class="nb-card__head"><h3 class="nb-h3">Tell me about</h3></div><div class="tg"><div><b>Homework from teachers</b><span class="nb-meta">New work and marks</span></div><span class="nb-toggle is-on"></span></div><div class="tg"><div><b>Saathy's nudges</b><span class="nb-meta">Fix-it recaps and next steps</span></div><span class="nb-toggle is-on"></span></div><div class="tg"><div><b>Streak reminders</b><span class="nb-meta">Once a day, 6 pm</span></div><span class="nb-toggle is-on"></span></div><div class="tg"><div><b>New games</b><span class="nb-meta">When one unlocks</span></div><span class="nb-toggle"></span></div><div class="tg"><div><b>School notices</b><span class="nb-meta">Circulars, timetables</span></div><span class="nb-toggle is-on"></span></div></section>
+ <section class="nb-card"><div class="nb-card__head"><h3 class="nb-h3">Quiet hours</h3><span class="nb-toggle is-on"></span></div><div class="nb-text">Nothing after <b>9 pm</b> or before <b>7 am</b>. Sleep matters more than streaks.</div></section>
+ <section class="nb-sticky nb-sticky--blue" style="margin:.4rem .3rem"><span class="nb-tape" style="width:4.5rem;top:-.6rem"></span><div style="display:flex;gap:.7rem;align-items:center"><svg class="nb-saathy" viewBox="0 0 120 90" style="width:3.6rem;height:auto;" role="img" aria-label="Saathy"><path class="body" d="M30 76C15 76 8 63 15 53C8 42 18 29 31 32C34 18 52 11 63 21C73 11 93 16 95 32C108 33 115 48 107 58C111 69 102 77 92 76Z"/><path class="shade" d="M22 64q4 6 12 6"/><path class="shade" d="M98 40q5 3 5 9"/><ellipse class="blush" cx="40" cy="59" rx="5.5" ry="3.2"/><ellipse class="blush" cx="80" cy="59" rx="5.5" ry="3.2"/><path class="face" d="M45 49q4 4 8 0"/><path class="face" d="M67 49q4 4 8 0"/><path class="face" d="M56 60q4 3 8 0"/></svg><div>9:00 pm. Saathy kept your place. See you tomorrow.</div></div></section>
+ <section class="nb-card nb-grow"><div class="nb-card__head"><h3 class="nb-h3">Who can reach you here</h3></div>
+  <div class="lk" style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px dashed var(--nb-border);font-family:var(--nb-font-hand);font-weight:700;font-size:1.15rem">Your teachers<span class="nb-chip nb-chip--green">On</span></div>
+  <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px dashed var(--nb-border);font-family:var(--nb-font-hand);font-weight:700;font-size:1.15rem">School office<span class="nb-chip nb-chip--green">On</span></div>
+  <div style="display:flex;justify-content:space-between;padding:.5rem 0;font-family:var(--nb-font-hand);font-weight:700;font-size:1.15rem">Other students<span class="nb-chip nb-chip--sand">Never</span></div></section>
+</aside></div>
+    </main>
+  </div>
+</div>
+<nav class="nb-mnav"><a class="" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>Home</a><a class="" href="#"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>Subjects</a><a class="" href="#"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="10" rx="4"/><path d="M8 11v4M6 13h4"/><circle cx="16" cy="12" r=".8"/><circle cx="18" cy="14" r=".8"/></svg>Games</a><a class="" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M5 6h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-8l-4 3v-3H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z"/><path d="M8 11h8M8 14h5"/></svg>Saathy</a><a class="" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 16v-4M12 16V8M17 16v-7"/></svg>Me</a></nav>
+</div></body></html>
