@@ -20,16 +20,16 @@ const STYLE_KEY = 'vidhyasaathy.learn-style';
 
 // Each game belongs to the NCERT chapter whose title contains one of these words.
 const GAMES = [
-  { id: 'atom', title: 'Atom Forge', hook: 'build an atom shell by shell', words: ['atom'], art: '⚛' },
-  { id: 'cell', title: 'Bio Quest', hook: 'explore a living cell', words: ['cell', 'unit of life'], art: '🔬' },
-  { id: 'matter', title: 'Particle Party', hook: 'heat and cool particles', words: ['matter'], art: '◈' },
-  { id: 'newton', title: 'Cricket Lab', hook: 'feel force and acceleration', words: ['force', 'laws of motion'], art: '🏏' },
-  { id: 'motion', title: 'Bus Stop Graphs', hook: 'draw a journey as a graph', words: ['motion'], art: '🚌' },
-  { id: 'float', title: 'Float or Sink', hook: 'test what floats', words: ['gravitation', 'floatation'], art: '⚓' },
-  { id: 'energy', title: 'Energy Slide', hook: 'trade height for speed', words: ['work', 'energy'], art: '⚡' },
-  { id: 'sound', title: 'Echo Corridor', hook: 'bounce sound off walls', words: ['sound'], art: '🔊' },
-  { id: 'graphs', title: 'Treasure Grid', hook: 'find treasure with coordinates', words: ['coordinate'], art: '🗺️' },
-  { id: 'poly', title: 'Polynomial Factory', hook: 'factor on the assembly line', words: ['polynomial'], art: '📐' },
+  { id: 'atom', title: 'Atom Forge', hook: 'build an atom shell by shell', words: ['atom'] },
+  { id: 'cell', title: 'Bio Quest', hook: 'explore a living cell', words: ['cell', 'unit of life'] },
+  { id: 'matter', title: 'Particle Party', hook: 'heat and cool particles', words: ['matter'] },
+  { id: 'newton', title: 'Cricket Lab', hook: 'feel force and acceleration', words: ['force', 'laws of motion'] },
+  { id: 'motion', title: 'Bus Stop Graphs', hook: 'draw a journey as a graph', words: ['motion'] },
+  { id: 'float', title: 'Float or Sink', hook: 'test what floats', words: ['gravitation', 'floatation'] },
+  { id: 'energy', title: 'Energy Slide', hook: 'trade height for speed', words: ['work', 'energy'] },
+  { id: 'sound', title: 'Echo Corridor', hook: 'bounce sound off walls', words: ['sound'] },
+  { id: 'graphs', title: 'Treasure Grid', hook: 'find treasure with coordinates', words: ['coordinate'] },
+  { id: 'poly', title: 'Polynomial Factory', hook: 'factor on the assembly line', words: ['polynomial'] },
 ] as const;
 
 const ACCENTS = ['sky', 'peach', 'mint', 'ice'] as const;
@@ -65,8 +65,31 @@ function Retry({ what, onRetry }: { what: string; onRetry: () => void }) {
   return <p className="vs-home-empty vs-home-retry" role="status">Could not load {what} just now. <button type="button" onClick={onRetry}>Try again</button></p>;
 }
 
+function GameThumb({ id }: { id: string }) {
+  const pen = { fill: 'none', stroke: '#193e69', strokeWidth: 1.7, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
+  return <svg className="vs-home-game-art" viewBox="0 0 72 72" aria-hidden="true">
+    <rect x="1.5" y="1.5" width="69" height="69" rx="12" fill="#fffdf8" stroke="#193e69" />
+    {id === 'motion' || id === 'newton' ? <>
+      <path {...pen} d="M12 54h48M12 54V20" />
+      <path {...pen} stroke="#517dab" d="M14 48l14-12 12 6 16-16" />
+      <circle cx="26" cy="42" r="4" fill="#d4a017" stroke="#193e69" />
+      <path {...pen} d="M40 58h18M46 54v8" />
+    </> : id === 'cell' ? <ellipse cx="36" cy="36" rx="18" ry="13" {...pen} /> : id === 'graphs' ? <>
+      <path {...pen} d="M16 52h40M16 52V18" />
+      <circle cx="28" cy="36" r="3" fill="#517dab" />
+      <circle cx="44" cy="26" r="3" fill="#d4a017" />
+    </> : <path {...pen} d="M18 46c6-16 30-16 36 0M22 30h28" />}
+  </svg>;
+}
+
 function Check() {
   return <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 6.5 5 9l4.5-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+}
+
+function PathGlyph({ state }: { state: 'mastered' | 'learning' | 'next' }) {
+  if (state === 'mastered') return <Check />;
+  if (state === 'learning') return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16c2-1 4-7 6-7s3 5 6 4" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>;
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5.5" fill="none" stroke="currentColor" strokeWidth="1.7" /></svg>;
 }
 
 /** Loads every chapter of the student's subjects once, so cards can name the subject and the chapter behind a plan item. */
@@ -97,7 +120,7 @@ function nextCopy(item: PlanItem) {
 
 function assignmentTag(item: Assignment, now: number) {
   const status = item.score?.status;
-  if (status === 'completed') return { label: item.score ? `Done · ${item.score.correct}/${item.score.total}` : 'Done', tone: 'done' };
+  if (status === 'completed') return { label: 'Done', tone: 'done' };
   if (status === 'pending_review') return { label: 'Being checked', tone: 'soft' };
   if (item.dueAt < now) return { label: 'Overdue', tone: 'late' };
   if (todayKey(new Date(item.dueAt)) === todayKey()) return { label: 'Due today', tone: 'today' };
@@ -233,14 +256,14 @@ export function HomeDesk({ me, stale, updatedAt, message }: { me: Me; stale: boo
           {subjects.status === 'loading' && !subjects.data ? <Skeleton /> : subjects.status === 'error' && !subjects.data ? <Retry what="your subjects" onRetry={subjects.reload} /> : subjects.data?.length ? <div className="vs-home-subject-grid">{subjects.data.map((subject, index) => {
             const current = chapters ? currentChapter(chapters, subject.id) : null;
             const own = (progress.data?.concepts ?? []).filter((item) => item.subjectId === subject.id);
-            const mastered = own.filter((item) => isMastered(wordFor(item.conceptId))).length;
-            const share = own.length ? Math.round((mastered / own.length) * 100) : 0;
+            const order = ["Let's fix this", 'Almost there', 'New', 'Mastered', 'Top form'];
+            const words = own.map((item) => wordFor(item.conceptId));
+            const headline = order.find((word) => words.some((item) => item === word)) ?? (own.length ? 'New' : 'Not started yet');
             return <Link className={`vs-home-subject is-${ACCENTS[index % ACCENTS.length]}`} key={subject.id} to={`/student/subjects/${subject.id}`}>
               <span className="vs-home-subject-icon"><SubjectIcon name={subject.name} /></span>
               <strong>{subject.name}</strong>
               <small>{current ? current.title : chapters ? 'No chapters yet' : '…'}</small>
-              <span className="vs-home-bar" aria-hidden="true"><i style={{ width: `${share}%` }} /></span>
-              <small className="vs-home-frac">{own.length ? `${mastered} / ${own.length} ideas mastered` : 'Not started yet'}</small>
+              <small className="vs-home-frac">{headline}</small>
             </Link>;
           })}</div> : <p className="vs-home-empty">Your teacher has not added a subject yet.</p>}
         </section>
@@ -252,7 +275,7 @@ export function HomeDesk({ me, stale, updatedAt, message }: { me: Me; stale: boo
             <ol className="vs-home-days">{days.map((day) => <li key={day.date} className={`${day.practiced ? 'is-on' : ''} ${day.date === today ? 'is-today' : ''}`} aria-label={`${day.date}: ${day.practiced ? 'practised' : 'not practised'}`}><i /><span>{dayLabel(day.date)}</span></li>)}</ol>
           </section>
           {game ? <Link className="vs-home-game vs-sketch" to={`/student/chapters/${game.chapter.id}/practice/engine/${game.game.id}`}>
-            <span className="vs-home-game-art">Play</span>
+            <GameThumb id={game.game.id} />
             <span><strong>Today’s game</strong><small>{game.game.title} · {game.game.hook}</small><em>Play →</em></span>
           </Link> : null}
         </div>
@@ -261,9 +284,9 @@ export function HomeDesk({ me, stale, updatedAt, message }: { me: Me; stale: boo
           <div className="vs-home-head"><h2 id="home-path">Your learning path · {[pathSubject?.name, pathChapter.title].filter(Boolean).join(': ')}</h2><Link to={`/student/chapters/${pathChapter.id}`}>See chapter →</Link></div>
           {concepts.status === 'loading' && !concepts.data ? <Skeleton /> : concepts.status === 'error' && !concepts.data ? <Retry what="this chapter" onRetry={concepts.reload} /> : conceptNodes.length ? <ol className="vs-home-nodes" style={{ ['--nodes' as string]: conceptNodes.length }}>{conceptNodes.map(({ concept, state, note }) => <li key={concept.id} className={`is-${state}`}>
             <Link to={`/student/chapters/${pathChapter.id}/concepts/${concept.id}`}>
-              <span className="vs-home-orb" aria-hidden="true">{state === 'mastered' ? <Check /> : state === 'learning' ? '✎' : '○'}</span>
-              <span className="vs-home-state">{state === 'mastered' ? 'Mastered' : state === 'learning' ? 'Learning' : 'Up next'}</span>
-              <strong>{concept.title}</strong><small>{note}</small>
+              <span className="vs-home-orb" aria-hidden="true"><PathGlyph state={state} /></span>
+              <span className="vs-home-state">{note}</span>
+              <strong>{concept.title}</strong>
             </Link></li>)}</ol> : <p className="vs-home-empty">Your teacher is still adding ideas to this chapter.</p>}
         </section> : null}
       </div>
