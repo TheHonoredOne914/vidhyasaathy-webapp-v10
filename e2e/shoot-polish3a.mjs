@@ -107,7 +107,8 @@ try {
           await notTaught().click();
           await page.getByRole('button', { name: 'Finish', exact: true }).click();
           await page.locator('.nb-sheet [role="alert"]').waitFor();
-          if (!submitted?.answers.length || submitted.answers.some((answer) => answer.answer !== 'not_taught' || !Number.isFinite(answer.timeMs))) throw new Error('Diagnostic not-taught payload invalid');
+          const notTaughtSent = "Haven't learned this yet";
+          if (!submitted?.answers.length || submitted.answers.some((answer) => answer.answer !== notTaughtSent || !Number.isFinite(answer.timeMs))) throw new Error('Diagnostic not-taught payload invalid');
           await page.unroute(endpoint);
           console.log('SMOKE diagnostic: skip confidence, back, not_taught payload and retryable network failure passed (submission intentionally aborted; no diagnostic evidence changed)');
         }
@@ -123,12 +124,19 @@ try {
           if (await next.count()) {
             const advanced = page.waitForResponse((response) => response.url().endsWith('/advance') && response.request().method() === 'POST');
             await next.click();
-            if (!(await advanced).ok()) throw new Error('Session advance failed');
-            await page.getByText('Slide 2 of', { exact: false }).waitFor();
-            await page.locator('.ctrl').getByRole('button', { name: /Back/ }).click();
-            await page.getByText('Slide 1 of', { exact: false }).waitFor();
+            const response = await advanced;
+            if (response.ok()) {
+              await page.getByText('Slide 2 of', { exact: false }).waitFor();
+              await page.locator('.ctrl').getByRole('button', { name: /Back/ }).click();
+              await page.getByText('Slide 1 of', { exact: false }).waitFor();
+              console.log('SMOKE session: per-slide device note and server-gated forward/back passed');
+            } else if (response.status() === 409) {
+              await page.getByRole('link', { name: /short lesson and two-question check/ }).waitFor();
+              console.log('SMOKE session: per-slide device note and remediation gate passed');
+            } else {
+              throw new Error(`Session advance failed: ${response.status()}`);
+            }
           }
-          console.log('SMOKE session: per-slide device note and server-gated forward/back passed');
         }
       }
     }

@@ -36,5 +36,13 @@
 
 - Completed the grid-paper slide, real progress, teacher-note empty state/link, Back/dots/Next controls and rail with scoped Ask, per-slide note and available slides. Future slide content remains server-redacted; no invented diagram, remark or timing.
 - The original demo database was opened read-only and copied to `apps/api/data/polish3a-verify.db` before attempting isolated verification; no migration or seed was run against the original.
-- Browser verification is blocked: hidden `Start-Process` server launches on the assigned isolated ports were rejected by execution policy, including one separate retry. No fallback onto the main demo ports and no fabricated screenshots or viewport measurements.
 - `docs/codex/routes-todo.md` is absent in this worktree; no pending route wiring was found.
+
+## 5. Browser verification (restart)
+
+- Demo started hidden on the assigned ports (API 3007, web 5179, RATE_LIMIT_MAX 5000); `apps/api/data/*.db` backed up first to `%TEMP%\opencode\db-backup-polish3a`. Screenshots via `e2e/shoot-polish3a.mjs` (playwright chromium, no MCP browser).
+- Viewport checks (scrollWidth/innerWidth) pass at 360/1024/1280/1440/1920 for home, subjects, subject-path, lesson, diagnostic and session-player; Priya home at 1440 passes. No `[role=alert]` on any populated sheet; every screen has a populated `h1`.
+- Smokes pass: lesson (style tabs, server checkpoint, simpler explanation), diagnostic (confidence hidden for not-taught, Back keeps answers, `not_taught` payload = `NOT_TAUGHT` marker, retryable network failure), session (device note survives reload, advance gate).
+- Real-data findings handled: Aarav's session slide 1 is correctly gated by the server's remediation 409 (smoke now asserts the remediation link instead of assuming advance); diagnostic not-taught sends `Haven't learned this yet` with `timeMs`, which is the API's NOT_TAUGHT marker (script assertion corrected, client was right).
+- Mockup parity fixes: subject-path subject heading is now the page `h1` (same `nb-h2` styling); session-player header gained the sky subject chip (`/student/subjects` via chapter subjectId; teacher name is a logged data gap) and the dot row now renders `total` dots with disabled placeholders for server-redacted slides.
+- Verified screenshots against `docs/mockups-v10-final/png` for session-player, lesson and diagnostic at 1440.

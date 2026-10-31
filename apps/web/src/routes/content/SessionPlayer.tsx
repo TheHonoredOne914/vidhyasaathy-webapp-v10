@@ -1,10 +1,11 @@
-import { LearningSessionSchema, SubmitSessionCheckSchema, type PublicItem } from '@vidhyasaathy/contracts';
+import { ChapterSchema, LearningSessionSchema, SubmitSessionCheckSchema, type PublicItem } from '@vidhyasaathy/contracts';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ApiClientError, postJson } from '../../api/client';
 import { LearningSessionSchema as SessionResponse } from '../../content/schemas';
 import { usePageMeta } from '../../meta';
 import { useRemote } from '../../setup/useRemote';
+import { SubjectListSchema } from '../../setup/schemas';
 import { fieldClass } from '../../ui/Field';
 import { type ConfidenceChoice } from '../../ui/ConfidenceChips';
 import { AccessDenied } from '../AccessDenied';
@@ -44,6 +45,8 @@ function StudentSessionPlayer({ sessionId }: { sessionId: string }) {
   const session = useRemote(sessionId ? `/sessions/${sessionId}` : null, SessionResponse);
   const [saved, setSaved] = useState<typeof session.data>(null);
   const data = saved ?? session.data;
+  const chapter = useRemote(data?.chapterId ? `/chapters/${data.chapterId}` : null, ChapterSchema);
+  const subjects = useRemote('/student/subjects', SubjectListSchema);
   const [cursor, setCursor] = useState(0);
   const [review, setReview] = useState(false);
   const [pending, setPending] = useState(false);
@@ -73,6 +76,7 @@ function StudentSessionPlayer({ sessionId }: { sessionId: string }) {
   const checks = data.check.filter(isPublicItem);
   const showCheck = progress.checkAvailable && !progress.completed && !review;
   const done = progress.completed;
+  const subjectName = Array.isArray(subjects.data) && chapter.data ? subjects.data.find((row) => row.id === chapter.data?.subjectId)?.name : undefined;
 
   async function advance(slideId: string) {
     if (busy.current) return;
@@ -139,7 +143,7 @@ function StudentSessionPlayer({ sessionId }: { sessionId: string }) {
       <div className="sp-wrap">
         <header className="sp-bar">
           <div><Link className="nb-link" to="/student?panel=study"><Icon name="back" /> Study sessions</Link><h1 className="nb-h1">{data.title}</h1></div>
-          <span className="nb-chip nb-chip--sand">{showCheck ? 'End-of-session check' : done && !review ? 'Session complete' : slides.length ? `Slide ${cursor + 1} of ${total}` : 'No slides yet'}</span>
+          <div className="sp-chips">{subjectName ? <span className="nb-chip nb-chip--sky">{subjectName}</span> : null}<span className="nb-chip nb-chip--sand">{showCheck ? 'End-of-session check' : done && !review ? 'Session complete' : slides.length ? `Slide ${cursor + 1} of ${total}` : 'No slides yet'}</span></div>
         </header>
         <div role="progressbar" aria-label="Slides opened" aria-valuemin={0} aria-valuemax={total} aria-valuenow={viewed}><ProgressBar value={viewed / total * 100} /></div>
         {done && !review ? (
@@ -206,7 +210,7 @@ function StudentSessionPlayer({ sessionId }: { sessionId: string }) {
             {blockedConcept ? <p><Link to={`/student/concepts/${blockedConcept}/remediation`}>Open the short lesson and two-question check</Link></p> : null}
             <div className="ctrl">
               <NbButton variant="ghost" disabled={pending || cursor === 0} onClick={() => { setCursor((current) => current - 1); }}><Icon name="back" /> Back</NbButton>
-              <div className="dots" aria-label="Slides">{slides.map((item, index) => <button type="button" key={item.id} aria-label={`Slide ${index + 1}`} aria-current={index === cursor ? 'step' : undefined} disabled={pending || index > viewed} onClick={() => { setCursor(index); }}><i className={index === cursor ? 'c' : index < viewed ? 'd' : ''} /></button>)}</div>
+              <div className="dots" aria-label="Slides">{Array.from({ length: total }, (_, index) => { const known = slides[index]; return <button type="button" key={known?.id ?? `slot-${index}`} aria-label={`Slide ${index + 1}`} aria-current={index === cursor ? 'step' : undefined} disabled={pending || !known || index > viewed} onClick={() => { setCursor(index); }}><i className={index === cursor ? 'c' : index < viewed ? 'd' : ''} /></button>; })}</div>
               {cursor < viewed && cursor < slides.length - 1 ? <NbButton disabled={pending} size="lg" onClick={() => { setCursor((current) => current + 1); }}>Next →</NbButton> : cursor === viewed && viewed < total ? <NbButton disabled={pending} size="lg" onClick={() => { void advance(slide.id); }}>{pending ? 'Saving slide…' : viewed + 1 === total ? 'Open the check →' : 'Next →'}</NbButton> : <NbButton onClick={() => { setReview(false); }}>{done ? 'Back to summary' : 'Open the check'}</NbButton>}
             </div>
             <Link className="nb-link" to={`/student/chapters/${data.chapterId}`}>Save and leave</Link>
