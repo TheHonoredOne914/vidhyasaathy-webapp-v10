@@ -9,6 +9,9 @@ describe('worksheet answers', () => {
     const view = { ...base, kind: 'match_pairs' as const, left: ['a', 'b'] };
     expect(worksheetAnswer(view, '', ['x'])).toBeNull();
     expect(worksheetAnswer(view, '', ['x', 'x'])).toBeNull();
+    const incomplete = new Array<string>(2);
+    incomplete[1] = 'y';
+    expect(worksheetAnswer(view, '', incomplete)).toBeNull();
     expect(worksheetAnswer(view, '', ['x', 'y'])).toEqual(['x', 'y']);
   });
 });

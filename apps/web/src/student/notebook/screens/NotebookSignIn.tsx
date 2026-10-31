@@ -26,6 +26,11 @@ function Boxes({ value, length, onChange, label, secret = false, disabled = fals
     onChange((value.slice(0, index) + digits + value.slice(index + digits.length)).slice(0, length));
     const target = event.currentTarget.parentElement?.children[Math.min(index + digits.length, length - 1)];
     if (target instanceof HTMLInputElement) target.focus();
+  }} onFocus={(event) => {
+    if (index > value.length) {
+      const target = event.currentTarget.parentElement?.children[value.length];
+      if (target instanceof HTMLInputElement) target.focus();
+    } else event.currentTarget.select();
   }} onChange={(event) => {
     const digit = event.target.value.replace(/\D/g, '').slice(-1);
     const next = (value.slice(0, index) + digit + value.slice(index + 1)).slice(0, length);
@@ -33,6 +38,7 @@ function Boxes({ value, length, onChange, label, secret = false, disabled = fals
     if (digit && event.target.nextElementSibling instanceof HTMLInputElement) event.target.nextElementSibling.focus();
   }} onKeyDown={(event) => {
     if (event.key === 'Backspace' && !value[index] && event.currentTarget.previousElementSibling instanceof HTMLInputElement) {
+      event.preventDefault();
       event.currentTarget.previousElementSibling.focus();
       onChange(value.slice(0, index - 1));
     }

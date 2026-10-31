@@ -1,7 +1,8 @@
 import { HomeworkListSchema, StudyPlanSchema } from '@vidhyasaathy/contracts';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { planHref } from '../../../ai/plan';
+import { useAttemptSync } from '../../../assessment/AttemptSync';
 import { useRemote } from '../../../setup/useRemote';
 import { Card, Chip, PageHead, Sticky, SubjectIcon, Tabs } from '../ui';
 import { NotebookState } from './polish3b/NotebookState';
@@ -11,6 +12,8 @@ import '../pages/homework.css';
 export function HomeworkBoard() {
   const homework = useRemote('/student/homework?tab=all', HomeworkListSchema);
   const plan = useRemote('/study-plan', StudyPlanSchema);
+  const sync = useAttemptSync();
+  useEffect(() => { homework.reload(); }, [sync.revision, homework.reload]);
   const [tab, setTab] = useState('todo');
   const [selected, setSelected] = useState('');
   if (homework.denied) return <NotebookState title="Homework" message="This homework notebook is not available. Ask your teacher to check your access." />;

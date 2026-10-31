@@ -8,6 +8,7 @@ import { Scribble } from '../student/notebook/icons';
 import { Saathy } from '../student/notebook/Saathy';
 import { MasteryChip } from '../student/notebook/ui';
 import { ScreenState } from '../student/notebook/screens/polish3c/ScreenState';
+import { weekStartIST } from '../student/notebook/screens/polish3c/parent';
 import '../student/notebook/pages/parent-home.css';
 
 const dateLabel = (time: number) => new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'short', day: 'numeric', month: 'short' }).format(time);
@@ -25,13 +26,12 @@ export function ParentHome() {
   const working = words.filter((row) => row.word === "Let's fix this" || row.word === 'Almost there');
   const assignments = report?.progress.assignments ?? [];
   const completed = assignments.filter((row) => row.score?.status === 'completed').length;
-  const upcoming = assignments.filter((row) => row.dueAt !== null && row.score?.status !== 'completed').sort((a, b) => (a.dueAt ?? 0) - (b.dueAt ?? 0));
-  const monday = new Date();
-  monday.setDate(monday.getDate() - (monday.getDay() + 6) % 7);
+  const upcoming = assignments.filter((row) => row.dueAt !== null && row.dueAt >= Date.now() && row.score?.status !== 'completed').sort((a, b) => (a.dueAt ?? 0) - (b.dueAt ?? 0));
+  const monday = weekStartIST();
   if (!children.data) return <ScreenState loading={children.status === 'loading'} error={children.message} retry={children.reload} />;
   if (!children.data.length) return <section className="nb-card"><h1 className="nb-h1">See how your child's doing</h1><p className="nb-empty">No child is linked to this account. Contact your school to check the link.</p><Link className="nb-link" to="/recover">Get account help</Link></section>;
   return <div className="nb-grid p3c-parent"><div className="nb-col">
-    <header className="nb-head ph-head"><div className="nb-head__eyebrow">Week of {dateLabel(monday.getTime())}</div><h1 className="nb-h1">{child ? `${child.name}'s week` : 'Your child’s week'}</h1><Scribble /></header>
+    <header className="nb-head ph-head"><div className="nb-head__eyebrow">Week of {dateLabel(monday)}</div><h1 className="nb-h1">{child ? `${child.name}'s week` : 'Your child’s week'}</h1><Scribble /></header>
     {child ? <p className="nb-sub ph-sub">{[child.className, child.sectionName, child.schoolName].filter(Boolean).join(' · ')} · latest recorded progress</p> : null}
     {children.data.length > 1 ? <label className="nb-label ph-selector">Child<select className="nb-input" value={childId} onChange={(event) => { setSelected(event.target.value); }}>{children.data.map((row) => <option key={row.id} value={row.id}>{row.name}</option>)}</select></label> : null}
     <ScreenState loading={!report && summary.status === 'loading'} error={!report ? summary.message : null} retry={summary.reload} />

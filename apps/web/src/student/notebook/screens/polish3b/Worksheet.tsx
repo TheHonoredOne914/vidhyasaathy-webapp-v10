@@ -20,7 +20,7 @@ export function dueChip(dueAt: number) {
 }
 
 export function worksheetAnswer(view: QuestionView, draft: string, matches: string[]): Answer | null {
-  if (view.kind === 'match_pairs') return matches.length === view.left.length && matches.every(Boolean) && new Set(matches).size === matches.length ? matches : null;
+  if (view.kind === 'match_pairs') return matches.length === view.left.length && view.left.every((_, index) => Boolean(matches[index])) && new Set(matches).size === matches.length ? matches : null;
   return draft.trim() || null;
 }
 

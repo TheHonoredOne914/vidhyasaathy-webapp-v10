@@ -13,6 +13,7 @@ import { Scribble } from '../student/notebook/icons';
 import { Chip } from '../student/notebook/ui';
 import { LineIcon } from '../student/notebook/screens/polish3c/LineIcon';
 import { ScreenState } from '../student/notebook/screens/polish3c/ScreenState';
+import { sectionConcepts } from '../student/notebook/screens/polish3c/teacher';
 import '../student/notebook/pages/teacher-home.css';
 
 const AttemptsSchema = z.array(AttemptSchema);
@@ -30,7 +31,7 @@ export function TeacherHome() {
   const classes = catalog.classes.data ?? [];
   const sections = catalog.sections.data ?? [];
   const subjects = catalog.subjects.data ?? [];
-  const concepts = [...new Map((desk?.classes ?? []).flatMap((row) => row.concepts).map((row) => [row.conceptId, row])).values()];
+  const concepts = sectionConcepts(desk?.classes ?? []);
   const focus = [...concepts].sort((a, b) => b.needingPractice - a.needingPractice).find((row) => row.needingPractice > 0);
   const nudges = [...new Map((desk?.bands ?? []).filter((row) => row.band === '0-25' || row.band === '25-50').map((row) => [row.profileId, row])).values()];
   const today = new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'long', day: 'numeric', month: 'short' }).format(new Date());
@@ -55,7 +56,7 @@ export function TeacherHome() {
             return <div className={`c${rate === null ? ' is-new' : ''}`} key={group.sectionId} style={rate === null ? undefined : { background: tint(rate) }}>{rate === null ? 'New' : `${Math.round(rate * 100)}%`}</div>;
           })}</Fragment>)}
         </div></div> : <p className="nb-empty">Your class concepts will appear after learning begins.</p>}
-        <div className="nb-sticky th-suggestion"><span className="nb-sticky__who">Saathy suggests</span>{focus ? <>Revisit {focus.title}. {focus.needingPractice} student{focus.needingPractice === 1 ? '' : 's'} in this section could use more practice.</> : 'A teaching suggestion will appear when there is enough recorded practice.'}</div>
+        <div className="nb-sticky th-suggestion"><span className="nb-sticky__who">Saathy suggests</span>{focus ? <>Revisit {focus.title}. {focus.needingPractice} student{focus.needingPractice === 1 ? '' : 's'} across your sections could use more practice.</> : 'A teaching suggestion will appear when there is enough recorded practice.'}</div>
       </section>
       <section className="nb-card" id="classes"><div className="nb-card__head"><h2 className="nb-h3">Your classes</h2><Link className="nb-link" to="/teacher/subjects">Publish notes</Link></div><CatalogGate catalog={catalog}>
         {classes.length ? classes.map((item) => <div className="th-class" key={item.id}><Link className="nb-row__t" to={`/teacher/classes/${item.id}`}>{item.name}</Link><div className="th-links">{sections.filter((row) => row.classId === item.id).map((row) => <Link key={row.id} to={`/teacher/sections/${row.id}`}>Section {row.name}</Link>)}{subjects.filter((row) => row.classId === item.id).map((row) => <Link key={row.id} to={`/teacher/subjects/${row.id}`}>{row.name}</Link>)}</div></div>) : <p className="nb-empty">No class is assigned to you. Ask your school administrator.</p>}

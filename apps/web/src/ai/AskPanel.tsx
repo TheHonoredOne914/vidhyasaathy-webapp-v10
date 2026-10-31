@@ -41,7 +41,7 @@ export function AskPanel() {
     try {
       const reply = await postJson('/ask', AskResponseSchema, parsed.data);
       setDoubts((current) => previous ? current.map((row) => row.id === previous.id ? { ...row, replies: [...row.replies, reply] } : row) : [...current, { id: crypto.randomUUID(), question: text, chapterId: parsed.data.chapterId, chapter: chapter?.title ?? '', subject: subject?.name ?? '', replies: [reply] }]);
-      if (reply.status === 'answered' || reply.status === 'not_in_notes') setQuestion('');
+      if (!previous && (reply.status === 'answered' || reply.status === 'not_in_notes')) setQuestion('');
     } catch { setError('Could not reach your notebook helper. Your question is still here. Try again.'); }
     finally { setPending(false); }
   }
