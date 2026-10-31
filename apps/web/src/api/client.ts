@@ -114,3 +114,17 @@ export function inlineFieldErrors(fields: Record<string, string[]>): Record<stri
   }
   return result;
 }
+
+export { errorFrom };
+
+// Unlike JSON requests, multipart uploads need the browser-generated boundary.
+export async function uploadForm(path: string, body: FormData, signal: AbortSignal): Promise<Response> {
+  try {
+    const response = await fetch(`${apiBase()}${path}`, { method: 'POST', body, signal, credentials: 'include' });
+    if (response.status === 401) window.dispatchEvent(new Event('session-expired'));
+    return response;
+  } catch (error) {
+    if (signal.aborted) throw error;
+    throw new ApiClientError(0, 'NETWORK', 'The network request failed. Check your connection and try again.');
+  }
+}
