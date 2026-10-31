@@ -6,7 +6,7 @@ import type { Beat } from './beats';
 export const cubicInOut = (t: number) => t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2;
 
 export function CameraRig({ beat, time, act, zoom = 0, reduced = false }: {
-  beat: Beat; time: number; act: boolean; zoom?: number; reduced?: boolean;
+  beat: Beat; time: number; act: boolean; zoom?: number | undefined; reduced?: boolean | undefined;
 }) {
   const { gl } = useThree();
   const orbit = useRef({ down: false, x: 0, y: 0, yaw: 0, pitch: 0, vx: 0, vy: 0, distance: 1, released: 0 });

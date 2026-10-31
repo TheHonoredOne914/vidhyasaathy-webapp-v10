@@ -69,6 +69,38 @@
 .afv-kz .vignette i:nth-child(2){background:#ff9406;animation-delay:-1s}
 .afv-kz .vignette i:nth-child(3){background:#4d8bff;width:24px;height:24px;animation-delay:-2s}
 @keyframes afv-float{50%{transform:translateY(-8px)}}
+.afv-kz .act-controls{flex-wrap:wrap;justify-content:center;align-items:center;width:min(92vw,760px);gap:8px;font-size:14px}
+.afv-kz .act-controls button{border:2px solid #ffffff99;border-radius:22px;padding:8px 16px;background:#2d0089;color:#fff;touch-action:none}
+.afv-kz .act-controls button:disabled{opacity:.5;cursor:default}
+.afv-kz .act-controls button[aria-pressed=true]{background:#c4246f}
+.afv-kz .act-controls p{margin:0;text-align:center;width:100%}
+.afv-kz .action-message{position:absolute;top:21vh;left:10%;width:80%;text-align:center;font-size:16px}
+.afv-kz .sort-cards,.afv-kz .build-controls,.afv-kz .quiz{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;width:100%}
+.afv-kz .sort-bin{min-width:140px;min-height:48px;border-style:dashed!important}
+.afv-kz .quiz label{display:flex;flex-direction:column;gap:4px;font-size:14px}
+.afv-kz .quiz select{pointer-events:auto;border-radius:12px;padding:6px;color:#2d0089;background:#fff}
+.afv-kz .slot-hint{animation:afv-slot 1s ease-in-out infinite}
+.afv-kz[data-afv-episode=stability] .meter{bottom:31vh}
+.afv-kz[data-afv-episode=stability] .hint,.afv-kz[data-afv-episode=recap] .hint{bottom:auto;top:17vh}
+.afv-kz[data-afv-episode=isotopes][data-afv-phase=act] .panelData{bottom:39vh}
+.afv-kz[data-afv-episode=recap] .act-controls{bottom:18vh}
+@keyframes afv-slot{50%{box-shadow:0 0 0 6px #ffffff55}}
+.afv-kz .iris{position:absolute;inset:0;background:#2d0089;pointer-events:none;z-index:1;animation:afv-iris 350ms ease-out both}
+.afv-kz .tag{animation:afv-pop 220ms cubic-bezier(.34,1.56,.64,1) both}
+.afv-kz .push-arrows{position:absolute;left:50%;top:48%;width:38%;display:flex;justify-content:space-between;transform:translateX(-50%);transition:width 350ms,opacity 350ms}
+.afv-kz .push-arrows i{width:25px;height:25px;border-top:7px solid #e8544a;border-right:7px solid #e8544a;transform:rotate(-135deg)}
+.afv-kz .push-arrows i:last-child{transform:rotate(45deg)}
+.afv-kz .push-arrows.stable{width:12%;opacity:0}
+@keyframes afv-iris{from{clip-path:circle(150% at 50% 50%)}to{clip-path:circle(0 at 50% 50%)}}
+@keyframes afv-pop{from{opacity:0;scale:.8}to{opacity:1;scale:1}}
+@media(max-width:600px){
+  .afv-kz .act-controls{bottom:19vh;font-size:14px;gap:6px}
+  .afv-kz .act-controls button{padding:6px 10px}
+  .afv-kz .quiz{gap:4px}
+  .afv-kz .quiz label{width:30%;font-size:14px}
+  .afv-kz .quiz select{max-width:100%}
+  .afv-kz .action-message{top:24vh;font-size:14px}
+}
 @media(max-width:600px){
   .afv-kz .chapter-name{display:none}
   .afv-kz .prog{top:3vh;gap:4px}

@@ -9,7 +9,7 @@ const sphere = new SphereGeometry(1, 48, 48);
 export type ParticleKind = 'p' | 'n';
 export function Particle({ kind, radius = 0.5, position = [0, 0, 0], face = false, mood = 'smile', seed = 1, wobble = 0, reduced = false, onTap, onProject }: {
   kind: ParticleKind; radius?: number; position?: [number, number, number]; face?: boolean | (() => boolean); mood?: Mood;
-  seed?: number; wobble?: number; reduced?: boolean; onTap?: (kind: ParticleKind) => void; onProject?: (point: ScreenAnchor) => void;
+  seed?: number; wobble?: number; reduced?: boolean; onTap?: ((kind: ParticleKind) => void) | undefined; onProject?: ((point: ScreenAnchor) => void) | undefined;
 }) {
   const root = useRef<Group>(null);
   const bounce = useRef(0);

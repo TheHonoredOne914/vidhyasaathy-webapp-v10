@@ -6,8 +6,8 @@ import { CameraRig } from './kz/CameraRig';
 import { BEATS } from './kz/beats';
 import { Backdrop } from './kz/Backdrop';
 import { Bokeh } from './kz/Bokeh';
-import { Electron } from './kz/Electron';
-import { Nucleus } from './kz/Nucleus';
+import { Electron } from './kz/ElectronView';
+import { Nucleus } from './kz/NucleusView';
 import { ShellRing } from './kz/ShellRing';
 import { Sparkles } from './kz/Sparkles';
 import { KZ } from './kz/palette';
@@ -41,13 +41,13 @@ function PerfGuard({ onSlow }: { onSlow: () => void }) {
   return null;
 }
 
-function Orbitals({ counts, radius = 1, reduced, onShell }: { counts: number[]; radius?: number; reduced?: boolean; onShell?: (shell: 'k' | 'l' | 'm') => void }) {
+function Orbitals({ counts, radius = 1, reduced, onShell }: { counts: number[]; radius?: number; reduced?: boolean | undefined; onShell?: ((shell: 'k' | 'l' | 'm') => void) | undefined }) {
   return <>{counts.map((count, shell) => {
     const r = (1.65 + shell * 0.95) * radius;
     const label = (['k', 'l', 'm'] as const)[shell]!;
     return <group key={shell} rotation={[0.4 + shell * 0.18, shell % 2 ? -0.3 : 0.18, -0.12]}>
       <ShellRing radius={r} active={!!onShell} onTap={onShell && (() => onShell(label))} />
-      {Array.from({ length: count }, (_, i) => <Electron key={i} radius={r} angle={i * Math.PI * 2 / count} speed={0.22 + shell * 0.08} reduced={reduced} />)}
+      {Array.from({ length: count }, (_, i) => <Electron key={i} radius={r} angle={i * Math.PI * 2 / count} speed={0.38 - shell * 0.08} reduced={reduced} />)}
     </group>;
   })}</>;
 }
@@ -69,7 +69,7 @@ function Atom({ api, beat }: { api: SceneApi; beat: number }) {
   </group>;
 }
 
-function IsotopePanels({ reduced }: { reduced?: boolean }) {
+function IsotopePanels({ reduced }: { reduced?: boolean | undefined }) {
   const { gl, size } = useThree();
   const panels = useMemo(() => [KZ.coral, KZ.teal, KZ.lavender].map((color) => ({
     scene: new Scene(), camera: new PerspectiveCamera(36, 1, 0.1, 100), color,

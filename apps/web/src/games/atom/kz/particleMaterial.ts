@@ -9,11 +9,21 @@ import { MOOD_ID, type Mood } from './palette';
  */
 const vert = /* glsl */ `
 varying vec3 vN; varying vec3 vP; varying vec3 vC;
+#ifdef USE_INSTANCING
+attribute float aFace; varying float vFace;
+#endif
 void main(){
-  vec4 mv = modelViewMatrix * vec4(position,1.0);
+  vec4 local = vec4(position,1.0);
+  vec3 norm = normal;
+  vec4 centre = vec4(0.0,0.0,0.0,1.0);
+  #ifdef USE_INSTANCING
+  local = instanceMatrix * local; centre = instanceMatrix * centre;
+  norm = mat3(instanceMatrix) * norm; vFace = aFace;
+  #endif
+  vec4 mv = modelViewMatrix * local;
   vP = mv.xyz;
-  vC = (modelViewMatrix * vec4(0.0,0.0,0.0,1.0)).xyz;
-  vN = normalize(normalMatrix * normal);
+  vC = (modelViewMatrix * centre).xyz;
+  vN = normalize(normalMatrix * norm);
   gl_Position = projectionMatrix * mv;
 }`;
 
@@ -22,12 +32,19 @@ uniform vec3 uBase,uLit,uShade,uHi,uRim,uInk,uBlush;
 uniform vec3 uLight; uniform float uFace,uMood,uTilt,uBlink,uPlus,uTime,uGrain;
 uniform vec2 uLook;
 varying vec3 vN; varying vec3 vP; varying vec3 vC;
+#ifdef USE_INSTANCING
+varying float vFace;
+#endif
 float hash(vec2 p){ return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453); }
 // IQ arc SDF, symmetric about +y by abs(p.x)
 float sdArc(vec2 p, vec2 sc, float ra, float rb){ p.x=abs(p.x); return ((sc.y*p.x>sc.x*p.y)? length(p-sc*ra) : abs(length(p)-ra)) - rb; }
 float sdEll(vec2 p, vec2 r){ float k=length(p/r); return (k-1.0)*min(r.x,r.y); }
 float fill(float d){ float a=fwidth(d)*0.9; return 1.0-smoothstep(-a,a,d); }
 void main(){
+  float face = uFace;
+  #ifdef USE_INSTANCING
+  face = vFace;
+  #endif
   vec3 n = normalize(vN);
   vec3 v = normalize(-vP);
   vec3 L = normalize(uLight);
@@ -40,14 +57,14 @@ void main(){
   vec3 h = normalize(L+v);
   float sp = smoothstep(0.968,0.978,dot(n,h));
   col = mix(col,uHi,sp*0.7);
-  if(uFace>0.5 || uPlus>0.5){
+  if(face>0.5 || uPlus>0.5){
     // camera-facing face frame: forward = towards camera from sphere centre
     vec3 f = normalize(-vC);
     vec3 r = normalize(cross(vec3(0.0,1.0,0.0),f));
     vec3 u = cross(f,r);
     vec2 p = vec2(dot(n,r),dot(n,u)) - uLook*0.22;
     float c=cos(uTilt), s=sin(uTilt); p = mat2(c,s,-s,c)*p;
-    if(uFace>0.5){
+    if(face>0.5){
       vec2 ep = vec2(abs(p.x)-0.235, p.y-0.10);
       float eye = sdEll(ep, vec2(0.068, 0.092*mix(1.0,0.12,uBlink)));
       // highlight sits top-centre of each eye: mirror-symmetric like the mouth
