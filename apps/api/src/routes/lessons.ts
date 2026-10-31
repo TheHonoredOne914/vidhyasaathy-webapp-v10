@@ -11,7 +11,7 @@ import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { requireAuth, requireRole } from '../auth/middleware.ts';
 import { chapterAccess, resourceId } from '../content/access.ts';
 import type { Db } from '../db/index.ts';
-import { conceptLadders, conceptLessons, conceptPrereqs, concepts } from '../db/schema.ts';
+import { classes, conceptLadders, conceptLessons, conceptPrereqs, concepts, subjects } from '../db/schema.ts';
 import { ApiException, parseInput } from '../errors.ts';
 import { enqueueRevision } from '../learning/revise.ts';
 import { recordAnswer } from '../learning/record.ts';
@@ -59,9 +59,14 @@ export function registerLessonRoutes(app: FastifyInstance, db: Db, now: () => nu
     const lesson = readLesson(request);
     if (!lesson.found) return lesson;
     const { school } = requireAuth(request);
+    const target = conceptFor(db, request, lesson.conceptId);
+    const chapter = chapterAccess(db, request, target.chapterId);
+    const subject = found(db.select().from(subjects).where(scope(subjects, school.id, chapter.subjectId)).get());
+    const schoolClass = found(db.select().from(classes).where(scope(classes, school.id, subject.classId)).get());
+    const grade = Number(schoolClass.name.match(/\d+/)?.[0] ?? 0);
     const edges = db.select().from(conceptPrereqs).where(and(eq(conceptPrereqs.schoolId, school.id), eq(conceptPrereqs.conceptId, lesson.conceptId))).all();
     const prior = edges.map((edge) => db.select().from(concepts).where(scope(concepts, school.id, edge.prereqId)).get())
-      .find((concept) => concept?.sourceClass !== null && concept?.sourceClass !== undefined);
+      .find((concept) => concept?.sourceClass != null && concept.sourceClass >= 6 && concept.sourceClass < grade);
     return { ...lesson,
       styles: {
         notes: { text: lesson.note }, story: { steps: lesson.steps },

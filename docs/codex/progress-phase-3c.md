@@ -16,3 +16,13 @@
 - Cleaned double indentation in the resumed edits (daily service, diagnostic route, tests, app registration). No logic changes.
 - Verification: `npm run typecheck` green; full workspace suite with `npx vitest run --workspace vitest.workspace.ts --configLoader native --pool forks --reporter dot`: 72 files, 297 passed + 1 skipped.
 
+## Codex review
+
+- Resumed after the laptop reboot; retained all four modified files and all existing commits/stashes.
+- Fixed path locking across empty/completed chapters, restricted lesson bridges to prior-class concepts, and excluded New ideas from parent working-on lists.
+- Added honest, idempotent demo teacher review metadata (`not_configured`, never fabricated generated lessons) and regression checks for review visibility, path locks and bridge source class.
+- Reviewed the notebook contracts/routes, answer-key boundaries, role guards, additive migration and daily challenge safeguards. Remaining work: additive multi-subject demo enrichment and final verification.
+- Added the additive multi-subject demo enrichment (`ensureNotebookDemo`: Chemistry/Biology/Mathematics Class 9 chapters with real NCERT content, Aarav stronger than Priya, graded returned homework, today + earlier notifications, a teacher remark) in a dedicated additive seeder.
+- The seeder is wired only into the demo seed entry point (`apps/api/src/db/seed.ts`) rather than `seedDemo` itself: returning demo databases must keep their tuned daily-loop stories unchanged, so narrowly-scoped tests that seed only Motion keep passing; notebook-seed.test.ts covers idempotency (second run changes nothing, foreign keys clean).
+- Fixed seeder/guide types (notes insert partial-row handling) before the run interruption; `npm run typecheck` green for every workspace.
+

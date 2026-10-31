@@ -5,6 +5,7 @@ import { LearningPreferencesSchema, NotebookProgressSchema, SubjectPathSchema, S
 import { DEMO_SCHOOL_ID, seedDemo } from '../src/db/demo.ts';
 import { answerEvidence, chapters, conceptLadders, concepts, items, parentLinks, profiles, teacherAssignments } from '../src/db/schema.ts';
 import { cookieFrom, createHarness, PASSWORD, PIN, type Harness } from './helpers.ts';
+import { notebookWorld, subjectPath } from '../src/notebook/views.ts';
 
 describe('notebook learning preferences', () => {
   let h: Harness;
@@ -105,11 +106,31 @@ describe('school-scoped notebook read models', () => {
     expect(dashboard.statusCode).toBe(200);
     expect(dashboard.json().kpis.studiedThisWeek.total).toBeGreaterThanOrEqual(5);
     expect(dashboard.json().heatTable.length).toBeGreaterThan(0);
+    expect(dashboard.json().reviewQueue.length).toBeGreaterThan(0);
+    expect(dashboard.json().reviewQueue.every((job: { status: string }) => ['ready', 'failed', 'not_configured'].includes(job.status))).toBe(true);
     expect(dashboard.body).not.toMatch(/"(?:draft|answerKey|correctOption)":/);
     const unrelated = h.roleCookie(DEMO_SCHOOL_ID, 'parent').cookie;
     expect((await get(`/parents/children/${childId}/home`, unrelated)).statusCode).toBe(403);
     const unassigned = h.roleCookie(DEMO_SCHOOL_ID, 'teacher').cookie;
     expect((await get('/teacher/home', unassigned)).json()).toMatchObject({ heatTable: [], reviewQueue: [], nudges: [] });
+  });
+
+  it('skips empty chapters but never skips an unfinished chapter in path locks', () => {
+    const pupil = h.database.db.select().from(profiles).where(eq(profiles.id, childId)).get()!;
+    const world = notebookWorld(h.database.db, DEMO_SCHOOL_ID, pupil, h.now());
+    const chapter = world.chapterRows[0]!;
+    const concept = world.conceptRows.find((row) => row.chapterId === chapter.id)!;
+    const chapterRows = ['Empty', 'First idea', 'Already mastered', 'Later idea'].map((title, position) =>
+      ({ ...chapter, id: randomUUID(), title, position }));
+    const conceptRows = chapterRows.slice(1).map((row) => ({ ...concept, id: randomUUID(), chapterId: row.id }));
+    const mastered = conceptRows[1]!.id;
+    const path = subjectPath({ ...world, chapterRows, conceptRows, allConcepts: conceptRows, edges: [],
+      mastery: (id) => id === mastered ? 3 : null, done: (id) => id === mastered,
+      word: (id) => id === mastered ? 'Mastered' : 'New' }, chapter.subjectId);
+    expect(path.chapters[1]!.lockReason).toBeNull();
+    expect(path.chapters[2]!.stations[0]).toMatchObject({ status: 'done', lockReason: null });
+    expect(path.chapters[3]!.lockReason).toBe('Finish First idea first.');
+    expect(path.chapters[3]!.stations[0]!.status).toBe('locked');
   });
 
   it('provides key-free lesson tabs and a no-penalty prerequisite diagnostic', async () => {
@@ -119,6 +140,7 @@ describe('school-scoped notebook read models', () => {
     expect(lesson.statusCode).toBe(200);
     expect(Object.keys(lesson.json().styles)).toEqual(['notes', 'story', 'diagram', 'exam']);
     expect(lesson.json().video).toBeNull();
+    expect(lesson.json().priorClassBridge.sourceClass).toBeLessThan(9);
     expect(lesson.body).not.toMatch(/"(?:answer|answers|correctOption|masteryLevel|level)":/);
     const pupil = h.roleCookie(DEMO_SCHOOL_ID, 'student');
     enroll(pupil.profileId);

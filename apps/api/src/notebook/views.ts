@@ -76,10 +76,10 @@ function ordered(world: World, chapterId: string) {
 
 export function subjectPath(world: World, subjectId: string) {
   const subject = found(world.subjectRows.find((row) => row.id === subjectId));
-  let previous: { id: string; title: string; complete: boolean } | null = null;
+  let unfinished: { title: string } | null = null;
   const chapters = world.chapterRows.filter((row) => row.subjectId === subjectId).map((chapter) => {
     const ideas = ordered(world, chapter.id);
-    const lockReason = previous && !previous.complete ? `Finish ${previous.title} first.` : null;
+    const lockReason = unfinished ? `Finish ${unfinished.title} first.` : null;
     let currentFound = false;
     const stations = ideas.map((idea) => {
       const unmet = world.edges.filter((edge) => edge.conceptId === idea.id).map((edge) => world.allConcepts.find((row) => row.id === edge.prereqId))
@@ -87,10 +87,10 @@ export function subjectPath(world: World, subjectId: string) {
       const reason = lockReason ?? (unmet ? `Try ${unmet.title} first.` : null);
       const status = world.done(idea.id) ? 'done' : reason ? 'locked' : currentFound ? 'next' : 'current';
       if (status === 'current') currentFound = true;
-      return { conceptId: idea.id, title: idea.title, word: world.word(idea.id), status, lockReason: reason };
+      return { conceptId: idea.id, title: idea.title, word: world.word(idea.id), status, lockReason: status === 'done' ? null : reason };
     });
     const goal = overview(world, ideas);
-    previous = { id: chapter.id, title: chapter.title, complete: goal.total > 0 && goal.done === goal.total };
+    if (!unfinished && goal.done < goal.total) unfinished = chapter;
     return { chapterId: chapter.id, title: chapter.title, lockReason, stations, goal: { done: goal.done, total: goal.total },
       atAGlance: words.map((word) => ({ word, count: stations.filter((row) => row.word === word).length })),
       nextUp: stations.find((row) => row.status === 'current') ?? null };
@@ -155,7 +155,8 @@ export function parentHome(db: Db, request: FastifyRequest, childId: string, now
     homework: { done: world.homework.filter((row) => world.handedIn(row.id)).length, total: world.homework.length },
     streakDays: rebuildProfileStreak(db, pupil.id, school.id, now).state.currentDays,
     subjects: subjectsBoard(world).subjects.map(({ subjectId, name, word, done, total }) => ({ subjectId, name, word, done, total })),
-    gotIt: world.conceptRows.filter((row) => world.done(row.id)).map(idea),
+    gotIt: world.conceptRows.filter((row) => world.done(row.id)
+      && world.week.some((answer) => answer.conceptId === row.id && answer.correct && !answer.notTaught)).map(idea),
     workingOn: world.conceptRows.filter((row) => world.mastery(row.id) !== null && !world.done(row.id)).map(idea),
     remarks: visibleAnnouncements(db, request).map(({ id, title, body, sectionId, createdAt }) => ({ id, title, body, sectionId, createdAt }))
       .filter((row) => row.sectionId === pupil.sectionId),
