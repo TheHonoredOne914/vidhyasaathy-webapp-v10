@@ -39,3 +39,57 @@
 .afv-kz button,.afv-kz input,.afv-kz select{font:inherit}
 .afv-kz button{cursor:pointer;pointer-events:auto}
 .afv-kz button:focus-visible,.afv-kz input:focus-visible{outline:3px solid #ffd23f;outline-offset:5px}
+.afv-kz{z-index:1000}
+.afv-kz h1,.afv-kz h2,.afv-kz p,.afv-kz button,.afv-kz a{font-family:inherit;color:inherit}
+.afv-kz .cap{border:0;text-align:left;width:max-content;pointer-events:auto}
+.afv-kz .prog button{padding:10px 0;background:none;border:0}
+.afv-kz .chapter-name{font-weight:600;font-size:clamp(12px,1vw,18px)}
+.afv-kz .exit{position:absolute;top:8vh;left:2.2vw;font-size:12px;pointer-events:auto;opacity:.8}
+.afv-kz .primary{border:2px solid #fff;border-radius:999px;background:#fff;color:#2d0089;padding:.8em 1.8em;font-weight:700;box-shadow:0 5px 0 #19005144}
+.afv-kz .begin{position:absolute;left:50%;top:45%;transform:translateX(-50%)}
+.afv-kz .hint{left:50%;bottom:25vh;transform:translateX(-50%);white-space:nowrap}
+.afv-kz .act-controls{position:absolute;bottom:17vh;left:50%;transform:translateX(-50%);display:flex;gap:12px;pointer-events:auto}
+.afv-kz .particle-label{position:absolute;top:38vh}
+.afv-kz .particle-label .tag{position:static;flex-direction:column;align-items:flex-start;gap:.2em}
+.afv-kz .proton-label{left:16vw}
+.afv-kz .neutron-label{right:14vw;top:48vh}
+.afv-kz .transport{position:absolute;bottom:.6vh;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;font-size:11px;pointer-events:auto;width:min(80vw,560px)}
+.afv-kz .transport button{border:0;background:transparent;padding:6px;color:#fff;white-space:nowrap}
+.afv-kz .transport input{flex:1;min-width:40px;accent-color:#fff}
+.afv-kz .transport span{white-space:nowrap}
+.afv-kz .payoff{position:absolute;top:15vh;left:50%;transform:translateX(-50%);font-size:18px;font-weight:600}
+.afv-kz .recap{position:absolute;inset:14vh 8vw 12vh;text-align:center;pointer-events:auto}
+.afv-kz .recap h1{font-size:clamp(32px,4vw,64px);margin:0 0 4vh}
+.afv-kz .recap-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:4vh}
+.afv-kz .recap article{background:#ffffff18;border:1px solid #ffffff45;border-radius:20px;padding:24px 16px}
+.afv-kz .recap h2{font-size:20px;margin:16px 0 8px}
+.afv-kz .recap p{font-size:14px;line-height:1.5;margin:0}
+.afv-kz .vignette{height:100px;display:flex;justify-content:center;align-items:center;gap:4px}
+.afv-kz .vignette i{font-style:normal;font-weight:800;background:#fb5a9e;width:48px;height:48px;display:grid;place-items:center;border-radius:50%;animation:afv-float 3s ease-in-out infinite}
+.afv-kz .vignette i:nth-child(2){background:#ff9406;animation-delay:-1s}
+.afv-kz .vignette i:nth-child(3){background:#4d8bff;width:24px;height:24px;animation-delay:-2s}
+@keyframes afv-float{50%{transform:translateY(-8px)}}
+@media(max-width:600px){
+  .afv-kz .chapter-name{display:none}
+  .afv-kz .prog{top:3vh;gap:4px}
+  .afv-kz .prog i{width:20px;height:4px}
+  .afv-kz .title{top:17vh;padding:0 16px}
+  .afv-kz .title h1{font-size:36px}
+  .afv-kz .cap{max-width:94vw;width:94vw;box-sizing:border-box;padding:12px;border-radius:24px;gap:10px;bottom:5vh}
+  .afv-kz .hint{font-size:11px;white-space:normal;width:90vw;justify-content:center;text-align:center;bottom:25vh}
+  .afv-kz .count{top:12vh;gap:5px}
+  .afv-kz .count .tag{font-size:11px}
+  .afv-kz .meter{width:90vw;bottom:20vh}
+  .afv-kz .proton-label{left:4vw;top:30vh}
+  .afv-kz .neutron-label{right:4vw;top:58vh}
+  .afv-kz .particle-label .tag{font-size:11px}
+  .afv-kz .panelTag{top:17vh}
+  .afv-kz .panelData{font-size:10px;white-space:normal;width:31vw;bottom:30vh}
+  .afv-kz .recap{inset:13vh 5vw 7vh;overflow:auto}
+  .afv-kz .recap-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .afv-kz .recap article{padding:12px 8px}
+  .afv-kz .recap h2{font-size:16px}
+  .afv-kz .recap p{font-size:11px}
+  .afv-kz .vignette{height:70px}
+}
+@media(prefers-reduced-motion:reduce){.afv-kz *{animation:none!important;transition:none!important}}
