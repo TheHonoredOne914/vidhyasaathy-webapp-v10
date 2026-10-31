@@ -44,15 +44,16 @@
 .afv-kz .cap{border:0;text-align:left;width:max-content;pointer-events:auto}
 .afv-kz .prog button{padding:10px 0;background:none;border:0}
 .afv-kz .chapter-name{font-weight:600;font-size:clamp(12px,1vw,18px)}
-.afv-kz .exit{position:absolute;top:8vh;left:2.2vw;font-size:12px;pointer-events:auto;opacity:.8}
+.afv-kz .exit{position:absolute;top:10vh;left:2.2vw;font-size:12px;pointer-events:auto;opacity:.8}
 .afv-kz .primary{border:2px solid #fff;border-radius:999px;background:#fff;color:#2d0089;padding:.8em 1.8em;font-weight:700;box-shadow:0 5px 0 #19005144}
 .afv-kz .begin{position:absolute;left:50%;top:45%;transform:translateX(-50%)}
 .afv-kz .hint{left:50%;bottom:25vh;transform:translateX(-50%);white-space:nowrap}
 .afv-kz .act-controls{position:absolute;bottom:17vh;left:50%;transform:translateX(-50%);display:flex;gap:12px;pointer-events:auto}
 .afv-kz .particle-label{position:absolute;top:38vh}
 .afv-kz .particle-label .tag{position:static;flex-direction:column;align-items:flex-start;gap:.2em}
-.afv-kz .proton-label{left:16vw}
-.afv-kz .neutron-label{right:14vw;top:48vh}
+.afv-kz .proton-label{left:14vw;top:28vh}
+.afv-kz .neutron-label{right:12vw;top:55vh}
+.afv-kz .atom-tag{position:absolute;left:50%;top:32vh;transform:translateX(-50%)}
 .afv-kz .transport{position:absolute;bottom:.6vh;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;font-size:11px;pointer-events:auto;width:min(80vw,560px)}
 .afv-kz .transport button{border:0;background:transparent;padding:6px;color:#fff;white-space:nowrap}
 .afv-kz .transport input{flex:1;min-width:40px;accent-color:#fff}
@@ -81,7 +82,8 @@
 .afv-kz .quiz select{pointer-events:auto;border-radius:12px;padding:6px;color:#2d0089;background:#fff}
 .afv-kz .slot-hint{animation:afv-slot 1s ease-in-out infinite}
 .afv-kz[data-afv-episode=stability] .meter{bottom:31vh}
-.afv-kz[data-afv-episode=stability] .hint,.afv-kz[data-afv-episode=recap] .hint{bottom:auto;top:17vh}
+.afv-kz[data-afv-episode=stability] .hint,.afv-kz[data-afv-episode=recap] .hint,.afv-kz[data-afv-episode=isotopes][data-afv-phase=act] .hint{bottom:auto;top:17vh}
+.afv-kz[data-afv-episode=isotopes] .panelTag{top:12vh}
 .afv-kz[data-afv-episode=isotopes][data-afv-phase=act] .panelData{bottom:39vh}
 .afv-kz[data-afv-episode=recap] .act-controls{bottom:18vh}
 @keyframes afv-slot{50%{box-shadow:0 0 0 6px #ffffff55}}
