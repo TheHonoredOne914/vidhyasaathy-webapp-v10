@@ -1,7 +1,7 @@
 import { buildApp } from './app.ts';
 import { loadConfig } from './config.ts';
 import { openDatabase } from './db/index.ts';
-import { OpenAiProvider } from './ai/provider.ts';
+import { createProvider } from './ai/provider.ts';
 
 const config = loadConfig();
 const database = openDatabase(config.DATABASE_PATH);
@@ -14,7 +14,8 @@ const app = await buildApp({
   rateLimitMax: config.RATE_LIMIT_MAX,
   authRateLimitMax: config.AUTH_RATE_LIMIT_MAX,
   uploadsDirectory: config.UPLOAD_DIRECTORY,
-  ...(config.OPENAI_API_KEY ? { llmProvider: new OpenAiProvider({ apiKey: config.OPENAI_API_KEY, model: config.OPENAI_MODEL, apiUrl: config.OPENAI_API_URL }) } : {}),
+  llmProvider: createProvider(config),
+  aiDailyTokenBudget: config.AI_DAILY_TOKEN_BUDGET,
   ...(config.CLAIM_CODE_ENCRYPTION_KEY ? { claimCodeEncryptionKey: config.CLAIM_CODE_ENCRYPTION_KEY } : {}),
   logger: true,
 });

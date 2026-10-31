@@ -1,6 +1,7 @@
 import { RoleSchema, type AiDraft, type Answer, type AskResponse, type ConceptLesson, type NotificationChannel, type RemediationResult, type SaveItem } from '@vidhyasaathy/contracts';
 import { sql } from 'drizzle-orm';
 import { check, foreignKey, index, integer, primaryKey, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+export * from './schema-phase4.ts';
 
 export const schools = sqliteTable('school', {
   id: text('id').primaryKey(),
@@ -429,7 +430,9 @@ export const answerEvidence = sqliteTable('answer_evidence', {
   conceptId: text('concept_id').notNull(), itemId: text('item_id').notNull(),
   level: integer('level').notNull(), correct: integer('correct', { mode: 'boolean' }).notNull(),
   confidence: text('confidence', { enum: ['sure', 'unsure', 'guess'] }).notNull(),
-  source: text('source').notNull(), errorType: text('error_type', { enum: ['concept_gap', 'careless', 'method', 'guess'] }),
+  source: text('source').notNull(),
+  weight: real('weight').notNull().default(1),
+  errorType: text('error_type', { enum: ['concept_gap', 'careless', 'method', 'guess'] }),
   timeMs: integer('time_ms').notNull(), answer: text('answer', { mode: 'json' }).notNull().$type<string | string[]>(),
   notTaught: integer('not_taught', { mode: 'boolean' }).notNull().default(false), createdAt: integer('created_at').notNull(),
 }, (t) => [

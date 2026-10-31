@@ -23,12 +23,14 @@ import { registerSyncRoutes } from './routes/sync.ts';
 import { createClaimIssuance } from './school/claims.ts';
 import { LocalStubProvider, type LlmProvider } from './ai/provider.ts';
 import { registerAiRoutes } from './routes/ai.ts';
+import { registerAskRoutes } from './routes/ask.ts';
 import { registerRemediationRoutes } from './routes/remediation.ts';
 import { registerDashboardRoutes } from './routes/dashboard.ts';
 import { registerPracticeRoutes } from './routes/practice.ts';
 import { registerDiagnosticRoutes } from './routes/diagnostic.ts';
 import { registerLessonRoutes } from './routes/lessons.ts';
 import { registerDailyRoutes } from './routes/daily.ts';
+import { registerGamesRoutes } from './routes/games.ts';
 import { registerAuthV9Routes } from './routes/auth-v9.ts';
 
 export interface AppOptions {
@@ -47,6 +49,7 @@ export interface AppOptions {
   uploadsDirectory?: string;
   llmProvider?: LlmProvider;
   aiJobPollMs?: number;
+  aiDailyTokenBudget?: number;
 }
 
 export async function buildApp(input: AppOptions) {
@@ -132,12 +135,14 @@ export async function buildApp(input: AppOptions) {
     registerAssessmentRoutes(app, db, auth, options.now);
     registerSyncRoutes(app, db, options.now);
     registerAiRoutes(app, input.database, auth, input.llmProvider ?? new LocalStubProvider(), options.now, input.aiJobPollMs ?? 1000);
+    registerAskRoutes(app, input.database, input.llmProvider ?? new LocalStubProvider(), options.now, input.aiDailyTokenBudget);
     registerRemediationRoutes(app, input.database, options.now);
     registerDashboardRoutes(app, input.database, auth, options.now);
     registerPracticeRoutes(app, db, auth, options.now);
     registerDiagnosticRoutes(app, db, options.now);
     registerLessonRoutes(app, db, options.now);
     registerDailyRoutes(app, db, options.now);
+    registerGamesRoutes(app, input.database, options.now);
     app.post('/auth/logout', async (request, reply) => {
       auth.logout(request, reply);
       return reply.code(204).send();

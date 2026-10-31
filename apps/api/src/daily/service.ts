@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { FastifyRequest } from 'fastify';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import {
   ConceptLessonSchema, type Answer,
 } from '@vidhyasaathy/contracts';
@@ -9,7 +9,7 @@ import { buildCatchup } from '@vidhyasaathy/core/catchup';
 import { buildDailyChallenge, DAILY_CHALLENGE_MINUTES, type ChallengeItem } from '@vidhyasaathy/core/daily-challenge';
 import { selectDushman } from '@vidhyasaathy/core/dushman';
 import { chapterBand, clampLevel, levelWord, type Band, type Level } from '@vidhyasaathy/core/learning';
-import { pickNextAction, type NextActionCandidate } from '@vidhyasaathy/core/next-action';
+import { pickNextAction, type NextActionCandidate, getFollowupCandidates, type FollowupItemRow } from '@vidhyasaathy/core/next-action';
 import { decayedMastery, frustrationRadar, revisionRadar, type RadarState } from '@vidhyasaathy/core/radars';
 import { buildNightlyPlan, replanAfterMiss, type NightItem } from '@vidhyasaathy/core/study-plan';
 import {
@@ -28,6 +28,7 @@ import {
   sessionProgress, slides, streakFreezeLedger, streakStates, streakTouches, studentConceptStates, studyPlanItems,
   studyPlans, subjects,
 } from '../db/schema.ts';
+import { followupItems } from '../db/schema-phase4.ts';
 import { ApiException } from '../errors.ts';
 import { found, scope } from '../school/access.ts';
 import { recordAnswer } from '../learning/record.ts';
@@ -297,6 +298,11 @@ export function studentHome(db: Db, request: FastifyRequest, now: number) {
       href: `/student/chapters/${chapter.id}/practice/${gameId}`, resumeState: null, dueAt: null, resumeAt: 0, lateUntil: null, windowOpen: true,
     });
   }
+  // Add followup candidates from unsure answers and wrong quick-tries
+  const followupRows = db.select().from(followupItems)
+    .where(and(eq(followupItems.profileId, world.profile.id), eq(followupItems.schoolId, world.school.id), isNull(followupItems.completedAt)))
+    .all() as FollowupItemRow[];
+  candidates.push(...getFollowupCandidates(followupRows, now));
   const decayed = radarOf(world).filter((row) => row.level != null).map((row) => ({
     conceptId: row.conceptId, name: row.name, decayed: decayedMastery(row.mastery, row.updatedAt, now),
   }));

@@ -7,6 +7,7 @@ export * from './ai.ts';
 export * from './dashboard.ts';
 export * from './practice.ts';
 export * from './daily.ts';
+export * from './games.ts';
 
 export const RoleSchema = z.enum(['admin', 'teacher', 'student', 'parent']);
 export type Role = z.infer<typeof RoleSchema>;
@@ -223,3 +224,4 @@ export type RosterImportResult = z.infer<typeof RosterImportResultSchema>;
 export const ClaimCodeSheetQuerySchema = z.object({ sectionId: IdSchema }).strict();
 export const IssueClaimCodeSchema = z.object({ profileId: IdSchema }).strict();
 export type IssueClaimCode = z.infer<typeof IssueClaimCodeSchema>;
+export * from './ask.ts';
