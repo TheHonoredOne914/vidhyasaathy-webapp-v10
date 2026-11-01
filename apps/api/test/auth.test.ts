@@ -83,6 +83,34 @@ describe('password authentication and sessions', () => {
   });
 });
 
+describe('local loose demo authentication', () => {
+  const previousMode = process.env.NODE_ENV;
+  const previousFlag = process.env.DEMO_LOOSE_AUTH;
+  beforeEach(() => { process.env.NODE_ENV = 'development'; process.env.DEMO_LOOSE_AUTH = 'true'; });
+  afterEach(() => {
+    if (previousMode === undefined) delete process.env.NODE_ENV; else process.env.NODE_ENV = previousMode;
+    if (previousFlag === undefined) delete process.env.DEMO_LOOSE_AUTH; else process.env.DEMO_LOOSE_AUTH = previousFlag;
+  });
+
+  it('accepts a wrong password and creates an account for a new email', async () => {
+    await h.register();
+    const known = await h.post('/auth/login', { email: 'admin@example.test', password: 'wrong' });
+    expect(known.statusCode).toBe(200);
+    const created = await h.post('/auth/login', { email: 'new-user@example.test', password: 'x' });
+    expect(created.statusCode).toBe(200);
+    expect(created.json().profile.name).toBe('New User');
+  });
+
+  it('accepts any student PIN and an arbitrary claim code', async () => {
+    const identity = MeSchema.parse((await h.register()).json());
+    const student = h.createProfile(identity.school.id);
+    const pin = await h.post('/auth/pin-login', { profileId: student.profileId, pin: 'wrong' });
+    expect(pin.statusCode).toBe(200);
+    const claim = await h.post('/auth/claim', { code: 'random-code', pin: 'x' });
+    expect(claim.statusCode).toBe(200);
+  });
+});
+
 describe('one-time claim redemption', () => {
   it('claims a student once, hashes the PIN, and permits later PIN login', async () => {
     const admin = MeSchema.parse((await h.register()).json());
