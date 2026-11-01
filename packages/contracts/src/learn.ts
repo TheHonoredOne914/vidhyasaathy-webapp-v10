@@ -174,18 +174,24 @@ export const LessonViewSchema = z.discriminatedUnion('found', [
 ]);
 export type LessonView = z.infer<typeof LessonViewSchema>;
 
+/** Client-generated per intentional attempt; a replay of the same request reuses it, a retry gets a new one. */
+const AttemptId = z.string().regex(/^[A-Za-z0-9_-]{8,64}$/).optional();
+
 export const SubmitCheckpointSchema = z.object({
+  attemptId: AttemptId,
   itemId: Id, answer: Short, confidence: z.enum(['sure', 'unsure', 'guess']),
   timeMs: z.number().int().nonnegative().max(86_400_000).default(0),
 }).strict();
 export const CheckpointResultSchema = z.object({ correct: z.boolean(), explanation: Line }).strict();
 
 export const SubmitFadedSchema = z.object({
+  attemptId: AttemptId,
   answer: Short, hinted: z.boolean(), confidence: z.enum(['sure', 'unsure', 'guess']),
   timeMs: z.number().int().nonnegative().max(86_400_000).default(0),
 }).strict();
 
 export const SubmitExplainSchema = z.object({
+  attemptId: AttemptId,
   ownWords: z.string().trim().min(8).max(500),
   gap: Short,
   confidence: z.enum(['sure', 'unsure', 'guess']),
@@ -194,6 +200,7 @@ export const SubmitExplainSchema = z.object({
 export const ExplainResultSchema = z.object({ correct: z.boolean(), explanation: Line, queued: z.literal(true) }).strict();
 
 export const SubmitFlashcardSchema = z.object({
+  attemptId: AttemptId,
   cardId: Id, rating: z.enum(['knew', 'almost', 'forgot']),
   timeMs: z.number().int().nonnegative().max(86_400_000).default(0),
 }).strict();

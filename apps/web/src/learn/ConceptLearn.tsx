@@ -78,7 +78,7 @@ export function ConceptLearn({ lesson, onSimpler }: { lesson: Found; onSimpler: 
               return;
             }
             void run(async () => {
-              const result = await postJson(`/concepts/${lesson.conceptId}/lesson/checkpoint`, CheckpointResultSchema, {
+              const result = await postJson(`/concepts/${lesson.conceptId}/lesson/checkpoint`, CheckpointResultSchema, { attemptId: crypto.randomUUID(),
                 itemId: step.checkpoint.id, answer, confidence: chosen, timeMs: Date.now() - started.current,
               });
               setNotes((currentNotes) => ({ ...currentNotes, [step.checkpoint.id]: result.explanation }));
@@ -107,7 +107,7 @@ export function ConceptLearn({ lesson, onSimpler }: { lesson: Found; onSimpler: 
               return;
             }
             void run(async () => {
-              const result = await postJson(`/concepts/${lesson.conceptId}/lesson/faded`, CheckpointResultSchema, {
+              const result = await postJson(`/concepts/${lesson.conceptId}/lesson/faded`, CheckpointResultSchema, { attemptId: crypto.randomUUID(),
                 answer: faded, hinted, confidence: confidence.faded, timeMs: Date.now() - started.current,
               });
               setFadedNote(result.explanation);
@@ -138,7 +138,7 @@ export function ConceptLearn({ lesson, onSimpler }: { lesson: Found; onSimpler: 
             return;
           }
           void run(async () => {
-            const result = await postJson(`/concepts/${lesson.conceptId}/lesson/explain`, ExplainResultSchema, {
+            const result = await postJson(`/concepts/${lesson.conceptId}/lesson/explain`, ExplainResultSchema, { attemptId: crypto.randomUUID(),
               ownWords: words, gap, confidence: confidence.explain, timeMs: Date.now() - started.current,
             });
             setExplainNote(result.explanation);
@@ -166,7 +166,7 @@ export function ConceptLearn({ lesson, onSimpler }: { lesson: Found; onSimpler: 
             {(['knew', 'almost', 'forgot'] as const).map((rating) => (
               <button key={rating} type="button" className="player-btn secondary" onClick={() => {
                 void run(async () => {
-                  await postJson(`/concepts/${lesson.conceptId}/lesson/flashcard`, FlashcardResultSchema, {
+                  await postJson(`/concepts/${lesson.conceptId}/lesson/flashcard`, FlashcardResultSchema, { attemptId: crypto.randomUUID(),
                     cardId: current.id, rating, timeMs: Date.now() - started.current,
                   });
                   setQueued('This idea is queued for 1, 3 and 7 days.');
