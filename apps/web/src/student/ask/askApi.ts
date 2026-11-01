@@ -20,10 +20,10 @@ export const ThreadSchema = z.object({
   concept: ConceptSchema.nullable(), purged: z.boolean(), messages: z.array(MessageSchema),
 });
 export const ThreadsSchema = z.object({ threads: z.array(z.object({
-  id: z.string(), title: z.string(), subjectName: z.string(), conceptName: z.string(), updatedAt: z.string(),
+  id: z.string(), title: z.string(), subjectName: z.string().nullable(), conceptName: z.string().nullable(), updatedAt: z.string(),
 })) });
 export const SavedSchema = z.object({ items: z.array(z.object({
-  id: z.string(), title: z.string(), subjectName: z.string(), savedAt: z.string(), messageId: z.string(),
+  id: z.string(), title: z.string(), subjectName: z.string().nullable(), savedAt: z.string(), messageId: z.string(),
 })) });
 export const QuickTryResultSchema = z.object({ correct: z.boolean(), correctOptionId: z.string(), explanation: z.string(), xp: z.number() });
 const SnapSchema = z.object({ snapId: z.string(), status: z.enum(['extracted', 'failed', 'not_configured']), extractedText: z.string().optional() });
@@ -45,9 +45,9 @@ export type QuickTry = z.infer<typeof QuickTrySchema>;
 export type QuickTryResult = z.infer<typeof QuickTryResultSchema>;
 export type AskRequest = {
   clientEventId: string; threadId?: string; text: string; style: 'hints' | 'explain'; mode: 'learn' | 'homework';
-  conceptId?: string; chapterId?: string; assignmentItemId?: string; snapId?: string;
-  from?: { kind: 'practice' | 'lesson' | 'homework' | 'session' | 'home'; ref?: string; label?: string };
-  followupKind?: Exclude<AskChip['kind'], 'ask_teacher'>;
+  conceptId?: string | undefined; chapterId?: string | undefined; assignmentItemId?: string | undefined; snapId?: string | undefined;
+  from?: { kind: 'practice' | 'lesson' | 'homework' | 'session' | 'home'; ref?: string | undefined; label?: string | undefined };
+  followupKind?: Exclude<AskChip['kind'], 'ask_teacher'> | undefined;
 };
 
 // SSE frames can cross byte chunks, use CRLF, and contain multiple data lines.
@@ -109,7 +109,7 @@ export async function streamAsk(request: AskRequest, onEvent: (event: AskEvent) 
   await readAskStream(response, onEvent, signal);
 }
 
-export const getThread = (id: string, signal?: AbortSignal) => getJson(`/ask/threads/${encodeURIComponent(id)}`, ThreadSchema, signal);
+export const getThread = (id: string, signal?: AbortSignal): Promise<AskThread> => getJson(`/ask/threads/${encodeURIComponent(id)}`, ThreadSchema, signal);
 export const answerQuickTry = (itemId: string, body: { clientEventId: string; threadId: string; optionId: string }, signal?: AbortSignal) =>
   postJson(`/ask/quick-try/${encodeURIComponent(itemId)}/answer`, QuickTryResultSchema, body, signal);
 

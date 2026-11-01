@@ -14,7 +14,6 @@
 .pg-ask{grid-template-columns:minmax(0,1fr) clamp(260px,22vw,340px);align-items:start}
 .pg-ask :is(.chat,.nb-col,.msg,.msg>div,.b,.composer,.ask-input){min-width:0}
 .pg-ask .chat{gap:var(--nb-s4)}
-.pg-ask .thread{gap:var(--nb-s5)}
 .pg-ask .ask-turn{display:flex;flex-direction:column;gap:var(--nb-s4);min-width:0}
 .pg-ask .msg{width:100%;overflow-wrap:anywhere}
 .pg-ask .msg.me{width:auto;max-width:85%}

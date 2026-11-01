@@ -32,11 +32,12 @@ export function GameFinishSummary() {
   const [attempt, setAttempt] = useState(0);
   const gameId = context?.gameId;
   const sessionId = context?.session?.sessionId;
+  const eventId = useRef(crypto.randomUUID());
   useEffect(() => {
     if (!gameId || !sessionId) return;
     const abort = new AbortController();
     setError(false);
-    void finishSession(gameId, sessionId, abort.signal).then((value) => {
+    void finishSession(gameId, sessionId, eventId.current, abort.signal).then((value) => {
       if (!abort.signal.aborted) setResult(value);
     }).catch(() => { if (!abort.signal.aborted) setError(true); });
     return () => abort.abort();
