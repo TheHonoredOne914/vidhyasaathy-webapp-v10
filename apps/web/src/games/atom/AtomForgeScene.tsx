@@ -67,7 +67,7 @@ function Atom({ api, beat }: { api: SceneApi; beat: number }) {
       reduced={api.reduced} onTap={(kind) => { api.onNucleusTap(); api.onParticleTap?.(kind); }} onProject={api.onAnchor} />
     {showShells && <Orbitals counts={shells} radius={beat === 0 ? 0.9 : 1} reduced={api.reduced}
       onShell={beat === 3 && api.phase === 'act' ? (shell) => api.onShellDrop(shell, shell === 'm') : undefined} />}
-    {beat === 2 && <ShellRing radius={2.05} active />}
+    {beat === 2 && <group rotation={[Math.PI / 2, 0, 0]}><ShellRing radius={2.05} active /></group>}
   </group>;
 }
 
@@ -92,7 +92,7 @@ function IsotopePanels({ reduced }: { reduced?: boolean | undefined }) {
   return <>{panels.map(({ scene, color }, i) => createPortal(<>
     <Backdrop inner={color} outer={color} /><Bokeh count={8} color="#ffffff" />
     <Nucleus p={6} n={6 + i} radius={0.34} reduced={reduced} />
-    <group rotation={[0.25, 0.15, 0]}><ShellRing radius={2.1} /><Electron radius={2.1} reduced={reduced} angle={i} /></group>
+    <group rotation={[1.3, 0.15, 0]}><ShellRing radius={2.1} /><Electron radius={2.1} reduced={reduced} angle={i} /></group>
   </>, scene))}</>;
 }
 

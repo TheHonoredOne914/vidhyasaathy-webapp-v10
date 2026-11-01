@@ -6,3 +6,4 @@
 - Kept exploration separate from assessed mastery: the recap no longer claims Mastered. Atom currently does not award XP or write assessment evidence; nine other games use phase-4b server evidence.
 - Preserved existing scratch files outside the worktree at C:/Users/HP/atom-review/scratch-preserved. No demo database migrated or reseeded.
 - Initial typecheck passed; initial forks suite exposed the known prerequisite PracticeAttemptSchema integration failure. Final integrated verification follows below.
+- Integrated verification: typecheck passed; Vitest native/forks passed 81 files, 331 tests. Playwright exercised all six beats and Games entry at three viewport sizes without page errors or horizontal overflow. Corrected the stability and isotope orbit planes against f4/f5.
