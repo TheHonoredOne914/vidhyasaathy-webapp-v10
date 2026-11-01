@@ -3,11 +3,11 @@ phase-4f progress
 
 Items completed:
 - [x] Task 1: API client (askApi.ts, gameApi.ts)
-- [ ] Task 2: Ask Saatty screen = ask.html
-- [ ] Task 3: Games board = games.html
-- [ ] Task 4: In-game wiring
-- [ ] Task 5: Shared shell nav active states
-- [ ] Task 6: Verify with shoot script
+- [x] Task 2: Ask Saathy screen = ask.html
+- [x] Task 3: Games board = games.html
+- [x] Task 4: In-game wiring
+- [x] Task 5: Shared shell nav active states
+- [x] Task 6: Verify with shoot script
 
 ## Codex review
 - Reviewed the WIP frontend against the approved Ask/Games markup and real backend contracts. Fixed schema output inference, nullable thread metadata, immutable SSE retries, stable finish event IDs, and the missing interactive-video session provider.
@@ -28,6 +28,9 @@ What's not done:
 Blockers:
 -
 
-ScrollWidth numbers ( Aarav / Priya at 360/1024/1280/1440/1920 ):
-- ask panel: 
-- games board:
+## Integrated verification
+- Root typecheck passed; all 88 files / 365 tests passed with native config loader and fork pool.
+- Isolated migrated demo copy: completed all four real Motion checkpoints, verified four evidence writes, immutable finish/answer retries; exercised grounded Ask SSE, owned history and quick-try answer retries.
+- Fixed Ask's rate-limit key collision with ordinary notebook requests; regression verifies independent limits.
+- Screenshot sweep: both Aarav and Priya, Ask and Games, all 360/1024/1280/1440/1920 widths equal document scrollWidth; no browser errors. Desktop/mobile screenshots inspected outside Git.
+- Retained honest provider/OCR empty states. Teacher escalation stays hidden until its opt-in confirmation design exists; no silent transcript sharing.

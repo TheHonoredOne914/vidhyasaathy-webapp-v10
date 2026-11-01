@@ -27,6 +27,15 @@ describe('Ask conversations', () => {
   afterEach(async () => { await h.app.close(); });
   const ask = (extra: Record<string, unknown> = {}) => h.post('/ask/stream', { clientEventId: randomUUID(), chapterId, conceptId, text: 'Explain speed distance time', ...extra }, student);
 
+  it('keeps the Ask allowance separate from ordinary notebook requests', async () => {
+    for (let index = 0; index < 15; index++) {
+      expect((await h.app.inject({ url: '/me', headers: { cookie: student } })).statusCode).toBe(200);
+    }
+    for (let index = 0; index < 12; index++) expect((await ask({ text: '' })).statusCode).toBe(200);
+    expect((await ask({ text: '' })).statusCode).toBe(429);
+    expect((await h.app.inject({ url: '/me', headers: { cookie: student } })).statusCode).toBe(200);
+  });
+
   it('works offline, guards homework, persists safely and replays events', async () => {
     const clientEventId = randomUUID();
     const response = await ask({ clientEventId, mode: 'homework', text: 'Calculate acceleration 2.5 m/s²' });

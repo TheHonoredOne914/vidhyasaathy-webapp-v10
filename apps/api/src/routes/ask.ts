@@ -37,7 +37,9 @@ export function registerAskRoutes(app: FastifyInstance, database: Database, prov
     return { configured: provider.configured, provider: provider.id, snapConfigured, budget: { usedTokens, limitTokens } };
   });
 
-  app.post('/ask/stream', { ...student, config: { rateLimit: { max: 12, timeWindow: '1 minute' } } }, async (request, reply) => {
+  app.post('/ask/stream', { ...student, config: { rateLimit: {
+    max: 12, timeWindow: '1 minute', keyGenerator: (request: FastifyRequest) => `ask:${request.auth?.profile.id ?? request.ip}`,
+  } } }, async (request, reply) => {
     const controller = new AbortController();
     const abort = () => controller.abort();
     request.raw.on('aborted', abort);
