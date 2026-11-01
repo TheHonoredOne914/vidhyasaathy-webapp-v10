@@ -10,6 +10,8 @@ import type { LlmProvider } from '../ai/provider.ts';
 import { requireAuth, requireRole } from '../auth/middleware.ts';
 import type { Database } from '../db/index.ts';
 import { ApiException, parseInput } from '../errors.ts';
+import { AskHintSchema } from '../../../../packages/contracts/src/ask.ts';
+import { toneGuard } from '../../../../packages/core/ask.ts';
 
 const Id = z.object({ id: z.string().min(1).max(100) });
 const List = z.object({ limit: z.coerce.number().int().min(1).max(50).default(20), subjectId: z.string().optional() });
@@ -100,6 +102,28 @@ export function registerAskRoutes(app: FastifyInstance, database: Database, prov
   };
   app.post('/ask/quick-try/answer', student, answerQuickTry);
   app.post('/ask/quick-try/:itemId/answer', student, answerQuickTry);
+
+  app.post('/ask/quick-try/:itemId/hint', student, async (request) => {
+    pipeline.purge();
+    const input = parseInput(AskHintSchema, request.body);
+    const thread = pipeline.owner(request, input.threadId);
+    const itemId = parseInput(z.object({ itemId: z.string().min(1).max(100) }), request.params).itemId;
+    const row = sqlite.prepare(`SELECT q.content,c.title FROM ask_quick_try q JOIN concept c ON c.id=q.concept_id
+      WHERE q.thread_id=? AND q.item_id=? AND q.created_at>=?`).get(thread.id, itemId, now() - 86400000) as { content: string; title: string } | undefined;
+    if (!row) throw new ApiException(404, 'NOT_FOUND', 'This quick check is no longer available.');
+    const content = SaveItemSchema.parse(JSON.parse(row.content));
+    if (content.type !== 'mcq') throw new ApiException(400, 'INVALID_INPUT', 'This question has no hint ladder.');
+    // Reveal reasoning progressively, keeping every offered answer redacted.
+    let reasoning = content.explanation ?? 'Write down the given information and connect it to the definition.';
+    for (const option of [...content.options].sort((a, b) => b.length - a.length)) {
+      reasoning = reasoning.replace(new RegExp(`(?<![\\p{L}\\p{N}])${option.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\p{L}\\p{N}])`, 'giu'), 'the matching choice');
+    }
+    const sentences = reasoning.match(/[^.!?]+[.!?]*/g) ?? [];
+    const text = input.stage === 'nudge' ? `Think about ${row.title}. What is given, and what is the question asking you to find?`
+      : input.stage === 'hint' ? `Connect the question to this idea: ${sentences[0]?.trim() || row.title}`
+      : `Work through this reasoning, then choose for yourself: ${reasoning || 'Write down the given information, then apply the definition one step at a time.'}`;
+    return { stage: input.stage, text: toneGuard(text) };
+  });
 
   app.get('/ask/threads/:id', student, async (request) => {
     pipeline.purge();
