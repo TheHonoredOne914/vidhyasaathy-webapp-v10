@@ -62,8 +62,9 @@ describe('session player states', () => {
     remote.status = 'loading';
     expect(render()).toContain('Opening the session');
     remote.status = 'error';
-    remote.message = 'Connection unavailable';
-    expect(render()).toContain('Connection unavailable');
+    remote.message = 'SQLITE_BUSY: private database path';
+    expect(render()).toContain('Your session could not be loaded. Please try again.');
+    expect(render()).not.toContain('SQLITE_BUSY');
     expect(render()).toContain('Try again');
   });
 

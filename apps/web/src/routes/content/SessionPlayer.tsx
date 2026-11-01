@@ -67,7 +67,7 @@ function StudentSessionPlayer({ sessionId }: { sessionId: string }) {
   }, [progress, data?.id, total, viewed]);
 
   if (session.denied) return <AccessDenied />;
-  if (session.status === 'error' && !data) return <Card title="Could not open this session"><p role="alert">{session.message ?? 'Try again.'}</p><NbButton onClick={session.reload}>Try again</NbButton></Card>;
+  if (session.status === 'error' && !data) return <Card title="Could not open this session"><p role="alert">Your session could not be loaded. Please try again.</p><NbButton onClick={session.reload}>Try again</NbButton></Card>;
   if (!data) return <div className="nb-grid sp-page" aria-label="Opening the session"><div className="nb-skel nb-skel--card" /><div className="nb-skel nb-skel--card" /></div>;
   if (!progress || !data.slides.length) return <Card title="No slides yet"><p>Your teacher has not added slides to this session.</p><NbButton onClick={session.reload}>Check again</NbButton></Card>;
 
@@ -88,7 +88,7 @@ function StudentSessionPlayer({ sessionId }: { sessionId: string }) {
       setSaved(await postJson(`/sessions/${sessionId}/advance`, LearningSessionSchema, { slideId }));
     } catch (cause) {
       setBlockedConcept(cause instanceof ApiClientError && cause.code === 'REMEDIATION_REQUIRED' ? slide?.conceptId ?? null : null);
-      setError(cause instanceof ApiClientError ? cause.message : 'The request could not be completed.');
+      setError(cause instanceof ApiClientError && cause.code === 'REMEDIATION_REQUIRED' ? 'Open the short lesson before continuing.' : 'Your slide could not be saved. Please try again.');
     } finally {
       busy.current = false;
       setPending(false);
@@ -131,7 +131,7 @@ function StudentSessionPlayer({ sessionId }: { sessionId: string }) {
       setSaved(await postJson(`/sessions/${sessionId}/check`, LearningSessionSchema, parsed.data));
     } catch (cause) {
       setBlockedConcept(cause instanceof ApiClientError && cause.code === 'REMEDIATION_REQUIRED' ? checks[0]?.conceptId ?? null : null);
-      setError(cause instanceof ApiClientError ? cause.message : 'The request could not be completed.');
+      setError(cause instanceof ApiClientError && cause.code === 'REMEDIATION_REQUIRED' ? 'Open the short lesson before continuing.' : 'Your check could not be submitted. Please try again.');
     } finally {
       busy.current = false;
       setPending(false);

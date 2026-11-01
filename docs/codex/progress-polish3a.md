@@ -1,5 +1,10 @@
 # polish3a progress
 
+## Integration review — 2026-11-01
+- Reviewed all session-player changes, local note isolation, public-question boundaries and mockup markup. Replaced raw server errors with retryable notebook copy, retaining remediation links; added a private-error regression assertion.
+- Removed generated screenshots from the Git index only (local captures preserved).
+- Study sessions currently aliases HomeworkBoard in the shared router; no unmocked replacement screen added. Missing diagram/teacher/timing API fields remain documented in data-gaps-polish3a.md.
+
 ## 1. Quick data fixes
 
 - Home already renders `/student/home.todaysGoal`; subject path now uses the same source, with loading, retry and empty states.
