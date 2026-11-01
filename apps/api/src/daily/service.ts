@@ -7,7 +7,7 @@ import {
 import { evaluateBadges } from '@vidhyasaathy/core/badges';
 import { buildCatchup } from '@vidhyasaathy/core/catchup';
 import { buildDailyChallenge, DAILY_CHALLENGE_MINUTES, type ChallengeItem } from '@vidhyasaathy/core/daily-challenge';
-import { selectDushman } from '@vidhyasaathy/core/dushman';
+import { dushmanRetirement, selectDushman } from '@vidhyasaathy/core/dushman';
 import { chapterBand, clampLevel, levelWord, type Band, type Level } from '@vidhyasaathy/core/learning';
 import { pickNextAction, type NextActionCandidate, getFollowupCandidates, type FollowupItemRow } from '@vidhyasaathy/core/next-action';
 import { decayedMastery, frustrationRadar, revisionRadar, type RadarState } from '@vidhyasaathy/core/radars';
@@ -48,6 +48,10 @@ function asLevel(value: number | null | undefined): Level | null {
 function weekdayName(day: string) {
   const [year, month, date] = day.split('-').map(Number);
   return WEEKDAYS[new Date(Date.UTC(year ?? 0, (month ?? 1) - 1, date ?? 1)).getUTCDay()] ?? day;
+}
+
+function istClock(at: number) {
+  return new Intl.DateTimeFormat('en-IN', { hour: 'numeric', hour12: true, timeZone: 'Asia/Kolkata' }).format(at).toLowerCase();
 }
 
 function weekDates(today: string) {
@@ -166,12 +170,23 @@ function sessionFocus(world: World, sessionId: string) {
   return slide ? world.conceptRows.find((row) => row.id === slide.conceptId) ?? null : null;
 }
 
+/** Tonight's session is only advertised once the server clock passes its release time. */
 function tonightSession(world: World, today: string) {
   return world.sessions.find((session) => {
-    if (session.releaseAt == null) return false;
+    if (session.releaseAt == null || session.releaseAt > world.now) return false;
     const progress = world.progress.find((row) => row.sessionId === session.id);
     if (progress?.completedAt != null) return false;
-    return istDay(session.releaseAt) === today || session.releaseAt <= world.now;
+    return istDay(session.releaseAt) === today;
+  }) ?? null;
+}
+
+/** A released-later-today session shows the locked card instead of an open one that would 403. */
+function upcomingSession(world: World, today: string) {
+  return world.sessions.find((session) => {
+    if (session.releaseAt == null || session.releaseAt <= world.now) return false;
+    if (istDay(session.releaseAt) !== today) return false;
+    const progress = world.progress.find((row) => row.sessionId === session.id);
+    return progress?.completedAt == null;
   }) ?? null;
 }
 
@@ -224,6 +239,21 @@ function focusChapter(world: World, conceptId: string | null) {
   return fromConcept ?? world.chapterRows.find((row) => row.title === 'Motion') ?? world.chapterRows[0] ?? null;
 }
 
+/** Queue reads retire Dushman entries whose concept has passing evidence, not only new answers. */
+function retireMasteredDushman(db: Db, world: World, now: number) {
+  for (const row of world.dushman) {
+    if (row.status !== 'active') continue;
+    const level = asLevel(world.ladders.find((ladder) => ladder.conceptId === row.conceptId)?.masteryLevel ?? null);
+    if (!dushmanRetirement(level).retire) continue;
+    db.update(dushmanEntries).set({ status: 'retired', retiredAt: now, reason: 'mastered' }).where(eq(dushmanEntries.id, row.id)).run();
+    db.insert(dushmanEvents).values({
+      id: randomUUID(), profileId: world.profile.id, schoolId: world.school.id, conceptId: row.conceptId,
+      kind: 'retired', evidenceId: null, createdAt: now,
+    }).run();
+    row.status = 'retired';
+  }
+}
+
 export function studentHome(db: Db, request: FastifyRequest, now: number) {
   const world = loadWorld(db, request, now);
   const today = istDay(now);
@@ -232,6 +262,7 @@ export function studentHome(db: Db, request: FastifyRequest, now: number) {
   const missed = absentDays(lastTouch, now);
   const session = tonightSession(world, today);
   const focus = session ? sessionFocus(world, session.id) : null;
+  const locked = upcomingSession(world, today);
   const candidates: NextActionCandidate[] = [];
   for (const row of world.progress) {
     if (row.completedAt != null || (row.viewedSlides <= 0 && row.checkSubmittedAt == null)) continue;
@@ -249,7 +280,7 @@ export function studentHome(db: Db, request: FastifyRequest, now: number) {
     if (!assignment) continue;
     candidates.push({
       id: `draft:${assignment.id}`, kind: 'unfinished', title: assignment.title, conceptId: null, conceptName: null,
-      estMinutes: 15, href: `/student/homework/${assignment.id}`, resumeState: 'draft', dueAt: null,
+      estMinutes: 15, href: `/student/assignments/${assignment.id}`, resumeState: 'draft', dueAt: null,
       resumeAt: draft.updatedAt || 1, lateUntil: null, windowOpen: true,
     });
   }
@@ -263,17 +294,20 @@ export function studentHome(db: Db, request: FastifyRequest, now: number) {
     if (assignment.dueAt >= horizon && !(assignment.dueAt < now && assignment.lateUntil != null && assignment.lateUntil >= now)) continue;
     candidates.push({
       id: assignment.id, kind: 'due', title: assignment.title, conceptId: null, conceptName: null, estMinutes: 15,
-      href: `/student/homework/${assignment.id}`, resumeState: null, dueAt: assignment.dueAt, resumeAt: 0,
+      href: `/student/assignments/${assignment.id}`, resumeState: null, dueAt: assignment.dueAt, resumeAt: 0,
       lateUntil: assignment.lateUntil, windowOpen: assignment.publishedAt != null && assignment.publishedAt <= now,
     });
   }
   const repair = fading[0];
   if (repair) {
-    candidates.push({
-      id: `review:${repair.conceptId}`, kind: 'revision', title: repair.name, conceptId: repair.conceptId, conceptName: repair.name,
-      estMinutes: repair.level === 1 ? 10 : 5, href: `/student/concepts/${repair.conceptId}`, resumeState: null,
-      dueAt: null, resumeAt: 0, lateUntil: null, windowOpen: true,
-    });
+    const repairChapter = focusChapter(world, repair.conceptId);
+    if (repairChapter) {
+      candidates.push({
+        id: `review:${repair.conceptId}`, kind: 'revision', title: repair.name, conceptId: repair.conceptId, conceptName: repair.name,
+        estMinutes: repair.level === 1 ? 10 : 5, href: `/student/chapters/${repairChapter.id}/concepts/${repair.conceptId}`, resumeState: null,
+        dueAt: null, resumeAt: 0, lateUntil: null, windowOpen: true,
+      });
+    }
   }
   if (session && focus) {
     candidates.push({
@@ -335,9 +369,13 @@ export function studentHome(db: Db, request: FastifyRequest, now: number) {
   });
   const plan = world.plans[0];
   const planItems = plan ? db.select().from(studyPlanItems).where(eq(studyPlanItems.planId, plan.id)).all() : [];
-  const goalItems = planItems.filter((row) => row.night === today && (row.status === 'planned' || row.status === 'folded')).map((row) => ({
-    id: row.id, label: conceptName(world, row.conceptId) ?? row.kind, done: false, href: `/student/concepts/${row.conceptId}`,
-  }));
+  const goalItems = planItems.filter((row) => row.night === today && (row.status === 'planned' || row.status === 'folded')).map((row) => {
+    const planChapter = focusChapter(world, row.conceptId);
+    return {
+      id: row.id, label: conceptName(world, row.conceptId) ?? row.kind, done: false,
+      href: planChapter ? `/student/chapters/${planChapter.id}/concepts/${row.conceptId}` : '/student?panel=subjects',
+    };
+  });
   if (!goalItems.length) {
     if (next) goalItems.push({ id: next.href, label: next.title, done: false, href: next.href });
     if (!challenge || challenge.status !== 'completed') goalItems.push({ id: 'daily-challenge', label: '5-minute challenge', done: false, href: '/student/challenge' });
@@ -348,7 +386,7 @@ export function studentHome(db: Db, request: FastifyRequest, now: number) {
       const subject = world.subjectRows.find((item) => item.id === world.chapterRows.find((chapterRow) => chapterRow.id === row.chapterId)?.subjectId)?.name ?? 'Class';
       const dueDay = istDay(row.dueAt);
       const badge = dueDay === today ? 'due_today' as const : row.dueAt < now ? 'overdue' as const : istDay(row.publishedAt ?? row.updatedAt) === today ? 'new' as const : 'suggested' as const;
-      return { id: row.id, title: row.title, subject, badge, href: `/student/homework/${row.id}`, sort: badge === 'overdue' ? 0 : 1 };
+      return { id: row.id, title: row.title, subject, badge, href: `/student/assignments/${row.id}`, sort: badge === 'overdue' ? 0 : 1 };
     }),
     ...world.sessions.filter((row) => row.releaseAt != null && row.releaseAt <= now).map((row) => {
       const subject = world.subjectRows.find((item) => item.id === world.chapterRows.find((chapterRow) => chapterRow.id === row.chapterId)?.subjectId)?.name ?? 'Class';
@@ -375,10 +413,15 @@ export function studentHome(db: Db, request: FastifyRequest, now: number) {
     }).onConflictDoNothing().run();
   }
   dispatchStudent(db, world.school.id, world.profile.id, now);
+  retireMasteredDushman(db, world, now);
   const line = streak.restartCopy ?? (missed >= 3 ? 'Good to see you.' : "Let's keep going.");
   return {
     greeting: { name: world.profile.name, dateIST: today, line },
     nextAction: next, catchUp: next?.kind === 'catchup' && catchPlan ? { copy: catchPlan.copy, estMinutes: catchPlan.estMinutes, href: '/student/catchup' } : null,
+    tonightSession: locked ? {
+      kind: 'locked' as const, opensAt: locked.releaseAt ?? now, title: locked.title,
+      copy: `Unlocks at ${istClock(locked.releaseAt ?? now)} — your evening plan is ready.`,
+    } : null,
     warmup: offer && next?.kind !== 'catchup' ? {
       conceptId: offer.concepts[0]!.conceptId, conceptName: offer.concepts[0]!.name, estMinutes: 2 as const, href: '/student/warmup',
     } : null,
@@ -509,10 +552,14 @@ export function studentCatchup(db: Db, request: FastifyRequest, now: number) {
   }).onConflictDoNothing().run();
   return {
     copy: plan.copy, estMinutes: plan.estMinutes,
-    steps: plan.steps.map((step) => ({
-      conceptId: step.conceptId, name: step.name, kind: step.kind, estMinutes: step.estMinutes,
-      href: step.kind === 'session' && session ? `/student/sessions/${session.id}?compact=1` : `/student/concepts/${step.conceptId}?compact=1`,
-    })),
+    steps: plan.steps.map((step) => {
+      const chapterId = world.conceptRows.find((row) => row.id === step.conceptId)?.chapterId;
+      return {
+        conceptId: step.conceptId, name: step.name, kind: step.kind, estMinutes: step.estMinutes,
+        href: step.kind === 'session' && session ? `/student/sessions/${session.id}?compact=1`
+          : chapterId ? `/student/chapters/${chapterId}/concepts/${step.conceptId}?compact=1` : '/student?panel=subjects',
+      };
+    }),
   };
 }
 
@@ -579,10 +626,16 @@ export function serveChallenge(db: Db, request: FastifyRequest, now: number) {
     }),
   });
   if (existing) {
-    const chapterId = world.itemRows.find((row) => existing.itemIds.includes(row.id))?.chapterId ?? world.chapterRows[0]?.id;
-    const routing = chapterId ? routingFor(world, chapterId) : '50-75';
-    const view = present(existing);
-    return { ...view, showTimer: routing === '75-100', showHindi: routing === '0-25' };
+    if (!existing.itemIds.length) {
+      // A legacy empty served row would 400/409 the whole day; drop it and deal a fresh hand.
+      db.delete(dailyChallenges).where(eq(dailyChallenges.id, existing.id)).run();
+    } else {
+      const chapterId = world.itemRows.find((row) => existing.itemIds.includes(row.id))?.chapterId ?? world.chapterRows[0]?.id;
+      const routing = chapterId ? routingFor(world, chapterId) : '50-75';
+      const view = present(existing);
+      const secondsLeft = existing.startedAt == null ? CHALLENGE_MS / 1000 : Math.max(0, Math.round((existing.startedAt + CHALLENGE_MS - now) / 1000));
+      return { ...view, secondsLeft, showTimer: routing === '75-100', showHindi: routing === '0-25' };
+    }
   }
   const home = studentHome(db, request, now);
   const tonightId = home.nextAction?.conceptId ?? world.conceptRows[0]?.id;
@@ -598,13 +651,18 @@ export function serveChallenge(db: Db, request: FastifyRequest, now: number) {
     items: challengeItems(world, chapterId),
   }, routing);
   const id = randomUUID();
+  if (!built.itemIds.length) {
+    // Never persist an empty challenge: a served row without items bricks every later request for the day.
+    return { id, status: 'served' as const, href: '/student/challenge', secondsLeft: CHALLENGE_MS / 1000,
+      showTimer: built.timerVisible, showHindi: built.hindiTerms, items: [] };
+  }
   db.insert(dailyChallenges).values({
     id, profileId: world.profile.id, schoolId: world.school.id, day: today, itemIds: built.itemIds,
     status: 'served', correct: 0, total: built.itemIds.length, startedAt: now, completedAt: null,
   }).run();
   const saved = db.select().from(dailyChallenges).where(eq(dailyChallenges.id, id)).get();
   if (!saved) throw new ApiException(500, 'INTERNAL_ERROR', 'The request could not be completed.');
-  return { ...present(saved), showTimer: built.timerVisible, showHindi: built.hindiTerms };
+  return { ...present(saved), secondsLeft: CHALLENGE_MS / 1000, showTimer: built.timerVisible, showHindi: built.hindiTerms };
 }
 
 export function answerChallenge(db: Db, request: FastifyRequest, challengeId: string, input: {
@@ -674,6 +732,7 @@ export function finishChallenge(db: Db, request: FastifyRequest, challengeId: st
 
 export function studentDushman(db: Db, request: FastifyRequest, now: number) {
   const world = loadWorld(db, request, now);
+  retireMasteredDushman(db, world, now);
   const chapter = world.chapterRows[0];
   const routing = chapter ? routingFor(world, chapter.id) : '50-75';
   const picks = selectDushman(world.conceptRows.map((concept) => ({

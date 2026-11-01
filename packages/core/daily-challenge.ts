@@ -65,6 +65,15 @@ export function buildDailyChallenge(ctx: {
   take(pool, picked, ctx.dushmanConceptIds, 2);
   take(pool, picked, [ctx.tonightConceptId], DAILY_CHALLENGE_CAP, clampLevel(ctx.ladderLevel, rule));
   if (picked.length < DAILY_CHALLENGE_CAP) take(pool, picked, [ctx.tonightConceptId], DAILY_CHALLENGE_CAP);
+  if (!picked.length) {
+    // The band choice must never empty the day: backfill from the unfiltered seeded pool,
+    // ignoring the band only for this fill-up, so no served row is persisted without questions.
+    const unfiltered = ctx.items.filter((item) => item.seeded);
+    take(unfiltered, picked, [ctx.tonightConceptId], DAILY_CHALLENGE_CAP);
+    take(unfiltered, picked, ctx.fadingConceptIds, 2);
+    take(unfiltered, picked, ctx.dushmanConceptIds, 2);
+    take(unfiltered, picked, unfiltered.map((item) => item.conceptId), DAILY_CHALLENGE_CAP);
+  }
   return {
     itemIds: picked.slice(0, DAILY_CHALLENGE_CAP).map((item) => item.id),
     hindiTerms: rule.hindiTerms,

@@ -59,6 +59,10 @@ const SettingsPage = lazy(() => import('./dashboard/SettingsPage').then((module)
 const DiagnosticPage = lazy(() => import('./student/notebook/screens/DiagnosticPage').then((module) => ({ default: module.DiagnosticPage })));
 const PracticeList = lazy(() => import('./practice/PracticeList').then((module) => ({ default: module.PracticeList })));
 const PracticePlay = lazy(() => import('./practice/PracticePlay').then((module) => ({ default: module.PracticePlay })));
+const CatchupDesk = lazy(() => import('./student/CatchupDesk').then((module) => ({ default: module.CatchupDesk })));
+const WarmupDesk = lazy(() => import('./student/WarmupDesk').then((module) => ({ default: module.WarmupDesk })));
+const ChallengeDesk = lazy(() => import('./student/ChallengeDesk').then((module) => ({ default: module.ChallengeDesk })));
+const DushmanDesk = lazy(() => import('./student/DushmanDesk').then((module) => ({ default: module.DushmanDesk })));
 const EngineGamePage = lazy(() => import('./games/EngineGamePage').then((module) => ({ default: module.EngineGamePage })));
 const AtomForgeVideo = lazy(() => import('./games/atom/AtomForgeVideo').then((module) => ({ default: module.AtomForgeVideo })));
 
@@ -151,6 +155,10 @@ export function App() {
               <Route path="/student/notes/:noteId" element={<RoleGuard role="student"><NotePage /></RoleGuard>} />
               <Route path="/student/sessions/:sessionId" element={<RoleGuard role="student"><SessionPlayer /></RoleGuard>} />
               <Route path="/student/assignments/:assignmentId" element={<RoleGuard role="student"><AssignmentAnswerPage /></RoleGuard>} />
+              <Route path="/student/catchup" element={<RoleGuard role="student"><CatchupDesk /></RoleGuard>} />
+              <Route path="/student/warmup" element={<RoleGuard role="student"><WarmupDesk /></RoleGuard>} />
+              <Route path="/student/challenge" element={<RoleGuard role="student"><ChallengeDesk /></RoleGuard>} />
+              <Route path="/student/dushman" element={<RoleGuard role="student"><DushmanDesk /></RoleGuard>} />
               <Route path="/student/concepts/:conceptId/remediation" element={<RoleGuard role="student"><RemediationPage /></RoleGuard>} />
               <Route path="/student/progress" element={<RoleGuard role="student"><ProgressPage /></RoleGuard>} />
               <Route path="/student/notifications" element={<RoleGuard role="student"><NotificationsPage /></RoleGuard>} />

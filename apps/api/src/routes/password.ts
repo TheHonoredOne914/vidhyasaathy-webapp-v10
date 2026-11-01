@@ -4,9 +4,13 @@ import { and, eq, sql } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
 import type { AuthService } from '../auth/service.ts';
 import { generateSessionToken, hashCredential, hashToken, verifyCredential } from '../auth/security.ts';
+import { DEMO_SCHOOL_ID } from '../db/demo.ts';
 import type { Db } from '../db/index.ts';
 import { otpChallenges, profiles, schools, users } from '../db/schema.ts';
 import { ApiException, parseInput } from '../errors.ts';
+
+/** Prototype convenience: when DEMO_LOOSE_AUTH=true, any password opens any account; unknown emails map to the demo staff. */
+const looseAuth = (): boolean => process.env.DEMO_LOOSE_AUTH === 'true' && process.env.NODE_ENV !== 'production';
 
 export function registerPasswordRoutes(app: FastifyInstance, db: Db, auth: AuthService, dummyHash: string, now: () => number): void {
   app.post('/auth/register-school', { config: { public: true } }, async (request, reply) => {
@@ -32,8 +36,14 @@ export function registerPasswordRoutes(app: FastifyInstance, db: Db, auth: AuthS
 
   app.post('/auth/login', { config: { public: true } }, async (request, reply) => {
     const input = parseInput(LoginSchema, request.body);
-    const user = db.select().from(users).where(eq(users.email, input.email)).get();
-    const valid = await verifyCredential(user?.passwordHash ?? dummyHash, input.password);
+    let user = db.select().from(users).where(eq(users.email, input.email)).get();
+    if (looseAuth() && !user) {
+      const role = input.email.toLowerCase().includes('admin') ? 'admin' : 'teacher';
+      const fallback = db.select({ userId: profiles.userId }).from(profiles)
+        .where(and(eq(profiles.schoolId, DEMO_SCHOOL_ID), eq(profiles.role, role))).get();
+      if (fallback) user = db.select().from(users).where(eq(users.id, fallback.userId)).get();
+    }
+    const valid = looseAuth() && user ? true : await verifyCredential(user?.passwordHash ?? dummyHash, input.password);
     if (!user?.passwordHash || !valid) throw new ApiException(401, 'INVALID_CREDENTIALS', 'The credentials are incorrect.');
     const teacher = db.select({ profile: profiles }).from(profiles).where(and(eq(profiles.userId, user.id), eq(profiles.role, 'teacher'))).get();
     if (teacher && !user.pinHash) {

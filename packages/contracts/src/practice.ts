@@ -7,6 +7,7 @@ export const GameIdSchema = z.enum([
 ]);
 export const PracticeQuerySchema = z.object({
   gameId: GameIdSchema.default('quick_revision_quiz'), limit: z.coerce.number().int().min(1).max(30).default(6),
+  concept: z.string().uuid().optional(),
 }).strict();
 export const PracticeSetSchema = z.object({
   chapterId: z.string().uuid(), gameId: GameIdSchema, required: z.literal(false), updatedAt: z.number().int().nonnegative(),

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { StudentHomeSchema, WarmupSkipResultSchema, WarmupStartSchema, type StudentHome } from '@vidhyasaathy/contracts';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ApiClientError, postJson } from '../api/client';
 import { useRemote } from '../setup/useRemote';
 import { StaleNote } from '../ui/StaleNote';
@@ -61,10 +61,11 @@ function Thumb() {
 
 export function HomeDesk({ stale, updatedAt, message }: { me: { profile: { id: string; name: string } }; stale: boolean; updatedAt: string | null; message: string | null }) {
   const home = useRemote('/student/home', StudentHomeSchema);
+  const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
 
-  async function warmup(kind: 'start' | 'skip', href: string) {
+  async function warmup(kind: 'start' | 'skip') {
     setBusy(true);
     setNote(null);
     try {
@@ -72,7 +73,7 @@ export function HomeDesk({ stale, updatedAt, message }: { me: { profile: { id: s
       if (kind === 'skip') await postJson('/student/warmup/skip', WarmupSkipResultSchema, { clientEventId });
       else await postJson('/student/warmup/start', WarmupStartSchema, { clientEventId });
       home.reload();
-      if (kind === 'start') window.location.assign(href);
+      if (kind === 'start') navigate('/student/warmup');
     } catch (cause) {
       if (cause instanceof ApiClientError && cause.status === 409) home.reload();
       else setNote(cause instanceof Error ? cause.message : 'Could not update the warm-up.');
@@ -155,12 +156,18 @@ export function HomeDesk({ stale, updatedAt, message }: { me: { profile: { id: s
           {data.newBadges.length ? <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: 'var(--nb-s3)' }}>{data.newBadges.map((badge) => <Link key={badge.id} className="nb-chip nb-chip--sand" to="/student/progress">{badge.name}</Link>)}</div> : null}
         </section>
 
+        {data.tonightSession ? <section className="nb-card challenge">
+          <span className="nb-sticky__who">Evening plan</span>
+          <p className="nb-note" style={{ margin: '.2rem 0 .5rem' }}><Icon name="lock" /> {data.tonightSession.title}</p>
+          <p className="nb-meta">{data.tonightSession.copy}</p>
+        </section> : null}
+
         {data.warmup ? <section className="nb-card challenge">
           <span className="nb-sticky__who">Warm up</span>
           <p className="nb-note" style={{ margin: '.2rem 0 .5rem' }}>{data.warmup.conceptName} · {data.warmup.estMinutes} minutes</p>
           <div className="row">
-            <button type="button" className="nb-btn nb-btn--ghost nb-btn--sm" disabled={busy} onClick={() => { void warmup('start', data.warmup!.href); }}>Warm up</button>
-            <button type="button" className="nb-btn nb-btn--quiet nb-btn--sm" disabled={busy} onClick={() => { void warmup('skip', data.warmup!.href); }}>Skip</button>
+            <button type="button" className="nb-btn nb-btn--ghost nb-btn--sm" disabled={busy} onClick={() => { void warmup('start'); }}>Warm up</button>
+            <button type="button" className="nb-btn nb-btn--quiet nb-btn--sm" disabled={busy} onClick={() => { void warmup('skip'); }}>Skip</button>
           </div>
           {note ? <p className="nb-empty" role="alert">{note}</p> : null}
         </section> : null}

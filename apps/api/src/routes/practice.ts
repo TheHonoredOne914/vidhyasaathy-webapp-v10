@@ -23,7 +23,7 @@ export function registerPracticeRoutes(app: FastifyInstance, db: Db, auth: AuthS
   app.get('/chapters/:id/practice/next', student, async (request) => PracticeNextSchema.parse(practiceNext(db, request, resourceId(request), now())));
   app.get('/chapters/:id/practice', student, async (request) => {
     const query = parseInput(PracticeQuerySchema, request.query);
-    return practiceSet(db, request, resourceId(request), query.gameId, query.limit, now());
+    return practiceSet(db, request, resourceId(request), query.gameId, query.limit, now(), query.concept ?? null);
   });
   app.post('/practice/attempts', student, async (request) => {
     const input = parseInput(SubmitPracticeAttemptSchema, request.body);

@@ -126,12 +126,13 @@ export function chapterBand(scores: readonly number[]): Band | null {
 }
 
 export function diagnosticEntry(results: readonly { correct: boolean; notTaught: boolean }[]) {
-  const notTaught = results.filter((result) => result.notTaught).length;
-  if (results.length > 0 && notTaught >= Math.ceil(results.length / 2)) {
+  const taught = results.filter((result) => !result.notTaught);
+  // Skipping everything is not a repair signal: an all-skip diagnostic starts in the middle.
+  if (!taught.length) return { level: 2 as Level, route: 'steady' as DiagnosticRoute };
+  const notTaught = results.length - taught.length;
+  if (notTaught >= Math.ceil(results.length / 2)) {
     return { level: 1 as Level, route: 'repair' as DiagnosticRoute };
   }
-  const taught = results.filter((result) => !result.notTaught);
-  if (!taught.length) return { level: 2 as Level, route: 'steady' as DiagnosticRoute };
   const ratio = taught.filter((result) => result.correct).length / taught.length;
   if (ratio >= 0.8) return { level: 3 as Level, route: 'challenge' as DiagnosticRoute };
   if (ratio < 0.5) return { level: 1 as Level, route: 'repair' as DiagnosticRoute };

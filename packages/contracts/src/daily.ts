@@ -48,6 +48,9 @@ export const StudentHomeSchema = z.object({
     subject: z.string(), chapter: z.string(),
     nodes: z.array(z.object({ conceptId: Id, name: z.string(), word: FriendlyWord, note: z.string() }).strict()),
   }).strict().nullable(),
+  tonightSession: z.object({
+    kind: z.literal('locked'), opensAt: Time, title: z.string(), copy: z.string(),
+  }).strict().nullable(),
   dailyChallenge: z.object({ status: z.enum(['ready', 'served', 'completed', 'expired']), href: z.string() }).strict(),
   dushman: z.array(z.object({ conceptId: Id, name: z.string() }).strict()),
   newBadges: z.array(z.object({ id: z.string(), name: z.string(), icon: z.string() }).strict()),
@@ -79,7 +82,8 @@ export const CatchupDoneSchema = z.object({
 
 export const DailyChallengeSchema = z.object({
   id: Id, status: z.enum(['served', 'completed', 'expired']), href: z.string(),
-  showTimer: z.boolean(), showHindi: z.boolean(), items: z.array(PublicItemSchema),
+  showTimer: z.boolean(), showHindi: z.boolean(), secondsLeft: z.number().int().nonnegative(),
+  items: z.array(PublicItemSchema),
 }).strict();
 export const DailyChallengeAnswerSchema = z.object({
   clientEventId: Id, itemId: Id, answer: AnswerSchema,
@@ -153,3 +157,4 @@ export const BadgeSeenSchema = z.object({ id: z.string(), seen: z.literal(true) 
 export const PlanItemDoneSchema = z.object({ done: z.literal(true) }).strict();
 
 export type StudentHome = z.infer<typeof StudentHomeSchema>;
+export type WarmupStart = z.infer<typeof WarmupStartSchema>;

@@ -1,7 +1,7 @@
-import { GameIdSchema, LessonViewSchema, PracticeAttemptSchema, PracticeSetSchema, ProgressSchema, StudentHomeSchema, type PracticeAttempt, type PublicItem } from '@vidhyasaathy/contracts';
+import { GameIdSchema, LessonViewSchema, PracticeAttemptSchema, PracticeSetSchema, ProgressSchema, StudentHomeSchema, DushmanListSchema, type PracticeAttempt, type PublicItem } from '@vidhyasaathy/contracts';
 import { gameModules, type GameState } from '@vidhyasaathy/core/games';
 import { useEffect, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ApiClientError, getJson, postJson } from '../api/client';
 import { usePageMeta } from '../meta';
 import { useRemote } from '../setup/useRemote';
@@ -20,9 +20,13 @@ function PenMark({ correct }: { correct: boolean }) {
 
 export function PracticePlay() {
   const { chapterId = '', gameId = '' } = useParams();
+  const [params] = useSearchParams();
+  const dushmanRound = params.get('skin') === 'dushman';
+  const roundConcept = params.get('concept');
   const parsed = GameIdSchema.safeParse(gameId);
   const id = parsed.success ? parsed.data : null;
-  const remote = useRemote(id && chapterId ? `/chapters/${chapterId}/practice?gameId=${id}&limit=6` : null, PracticeSetSchema);
+  const query = id && chapterId ? `/chapters/${chapterId}/practice?gameId=${id}&limit=6${roundConcept ? `&concept=${encodeURIComponent(roundConcept)}` : ''}` : null;
+  const remote = useRemote(query, PracticeSetSchema);
   const home = useRemote('/student/home', StudentHomeSchema);
   const progress = useRemote('/progress', ProgressSchema);
   const [game, setGame] = useState<GameState | null>(null);
@@ -49,6 +53,7 @@ export function PracticePlay() {
   const lesson = useRemote(current ? `/concepts/${current.conceptId}/lesson${hint === 'simpler' ? '?simpler=1' : ''}` : null, LessonViewSchema);
   const notes = lesson.data?.found ? lesson.data : null;
   const copy = id ? gameCopy(id) : null;
+  const dushmanName = home.data?.dushman.find((row) => row.conceptId === roundConcept)?.name ?? null;
   usePageMeta(copy ? `${copy.title} — VidhyaSaathy` : 'Practice — VidhyaSaathy', 'Optional practice on released questions.');
 
   useEffect(() => {
@@ -68,6 +73,13 @@ export function PracticePlay() {
     const timer = window.setInterval(() => { setTick(Date.now()); }, 1000);
     return () => { window.clearInterval(timer); };
   }, [game?.deadline]);
+
+  // A finished Dushman round re-checks the queue, so an idea that just reached mastery leaves the list.
+  useEffect(() => {
+    if (!dushmanRound || !game || game.answers.length === 0) return;
+    if (game.answers.length < game.items.length) return;
+    void getJson('/student/dushman', DushmanListSchema).catch(() => { /* The next queue read re-checks anyway. */ });
+  }, [dushmanRound, game]);
 
   if (!id || !copy) return <NotebookState title="Practice" message="This game is not in your notebook." />;
   if (remote.denied) return <NotebookState title="This practice is not available" message="Ask your teacher to check your access." />;
@@ -125,14 +137,19 @@ export function PracticePlay() {
 
   return <div className={`pg-quiz${review ? review.correct ? ' quiz-right' : ' quiz-wrong' : ''}`}>
     <div className="qz-top">
-      <Link className="back" to={`/student/chapters/${chapterId}/practice`}><Icon name="back" />{notes?.title ?? copy.title}</Link>
-      <div className="strip-wrap"><QuizStrip steps={strip} /><div className="strip-cap"><span>{copy.title} · {set.items.length} questions</span><span>{done ? 'Finished' : `Q${index + 1} of ${set.items.length}`}</span></div></div>
+      <Link className="back" to={dushmanRound ? '/student/dushman' : `/student/chapters/${chapterId}/practice`}><Icon name="back" />{dushmanRound ? 'Dushman list' : notes?.title ?? copy.title}</Link>
+      <div className="strip-wrap"><QuizStrip steps={strip} /><div className="strip-cap"><span>{dushmanRound ? 'Dushman round' : copy.title} · {set.items.length} questions</span><span>{done ? 'Finished' : `Q${index + 1} of ${set.items.length}`}</span></div></div>
       {home.data ? <Chip tone="sand">{home.data.xp} XP</Chip> : null}
     </div>
     <div className="nb-quiz">
       <div className="qz-main">
+        {dushmanRound ? <section className="nb-card" data-testid="dushman-frame">
+          <span className="nb-tape" aria-hidden="true" />
+          <div className="nb-card__head"><Chip tone="red">Dushman round</Chip>{home.data?.dushman.find((row) => row.conceptId === roundConcept) ? <span className="nb-meta">Still on your list</span> : null}</div>
+          <p className="nb-note" style={{ margin: 0 }}>{dushmanName ? <>Only <b>{dushmanName}</b> questions are dealt in this round.</> : 'Only this one idea is dealt in this round.'} Answer sure and correct, and it leaves your Dushman list on its own.</p>
+        </section> : null}
         {game.deadline != null && !done ? <p className="nb-meta">Seconds left: {Math.max(0, Math.ceil((game.deadline - tick) / 1000))}</p> : null}
-        {!set.items.length ? <NotebookState title="A fresh page" message="No released questions match this practice yet." /> : done ? <Card title="Practice complete"><p className="nb-note" data-testid="practice-result">{result.correct === result.total ? 'Top form on this set.' : result.correct ? 'Almost there. Keep the notes you worked on in mind.' : "Let's fix this. Read the notes, then try again."}</p><Link className="nb-btn nb-btn--primary" to="/student">Go home</Link></Card> : null}
+        {!set.items.length ? <NotebookState title="A fresh page" message={dushmanRound ? 'No questions for this idea are released yet. The Dushman round stays open — try again after the next lesson lands.' : 'No released questions match this practice yet.'} /> : done ? <Card title="Practice complete"><p className="nb-note" data-testid="practice-result">{result.correct === result.total ? 'Top form on this set.' : result.correct ? 'Almost there. Keep the notes you worked on in mind.' : "Let's fix this. Read the notes, then try again."}</p>{dushmanRound ? <p className="nb-note">If this idea held steady, it leaves your Dushman list on its own.</p> : null}<Link className="nb-btn nb-btn--primary" to={dushmanRound ? '/student/dushman' : '/student'}>{dushmanRound ? 'Back to the list' : 'Go home'}</Link></Card> : null}
         {item ? <form className="nb-qcard" onSubmit={(event) => {
           event.preventDefault();
           if (!review) { void submit(item); return; }

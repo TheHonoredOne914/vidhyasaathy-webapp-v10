@@ -1,8 +1,8 @@
 import { LoginSchema, MeSchema, PinLoginSchema, SetPinSchema } from '@vidhyasaathy/contracts';
-import { useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
-import { ApiClientError, inlineFieldErrors, postJson, validateForm } from '../../../api/client';
+import { ApiClientError, getJson, inlineFieldErrors, postJson, validateForm } from '../../../api/client';
 import { ROLE_HOME } from '../../../roles';
 import { useSession } from '../../../session';
 import { readStorage, readStudentProfiles, removeStorage, writeStorage } from '../../../storage';
@@ -17,6 +17,7 @@ const LoginResponseSchema = z.union([MeSchema, z.object({ requiresPin: z.literal
 const challengeSchema = z.object({ otpToken: z.string(), otp: z.string().optional() });
 const phoneSchema = z.object({ phone: z.string().regex(/^\d{10}$/, 'Enter a 10 digit phone number.') });
 const otpSchema = z.object({ otpToken: z.string().min(20), otp: z.string().regex(/^\d{6}$/, 'Enter the 6 digit OTP.') });
+const demoStudentsSchema = z.object({ students: z.array(z.object({ id: z.string().uuid(), name: z.string(), school: z.string() })) });
 
 function Boxes({ value, length, onChange, label, secret = false, disabled = false }: { value: string; length: number; onChange: (value: string) => void; label: string; secret?: boolean; disabled?: boolean }) {
   return <div className="boxes">{Array.from({ length }, (_, index) => <input key={index} aria-label={index === 0 ? label : `${label} ${index + 1}`} type={secret ? 'password' : 'text'} disabled={disabled} inputMode="numeric" autoComplete={index === 0 && !secret ? 'one-time-code' : 'off'} maxLength={1} className={`${!disabled && index === value.length ? 'f' : ''} ${value[index] ? '' : 'e'}`} value={value[index] ?? ''} onPaste={(event) => {
@@ -83,6 +84,11 @@ export function NotebookSignIn() {
   const role: RoleTab = initial === 'parent' || initial === 'teacher' ? initial : 'student';
   const [admin, setAdmin] = useState(false);
   const students = useMemo(readStudentProfiles, []);
+  const [demoStudents, setDemoStudents] = useState<z.infer<typeof demoStudentsSchema>['students']>([]);
+  useEffect(() => {
+    if (role !== 'student' || students.length > 0 || demoStudents.length > 0) return;
+    getJson('/auth/demo/students', demoStudentsSchema).then((result) => setDemoStudents(result.students)).catch(() => {});
+  }, [role, students.length, demoStudents.length]);
   const [name, setName] = useState('');
   const [pin, setPin] = useState('');
   const [email, setEmail] = useState(() => readStorage(REMEMBER_KEY) ?? '');
@@ -104,8 +110,9 @@ export function NotebookSignIn() {
     setPending(true);
     try {
       if (role === 'student') {
-        const match = students.find((student) => student.name.toLowerCase() === name.trim().toLowerCase());
-        if (!match) { setError(students.length ? 'That name is not on this browser yet. Pick a saved name, or ask your teacher.' : 'This browser has no student notebook yet. Ask your teacher for the activation code.'); return; }
+        const match = students.find((student) => student.name.toLowerCase() === name.trim().toLowerCase())
+          ?? demoStudents.find((student) => student.name.toLowerCase() === name.trim().toLowerCase());
+        if (!match) { setError('Type a demo student name to continue — Aarav, Meera, Kabir, Priya or Rohan.'); return; }
         const parsed = validateForm(PinLoginSchema, { profileId: match.id, pin });
         if (!parsed.ok) { setError(parsed.fields.pin ?? 'Use a 4 digit PIN.'); return; }
         const me = await postJson('/auth/pin-login', MeSchema, parsed.data);
@@ -147,6 +154,7 @@ export function NotebookSignIn() {
   }
 
   const cardBg = role === 'teacher' || admin ? 'var(--nb-sky)' : role === 'parent' ? '#E4F1E2' : 'var(--nb-sticky-yellow)';
+  const savedOrDemo = students.length ? students : demoStudents;
   const heading = role === 'teacher' ? 'Good to see you' : role === 'parent' ? "See how your child's doing" : 'Hey, welcome back';
   const sub = role === 'teacher' ? 'Sign in with your school email.' : role === 'parent' ? 'We send a code to the phone number the school has.' : 'Use the name and PIN saved on this browser.';
 
@@ -162,9 +170,9 @@ export function NotebookSignIn() {
         </nav>
         <div className="si-card" style={{ background: cardBg }}>
           {role === 'student' ? <>
-            <div className="nb-field"><span className="nb-label">Class code</span><Boxes value="" length={6} label="Class code" onChange={() => {}} disabled /><span className="nb-meta">Class-code sign-in isn't available yet. Use a notebook saved on this browser.</span></div>
-            {students.length ? <div className="nb-field"><span className="nb-label">On this browser</span><div>{students.map((student) => <button type="button" key={student.id} className="nb-btn nb-btn--ghost nb-btn--sm" style={{ margin: '0 .4rem .4rem 0' }} onClick={() => { setName(student.name); }}>{student.name}</button>)}</div></div> : null}
-            <div className="nb-field"><label className="nb-label" htmlFor="student-name">Your name</label><input id="student-name" className="nb-input nb-input--lined" value={name} onChange={(event) => { setName(event.target.value); }} autoComplete="name" />{error ? <span className="pen" role="alert">{error}</span> : <span className="nb-meta">{students.length ? 'Pick a saved name, then your PIN.' : 'Ask your teacher to activate this notebook first.'}</span>}</div>
+            <div className="nb-field"><span className="nb-label">Class code</span><Boxes value="" length={6} label="Class code" onChange={() => {}} disabled /><span className="nb-meta">Demo mode: type any demo student name below and any 4-digit PIN opens the notebook.</span></div>
+            {savedOrDemo.length ? <div className="nb-field"><span className="nb-label">{students.length ? 'On this browser' : 'Demo students'}</span><div>{savedOrDemo.map((student) => <button type="button" key={student.id} className="nb-btn nb-btn--ghost nb-btn--sm" style={{ margin: '0 .4rem .4rem 0' }} onClick={() => { setName(student.name); }}>{student.name}</button>)}</div></div> : null}
+            <div className="nb-field"><label className="nb-label" htmlFor="student-name">Your name</label><input id="student-name" className="nb-input nb-input--lined" value={name} onChange={(event) => { setName(event.target.value); }} autoComplete="name" />{error ? <span className="pen" role="alert">{error}</span> : <span className="nb-meta">{students.length ? 'Pick a saved name, then your PIN.' : 'Pick a demo student name — any 4-digit PIN works.'}</span>}</div>
             <div className="nb-field"><span className="nb-label">4-digit PIN</span><Boxes value={pin} length={4} label="PIN" onChange={setPin} secret /></div>
             <button className="nb-btn nb-btn--primary nb-btn--lg" style={{ justifyContent: 'center' }} disabled={pending} type="submit">{pending ? 'Opening…' : 'Open my notebook'} <Icon name="arrow" /></button>
             <div className="si-foot"><Link className="nb-link" to="/recover" style={{ fontSize: '1rem' }}>Forgot PIN? Ask your teacher</Link><span>No email needed</span></div>
