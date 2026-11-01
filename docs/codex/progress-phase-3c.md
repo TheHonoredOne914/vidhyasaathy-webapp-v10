@@ -1,5 +1,10 @@
 # Phase 3C backend progress
 
+## Integration review — 2026-11-01
+- Rechecked the already-reviewed branch; tracked junk scan clean. No demo database migration or reseed performed.
+- `npm run typecheck`: passed (Node v24.15.0).
+- `npx vitest run --workspace vitest.workspace.ts --configLoader native --pool forks --reporter dot`: 73 files passed; 299 tests passed, 1 skipped.
+
 ## Acceptance audit
 - Existing seed tests cover Aarav/Priya/Rohan next actions; core tests cover freeze boundaries, IST midnight and nightly replanning.
 - Added next-day warm-up skip, challenge evidence/double-submit, empty challenge completion, Dushman retirement and badge idempotency coverage.
