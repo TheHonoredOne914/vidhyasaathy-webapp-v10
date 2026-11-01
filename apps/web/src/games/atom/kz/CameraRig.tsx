@@ -18,7 +18,7 @@ export function CameraRig({ beat, time, act, zoom = 0, reduced = false }: {
       if (!state.down) return;
       state.vx = (event.clientX - state.x) * 0.004; state.vy = (event.clientY - state.y) * 0.004;
       state.x = event.clientX; state.y = event.clientY;
-      state.yaw += state.vx; state.pitch = Math.max(-Math.PI * 35 / 180, Math.min(Math.PI * 35 / 180, state.pitch + state.vy));
+      state.yaw = Math.max(-0.61, Math.min(0.61, state.yaw + state.vx)); state.pitch = Math.max(-0.61, Math.min(0.61, state.pitch + state.vy));
     };
     const up = () => { state.down = false; state.released = performance.now(); };
     const wheel = (event: WheelEvent) => { event.preventDefault(); state.distance = Math.max(0.7, Math.min(1.4, state.distance + event.deltaY * 0.001)); state.released = performance.now(); };
@@ -41,7 +41,7 @@ export function CameraRig({ beat, time, act, zoom = 0, reduced = false }: {
     const state = orbit.current;
     if (!state.down) {
       state.vx *= Math.exp(-dt * 10); state.vy *= Math.exp(-dt * 10);
-      state.yaw += state.vx; state.pitch = Math.max(-0.61, Math.min(0.61, state.pitch + state.vy));
+      state.yaw = Math.max(-0.61, Math.min(0.61, state.yaw + state.vx)); state.pitch = Math.max(-0.61, Math.min(0.61, state.pitch + state.vy));
       if (!act && performance.now() - state.released > 100) { state.yaw *= Math.exp(-dt * 8); state.pitch *= Math.exp(-dt * 8); }
     }
     vectors.offset.copy(vectors.position).sub(vectors.target);

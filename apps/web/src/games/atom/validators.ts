@@ -10,7 +10,7 @@ export function isotopeName(element: string, protons: number, neutrons: number):
 
 export function isotopeStability(protons: number, neutrons: number): 'stable' | 'borderline' | 'radioactive' {
   const ratio = neutrons / Math.max(1, protons);
-  if (protons === 6 && neutrons === 7) return 'stable';
+  if (protons === 6) return neutrons === 6 || neutrons === 7 ? 'stable' : 'radioactive';
   if (ratio > 1.5 || ratio < 0.8) return 'radioactive';
   return 'borderline';
 }

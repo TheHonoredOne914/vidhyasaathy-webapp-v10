@@ -11,6 +11,7 @@ import { Nucleus } from './kz/NucleusView';
 import { ShellRing } from './kz/ShellRing';
 import { Sparkles } from './kz/Sparkles';
 import { KZ } from './kz/palette';
+import { isotopeStability } from './validators';
 import type { ParticleKind } from './kz/Particle';
 import type { ScreenAnchor } from './kz/useProjected';
 
@@ -43,9 +44,10 @@ function PerfGuard({ onSlow }: { onSlow: () => void }) {
 
 function Orbitals({ counts, radius = 1, reduced, onShell }: { counts: number[]; radius?: number; reduced?: boolean | undefined; onShell?: ((shell: 'k' | 'l' | 'm') => void) | undefined }) {
   return <>{counts.map((count, shell) => {
+    if (!count && !onShell) return null;
     const r = (1.65 + shell * 0.95) * radius;
     const label = (['k', 'l', 'm'] as const)[shell]!;
-    return <group key={shell} rotation={[0.4 + shell * 0.18, shell % 2 ? -0.3 : 0.18, -0.12]}>
+    return <group key={shell} rotation={[0.35, shell % 2 ? -0.12 : 0.12, shell % 2 ? -0.38 : 0.38]}>
       <ShellRing radius={r} active={!!onShell} onTap={onShell && (() => onShell(label))} />
       {Array.from({ length: count }, (_, i) => <Electron key={i} radius={r} angle={i * Math.PI * 2 / count} speed={0.38 - shell * 0.08} reduced={reduced} />)}
     </group>;
@@ -55,15 +57,15 @@ function Orbitals({ counts, radius = 1, reduced, onShell }: { counts: number[]; 
 function Atom({ api, beat }: { api: SceneApi; beat: number }) {
   const p = api.protons ?? (beat === 3 ? 11 : 6);
   const n = api.neutrons ?? (beat === 2 ? 4 : beat === 3 ? 12 : 6);
-  const stable = n === 6 || n === 7;
+  const stable = isotopeStability(p, n) === 'stable';
   const count = api.electrons ?? (beat === 3 ? 10 : 6);
   const shells = [Math.min(2, count), Math.min(8, Math.max(0, count - 2)), Math.max(0, count - 10)];
   const showShells = beat === 0 || beat === 3 || beat === 5 || (beat === 1 && api.phase === 'branch');
-  return <group position={beat === 0 ? [0, -1.6, 0] : [0, 0, 0]}>
+  return <group position={beat === 0 ? [0, -2.1, 0] : [0, 0, 0]}>
     <Nucleus p={p} n={n} radius={beat === 0 ? 0.34 : beat === 3 || beat === 5 ? 0.25 : 0.5}
       faces={3} mood={beat === 2 && !stable ? 'worried' : 'smile'} wobble={beat === 2 && !stable ? 0.1 : 0}
       reduced={api.reduced} onTap={(kind) => { api.onNucleusTap(); api.onParticleTap?.(kind); }} onProject={api.onAnchor} />
-    {showShells && <Orbitals counts={shells} radius={beat === 0 ? 1.18 : 1} reduced={api.reduced}
+    {showShells && <Orbitals counts={shells} radius={beat === 0 ? 0.9 : 1} reduced={api.reduced}
       onShell={beat === 3 && api.phase === 'act' ? (shell) => api.onShellDrop(shell, shell === 'm') : undefined} />}
     {beat === 2 && <ShellRing radius={2.05} active />}
   </group>;
@@ -79,7 +81,9 @@ function IsotopePanels({ reduced }: { reduced?: boolean | undefined }) {
     gl.autoClear = true; gl.setScissorTest(true);
     panels.forEach(({ scene, camera }, i) => {
       const left = Math.round(i * size.width / 3), right = Math.round((i + 1) * size.width / 3);
-      camera.aspect = (right - left) / size.height; camera.position.set(0, 0, 11.5); camera.lookAt(0, 0, 0); camera.updateProjectionMatrix();
+      camera.aspect = (right - left) / size.height;
+      const distance = Math.max(11.5, 2.4 / (Math.tan(Math.PI / 10) * camera.aspect));
+      camera.position.set(0, 0, distance); camera.lookAt(0, 0, 0); camera.updateProjectionMatrix();
       gl.setViewport(left, 0, right - left, size.height); gl.setScissor(left, 0, right - left, size.height);
       gl.render(scene, camera);
     });

@@ -44,9 +44,9 @@
 .afv-kz .cap{border:0;text-align:left;width:max-content;pointer-events:auto}
 .afv-kz .prog button{padding:10px 0;background:none;border:0}
 .afv-kz .chapter-name{font-weight:600;font-size:clamp(12px,1vw,18px)}
-.afv-kz .exit{position:absolute;top:10vh;left:2.2vw;font-size:12px;pointer-events:auto;opacity:.8}
+.afv-kz .exit{position:absolute;top:9vh;left:2.2vw;font-size:16px;min-height:44px;display:flex;align-items:center;pointer-events:auto}
 .afv-kz .primary{border:2px solid #fff;border-radius:999px;background:#fff;color:#2d0089;padding:.8em 1.8em;font-weight:700;box-shadow:0 5px 0 #19005144}
-.afv-kz .begin{position:absolute;left:50%;top:45%;transform:translateX(-50%)}
+.afv-kz .begin{position:absolute;left:50%;bottom:19vh;transform:translateX(-50%)}
 .afv-kz .hint{left:50%;bottom:25vh;transform:translateX(-50%);white-space:nowrap}
 .afv-kz .act-controls{position:absolute;bottom:17vh;left:50%;transform:translateX(-50%);display:flex;gap:12px;pointer-events:auto}
 .afv-kz .particle-label{position:absolute;top:38vh}

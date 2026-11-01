@@ -8,7 +8,7 @@ export function makeBackdrop(inner: string, outer: string, center: [number, numb
     vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position.xy,0.9999,1.0);} `,
     fragmentShader: `uniform vec3 uA,uB; uniform vec2 uC,uRes; varying vec2 vUv;
       float h(vec2 p){return fract(sin(dot(p,vec2(41.3,289.1)))*43758.5);} 
-      void main(){ vec2 q=(vUv-uC)*vec2(uRes.x/uRes.y,1.0); float t=smoothstep(0.0,1.05,length(q)); vec3 c=mix(uA,uB,t); c+= (h(gl_FragCoord.xy)-0.5)*0.045; gl_FragColor=vec4(c,1.0);
+      void main(){ vec2 q=(vUv-uC)*vec2(uRes.x/uRes.y,1.0); float t=smoothstep(0.0,1.05,length(q)); vec3 c=mix(uA,uB,t); c+= (h(gl_FragCoord.xy)-0.5)*0.008; gl_FragColor=vec4(c,1.0);
 #include <colorspace_fragment>
 } `,
   }));

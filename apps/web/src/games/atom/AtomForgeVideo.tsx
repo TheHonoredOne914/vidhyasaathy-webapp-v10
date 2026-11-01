@@ -137,7 +137,7 @@ export function AtomForgeVideo() {
       <div className="chip"><Tag>Atom Forge</Tag><span className="chapter-name">{beat.title}</span></div>
       <Progress current={episode} titles={BEATS.map((item) => item.title)} onSelect={select} />
       <Link className="exit" to="/student/games" aria-label="Back to games">Back to games</Link>
-      {episode === 0 && phase !== 'done' && <div className="title"><h1>What is everything<br />made of?</h1><p>{beat.subtitle}</p></div>}
+      {episode === 0 && (phase === 'intro' || phase === 'play') && <div className="title"><h1>What is everything<br />made of?</h1><p>{beat.subtitle}</p></div>}
       {episode === 1 && <>
         <div ref={protonLine} className="lead" /><div ref={neutronLine} className="lead" />
         <div ref={protonTag} className="particle-label proton-label"><Tag color="#c4246f">Proton <small>charge +1</small></Tag></div>
@@ -151,7 +151,7 @@ export function AtomForgeVideo() {
       </div>)}
       {phase === 'intro' && <button type="button" className="primary begin" data-afv-begin="1" onClick={() => { setPhase('play'); setPlaying(true); }}>Enter the atom</button>}
       {episode === 2 && phase !== 'done' && <div className={'push-arrows' + (neutrons === 6 || neutrons === 7 ? ' stable' : '')} aria-hidden="true"><i /><i /></div>}
-      {phase === 'act' && <><Hint>{beat.hint}</Hint><div className="act-controls" data-afv-prompt="1">
+      {phase === 'act' && <>{episode !== 0 && <Hint>{beat.hint}</Hint>}<div className="act-controls" data-afv-prompt="1">
         {episode === 0 && <button type="button" className="primary" onPointerDown={(event) => { event.currentTarget.setPointerCapture(event.pointerId); setHolding(true); }} onPointerUp={() => setHolding(false)} onPointerCancel={() => setHolding(false)} onKeyDown={(event) => { if ([' ', 'Enter', 'ArrowUp'].includes(event.key)) { event.preventDefault(); setHolding(true); } }} onKeyUp={() => setHolding(false)} onBlur={() => setHolding(false)}>Hold to zoom</button>}
         {episode === 1 && <>{(['p', 'n'] as const).map((kind) => <button type="button" key={kind} data-afv-hotspot={kind} aria-pressed={tapped.includes(kind)} onClick={() => tapParticle(kind)}>Tap {kind === 'p' ? 'proton' : 'neutron'}</button>)}</>}
         {episode === 2 && <><button type="button" data-afv-drop="neutron" onPointerDown={(event) => { event.currentTarget.setPointerCapture(event.pointerId); trayStart.current = { x: event.clientX, y: event.clientY }; setDragging('in'); }} onClick={(event) => { if (event.detail === 0) setNeutrons((n) => Math.min(10, n + 1)); }}>Add neutron</button><button type="button" onClick={() => setNeutrons((n) => Math.max(0, n - 1))}>Remove neutron</button><button type="button" disabled={neutrons !== 6} onClick={complete}>Keep this nucleus</button><span>{neutrons > 6 ? 'Almost there, one too many' : 'Make carbon-12'}</span></>}
@@ -164,7 +164,7 @@ export function AtomForgeVideo() {
         ].map((question) => <label key={question.id}>{question.text}<select aria-label={question.text} value={quiz[question.id] ?? ''} onChange={(event) => setQuiz({ ...quiz, [question.id]: event.target.value })}><option value="">Choose</option>{question.options.map((option) => <option key={option}>{option}</option>)}</select></label>)}</div><button type="button" onClick={() => { const result = conceptQuiz(quiz); if (result.correct) complete(); else setMessage(result.feedback); }}>Check my recall</button></>}
       </div>{message && <p className="action-message" role="status">{message}</p>}</>}
       {phase === 'branch' && <div className="payoff" data-afv-branch={branchKind ?? 'ok'}>Almost there · watch what changes</div>}
-      {phase === 'done' && <section className="recap" aria-label="Atom recap"><h1>Mastered</h1><div className="recap-grid">{RECAP.map((card) => <article key={card.kind}>
+      {phase === 'done' && <section className="recap" aria-label="Atom recap"><h1>Your atom recap</h1><div className="recap-grid">{RECAP.map((card) => <article key={card.kind}>
         <div className={'vignette ' + card.kind} aria-hidden="true"><i>+</i><i>0</i><i>−</i></div><h2>{card.title}</h2><p>{card.text}</p>
       </article>)}</div><button type="button" className="primary" onClick={() => select(0)}>Explore again</button></section>}
       {phase !== 'done' && <Caption text={caption} onAdvance={advanceCaption} />}
