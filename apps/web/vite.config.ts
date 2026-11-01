@@ -40,11 +40,19 @@ export default defineConfig(({ command, mode }) => {
         changeOrigin: false,
         rewrite: (path) => path.replace(/^\/api/, '') || '/',
         configure: (proxy) => {
-          proxy.on('proxyReq', (proxyReq, _req) => {
-            // The API's CSRF check requires this exact origin. Same-origin through
-            // the dev proxy/preview tunnel may carry a different host, so always
-            // present the app origin to the API.
-            proxyReq.setHeader('origin', process.env.VITE_APP_ORIGIN || 'http://127.0.0.1:5173');
+          // The API's CSRF check wants APP_ORIGIN. Map only this dev server's own
+          // origins (and explicitly listed tunnel origins) onto it; any other Origin
+          // is forwarded untouched so cross-site requests stay rejected.
+          const appOrigin = process.env.APP_ORIGIN || process.env.VITE_APP_ORIGIN || fileEnv.APP_ORIGIN || 'http://127.0.0.1:5173';
+          const allowed = new Set([
+            appOrigin,
+            ...(process.env.VITE_ALLOWED_ORIGINS || fileEnv.VITE_ALLOWED_ORIGINS || '').split(',').map((value) => value.trim()).filter(Boolean),
+          ].map((value) => value.replace(/\/+$/, '')));
+          proxy.on('proxyReq', (proxyReq, req) => {
+            const incoming = typeof req.headers.origin === 'string' ? req.headers.origin.replace(/\/+$/, '') : '';
+            const host = req.headers.host;
+            const own = host ? [`http://${host}`, `https://${host}`] : [];
+            if (incoming && (allowed.has(incoming) || own.includes(incoming))) proxyReq.setHeader('origin', appOrigin);
           });
         },
       },
