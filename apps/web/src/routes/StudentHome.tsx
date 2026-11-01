@@ -4,6 +4,7 @@ import { AskPanel } from '../ai/AskPanel';
 import { HomeDesk } from '../student/HomeDesk';
 import { GamesBoard } from '../student/notebook/screens/GamesBoard';
 import { HomeworkBoard } from '../student/notebook/screens/HomeworkBoard';
+import { StudySessionsBoard } from '../student/notebook/screens/StudySessionsBoard';
 import { SubjectsBoard } from '../student/notebook/screens/SubjectsBoard';
 import { AccessDenied } from './AccessDenied';
 
@@ -16,7 +17,8 @@ export function StudentHome({ me, stale, updatedAt, message }: { me: Me; stale: 
   if (!PANELS.has(panel)) return <AccessDenied />;
   if (panel === 'subjects') return <SubjectsBoard query={params.get('q') ?? ''} />;
   if (panel === 'games') return <GamesBoard />;
-  if (panel === 'homework' || panel === 'study') return <HomeworkBoard />;
+  if (panel === 'homework') return <HomeworkBoard />;
+  if (panel === 'study') return <StudySessionsBoard />;
   if (panel === 'ask') return <AskPanel />;
   return <HomeDesk me={me} stale={stale} updatedAt={updatedAt} message={message} />;
 }

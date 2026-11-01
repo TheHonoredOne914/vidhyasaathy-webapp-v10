@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { AdvanceSessionSchema, PublishContentSchema, SaveLearningSessionSchema, SubmitSessionCheckSchema, type SaveLearningSession } from '@vidhyasaathy/contracts';
+import { AdvanceSessionSchema, PublishContentSchema, SaveLearningSessionSchema, StudentStudySessionsSchema, SubmitSessionCheckSchema, type SaveLearningSession, type StudentStudySession } from '@vidhyasaathy/contracts';
 import { clampLevel, sessionGate, type Confidence, type ErrorFamily } from '@vidhyasaathy/core/learning';
 import { advanceSlide, completeSession } from '@vidhyasaathy/core/session';
 import { and, eq } from 'drizzle-orm';
@@ -11,7 +11,7 @@ import type { AuthService } from '../auth/service.ts';
 import { chapterAccess, requireDraft, resourceId } from '../content/access.ts';
 import { learningSessionAccess, progressRow, sessionItems, sessionSlides, sessionView, visibleSessions } from '../content/sessions.ts';
 import type { Db } from '../db/index.ts';
-import { concepts, items, learningEvidence, learningSessions, notes, sessionProgress, slides } from '../db/schema.ts';
+import { chapters, concepts, items, learningEvidence, learningSessions, notes, profiles, sessionProgress, slides, subjects } from '../db/schema.ts';
 import { touchStreak } from '../daily/streak-store.ts';
 import { mistakeFor, recordAnswer } from '../learning/record.ts';
 import { ApiException, parseInput } from '../errors.ts';
@@ -46,6 +46,39 @@ export function registerLearningSessionRoutes(app: FastifyInstance, db: Db, auth
     return visibleSessions(db, request, resourceId(request), now()).map((session) => {
       const { id, schoolId, chapterId, sectionId, title, status, releaseAt, updatedAt, progress } = sessionView(db, request, session);
       return { id, schoolId, chapterId, sectionId, title, status, releaseAt, updatedAt, progress };
+    });
+  });
+  app.get('/student/study-sessions', student, async (request) => {
+    const { school, profile } = requireAuth(request);
+    const me = found(db.select().from(profiles).where(scope(profiles, school.id, profile.id)).get());
+    const at = now();
+    const rows = db.select({ session: learningSessions, chapter: chapters, subject: subjects }).from(learningSessions)
+      .innerJoin(chapters, and(eq(chapters.id, learningSessions.chapterId), eq(chapters.schoolId, learningSessions.schoolId)))
+      .innerJoin(subjects, and(eq(subjects.id, chapters.subjectId), eq(subjects.schoolId, chapters.schoolId)))
+      .where(and(eq(learningSessions.schoolId, school.id), eq(learningSessions.sectionId, me.sectionId ?? ''), eq(learningSessions.status, 'published'))).all();
+    const sessions: StudentStudySession[] = [];
+    for (const { session, chapter, subject } of rows) {
+      const total = sessionSlides(db, session.id).length;
+      if (!total) continue;
+      const progress = progressRow(db, session.id, profile.id);
+      const viewedSlides = Math.min(progress?.viewedSlides ?? 0, total);
+      const completedAt = progress?.completedAt ?? null;
+      const state: StudentStudySession['state'] = session.releaseAt !== null && session.releaseAt > at ? 'upcoming'
+        : completedAt !== null ? 'done' : viewedSlides > 0 ? 'in_progress' : 'new';
+      sessions.push({ id: session.id, chapterId: chapter.id, chapterTitle: chapter.title, subject: subject.name, title: session.title,
+        state, releaseAt: session.releaseAt, slides: total, viewedSlides, completedAt });
+    }
+    const order = { in_progress: 0, new: 1, upcoming: 2, done: 3 } as const;
+    sessions.sort((a, b) => order[a.state] - order[b.state]
+      || (a.state === 'upcoming' ? (a.releaseAt ?? 0) - (b.releaseAt ?? 0) : a.state === 'done' ? (b.completedAt ?? 0) - (a.completedAt ?? 0) : (b.releaseAt ?? 0) - (a.releaseAt ?? 0))
+      || a.title.localeCompare(b.title));
+    return StudentStudySessionsSchema.parse({
+      counts: {
+        waiting: sessions.filter((row) => row.state === 'new' || row.state === 'in_progress').length,
+        upcoming: sessions.filter((row) => row.state === 'upcoming').length,
+        done: sessions.filter((row) => row.state === 'done').length,
+      },
+      sessions,
     });
   });
   app.get('/sessions/:id', { preHandler: requireRole('admin', 'teacher', 'student') }, async (request) => {
