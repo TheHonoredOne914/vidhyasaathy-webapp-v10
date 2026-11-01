@@ -2,14 +2,14 @@ import { PinLoginSchema } from '@vidhyasaathy/contracts';
 import { and, eq } from 'drizzle-orm';
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import type { AuthOptions, AuthService } from '../auth/service.ts';
+import { demoLooseAuthEnabled } from '../auth/demo-loose.ts';
 import { verifyCredential } from '../auth/security.ts';
 import { DEMO_SCHOOL_ID } from '../db/demo.ts';
 import type { Db } from '../db/index.ts';
 import { profiles, users } from '../db/schema.ts';
 import { ApiException, parseInput } from '../errors.ts';
 
-/** Prototype convenience: when DEMO_LOOSE_AUTH=true, any 4-digit PIN opens any student notebook. */
-const looseAuth = (): boolean => process.env.DEMO_LOOSE_AUTH === 'true' && process.env.NODE_ENV !== 'production';
+const looseAuth = demoLooseAuthEnabled;
 
 function pinLocked(reply: FastifyReply, lockedUntil: number, now: number): ApiException {
   reply.header('Retry-After', Math.max(1, Math.ceil((lockedUntil - now) / 1000)));
@@ -25,13 +25,15 @@ export function registerPinRoute(app: FastifyInstance, db: Db, auth: AuthService
   });
 
   app.post('/auth/pin-login', { config: { public: true } }, async (request, reply) => {
-    const input = parseInput(PinLoginSchema, request.body);
+    const body = typeof request.body === 'object' && request.body !== null ? request.body as Record<string, unknown> : {};
+    const input = looseAuth()
+      ? { profileId: typeof body.profileId === 'string' ? body.profileId : '', pin: typeof body.pin === 'string' ? body.pin : 'demo' }
+      : parseInput(PinLoginSchema, request.body);
     const record = db.select({ user: users, role: profiles.role }).from(profiles)
       .innerJoin(users, eq(profiles.userId, users.id)).where(eq(profiles.id, input.profileId)).get();
     const user = record?.role === 'student' ? record.user : undefined;
-    if (user?.pinLockedUntil && user.pinLockedUntil > options.now()) throw pinLocked(reply, user.pinLockedUntil, options.now());
+    if (!looseAuth() && user?.pinLockedUntil && user.pinLockedUntil > options.now()) throw pinLocked(reply, user.pinLockedUntil, options.now());
     if (looseAuth() && user) {
-      db.update(users).set({ failedPinAttempts: 0, pinLockedUntil: null }).where(eq(users.id, user.id)).run();
       return auth.startSession(request, reply, 'auth.pin-login', () => auth.identityForProfile(input.profileId));
     }
     const valid = await verifyCredential(user?.pinHash ?? dummyHash, input.pin);

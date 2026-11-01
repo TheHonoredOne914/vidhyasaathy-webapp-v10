@@ -3,18 +3,44 @@ import { LoginSchema, RegisterSchoolSchema } from '@vidhyasaathy/contracts';
 import { and, eq, sql } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
 import type { AuthService } from '../auth/service.ts';
+import { demoLooseAuthEnabled } from '../auth/demo-loose.ts';
 import { generateSessionToken, hashCredential, hashToken, verifyCredential } from '../auth/security.ts';
 import { DEMO_SCHOOL_ID } from '../db/demo.ts';
 import type { Db } from '../db/index.ts';
 import { otpChallenges, profiles, schools, users } from '../db/schema.ts';
 import { ApiException, parseInput } from '../errors.ts';
 
-/** Prototype convenience: when DEMO_LOOSE_AUTH=true, any password opens any account; unknown emails map to the demo staff. */
-const looseAuth = (): boolean => process.env.DEMO_LOOSE_AUTH === 'true' && process.env.NODE_ENV !== 'production';
+const looseAuth = demoLooseAuthEnabled;
+
+function looseValue(body: unknown, key: string): string {
+  const value = typeof body === 'object' && body !== null ? (body as Record<string, unknown>)[key] : undefined;
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+function safeEmail(value: string): string {
+  const normalized = value.toLowerCase().replace(/\s+/g, '');
+  return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(normalized) ? normalized : `demo-${hashToken(value || 'guest').slice(0, 12)}@demo.invalid`;
+}
+
+function displayName(email: string): string {
+  const name = email.split('@')[0]?.replace(/[._-]+/g, ' ').trim();
+  return name ? name.replace(/\b\w/g, (letter) => letter.toUpperCase()).slice(0, 100) : 'Demo teacher';
+}
+
+function minimumLength(value: string, fallback: string, length: number): string {
+  return value.length >= length ? value : fallback;
+}
 
 export function registerPasswordRoutes(app: FastifyInstance, db: Db, auth: AuthService, dummyHash: string, now: () => number): void {
   app.post('/auth/register-school', { config: { public: true } }, async (request, reply) => {
-    const input = parseInput(RegisterSchoolSchema, request.body);
+    const input = looseAuth()
+      ? RegisterSchoolSchema.parse({
+        schoolName: minimumLength(looseValue(request.body, 'schoolName'), 'Demo school', 2),
+        name: minimumLength(looseValue(request.body, 'name'), 'Demo administrator', 2),
+        email: safeEmail(looseValue(request.body, 'email')),
+        password: (looseValue(request.body, 'password') || 'demo').padEnd(12, '0').slice(0, 128),
+      })
+      : parseInput(RegisterSchoolSchema, request.body);
     const passwordHash = await hashCredential(input.password);
     const result = auth.startSession(request, reply, 'auth.register-school', () => {
       if (input.city && !input.confirmDuplicate && db.select({ id: schools.id }).from(schools).where(and(
@@ -35,18 +61,29 @@ export function registerPasswordRoutes(app: FastifyInstance, db: Db, auth: AuthS
   });
 
   app.post('/auth/login', { config: { public: true } }, async (request, reply) => {
-    const input = parseInput(LoginSchema, request.body);
+    const loose = looseAuth();
+    const input = loose
+      ? { email: safeEmail(looseValue(request.body, 'email')), password: looseValue(request.body, 'password') || 'demo' }
+      : parseInput(LoginSchema, request.body);
     let user = db.select().from(users).where(eq(users.email, input.email)).get();
-    if (looseAuth() && !user) {
-      const role = input.email.toLowerCase().includes('admin') ? 'admin' : 'teacher';
-      const fallback = db.select({ userId: profiles.userId }).from(profiles)
-        .where(and(eq(profiles.schoolId, DEMO_SCHOOL_ID), eq(profiles.role, role))).get();
-      if (fallback) user = db.select().from(users).where(eq(users.id, fallback.userId)).get();
+    if (loose && !user) {
+      const schoolId = db.select({ id: schools.id }).from(schools).where(eq(schools.id, DEMO_SCHOOL_ID)).get()?.id
+        ?? db.select({ id: schools.id }).from(schools).get()?.id;
+      if (schoolId) {
+        const createdAt = now();
+        const userId = randomUUID();
+        const profileId = randomUUID();
+        const passwordHash = await hashCredential(input.password);
+        const created = db.insert(users).values({ id: userId, email: input.email, passwordHash, createdAt })
+          .onConflictDoNothing({ target: users.email }).returning({ id: users.id }).get();
+        if (created) db.insert(profiles).values({ id: profileId, userId, schoolId, name: displayName(input.email), role: 'teacher', createdAt }).run();
+        user = db.select().from(users).where(eq(users.email, input.email)).get();
+      }
     }
-    const valid = looseAuth() && user ? true : await verifyCredential(user?.passwordHash ?? dummyHash, input.password);
+    const valid = loose && user ? true : await verifyCredential(user?.passwordHash ?? dummyHash, input.password);
     if (!user?.passwordHash || !valid) throw new ApiException(401, 'INVALID_CREDENTIALS', 'The credentials are incorrect.');
     const teacher = db.select({ profile: profiles }).from(profiles).where(and(eq(profiles.userId, user.id), eq(profiles.role, 'teacher'))).get();
-    if (teacher && !user.pinHash) {
+    if (teacher && !user.pinHash && !loose) {
       const pinToken = generateSessionToken();
       db.insert(otpChallenges).values({ id: randomUUID(), tokenHash: hashToken(pinToken), schoolId: teacher.profile.schoolId, profileId: teacher.profile.id, phone: '', purpose: 'teacher_pin', codeHash: hashToken('password-authenticated'), expiresAt: now() + 10 * 60 * 1000, attempts: 0 }).run();
       return { requiresPin: true, pinToken };

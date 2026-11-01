@@ -3,10 +3,12 @@ import { isClaimCodeExpired } from '@vidhyasaathy/core/claim';
 import { and, eq, gt, isNull } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
 import type { AuthService } from '../auth/service.ts';
+import { demoLooseAuthEnabled } from '../auth/demo-loose.ts';
 import { hashCredential, hashToken } from '../auth/security.ts';
 import type { Db } from '../db/index.ts';
-import { claimCodes, users } from '../db/schema.ts';
+import { profiles, claimCodes, users } from '../db/schema.ts';
 import { ApiException, parseInput } from '../errors.ts';
+import { DEMO_SCHOOL_ID } from '../db/demo.ts';
 
 function invalidClaim(): ApiException {
   return new ApiException(400, 'INVALID_CLAIM_CODE', 'The activation code is invalid, expired, or already used.');
@@ -14,10 +16,19 @@ function invalidClaim(): ApiException {
 
 export function registerClaimRoute(app: FastifyInstance, db: Db, auth: AuthService, now: () => number): void {
   app.post('/auth/claim', { config: { public: true } }, async (request, reply) => {
-    const input = parseInput(ClaimSchema, request.body);
+    const body = typeof request.body === 'object' && request.body !== null ? request.body as Record<string, unknown> : {};
+    const input = demoLooseAuthEnabled()
+      ? { code: typeof body.code === 'string' ? body.code : '', pin: typeof body.pin === 'string' ? body.pin : 'demo' }
+      : parseInput(ClaimSchema, request.body);
     const codeHash = hashToken(input.code);
     const code = db.select().from(claimCodes).where(eq(claimCodes.codeHash, codeHash)).get();
-    if (!code || code.redeemedAt !== null || isClaimCodeExpired(code.expiresAt, now())) throw invalidClaim();
+    if (!code || code.redeemedAt !== null || isClaimCodeExpired(code.expiresAt, now())) {
+      if (!demoLooseAuthEnabled()) throw invalidClaim();
+      const demoProfile = db.select().from(profiles).where(and(eq(profiles.schoolId, DEMO_SCHOOL_ID), eq(profiles.role, 'student'))).get()
+        ?? db.select().from(profiles).where(eq(profiles.role, 'student')).get();
+      if (!demoProfile) throw invalidClaim();
+      return auth.startSession(request, reply, 'auth.claim', () => auth.identityForProfile(demoProfile.id));
+    }
     const pinHash = await hashCredential(input.pin);
     return auth.startSession(request, reply, 'auth.claim', () => {
       const identity = auth.identityForProfile(code.profileId);

@@ -2,6 +2,7 @@ import { randomInt, randomUUID } from 'node:crypto';
 import { StudentLookupSchema, StudentActivateSchema, OtpVerifySchema, SetPinSchema, ParentOtpRequestSchema } from '@vidhyasaathy/contracts';
 import { and, eq, gt, isNull } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
+import { demoLooseAuthEnabled } from '../auth/demo-loose.ts';
 import type { AuthOptions, AuthService } from '../auth/service.ts';
 import { hashCredential, hashToken, generateSessionToken } from '../auth/security.ts';
 import type { Db } from '../db/index.ts';
@@ -14,7 +15,7 @@ const phoneMask = (phone: string) => phone ? `${'*'.repeat(Math.max(0, phone.len
 const otpCode = () => String(randomInt(100000, 1000000));
 const token = () => generateSessionToken();
 /** Prototype convenience: when DEMO_LOOSE_AUTH=true, any phone falls back to the demo parent and any OTP is accepted. */
-const looseAuth = (): boolean => process.env.DEMO_LOOSE_AUTH === 'true' && process.env.NODE_ENV !== 'production';
+const looseAuth = demoLooseAuthEnabled;
 
 export function registerAuthV9Routes(app: FastifyInstance, db: Db, auth: AuthService, options: AuthOptions): void {
   function issueOtp(input: { schoolId: string; profileId: string; phone: string; purpose: 'student_verify' | 'parent_login' | 'teacher_pin'; claimCodeId?: string }) {
@@ -58,7 +59,9 @@ export function registerAuthV9Routes(app: FastifyInstance, db: Db, auth: AuthSer
     return auth.startSession(request, reply, 'auth.teacher.set-pin', () => auth.identityForProfile(profile.id));
   });
   app.post('/auth/parent/request-otp', { config: { public: true } }, async (request) => {
-    const { phone } = parseInput(ParentOtpRequestSchema, request.body); let row = db.select({ profile: profiles, school: schools }).from(profiles).innerJoin(schools, eq(schools.id, profiles.schoolId)).where(and(eq(profiles.role, 'parent'), eq(profiles.phone, phone))).get();
+    const values = typeof request.body === 'object' && request.body !== null ? request.body as Record<string, unknown> : {};
+    const { phone } = looseAuth() ? { phone: typeof values.phone === 'string' ? values.phone : '' } : parseInput(ParentOtpRequestSchema, request.body);
+    let row = db.select({ profile: profiles, school: schools }).from(profiles).innerJoin(schools, eq(schools.id, profiles.schoolId)).where(and(eq(profiles.role, 'parent'), eq(profiles.phone, phone))).get();
     if (!row && looseAuth()) row = db.select({ profile: profiles, school: schools }).from(profiles).innerJoin(schools, eq(schools.id, profiles.schoolId)).where(and(eq(profiles.role, 'parent'), eq(profiles.schoolId, DEMO_SCHOOL_ID))).get();
     if (!row || !db.select({ id: parentLinks.id }).from(parentLinks).where(and(eq(parentLinks.parentProfileId, row.profile.id), eq(parentLinks.schoolId, row.school.id))).get()) throw new ApiException(404, 'PARENT_NOT_FOUND', 'No parent account uses that phone number.');
     return issueOtp({ schoolId: row.school.id, profileId: row.profile.id, phone: row.profile.phone, purpose: 'parent_login' });
@@ -67,9 +70,13 @@ export function registerAuthV9Routes(app: FastifyInstance, db: Db, auth: AuthSer
 }
 
 async function verifyOtp(db: Db, body: unknown, purpose: 'student_verify' | 'parent_login', now: number, successCode: string) {
-  const input = parseInput(OtpVerifySchema, body); const row = db.select().from(otpChallenges).where(and(eq(otpChallenges.tokenHash, hashToken(input.otpToken)), eq(otpChallenges.purpose, purpose), gt(otpChallenges.expiresAt, now))).get();
+  const values = typeof body === 'object' && body !== null ? body as Record<string, unknown> : {};
+  const input = looseAuth()
+    ? { otpToken: typeof values.otpToken === 'string' ? values.otpToken : '', otp: typeof values.otp === 'string' ? values.otp : '' }
+    : parseInput(OtpVerifySchema, body);
+  const row = db.select().from(otpChallenges).where(and(eq(otpChallenges.tokenHash, hashToken(input.otpToken)), eq(otpChallenges.purpose, purpose), gt(otpChallenges.expiresAt, now))).get();
   const otpOk = looseAuth() || (row && hashToken(input.otp) === row.codeHash);
-  if (!row || row.attempts >= 5 || !otpOk) { if (row) db.update(otpChallenges).set({ attempts: row.attempts + 1 }).where(eq(otpChallenges.id, row.id)).run(); throw new ApiException(400, 'INVALID_OTP', 'That OTP is incorrect or expired.'); }
+  if (!row || (!looseAuth() && row.attempts >= 5) || !otpOk) { if (row && !looseAuth()) db.update(otpChallenges).set({ attempts: row.attempts + 1 }).where(eq(otpChallenges.id, row.id)).run(); throw new ApiException(400, 'INVALID_OTP', 'That OTP is incorrect or expired.'); }
   if (purpose === 'student_verify') { const next = token(); db.update(otpChallenges).set({ tokenHash: hashToken(next), codeHash: hashToken('verified'), expiresAt: now + OTP_TTL }).where(eq(otpChallenges.id, row.id)).run(); return { pinToken: next, profileId: row.profileId!, code: successCode }; }
   db.delete(otpChallenges).where(eq(otpChallenges.id, row.id)).run(); return { profileId: row.profileId!, code: successCode };
 }

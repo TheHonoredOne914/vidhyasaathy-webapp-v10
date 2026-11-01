@@ -13,6 +13,8 @@ const env = {
   RATE_LIMIT_MAX: process.env.RATE_LIMIT_MAX ?? '5000',
   AUTH_RATE_LIMIT_MAX: process.env.AUTH_RATE_LIMIT_MAX ?? '500',
   DEMO_SEED: 'true',
+  DEMO_LOOSE_AUTH: process.env.DEMO_LOOSE_AUTH ?? 'true',
+  VITE_DEMO_LOOSE_AUTH: process.env.DEMO_LOOSE_AUTH ?? 'true',
   DEMO_PASSWORD: 'Saathy@2026!',
   DEMO_PIN: '2468',
   // Keeps the documented staff password working on an existing demo database.

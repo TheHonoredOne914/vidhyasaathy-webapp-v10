@@ -32,6 +32,9 @@ export function RegisterSchool() {
   }
 
   function advance() {
+    if (import.meta.env.DEV && import.meta.env.VITE_DEMO_LOOSE_AUTH !== 'false') {
+      setErrors({}); setFormError(null); setStep((current) => Math.min(current + 1, 3)); return;
+    }
     const nextErrors = step === 0 ? stepOneErrors(draft) : step === 1 ? stepTwoErrors(draft) : {};
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
@@ -41,7 +44,7 @@ export function RegisterSchool() {
 
   async function register() {
     setFormError(null);
-    const parsed = validateForm(RegisterSchoolSchema, {
+    const values = {
       schoolName: draft.schoolName,
       name: draft.name,
       email: draft.email,
@@ -51,7 +54,10 @@ export function RegisterSchool() {
       board: draft.board,
       phone: draft.phone,
       confirmDuplicate,
-    });
+    };
+    const parsed = import.meta.env.DEV && import.meta.env.VITE_DEMO_LOOSE_AUTH !== 'false'
+      ? { ok: true as const, data: values }
+      : validateForm(RegisterSchoolSchema, values);
     if (!parsed.ok) {
       setErrors(parsed.fields);
       if (parsed.fields.schoolName || parsed.fields.email) setStep(0);
