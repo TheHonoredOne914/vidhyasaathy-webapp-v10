@@ -1,5 +1,5 @@
 import { LoginSchema, MeSchema, PinLoginSchema, SetPinSchema } from '@vidhyasaathy/contracts';
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 import { ApiClientError, getJson, inlineFieldErrors, postJson, validateForm } from '../../../api/client';
@@ -101,6 +101,27 @@ export function NotebookSignIn() {
   const [teacherPin, setTeacherPin] = useState('');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const autoDemo = import.meta.env.DEV && import.meta.env.VITE_DEMO_AUTO_SIGNIN === 'true';
+  const autoStarted = useRef(false);
+  const [autoPending, setAutoPending] = useState(autoDemo);
+  useEffect(() => {
+    if (!autoDemo || session.status === 'loading' || autoStarted.current) return;
+    autoStarted.current = true;
+    void (async () => {
+      try {
+        const result = await getJson('/auth/demo/students', demoStudentsSchema);
+        const aarav = result.students.find((student) => student.name.toLowerCase() === 'aarav');
+        if (!aarav) throw new Error('Demo student Aarav not found.');
+        const me = await postJson('/auth/pin-login', MeSchema, { profileId: aarav.id, pin: import.meta.env.VITE_DEMO_AUTO_PIN });
+        session.accept(me);
+        void navigate(ROLE_HOME[me.profile.role], { replace: true });
+      } catch {
+        setError('Could not open the demo account. Please sign in manually.');
+        setAutoPending(false);
+      }
+    })();
+  }, [autoDemo, session, navigate]);
+  if (autoPending) return <div className="si" aria-busy="true">Opening Aarav’s workspace…</div>;
   if (session.status === 'loading') return <div className="si"><section className="si-l" aria-busy="true" aria-label="Opening sign-in"><div className="si-form"><div className="nb-skel" /><div className="nb-skel" /></div></section><Night role={role} /></div>;
   if (session.me && !session.stale) return <Navigate to={ROLE_HOME[session.me.profile.role]} replace />;
 
