@@ -717,6 +717,12 @@ export function finishChallenge(db: Db, request: FastifyRequest, challengeId: st
   if (challenge.profileId !== profile.id || challenge.schoolId !== school.id) throw new ApiException(404, 'NOT_FOUND', 'Resource not found.');
   const answered = db.select().from(answerEvidence).where(and(eq(answerEvidence.profileId, profile.id), eq(answerEvidence.schoolId, school.id))).all()
     .filter((row) => row.source === 'game:daily_challenge' && challenge.itemIds.includes(row.itemId) && istDay(row.createdAt) === challenge.day && (challenge.startedAt == null || row.createdAt >= challenge.startedAt));
+  const timeUp = challenge.startedAt != null && now >= challenge.startedAt + CHALLENGE_MS;
+  if (challenge.status === 'expired' || (challenge.status === 'served' && !answered.length && timeUp)) {
+    // Time ran out with nothing tried: close the day honestly, with no XP or streak credit.
+    if (challenge.status === 'served') db.update(dailyChallenges).set({ status: 'expired', correct: 0, completedAt: now }).where(eq(dailyChallenges.id, challenge.id)).run();
+    return { status: 'expired' as const, xp: 0, answered: 0 };
+  }
   if (challenge.status !== 'completed') {
     if (challenge.day !== istDay(now)) throw new ApiException(409, 'CHALLENGE_CLOSED', 'This challenge belongs to an earlier day.');
     if (!answered.length || (answered.length < challenge.itemIds.length && (challenge.startedAt == null || now < challenge.startedAt + CHALLENGE_MS))) {
