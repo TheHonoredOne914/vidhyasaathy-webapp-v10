@@ -1,399 +1,179 @@
-import '@fontsource/patrick-hand';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { AtomForgeScene, type SceneEpisode, type SceneApi } from './AtomForgeScene';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { AtomForgeScene, type ScenePhase } from './AtomForgeScene';
+import { BEATS, RECAP } from './kz/beats';
+import { Caption, Chips, Hint, Meter, Progress, Tag } from './kz/Hud';
+import { atomBuild, conceptQuiz, isotopeSort, isotopeStability } from './validators';
+import type { ParticleKind } from './kz/Particle';
+import type { ScreenAnchor } from './kz/useProjected';
 import './atom-forge-video.css';
 
-type Episode = {
-  id: SceneEpisode;
-  title: string;
-  blurb: string;
-  durationMs: number;
-  captions: string[];
-  actAt: number;
-  actPrompt: string;
-  actKind: 'tap-nucleus' | 'drag-electron-k' | 'drag-electron-m' | 'drag-bond';
-  wrongClip: string;
-  rightClip: string;
-  concept: string;
-};
-
-const EPISODES: Episode[] = [
-  {
-    id: 'zoom',
-    title: '1 · Salt → atoms',
-    blurb: 'Zoom in',
-    durationMs: 11000,
-    captions: [
-      'A tiny grain of salt sits in your hand.',
-      'Zoom closer… crystals are stacks of atoms.',
-      'Closer still — each atom has a busy heart.',
-      'Tap the glowing nucleus when you see it.',
-    ],
-    actAt: 7000,
-    actPrompt: 'Tap the glowing nucleus',
-    actKind: 'tap-nucleus',
-    wrongClip: 'Missed it — the nucleus is the bright clustered centre.',
-    rightClip: 'Yes! That dense cluster is the nucleus.',
-    concept: 'Everyday matter is atoms packed into patterns.',
-  },
-  {
-    id: 'nucleus',
-    title: '2 · Nucleus',
-    blurb: 'Protons + neutrons',
-    durationMs: 10000,
-    captions: [
-      'Protons (coral) and neutrons (gold) huddle together.',
-      'This packed core is almost all the atom’s mass.',
-      'Electrons live much farther out.',
-      'Tap the nucleus again to lock the idea.',
-    ],
-    actAt: 6500,
-    actPrompt: 'Tap the nucleus cluster',
-    actKind: 'tap-nucleus',
-    wrongClip: 'Aim for the clustered spheres in the middle.',
-    rightClip: 'Locked in — protons and neutrons make the nucleus.',
-    concept: 'Nucleus = protons + neutrons. Tiny, heavy, central.',
-  },
-  {
-    id: 'shells',
-    title: '3 · Shells',
-    blurb: 'K then L',
-    durationMs: 12000,
-    captions: [
-      'Electrons race on tilted orbital rings.',
-      'They fill from the inside: K shell first.',
-      'K only holds two glowing electrons.',
-      'Drag the free electron onto the inner K ring.',
-    ],
-    actAt: 7500,
-    actPrompt: 'Drag the electron onto the K shell',
-    actKind: 'drag-electron-k',
-    wrongClip: 'K is the smallest ring hugging the nucleus. Try again.',
-    rightClip: 'K lights up — two electrons make it full.',
-    concept: 'Bohr shells fill inside-out. K = 2.',
-  },
-  {
-    id: 'sodium',
-    title: '4 · Sodium',
-    blurb: 'Na · 2,8,1',
-    durationMs: 13000,
-    captions: [
-      'Sodium has 11 protons — atomic number 11.',
-      'Shells fill 2, then 8… one electron left over.',
-      'That lonely outer electron wants company.',
-      'Drag it onto the outer M shell.',
-    ],
-    actAt: 8000,
-    actPrompt: 'Drag the electron onto the M shell',
-    actKind: 'drag-electron-m',
-    wrongClip: 'M is the wide outer ring. Drop it there.',
-    rightClip: 'Sodium stands: 2, 8, 1 — ready to bond.',
-    concept: 'Na electron config is 2,8,1. Valency 1.',
-  },
-  {
-    id: 'bond',
-    title: '5 · Bond',
-    blurb: 'Salt is born',
-    durationMs: 14000,
-    captions: [
-      'Chlorine needs one more electron for a full outer shell.',
-      'Sodium can give its lonely electron away.',
-      'Watch the electron leap with a light trail…',
-      'Drag Na’s electron toward Cl to finish the bond.',
-    ],
-    actAt: 8500,
-    actPrompt: 'Drag the electron from Na toward Cl',
-    actKind: 'drag-bond',
-    wrongClip: 'Pull it across toward the chlorine atom on the right.',
-    rightClip: 'Bonded! Charges pull them into a salt crystal.',
-    concept: 'Electron transfer → ions → ionic crystal (salt).',
-  },
-];
-
-type Phase = 'intro' | 'play' | 'act' | 'branch' | 'done';
-
-function fmt(ms: number) {
-  const s = Math.max(0, Math.floor(ms / 1000));
-  const m = Math.floor(s / 60);
-  const r = s % 60;
-  return m > 0 ? `${m}:${String(r).padStart(2, '0')}` : `${r}s`;
-}
-
 export function AtomForgeVideo() {
-  const [phase, setPhase] = useState<Phase>('intro');
-  const [epIndex, setEpIndex] = useState(0);
-  const [ms, setMs] = useState(0);
+  const [episode, setEpisode] = useState(0);
+  const [phase, setPhase] = useState<ScenePhase>('intro');
   const [playing, setPlaying] = useState(false);
-  const [frontier, setFrontier] = useState(0);
-  const [unlocked, setUnlocked] = useState(0);
-  const [xp, setXp] = useState(0);
-  const [branch, setBranch] = useState<{ kind: 'ok' | 'bad'; text: string } | null>(null);
-
-  const episode = EPISODES[epIndex]!;
-  const offsets = useMemo(() => {
-    let o = 0;
-    return EPISODES.map((ep) => {
-      const start = o;
-      o += ep.durationMs;
-      return start;
-    });
-  }, []);
-  const totalMs = offsets[offsets.length - 1]! + EPISODES[EPISODES.length - 1]!.durationMs;
-  const globalMs = (offsets[epIndex] ?? 0) + ms;
-  const captionIndex = Math.min(
-    episode.captions.length - 1,
-    Math.floor((ms / Math.max(1, episode.durationMs)) * episode.captions.length),
-  );
-  const caption = episode.captions[captionIndex] ?? '';
-  const t = episode.durationMs <= 0 ? 0 : ms / episode.durationMs;
-  const inAct = phase === 'act';
+  const [time, setTime] = useState(0);
+  const [branchKind, setBranchKind] = useState<'ok' | 'bad' | null>(null);
+  const [reduced, setReduced] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const protonTag = useRef<HTMLDivElement>(null), neutronTag = useRef<HTMLDivElement>(null);
+  const protonLine = useRef<HTMLDivElement>(null), neutronLine = useRef<HTMLDivElement>(null);
+  const beat = BEATS[episode]!;
+  const [zoom, setZoom] = useState(0);
+  const [holding, setHolding] = useState(false);
+  const [tapped, setTapped] = useState<ParticleKind[]>([]);
+  const [neutrons, setNeutrons] = useState(4);
+  const [placed, setPlaced] = useState(false);
+  const [message, setMessage] = useState('');
+  const [sort, setSort] = useState<Record<string, string>>({});
+  const [card, setCard] = useState('c12');
+  const [build, setBuild] = useState({ p: 6, n: 6, e: 6 });
+  const [quiz, setQuiz] = useState<Record<string, string>>({});
+  const [dragging, setDragging] = useState<'in' | 'out' | null>(null);
+  const dragStart = useRef<{ x: number; y: number } | null>(null);
+  const trayStart = useRef<{ x: number; y: number } | null>(null);
+  useEffect(() => {
+    setZoom(0); setHolding(false); setTapped([]); setNeutrons(4); setPlaced(false); setMessage(''); setSort({}); setQuiz({}); setDragging(null);
+  }, [episode]);
+  useEffect(() => {
+    if (episode !== 0 || phase !== 'act') return;
+    const timer = window.setInterval(() => setZoom((value) => Math.max(0, Math.min(1, value + (holding ? 0.035 : -0.008)))), 50);
+    return () => window.clearInterval(timer);
+  }, [episode, phase, holding]);
+  useEffect(() => { if (zoom >= 1 && phase === 'act') { setHolding(false); setBranchKind('ok'); setPhase('branch'); setPlaying(true); } }, [zoom, phase]);
 
   useEffect(() => {
-    if (!playing || phase !== 'play') return;
-    let frame = 0;
-    let prev: number | null = null;
-    let local = ms;
-    const stopAt = episode.actAt;
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setReduced(media.matches);
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+  useEffect(() => {
+    if (phase !== 'play' || !playing) return;
+    let frame = 0, previous = performance.now();
     const tick = (now: number) => {
-      const delta = prev == null ? 0 : now - prev;
-      prev = now;
-      local = Math.min(stopAt, local + delta);
-      setMs(local);
-      setFrontier((f) => Math.max(f, (offsets[epIndex] ?? 0) + local));
-      if (local >= stopAt) {
-        setPlaying(false);
-        setPhase('act');
-        return;
-      }
+      const dt = Math.min(Math.max(0, (now - previous) / 1000), 0.1); previous = now;
+      setTime((value) => Math.min(beat.actAt, value + dt));
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [playing, phase, episode, epIndex, offsets]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [phase, playing, beat.actAt]);
+  useEffect(() => {
+    if (phase === 'play' && time >= beat.actAt) { setPhase('act'); setPlaying(false); }
+  }, [time, phase, beat.actAt]);
+  useEffect(() => {
+    if (phase !== 'branch' || branchKind !== 'ok' || !playing) return;
+    const timer = window.setTimeout(() => {
+      if (episode === BEATS.length - 1) { setPhase('done'); setPlaying(false); }
+      else { setEpisode(episode + 1); setTime(0); setBranchKind(null); setPhase('play'); }
+    }, 2500);
+    return () => window.clearTimeout(timer);
+  }, [phase, branchKind, playing, episode]);
 
-  const succeed = useCallback(() => {
-    setBranch({ kind: 'ok', text: episode.rightClip });
-    setPhase('branch');
-    setXp((x) => x + 25);
-    window.setTimeout(() => {
-      setBranch(null);
-      if (epIndex >= EPISODES.length - 1) {
-        setPhase('done');
-        setMs(episode.durationMs);
-        setFrontier(totalMs);
-        return;
+  const select = (index: number) => { setEpisode(index); setTime(0); setPhase('play'); setBranchKind(null); setPlaying(true); };
+  const complete = () => { setBranchKind('ok'); setPhase('branch'); setPlaying(true); };
+  const tapParticle = (kind: ParticleKind) => {
+    if (episode !== 1 || phase !== 'act') return;
+    const next = [...new Set([...tapped, kind])]; setTapped(next);
+    setMessage(kind === 'p' ? 'Proton pinned · charge +1' : 'Neutron pinned · no charge');
+    if (next.length === 2) complete();
+  };
+  const shell = (target: string) => {
+    if (episode !== 3 || phase !== 'act') return;
+    const answer: Record<string, string> = {};
+    for (let i = 0; i < 23; i++) answer['n' + i] = 'nucleus';
+    for (let i = 0; i < 10; i++) answer['e' + i] = i < 2 ? 'k' : 'l';
+    answer.e10 = target;
+    if (atomBuild(answer).correct) { setPlaced(true); setMessage(''); complete(); }
+    else setMessage("Let's fix this: " + target.toUpperCase() + ' is full');
+  };
+  const sortCard = (bin: string, selected = card) => {
+    if (sort[selected]) return;
+    const next = { ...sort, [selected]: bin };
+    if ((selected.startsWith('c1') ? 'isotope' : 'isobar') !== bin) { setMessage("Let's fix this: compare Z and A"); return; }
+    setSort(next); setMessage('');
+    const remaining = ['c12', 'c14', 'ca40', 'ar40'].find((id) => !next[id]);
+    if (remaining) setCard(remaining);
+    if (isotopeSort(next).correct) complete();
+  };
+  const configuration = [Math.min(2, build.e), Math.min(8, Math.max(0, build.e - 2)), Math.max(0, build.e - 10)];
+  const elements = ['No element', 'Hydrogen', 'Helium', 'Lithium', 'Beryllium', 'Boron', 'Carbon', 'Nitrogen', 'Oxygen', 'Fluorine', 'Neon', 'Sodium', 'Magnesium', 'Aluminium', 'Silicon', 'Phosphorus', 'Sulfur', 'Chlorine', 'Argon'];
+  const skip = () => { setTime(beat.actAt); setPhase('act'); setPlaying(false); };
+  const advanceCaption = () => {
+    if (phase === 'play') setTime((value) => Math.min(beat.actAt, (Math.floor(value / 3.5) + 1) * 3.5));
+  };
+  const project = useCallback((kind: ParticleKind, point: ScreenAnchor) => {
+    const tag = (kind === 'p' ? protonTag : neutronTag).current;
+    const line = (kind === 'p' ? protonLine : neutronLine).current;
+    if (!tag || !line) return;
+    const rect = tag.getBoundingClientRect();
+    const x = kind === 'p' ? rect.right : rect.left, y = rect.top + rect.height / 2;
+    const dx = point.x - x, dy = point.y - y;
+    Object.assign(line.style, { left: x + 'px', top: y + 'px', width: Math.hypot(dx, dy) + 'px', transform: 'rotate(' + Math.atan2(dy, dx) + 'rad)', opacity: point.visible ? '1' : '0' });
+  }, []);
+  const caption = phase === 'branch' || phase === 'done' ? beat.payoff : beat.captions[Math.max(0, Math.min(beat.captions.length - 1, Math.floor(time / 3.5)))]!;
+
+  return <main className="afv-kz" aria-label="Atom Forge" data-afv-episode={beat.id} data-afv-phase={phase} data-afv-playing={playing ? '1' : '0'}
+    onPointerDown={(event) => {
+      if ((event.target as HTMLElement).closest('button,input,select,a')) return;
+      if (episode === 0 && phase === 'act') setHolding(true);
+      if (episode === 2 && phase === 'act') dragStart.current = { x: event.clientX, y: event.clientY };
+    }} onPointerUp={(event) => {
+      setHolding(false);
+      if (dragging === 'in') {
+        const x = event.clientX / window.innerWidth, y = event.clientY / window.innerHeight;
+        const moved = trayStart.current && Math.hypot(event.clientX - trayStart.current.x, event.clientY - trayStart.current.y) > 12;
+        if (!moved || (x > 0.2 && x < 0.8 && y > 0.2 && y < 0.7)) setNeutrons((n) => Math.min(10, n + 1));
       }
-      const next = epIndex + 1;
-      setUnlocked((u) => Math.max(u, next));
-      setEpIndex(next);
-      setMs(0);
-      setPhase('play');
-      setPlaying(true);
-    }, 1600);
-  }, [episode, epIndex, totalMs]);
-
-  const fail = useCallback(() => {
-    setBranch({ kind: 'bad', text: episode.wrongClip });
-    setPhase('branch');
-    window.setTimeout(() => {
-      setBranch(null);
-      setMs(Math.max(0, episode.actAt - 2200));
-      setPhase('play');
-      setPlaying(true);
-    }, 1900);
-  }, [episode]);
-
-  const targetShell =
-    inAct || phase === 'branch'
-      ? episode.actKind === 'drag-electron-k'
-        ? 'k'
-        : episode.actKind === 'drag-electron-m'
-          ? 'm'
-          : episode.actKind === 'drag-bond'
-            ? 'cl'
-            : null
-      : null;
-
-  const api: SceneApi = {
-    episode: episode.id,
-    phase,
-    t: phase === 'done' ? 1 : t,
-    branchKind: branch?.kind ?? null,
-    dragElectron: episode.actKind !== 'tap-nucleus',
-    targetShell,
-    onNucleusTap: () => {
-      if (!inAct || episode.actKind !== 'tap-nucleus') return;
-      succeed();
-    },
-    onShellDrop: (_shell, ok) => {
-      if (!inAct) return;
-      if (ok) succeed();
-      else fail();
-    },
-  };
-
-  const doneApi: SceneApi = {
-    episode: 'bond', phase: 'done', t: 1, branchKind: 'ok', dragElectron: false, targetShell: null,
-    onNucleusTap: () => {}, onShellDrop: () => {},
-  };
-  const restart = () => { setEpIndex(0); setMs(0); setUnlocked(0); setFrontier(0); setXp(0); setPhase('play'); setPlaying(true); };
-
-  const seekEpisode = (index: number) => {
-    if (index > unlocked) return;
-    setBranch(null);
-    setEpIndex(index);
-    setMs(0);
-    setPhase('play');
-    setPlaying(true);
-  };
-
-  const scrub = (value: number) => {
-    const target = Math.max(0, Math.min(Math.max(frontier, 1), value));
-    let index = 0;
-    for (let i = 1; i <= unlocked; i += 1) {
-      if ((offsets[i] ?? Infinity) <= target) index = i;
-    }
-    setPlaying(false);
-    setBranch(null);
-    setEpIndex(index);
-    setMs(Math.min(EPISODES[index]!.durationMs, target - (offsets[index] ?? 0)));
-    setPhase('play');
-  };
-
-  const chapters = (
-    <nav className={`afv-chapters ${phase === 'intro' ? '' : 'afv-chapters--pills'}`} aria-label="Episode chapters">
-      {EPISODES.map((ep, index) => (
-        <button
-          key={ep.id}
-          type="button"
-          disabled={phase === 'intro' ? true : index > unlocked}
-          aria-current={phase !== 'intro' && index === epIndex ? 'step' : undefined}
-          onClick={() => (phase === 'intro' ? undefined : seekEpisode(index))}
-        >
-          <strong>{ep.title}</strong>
-          {phase === 'intro' && <small>{ep.blurb}</small>}
-        </button>
-      ))}
-    </nav>
-  );
-
-  if (phase === 'intro') {
-    return (
-      <section className="afv" aria-label="Atom Forge interactive video">
-        <div className="afv-top">
-          <div>
-            <p>NCERT · Class 9 · Ch 4 Structure of the Atom</p>
-            <h1>Atom Forge</h1>
-          </div>
-          <span className="afv-xp">3D interactive video</span>
-        </div>
-        <p className="afv-lede">
-          A silent Kurzgesagt-style short — camera whip-zooms from salt into atoms, then you grab electrons in 3D.
-        </p>
-        {chapters}
-        <div className="afv-controls">
-          <button type="button" className="primary" data-afv-begin="1" onClick={() => { setPhase('play'); setPlaying(true); }}>
-            Begin episode 1
-          </button>
-        </div>
-      </section>
-    );
-  }
-
-  return (
-    <section
-      className="afv afv--stage"
-      aria-label="Atom Forge interactive video"
-      data-afv-playing={playing ? '1' : '0'}
-      data-afv-phase={phase}
-      data-afv-episode={episode.id}
-    >
-      <div className="afv-stage-wrap">
-        <AtomForgeScene api={phase === 'done' ? doneApi : api} />
-        {phase === 'done' && (
-          <div className="afv-overlay-top">
-            <div className="afv-overlay-title">
-              <p>Episode complete - Salt forged from atoms</p>
-              <span className="afv-xp">+{xp} XP</span>
-            </div>
-          </div>
-        )}
-        {phase !== 'done' && <div className="afv-overlay-top">
-          <div className="afv-overlay-title">
-            <p>Atom Forge · {episode.title}</p>
-            <span className="afv-xp">{xp} XP</span>
-          </div>
-          {chapters}
-        </div>}
-
-        {inAct && episode.actKind === 'tap-nucleus' && (
-          <button type="button" className="afv-hotspot afv-hotspot--nucleus" data-afv-hotspot="nucleus" aria-label="Nucleus" onClick={() => succeed()} />
-        )}
-        {inAct && episode.actKind === 'drag-electron-k' && (
-          <>
-            <div className="afv-hotspot afv-hotspot--electron" data-afv-electron="1" />
-            <div className="afv-hotspot afv-hotspot--k" data-afv-drop="k" />
-            <button type="button" className="afv-assist" data-afv-assist="k" onClick={() => succeed()}>Snap to K</button>
-          </>
-        )}
-        {inAct && episode.actKind === 'drag-electron-m' && (
-          <>
-            <div className="afv-hotspot afv-hotspot--electron" data-afv-electron="1" />
-            <div className="afv-hotspot afv-hotspot--m" data-afv-drop="m" />
-            <button type="button" className="afv-assist" data-afv-assist="m" onClick={() => succeed()}>Snap to M</button>
-          </>
-        )}
-        {inAct && episode.actKind === 'drag-bond' && (
-          <>
-            <div className="afv-hotspot afv-hotspot--electron" data-afv-electron="1" />
-            <div className="afv-hotspot afv-hotspot--cl" data-afv-drop="cl" />
-            <button type="button" className="afv-assist" data-afv-assist="cl" onClick={() => succeed()}>Transfer to Cl</button>
-          </>
-        )}
-        {inAct && <div className="afv-prompt" data-afv-prompt="1">{episode.actPrompt}</div>}
-        {branch && (
-          <div className="afv-branch" data-kind={branch.kind} data-afv-branch={branch.kind}>
-            <h2>{branch.kind === 'ok' ? 'Nice!' : 'Watch again'}</h2>
-            <p>{branch.text}</p>
-          </div>
-        )}
-        <div className="afv-caption" aria-live="polite">
-          <div>
-            <strong>Saathy</strong>
-            <span>{phase === 'done' ? 'You zoomed into matter, built sodium, and watched salt bloom.' : inAct ? episode.actPrompt : branch ? branch.text : caption}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="afv-controls afv-controls--bar">
-        {phase === 'done' && <button type="button" className="primary" onClick={restart}>Watch again</button>}
-        {phase !== 'done' && <button type="button" data-afv-play="1" disabled={inAct || Boolean(branch)} onClick={() => setPlaying((p) => !p)}>
-          {playing ? 'Pause' : 'Play'}
-        </button>}
-        <label className="afv-scrub">
-          <input
-            type="range"
-            min={0}
-            max={totalMs}
-            step={1}
-            value={Math.min(totalMs, globalMs)}
-            aria-label="Progress scrubber"
-            data-afv-scrub="1"
-            disabled={Boolean(branch)}
-            onChange={(e) => scrub(Number(e.target.value))}
-          />
-          <small data-afv-time="1">
-            {fmt(globalMs)} / {fmt(totalMs)} · ep {epIndex + 1}/{EPISODES.length}
-            {frontier < totalMs ? ` · unlocked ${fmt(frontier)}` : ''}
-          </small>
-        </label>
-      </div>
-      <footer className="afv-footer">
-        <span>{episode.concept}</span>
-        <span>Silent · act-in-scene · no quiz</span>
-      </footer>
-    </section>
-  );
+      else if (episode === 2 && dragStart.current && Math.hypot(event.clientX - dragStart.current.x, event.clientY - dragStart.current.y) > 80 && event.clientY > window.innerHeight * 0.65) setNeutrons((n) => Math.max(0, n - 1));
+      setDragging(null); dragStart.current = null;
+    }} onPointerCancel={() => { setHolding(false); setDragging(null); }}>
+    <AtomForgeScene episode={beat.id} beat={episode} phase={phase} t={time} branchKind={branchKind} reduced={reduced}
+      zoom={zoom} protons={episode === 5 ? build.p : episode === 3 ? 11 : 6} neutrons={episode === 5 ? build.n : episode === 2 ? neutrons : episode === 3 ? 12 : 6}
+      electrons={episode === 5 ? build.e : episode === 3 ? placed ? 11 : 10 : 6}
+      dragElectron={false} targetShell={null} onNucleusTap={() => undefined} onParticleTap={tapParticle} onShellDrop={(target) => shell(target)} onAnchor={project} />
+    <div key={episode} className="iris" aria-hidden="true" />
+    <div className="hud">
+      <div className="chip"><Tag>Atom Forge</Tag><span className="chapter-name">{beat.title}</span></div>
+      <Progress current={episode} titles={BEATS.map((item) => item.title)} onSelect={select} />
+      <Link className="exit" to="/student/games" aria-label="Back to games">Back to games</Link>
+      {episode === 0 && (phase === 'intro' || phase === 'play') && <div className="title"><h1>What is everything<br />made of?</h1><p>{beat.subtitle}</p></div>}
+      {episode === 1 && <>
+        <div ref={protonLine} className="lead" /><div ref={neutronLine} className="lead" />
+        <div ref={protonTag} className="particle-label proton-label"><Tag color="#c4246f">Proton <small>charge +1</small></Tag></div>
+        <div ref={neutronTag} className="particle-label neutron-label"><Tag color="#e8540a">Neutron <small>no charge</small></Tag></div>
+      </>}
+      {episode === 2 && <><Chips protons={6} neutrons={neutrons} /><Meter value={isotopeStability(6, neutrons) === 'radioactive' ? 0.2 : neutrons === 6 ? 1 : 0.65} /></>}
+      {episode === 3 && <div className="count"><Tag>K 2</Tag><Tag>L 8</Tag><Tag>M {placed ? '1' : '0 / 1'}</Tag></div>}
+      {episode === 4 && [12, 13, 14].map((mass, i) => <div key={mass}>
+        <Tag className="panelTag" style={{ left: ((i + 0.5) * 100 / 3) + '%' }}>{['¹²C', '¹³C', '¹⁴C'][i]}</Tag>
+        <div className="panelData" style={{ left: ((i + 0.5) * 100 / 3) + '%' }}>6 protons · {mass - 6} neutrons<span>Z = 6 · A = {mass}</span></div>
+      </div>)}
+      {phase === 'intro' && <button type="button" className="primary begin" data-afv-begin="1" onClick={() => { setPhase('play'); setPlaying(true); }}>Enter the atom</button>}
+      {episode === 2 && phase !== 'done' && <div className={'push-arrows' + (neutrons === 6 || neutrons === 7 ? ' stable' : '')} aria-hidden="true"><i /><i /></div>}
+      {phase === 'act' && <>{episode !== 0 && <Hint>{beat.hint}</Hint>}<div className="act-controls" data-afv-prompt="1">
+        {episode === 0 && <button type="button" className="primary" onPointerDown={(event) => { event.currentTarget.setPointerCapture(event.pointerId); setHolding(true); }} onPointerUp={() => setHolding(false)} onPointerCancel={() => setHolding(false)} onKeyDown={(event) => { if ([' ', 'Enter', 'ArrowUp'].includes(event.key)) { event.preventDefault(); setHolding(true); } }} onKeyUp={() => setHolding(false)} onBlur={() => setHolding(false)}>Hold to zoom</button>}
+        {episode === 1 && <>{(['p', 'n'] as const).map((kind) => <button type="button" key={kind} data-afv-hotspot={kind} aria-pressed={tapped.includes(kind)} onClick={() => tapParticle(kind)}>Tap {kind === 'p' ? 'proton' : 'neutron'}</button>)}</>}
+        {episode === 2 && <><button type="button" data-afv-drop="neutron" onPointerDown={(event) => { event.currentTarget.setPointerCapture(event.pointerId); trayStart.current = { x: event.clientX, y: event.clientY }; setDragging('in'); }} onClick={(event) => { if (event.detail === 0) setNeutrons((n) => Math.min(10, n + 1)); }}>Add neutron</button><button type="button" onClick={() => setNeutrons((n) => Math.max(0, n - 1))}>Remove neutron</button><button type="button" disabled={neutrons !== 6} onClick={complete}>Keep this nucleus</button><span>{neutrons > 6 ? 'Almost there, one too many' : 'Make carbon-12'}</span></>}
+        {episode === 3 && <>{['k', 'l', 'm'].map((target) => <button type="button" data-afv-electron={target} className={target === 'm' && message ? 'slot-hint' : ''} key={target} onClick={() => shell(target)}>Shell {target.toUpperCase()}</button>)}</>}
+        {episode === 4 && <><div className="sort-cards">{[['c12', 'C-12 · Z 6'], ['c14', 'C-14 · Z 6'], ['ca40', 'Ca-40 · Z 20'], ['ar40', 'Ar-40 · Z 18']].map(([id, label]) => <button type="button" key={id} disabled={!!sort[id!]} aria-pressed={card === id} draggable onDragStart={(event) => { setCard(id!); event.dataTransfer.setData('text/plain', id!); }} onClick={() => setCard(id!)}>{label}{sort[id!] ? ' · placed' : ''}</button>)}</div>{['isotope', 'isobar'].map((bin) => <button type="button" className="sort-bin" key={bin} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); sortCard(bin); }} onClick={() => sortCard(bin)}>{bin === 'isotope' ? 'Isotopes' : 'Isobars'}</button>)}</>}
+        {episode === 5 && <><div className="build-controls">{(['p', 'n', 'e'] as const).map((kind) => <div key={kind}><span>{kind === 'p' ? 'Protons' : kind === 'n' ? 'Neutrons' : 'Electrons'} {build[kind]}</span>{[-1, 1].map((step) => <button type="button" key={step} aria-label={(step > 0 ? 'Add ' : 'Remove ') + kind} onClick={() => setBuild((value) => ({ ...value, [kind]: Math.max(kind === 'p' ? 1 : 0, Math.min(18, value[kind] + step)) }))}>{step > 0 ? '+' : '−'}</button>)}</div>)}</div><p>{elements[build.p]} · Z {build.p} · A {build.p + build.n} · {configuration.join(', ')} · {isotopeStability(build.p, build.n)}</p><div className="quiz">{[
+          { id: 'q1', text: 'What sets Z?', options: ['protons', 'neutrons', 'electrons'] },
+          { id: 'q2', text: '6 protons + 8 neutrons: A?', options: ['six', 'eight', 'fourteen'] },
+          { id: 'q3', text: 'Same Z, different A?', options: ['isotopes', 'isobars', 'ions'] },
+        ].map((question) => <label key={question.id}>{question.text}<select aria-label={question.text} value={quiz[question.id] ?? ''} onChange={(event) => setQuiz({ ...quiz, [question.id]: event.target.value })}><option value="">Choose</option>{question.options.map((option) => <option key={option}>{option}</option>)}</select></label>)}</div><button type="button" onClick={() => { const result = conceptQuiz(quiz); if (result.correct) complete(); else setMessage(result.feedback); }}>Check my recall</button></>}
+      </div>{message && <p className="action-message" role="status">{message}</p>}</>}
+      {phase === 'branch' && <div className="payoff" data-afv-branch={branchKind ?? 'ok'}>Almost there · watch what changes</div>}
+      {phase === 'done' && <section className="recap" aria-label="Atom recap"><h1>Your atom recap</h1><div className="recap-grid">{RECAP.map((card) => <article key={card.kind}>
+        <div className={'vignette ' + card.kind} aria-hidden="true"><i>+</i><i>0</i><i>−</i></div><h2>{card.title}</h2><p>{card.text}</p>
+      </article>)}</div><button type="button" className="primary" onClick={() => select(0)}>Explore again</button></section>}
+      {phase !== 'done' && <Caption text={caption} onAdvance={advanceCaption} />}
+      {phase !== 'intro' && phase !== 'done' && <div className="transport">
+        <button type="button" data-afv-play="1" disabled={phase === 'act'} onClick={() => setPlaying(!playing)}>{playing ? 'Pause' : 'Play'}</button>
+        <input data-afv-scrub="1" aria-label="Cutscene timeline" type="range" min={0} max={beat.actAt} step={0.1} value={time} onChange={(event) => { setTime(Number(event.target.value)); setPhase('play'); setBranchKind(null); }} />
+        <span data-afv-time="1">{Math.floor(time)} / {beat.actAt}s</span>
+        {phase === 'play' && <button type="button" data-afv-assist="1" onClick={skip}>Your turn</button>}
+      </div>}
+    </div>
+  </main>;
 }
-
-export default AtomForgeVideo;

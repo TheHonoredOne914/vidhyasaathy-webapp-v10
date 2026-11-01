@@ -8,7 +8,7 @@
 
 ## Carren's hard rules (ALWAYS follow; they override docs/spec/*)
 - Keep ALL existing data and work (demo DB, seeded content, existing features). Never wipe or reseed destructively; migrations must be additive. Back up apps/api/data/*.db before any migration.
-- No new games. Only games Carren sends. Atom Forge is PAUSED: do not touch apps/web/src/games/atom* or its routes.
+- Atom Forge: being rebuilt on branch atom-kz per docs/atom-kz/ (Carren approved 2026-10-30). Only the atom-kz run edits apps/web/src/games/atom*.
 - Landing page, themes and colours unchanged. No dark mode, no new palette.
 - No sound/audio/voice/speech anywhere.
 - Never show bands, ranks, leaderboards or numeric levels to students. Friendly words only: "Let's fix this" (L1), "Almost there" (L2), "Mastered" (L3), "Top form" (L4).

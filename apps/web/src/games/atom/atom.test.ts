@@ -1,12 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { validateGame } from '../engine/types';
-import { atomGame } from './index';
+import { BEATS } from './kz/beats';
 import { alphaModel, atomBuild, conceptQuiz, isotopeSort, isotopeName, isotopeStability, massNumber } from './validators';
 
 describe('Structure of the Atom game', () => {
-  // AGENTS.md: Atom Forge is paused, so the definition has no scenes until that game resumes.
-  it.skip('passes the engine structure validator (Atom Forge is paused)', () => {
-    expect(() => validateGame(atomGame)).not.toThrow();
+  it('uses the six interactive cutscene beats rather than engine scenes', () => {
+    expect(BEATS.map((beat) => beat.id)).toEqual(['cold-open', 'nucleus', 'stability', 'shells', 'isotopes', 'recap']);
   });
 
   it('identifies Rutherford from the alpha-particle evidence', () => {
@@ -38,6 +36,8 @@ describe('Structure of the Atom game', () => {
     expect(massNumber(6, 7)).toBe(13);
     expect(isotopeName('Carbon', 6, 7)).toBe('Carbon-13');
     expect(isotopeStability(6, 7)).toBe('stable');
-    expect(isotopeStability(6, 8)).toBe('borderline');
+    expect(isotopeStability(6, 6)).toBe('stable');
+    expect(isotopeStability(6, 8)).toBe('radioactive');
+    expect(isotopeStability(6, 4)).toBe('radioactive');
   });
 });

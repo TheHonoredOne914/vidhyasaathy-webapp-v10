@@ -14,7 +14,7 @@ import '../pages/games.css';
 const CATALOG = [
   { id: 'newton', title: 'Cricket Lab', topic: 'Force and motion', words: ['force', 'laws of motion'] },
   { id: 'motion', title: 'Bus Stop Graphs', topic: 'Motion graphs', words: ['motion'] },
-  { id: 'atom', title: 'Atom Forge', topic: 'Atoms', words: ['atom'], paused: true },
+  { id: 'atom', title: 'Atom Forge', topic: 'Atoms', words: ['atom'] },
   { id: 'cell', title: 'Bio Quest', topic: 'The cell', words: ['cell', 'unit of life'] },
   { id: 'matter', title: 'Particle Party', topic: 'Matter', words: ['matter'] },
   { id: 'float', title: 'Float or Sink', topic: 'Gravitation', words: ['gravitation', 'floatation'] },
@@ -86,13 +86,13 @@ export function GamesBoard() {
     <div className="gm-grid">{catalog.map((game) => {
       const chapter = game.id === featured?.id ? chapters.find((item) => recommendation?.href.includes(item.id)) ?? match(game.words) : match(game.words);
       const paused = 'paused' in game && game.paused;
-      const locked = !paused && (!chapter || (chapter.status === 'not_started' && game.id !== featured?.id));
+      const locked = game.id !== 'atom' && !paused && (!chapter || (chapter.status === 'not_started' && game.id !== featured?.id));
       const className = `nb-card gm${locked ? ' lock' : ''}${game.id === featured?.id && !locked ? ' today' : ''}`;
       const body = <>
         <div className="art" aria-hidden="true"><GameArt id={game.id} /></div>
         <b>{paused ? 'Atom Forge' : GAME_REGISTRY.find((item) => item.id === game.id)?.title}</b>
         <span className="nb-meta">{chapter?.title ?? 'A chapter game'}</span>
-        <div className="foot">{paused ? <Chip tone="sand">Coming back soon</Chip> : locked ? <span className="nb-meta">Opens after {chapter?.title ?? 'its chapter'}</span> : <><span className="nb-meta">{game.id === featured?.id ? 'Today' : ''}</span><Link className={`nb-btn nb-btn--${game.id === featured?.id ? 'primary' : 'ghost'} nb-btn--sm`} to={game.id === featured?.id && recommendation ? recommendation.href : `/student/chapters/${chapter!.id}/practice/engine/${game.id}`}>Play</Link></>}</div>
+        <div className="foot">{paused ? <Chip tone="sand">Coming back soon</Chip> : locked ? <span className="nb-meta">Opens after {chapter?.title ?? 'its chapter'}</span> : <><span className="nb-meta">{game.id === featured?.id ? 'Today' : ''}</span><Link className={`nb-btn nb-btn--${game.id === featured?.id ? 'primary' : 'ghost'} nb-btn--sm`} to={game.id === 'atom' ? `/student/chapters/${chapter?.id ?? pool[0]?.id ?? chapters[0]?.id ?? 'atoms'}/practice/engine/atom` : game.id === featured?.id && recommendation ? recommendation.href : `/student/chapters/${chapter!.id}/practice/engine/${game.id}`}>Play</Link></>}</div>
       </>;
       return <article className={className} key={game.id}>{body}</article>;
     })}</div>
