@@ -1,6 +1,7 @@
 # polish3a progress
 
 ## Integration review — 2026-11-01
+- Integrated reviewed phase-3c prerequisite fixes; final typecheck passed and forks tests passed (77 files, 312 passed, 1 skipped). No fresh browser captures claimed in this review.
 - Reviewed all session-player changes, local note isolation, public-question boundaries and mockup markup. Replaced raw server errors with retryable notebook copy, retaining remediation links; added a private-error regression assertion.
 - Removed generated screenshots from the Git index only (local captures preserved).
 - Study sessions currently aliases HomeworkBoard in the shared router; no unmocked replacement screen added. Missing diagram/teacher/timing API fields remain documented in data-gaps-polish3a.md.
