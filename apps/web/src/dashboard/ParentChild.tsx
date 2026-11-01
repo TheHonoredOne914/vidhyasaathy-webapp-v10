@@ -9,7 +9,7 @@ import { evidenceLabel } from './format';
 import { RemoteBlock } from './RemoteBlock';
 import './dashboard.css';
 
-export function ParentChild() {
+export function ParentChild({ view = 'overview' }: { view?: 'overview' | 'progress' | 'assignments' }) {
   const { childId = '' } = useParams();
   usePageMeta(PAGE.parentChild.title, PAGE.parentChild.description);
   const summary = useRemote(childId ? `/parents/children/${childId}/summary` : null, ParentSummarySchema);
@@ -20,6 +20,23 @@ export function ParentChild() {
       <RemoteBlock remote={summary} title="Could not load this child">
         {(data) => (
           <>
+            <nav className="child-tabs" aria-label="Child pages">
+              <Link to={`/parent/children/${childId}`} aria-current={view === 'overview' ? 'page' : undefined}>Overview</Link>
+              <Link to={`/parent/children/${childId}/progress`} aria-current={view === 'progress' ? 'page' : undefined}>Progress</Link>
+              <Link to={`/parent/children/${childId}/assignments`} aria-current={view === 'assignments' ? 'page' : undefined}>Assignments</Link>
+            </nav>
+            {view === 'progress' ? <article className="dash-panel">
+              <h1>{data.child.name}'s progress</h1>
+              <p>{data.observedResult.text}</p>
+              <h2>Current focus</h2>
+              {data.currentFocus.length ? <ul>{data.currentFocus.map((concept) => <li key={concept.conceptId}>{concept.title} — Let's fix this</li>)}</ul> : <p>New learning will appear after the next check.</p>}
+              <h2>Next step</h2><p>{data.suggestedAction.text}</p>
+            </article> : view === 'assignments' ? <article className="dash-panel">
+              <h1>{data.child.name}'s assignments</h1>
+              {data.progress.assignments.length ? <ul className="dash-list">{data.progress.assignments.map((item) => <li key={item.id}>
+                <h2>{item.title}</h2><p>Due {formatDue(item.dueAt)}. {scoreText(item.score)}. {item.teacherName}.</p>
+              </li>)}</ul> : <p>No assignment is published.</p>}
+            </article> : <>
             <header className="dash-banner">
               <Link className="back-link" to="/parent">← All children</Link>
               <h1>{data.child.name}</h1>
@@ -78,6 +95,7 @@ export function ParentChild() {
                 <p key={item.id}><strong>{item.title}.</strong> {item.body}</p>
               )) : <p>No teacher update for this class.</p>}
             </article>
+            </>}
           </>
         )}
       </RemoteBlock>

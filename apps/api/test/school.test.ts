@@ -309,9 +309,33 @@ describe('school CRUD and role enforcement', () => {
     for (const path of ['invite-teacher', 'import-roster', 'link-parent', 'teacher-assignments', 'claim-codes']) {
       expect((await h.post(`/admin/${path}`, {}, user.cookie)).statusCode).toBe(403);
     }
-    if (role !== 'teacher') for (const path of ['classes', 'sections', 'subjects', 'academic-years']) {
+    if (role === 'student') for (const path of ['classes', 'sections', 'subjects', 'academic-years']) {
       expect((await h.app.inject({ url: `/${path}`, headers: { cookie: user.cookie } })).statusCode).toBe(403);
     }
+  });
+
+  it('limits parent academic lookups to linked children and removes access immediately on unlink', async () => {
+    const school = await setup();
+    const other = await setup('other-admin@example.test');
+    const parent = h.roleCookie(school.identity.school.id, 'parent');
+    const student = h.createProfile(school.identity.school.id);
+    const get = (path: string) => h.app.inject({ url: path, headers: { cookie: parent.cookie } });
+    for (const path of ['classes', 'sections', 'subjects', 'academic-years']) {
+      expect((await get(`/${path}`)).json()).toEqual([]);
+    }
+    h.database.db.update(profiles).set({ sectionId: school.section.id }).where(eq(profiles.id, student.profileId)).run();
+    const link = { id: randomUUID(), schoolId: school.identity.school.id, parentProfileId: parent.profileId, studentProfileId: student.profileId };
+    h.database.db.insert(parentLinks).values(link).run();
+    for (const [path, row] of [['classes', school.schoolClass], ['sections', school.section], ['subjects', school.subject], ['academic-years', school.academicYear]] as const) {
+      expect((await get(`/${path}`)).json()).toEqual([row]);
+    }
+    expect((await get(`/sections/${school.section.id}`)).statusCode).toBe(200);
+    expect((await get(`/classes/${school.schoolClass.id}`)).statusCode).toBe(200);
+    expect((await get(`/sections/${other.section.id}`)).statusCode).toBe(404);
+    expect((await get(`/classes/${other.schoolClass.id}`)).statusCode).toBe(404);
+    h.database.db.delete(parentLinks).where(eq(parentLinks.id, link.id)).run();
+    expect((await get('/sections')).json()).toEqual([]);
+    expect((await get(`/sections/${school.section.id}`)).statusCode).toBe(404);
   });
 
   it('requires authentication, validates inputs and checks CSRF even for public invite acceptance', async () => {
