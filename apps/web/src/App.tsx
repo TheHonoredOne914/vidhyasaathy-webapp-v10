@@ -60,6 +60,7 @@ const DiagnosticPage = lazy(() => import('./student/notebook/screens/DiagnosticP
 const PracticeList = lazy(() => import('./practice/PracticeList').then((module) => ({ default: module.PracticeList })));
 const PracticePlay = lazy(() => import('./practice/PracticePlay').then((module) => ({ default: module.PracticePlay })));
 const EngineGamePage = lazy(() => import('./games/EngineGamePage').then((module) => ({ default: module.EngineGamePage })));
+const AtomForgeVideo = lazy(() => import('./games/atom/AtomForgeVideo').then((module) => ({ default: module.AtomForgeVideo })));
 
 export function prefetchSignIn() {
   return import('./routes/SignIn');
@@ -72,6 +73,7 @@ export function App() {
         <AttemptSyncProvider>
         <Suspense fallback={<RouteFallback />}>
           <Routes>
+            <Route path="/student/games/atom" element={<RoleGuard role="student"><AtomForgeVideo /></RoleGuard>} />
             <Route path="/student/chapters/:chapterId/practice/engine/:gameId" element={<RoleGuard role="student"><EngineGamePage /></RoleGuard>} />
             <Route element={<Shell />}>
               <Route path="/" element={<Landing />} />
