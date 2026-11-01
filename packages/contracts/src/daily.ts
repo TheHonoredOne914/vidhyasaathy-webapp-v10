@@ -158,3 +158,18 @@ export const PlanItemDoneSchema = z.object({ done: z.literal(true) }).strict();
 
 export type StudentHome = z.infer<typeof StudentHomeSchema>;
 export type WarmupStart = z.infer<typeof WarmupStartSchema>;
+
+export const StudySessionStateSchema = z.enum(['new', 'in_progress', 'upcoming', 'done']);
+export const StudentStudySessionSchema = z.object({
+  id: Id, chapterId: z.string().min(1), chapterTitle: z.string(), subject: z.string(), title: z.string(),
+  state: StudySessionStateSchema, releaseAt: Time.nullable(), slides: z.number().int().nonnegative(),
+  viewedSlides: z.number().int().nonnegative(), completedAt: Time.nullable(),
+}).strict();
+export const StudentStudySessionsSchema = z.object({
+  counts: z.object({
+    waiting: z.number().int().nonnegative(), upcoming: z.number().int().nonnegative(), done: z.number().int().nonnegative(),
+  }).strict(),
+  sessions: z.array(StudentStudySessionSchema),
+}).strict();
+export type StudentStudySession = z.infer<typeof StudentStudySessionSchema>;
+export type StudentStudySessions = z.infer<typeof StudentStudySessionsSchema>;
