@@ -88,7 +88,7 @@ test('teacher roster and student subjects use server-side assignment and school 
   assert.equal((await get('/admin/summary', cookie)).statusCode, 403);
   assert.equal((await get(`/sections/${assigned.sectionId}/students`, cookie)).statusCode, 403);
   assert.equal((await get(`/sections/${assigned.sectionId}/students`, teacher.cookie)).json()[0].activated, true);
-  assert.deepEqual((await get('/admin/summary', owner.cookie)).json(), { classes: 1, teachers: 1, students: 1, activated: 1, parentLinks: 0 });
+  assert.deepEqual((await get('/admin/summary', owner.cookie)).json(), { classes: 1, teachers: 1, students: 1, activated: 1, pending: 0, studentsWithParent: 0, parentLinks: 0 });
   const unassigned = h.roleCookie(owner.me.school.id, 'student');
   assert.deepEqual((await get('/student/subjects', unassigned.cookie)).json(), []);
   assert.deepEqual((await get('/student/enrollment', unassigned.cookie)).json(), { className: null, sectionName: null, rollNumber: null });

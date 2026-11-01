@@ -6,7 +6,8 @@ import {
   CatchupSchema, DailyChallengeSchema, StudentHomeSchema,
 } from '@vidhyasaathy/contracts';
 import { DEMO_SCHOOL_ID, seedDemo } from '../src/db/demo.ts';
-import { profiles, streakTouches } from '../src/db/schema.ts';
+import { answerEvidence, badgeAwards, dushmanEntries, profiles, streakTouches } from '../src/db/schema.ts';
+import { applyLearningAwards } from '../src/daily/awards.ts';
 import { cookieFrom, createHarness, PASSWORD, PIN, type Harness } from './helpers.ts';
 
 const BANNED = new Set(['correct', 'answerKey', 'key', 'band', 'rank']);
@@ -73,6 +74,12 @@ describe('daily loop API', () => {
     expect((await post('/student/warmup/skip', 'Priya', { clientEventId: randomUUID() })).statusCode).toBe(200);
     const after = StudentHomeSchema.parse((await get('/student/home', 'Priya')).json());
     expect(after.warmup).toBeNull();
+    h.advance(24 * 60 * 60 * 1000);
+    const priya = h.database.db.select().from(profiles).where(and(
+      eq(profiles.schoolId, DEMO_SCHOOL_ID), eq(profiles.name, 'Priya'),
+    )).get()!;
+    cookies.set('Priya', cookieFrom((await h.post('/auth/pin-login', { profileId: priya.id, pin: PIN })).headers));
+    expect(StudentHomeSchema.parse((await get('/student/home', 'Priya')).json()).warmup).not.toBeNull();
   });
 
   it('serves one daily challenge per day and one streak row for a double tap', async () => {
@@ -80,6 +87,8 @@ describe('daily loop API', () => {
     const second = DailyChallengeSchema.parse((await get('/student/daily-challenge', 'Aarav')).json());
     expect(second.id).toBe(first.id);
     expect(first.items.length).toBeGreaterThan(0);
+    expect(first.items.length).toBeLessThanOrEqual(5);
+    expect((await post(`/student/daily-challenge/${first.id}/finish`, 'Aarav', {})).statusCode).toBe(409);
     expect(leaks(first)).toEqual([]);
     const item = first.items[0]!;
     const answer = item.type === 'mcq' ? item.options[0] : '1';
@@ -94,9 +103,26 @@ describe('daily loop API', () => {
       eq(profiles.schoolId, DEMO_SCHOOL_ID), eq(profiles.name, 'Aarav'),
     )).get()!;
     const today = istDay(h.now());
+    expect(h.database.db.select().from(answerEvidence).where(and(
+      eq(answerEvidence.profileId, profile.id), eq(answerEvidence.source, 'game:daily_challenge'),
+    )).all()).toHaveLength(1);
     expect(h.database.db.select().from(streakTouches).where(and(
       eq(streakTouches.profileId, profile.id), eq(streakTouches.day, today),
     )).all()).toHaveLength(1);
+  });
+
+  it('retires a mastered Dushman and awards its badge only once', () => {
+    const entry = h.database.db.select().from(dushmanEntries).get()!;
+    const input = { schoolId: DEMO_SCHOOL_ID, profileId: entry.profileId, conceptId: entry.conceptId,
+      evidenceId: 'audit-mastery-event', fromLevel: 2, toLevel: 3, now: h.now() };
+    applyLearningAwards(h.database.db, input);
+    applyLearningAwards(h.database.db, input);
+    expect(h.database.db.select().from(dushmanEntries).where(eq(dushmanEntries.id, entry.id)).get()?.status).toBe('retired');
+    const awards = h.database.db.select().from(badgeAwards).where(and(
+      eq(badgeAwards.profileId, entry.profileId), eq(badgeAwards.badgeId, 'dushman_slayer'),
+    )).all();
+    expect(awards).toHaveLength(1);
+    expect(awards[0]?.triggerEventId).toBe(input.evidenceId);
   });
 
   it('refuses parent and teacher tokens on student routes', async () => {

@@ -3,7 +3,7 @@ import type { GameId, PracticeSet, SubmitPracticeAttempt } from '@vidhyasaathy/c
 import { gameModules } from '@vidhyasaathy/core/games';
 import { interleave } from '@vidhyasaathy/core/interleaving';
 import { streak } from '@vidhyasaathy/core/streak';
-import { and, eq, lte } from 'drizzle-orm';
+import { and, eq, lte, sql } from 'drizzle-orm';
 import type { FastifyRequest } from 'fastify';
 import { requireRemediationComplete } from '../ai/remediation-progress.ts';
 import { attemptChanged, markItem } from '../assessment/service.ts';
@@ -63,7 +63,7 @@ export function practiceNext(db: Db, request: FastifyRequest, chapterId: string,
     ladders.map((row) => ({ conceptId: row.conceptId, level: row.ladderLevel as Level })));
   const ladder = picked ? ladders.find((row) => row.conceptId === picked.conceptId) : null;
   return {
-    chapterId, item: picked ? publicItem(picked.row) : null, level: ladder?.ladderLevel ?? picked?.level ?? 2,
+    chapterId, item: picked ? publicItem(picked.row) : null,
     word: levelWord((ladder?.masteryLevel ?? null) as Level | null), bridge: ladder?.bridge ?? null,
   };
 }
@@ -74,9 +74,14 @@ function presentPractice(db: Db, row: typeof attempts.$inferSelect) {
   const saved = db.select().from(answerEvidence).where(eq(answerEvidence.id, `practice:${row.clientEventId}`)).get();
   const ladder = db.select().from(conceptLadders).where(and(eq(conceptLadders.profileId, row.profileId), eq(conceptLadders.conceptId, row.conceptId))).get();
   const correctOption = item?.content.type === 'mcq' ? item.content.answer : null;
+  const repeatedError = !row.correct && saved?.errorType ? !!db.select({ id: answerEvidence.id }).from(answerEvidence).where(and(
+    eq(answerEvidence.schoolId, row.schoolId), eq(answerEvidence.profileId, row.profileId), eq(answerEvidence.conceptId, row.conceptId),
+    eq(answerEvidence.correct, false), eq(answerEvidence.notTaught, false), eq(answerEvidence.errorType, saved.errorType),
+    sql`rowid < (select rowid from answer_evidence where id = ${saved.id})`,
+  )).limit(1).get() : false;
   return {
     ...row, explanation: row.correct ? null : (feedback.explanation ?? 'Look at this idea again, then try a simpler question.'),
-    fix: row.correct ? null : feedback.fix, correctOption, errorType: saved?.errorType ?? feedback.errorType, bridge: ladder?.bridge ?? null,
+    fix: row.correct ? null : feedback.fix, correctOption, errorType: saved?.errorType ?? feedback.errorType, bridge: ladder?.bridge ?? null, repeatedError,
   };
 }
 
