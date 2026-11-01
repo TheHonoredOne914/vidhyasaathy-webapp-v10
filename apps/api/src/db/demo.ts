@@ -6,9 +6,10 @@ import { hashCredential, hashToken } from '../auth/security.ts';
 import type { Db } from './index.ts';
 import { ensureMotionBank, ensureMotionHistories } from '../content/motion-bank.ts';
 import { ensureDailyLoop } from './daily-seed.ts';
-import { academicYears, assignmentItems, assignments, chapters, classes, conceptPrereqs, concepts, items,
+import { academicYears, aiDraftJobs, assignmentItems, assignments, chapters, classes, conceptPrereqs, concepts, items,
   claimCodes, learningEvidence, learningSessions, noteConcepts, notes, parentLinks, profiles, schools, sections, sessionProgress,
   slides, studentConceptStates, subjects, syncChanges, teacherAssignments, users, attempts } from './schema.ts';
+import { digest } from '../ai/retrieval.ts';
 
 export const DEMO_SCHOOL_ID = 'd7000000-0000-4000-8000-000000000001';
 const Credentials = z.object({ password: z.string().min(12).max(128), pin: z.string().regex(/^\d{4}$/) }).strict();
@@ -305,9 +306,35 @@ export function ensureMotionContent(db: Db, now: number) {
     noteIds[note.concept] = id;
   }
   refreshMotionChecks(db, chapter.id, conceptId);
+  ensureTeacherReviewJobs(db, chapter, noteIds, now);
   if (!session || db.select().from(slides).where(eq(slides.sessionId, session.id)).all().length > 0) return;
   db.insert(slides).values(MOTION_SLIDES.map((slide, position) => ({ id: randomUUID(), schoolId: DEMO_SCHOOL_ID, chapterId: chapter.id,
     sessionId: session.id, conceptId: conceptId(slide.concept)!, noteId: noteIds[slide.concept] ?? null, position, title: slide.title, body: slide.body }))).run();
+}
+
+/** Idempotently gives the demo teacher lesson review metadata; with no AI provider configured the honest status is not_configured. */
+function ensureTeacherReviewJobs(db: Db, chapter: typeof chapters.$inferSelect, noteIds: Record<string, string>, now: number) {
+  const teacher = db.select().from(profiles).where(and(eq(profiles.schoolId, DEMO_SCHOOL_ID), eq(profiles.role, 'teacher'))).get();
+  const assignment = teacher ? db.select().from(teacherAssignments).where(and(
+    eq(teacherAssignments.schoolId, DEMO_SCHOOL_ID), eq(teacherAssignments.teacherProfileId, teacher.id),
+    eq(teacherAssignments.subjectId, chapter.subjectId))).get() : null;
+  if (!assignment) return;
+  for (const concept of ['Distance & Displacement', 'Acceleration'] as const) {
+    const noteId = noteIds[concept];
+    const existing = noteId && db.select().from(aiDraftJobs).where(and(eq(aiDraftJobs.schoolId, DEMO_SCHOOL_ID),
+      eq(aiDraftJobs.noteId, noteId), eq(aiDraftJobs.sectionId, assignment.sectionId))).get();
+    if (!noteId || existing) continue;
+    const note = db.select().from(notes).where(eq(notes.id, noteId)).get();
+    if (!note) continue;
+    const source = { noteId, title: note.title, body: note.body,
+      concepts: db.select({ id: concepts.id, title: concepts.title }).from(noteConcepts)
+        .innerJoin(concepts, eq(concepts.id, noteConcepts.conceptId))
+        .where(and(eq(noteConcepts.schoolId, DEMO_SCHOOL_ID), eq(noteConcepts.noteId, noteId))).all() };
+    db.insert(aiDraftJobs).values({ id: randomUUID(), schoolId: DEMO_SCHOOL_ID, chapterId: chapter.id, noteId,
+      sectionId: assignment.sectionId, requestedBy: teacher!.id, sourceHash: digest(source),
+      status: 'not_configured', message: 'AI not configured', draft: null, sessionId: null, assignmentId: null,
+      createdAt: now, updatedAt: now }).run();
+  }
 }
 
 /**

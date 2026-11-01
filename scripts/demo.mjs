@@ -6,6 +6,8 @@ const webPort = Number(process.env.WEB_PORT ?? 5173);
 const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const env = {
   ...process.env,
+  RATE_LIMIT_MAX: process.env.RATE_LIMIT_MAX ?? '5000',
+  AUTH_RATE_LIMIT_MAX: process.env.AUTH_RATE_LIMIT_MAX ?? '500',
   DEMO_SEED: 'true',
   DEMO_PASSWORD: 'Saathy@2026!',
   DEMO_PIN: '2468',

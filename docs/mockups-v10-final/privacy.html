@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>VidhyaSaathy · Privacy</title>
+<link rel="stylesheet" href="tokens.css"/><link rel="stylesheet" href="components.css"/>
+<style>
+
+.p45{display:grid;grid-template-columns:minmax(0,1fr) clamp(260px,22vw,340px);gap:var(--nb-s5) var(--nb-s6);align-items:start}
+.p45 > .nb-col, .p45 > aside{min-width:0;display:flex;flex-direction:column;gap:var(--nb-s4)}
+@media (max-width:1179px){.p45{grid-template-columns:minmax(0,1fr)}}
+.ex-tag{position:fixed;right:.8rem;bottom:.7rem;z-index:80;font-family:var(--nb-font-hand);font-weight:700;font-size:.95rem;color:var(--nb-ink-soft);background:var(--nb-paper);border:1.5px dashed var(--nb-border);border-radius:999px;padding:.1rem .7rem;transform:rotate(-1.5deg)}
+@media print{.ex-tag{display:none}}
+.lined{background:repeating-linear-gradient(180deg,transparent 0,transparent calc(var(--nb-rule) - 1px),var(--nb-rule-ink) calc(var(--nb-rule) - 1px),var(--nb-rule-ink) var(--nb-rule));line-height:var(--nb-rule);font-family:var(--nb-font-note);font-size:1.2rem;color:var(--nb-navy)}
+.hand{font-family:var(--nb-font-hand);font-weight:700}
+.note{font-family:var(--nb-font-note)}
+.chk{width:1.35rem;height:1.35rem;border:2px solid var(--nb-navy);border-radius:5px;display:inline-grid;place-items:center;flex-shrink:0;background:var(--nb-paper)}
+.chk.on{background:var(--nb-navy)} .chk.on svg{stroke:#fff;width:1rem;height:1rem;stroke-width:3}
+.row-x{display:flex;align-items:center;gap:var(--nb-s3);flex-wrap:wrap}
+.spread{display:flex;align-items:center;justify-content:space-between;gap:var(--nb-s3);flex-wrap:wrap}
+
+.wsw-wrap{overflow-x:auto;border:2px solid var(--nb-navy);border-radius:6px 20px 8px 18px;background:var(--nb-paper);box-shadow:4px 5px 0 rgb(27 42 74 / 10%)}
+.wsw{width:100%;border-collapse:collapse;min-width:40rem}
+.wsw th{font-family:var(--nb-font-hand);font-weight:700;font-size:1.3rem;padding:.7rem .8rem;text-align:center;border-bottom:2px solid var(--nb-navy);background:var(--nb-cream);vertical-align:bottom}
+.wsw th:first-child{text-align:left}
+.wsw th small{display:block;font-family:var(--nb-font-ui);font-weight:500;font-size:.75rem;color:var(--nb-ink-soft)}
+.wsw td{padding:.65rem .8rem;border-bottom:1px dashed var(--nb-border);text-align:center;vertical-align:middle;font-size:.92rem}
+.wsw td:first-child{text-align:left}
+.wsw td:first-child b{display:block;font-size:1rem}
+.wsw td:first-child span{font-size:.82rem;color:var(--nb-ink-soft)}
+.wsw tr:last-child td{border-bottom:0}
+.yes,.no{display:inline-grid;place-items:center;width:2rem;height:2rem;border-radius:50%}
+.yes{border:2px solid var(--nb-ok);background:var(--nb-ok-soft)} .yes svg{stroke:var(--nb-ok);width:1.1rem;height:1.1rem;stroke-width:3}
+.no svg{stroke:var(--nb-redpen);width:1.2rem;height:1.2rem;stroke-width:3}
+.some{font-family:var(--nb-font-hand);font-weight:700;font-size:1.05rem;color:#8A6410;line-height:1.1;display:block}
+.you-col{background:rgb(255 241 166 / 35%)}
+.keep{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--nb-s4)}
+.keep .nb-sticky b{font-family:var(--nb-font-hand);font-size:1.5rem;display:block;line-height:1.1}
+.never li{display:flex;gap:.5rem;align-items:flex-start;margin:.35rem 0}
+.never svg{stroke:var(--nb-redpen);width:1.1rem;height:1.1rem;flex-shrink:0;margin-top:.2rem;stroke-width:2.6}
+.lockrow{display:flex;gap:.5rem;align-items:center;font-size:.85rem;color:var(--nb-ink-soft)}
+.lockrow svg{width:1rem;height:1rem}
+@media (max-width:900px){.keep{grid-template-columns:1fr}}
+
+</style></head>
+<body class=""><div id="root">
+<div class="nb-app">
+  <aside class="nb-side">
+    <div class="nb-brand"><div class="nb-brand__mark">V</div><div><div class="nb-brand__name">VidhyaSaathy</div><div class="nb-brand__tag">Class 9 · NCERT</div></div></div>
+    <nav class="nb-nav">
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>Home</a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>My subjects</a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>Study sessions</a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M7 4h10v16l-5-3-5 3V4z"/></svg>Homework<span class="nb-nav__badge">2</span></a>
+<div class="nb-nav__sec">Play</div>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="10" rx="4"/><path d="M8 11v4M6 13h4"/><circle cx="16" cy="12" r=".8"/><circle cx="18" cy="14" r=".8"/></svg>Games</a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M5 6h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-8l-4 3v-3H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z"/><path d="M8 11h8M8 14h5"/></svg>Ask Saathy</a>
+<div class="nb-nav__sec">You</div>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 16v-4M12 16V8M17 16v-7"/></svg>My progress</a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>Notifications<span class="nb-nav__badge">2</span></a>
+<a class="nb-nav__item is-active" href="#"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M3 12h2M19 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Settings</a>
+    </nav>
+    
+    <div class="nb-side__foot"><div class="nb-profile"><div class="nb-avatar">A</div><div><b>Aarav</b><span>IX-B · Roll 17</span></div></div></div>
+  </aside>
+  <div class="nb-main">
+    <header class="nb-top">
+      <div class="nb-brand nb-show-m"><div class="nb-brand__mark">V</div></div>
+      <div class="nb-search"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>Search lessons, notes, questions, games…</span><kbd>/</kbd></div>
+      <div class="nb-top__right"><span class="nb-pill nb-pill--streak"><svg class="i" viewBox="0 0 24 24"><path d="M12 3c2 3 4 5 4 9a4 4 0 1 1-8 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 0-8z"/></svg>5 day streak</span><span class="nb-pill nb-pill--xp"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l2.2 6.5H21l-5.4 3.9 2.1 6.6L12 16.8 6.3 20l2.1-6.6L3 9.5h6.8z"/></svg>340 XP</span><button class="nb-bell" aria-label="Notifications"><svg class="i" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M10 19a2 2 0 0 0 4 0"/></svg><i></i></button></div>
+    </header>
+    <main class="nb-sheet">
+
+<div class="nb-head"><div style="display:flex;gap:var(--nb-s4);align-items:center"><svg class="nb-saathy" viewBox="0 0 120 90" style="width:4.6rem;height:auto;" role="img" aria-label="Saathy"><path class="body" d="M30 76C15 76 8 63 15 53C8 42 18 29 31 32C34 18 52 11 63 21C73 11 93 16 95 32C108 33 115 48 107 58C111 69 102 77 92 76Z"/><path class="shade" d="M22 64q4 6 12 6"/><path class="shade" d="M98 40q5 3 5 9"/><ellipse class="blush" cx="40" cy="59" rx="5.5" ry="3.2"/><ellipse class="blush" cx="80" cy="59" rx="5.5" ry="3.2"/><path class="face" d="M45 50q4-5 8 0"/><path class="face" d="M67 50q4-5 8 0"/><path class="face" d="M54 60q6 5 12 0"/></svg><div><div class="nb-head__eyebrow">Settings · Privacy</div><h1 class="nb-h1">Who sees what</h1><div class="nb-sub">No small print. Here's exactly who can see each thing you do here.</div></div></div>
+<a class="nb-link" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Settings</a></div>
+<div class="p45">
+ <div class="nb-col">
+  <div class="wsw-wrap"><table class="wsw"><thead><tr><th>Your stuff</th><th class="you-col">You</th><th>Your teachers<small>Sharma Ma'am and others</small></th><th>Your parent<small>once the school links them</small></th><th>School admin</th></tr></thead><tbody><tr><td><b>Your chats with Saathy</b><span>Cleared after 24 hours</span></td><td class="you-col"><span class="yes" aria-label="Yes"><svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span></td><td><span class="no" aria-label="No"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></span></td><td><span class="no" aria-label="No"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></span></td><td><span class="no" aria-label="No"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></span></td></tr><tr><td><b>Photos you snap</b><span>Deleted after 24 hours</span></td><td class="you-col"><span class="yes" aria-label="Yes"><svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span></td><td><span class="no" aria-label="No"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></span></td><td><span class="no" aria-label="No"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></span></td><td><span class="no" aria-label="No"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></span></td></tr><tr><td><b>A doubt you send to your teacher</b><span>Only when you tick "tell my teacher"</span></td><td class="you-col"><span class="yes" aria-label="Yes"><svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span></td><td><span class="some">Only that question</span></td><td><span class="no" aria-label="No"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></span></td><td><span class="no" aria-label="No"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></span></td></tr><tr><td><b>Your answers to questions</b><span>Every practice, quiz and game answer</span></td><td class="you-col"><span class="yes" aria-label="Yes"><svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span></td><td><span class="some">Your subject teachers</span></td><td><span class="no" aria-label="No"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></span></td><td><span class="no" aria-label="No"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></span></td></tr><tr><td><b>Progress words</b><span>Mastered, Almost there, and so on</span></td><td class="you-col"><span class="yes" aria-label="Yes"><svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span></td><td><span class="yes" aria-label="Yes"><svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span></td><td><span class="yes" aria-label="Yes"><svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span></td><td><span class="some">Whole-school totals only</span></td></tr><tr><td><b>Time studied and streak</b><span>Minutes per day</span></td><td class="you-col"><span class="yes" aria-label="Yes"><svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span></td><td><span class="yes" aria-label="Yes"><svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span></td><td><span class="yes" aria-label="Yes"><svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span></td><td><span class="some">Whole-school totals only</span></td></tr><tr><td><b>Homework handed in</b><span>Done, late, or not yet</span></td><td class="you-col"><span class="yes" aria-label="Yes"><svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span></td><td><span class="yes" aria-label="Yes"><svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span></td><td><span class="yes" aria-label="Yes"><svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span></td><td><span class="no" aria-label="No"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></span></td></tr></tbody></table></div>
+  <div class="lockrow"><svg class="i" viewBox="0 0 24 24"><rect x="6" y="11" width="12" height="9" rx="1.5"/><path d="M9 11V8a3 3 0 0 1 6 0v3"/></svg> Nobody at school can change this table. It's built into how VidhyaSaathy works.</div>
+  <div class="keep">
+   <div class="nb-sticky nb-sticky--blue" style="transform:rotate(-.6deg)"><span class="nb-sticky__who">Kept for 24 hours</span><b>Chats and photos</b>Then they're gone. The question's title stays in your doubts list.</div>
+   <div class="nb-sticky nb-sticky--green" style="transform:rotate(.5deg)"><span class="nb-sticky__who">Kept until you remove it</span><b>Saved explanations</b>Anything you bookmark from Saathy stays in Saved.</div>
+   <div class="nb-sticky" style="transform:rotate(-.3deg)"><span class="nb-sticky__who">Kept for the school year</span><b>Your progress</b>So Saathy knows what to give you next.</div>
+  </div>
+ </div>
+ <aside>
+  <section class="nb-card"><div class="nb-card__head"><h3 class="nb-h3">We never</h3></div>
+   <ul class="never nb-text" style="list-style:none;padding:0;margin:0;font-size:.95rem"><li><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg> Show your marks or progress to other students</li><li><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg> Rank you against your classmates</li><li><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg> Show ads or sell your data</li><li><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg> Show your chats to your parent or teacher</li></ul></section>
+  <section class="nb-card"><div class="nb-card__head"><h3 class="nb-h3">Linked parent</h3></div>
+   <div class="nb-row" style="grid-template-columns:auto 1fr"><span class="nb-avatar" style="background:var(--nb-sticky-lilac)">M</span><div><div class="nb-row__t">Mrs. Mehta</div><div class="nb-row__s">Linked by the school on 2 Sep</div></div></div>
+   <div class="nb-note" style="margin-top:.5rem">She sees your progress, never your chats.</div></section>
+  <section class="nb-card nb-card--flat"><div class="nb-card__head"><h3 class="nb-h3">Your data</h3></div>
+   <div class="nb-col" style="gap:.5rem"><button class="nb-btn nb-btn--ghost">Download my data</button><button class="nb-btn nb-btn--quiet">Ask to delete my account</button></div>
+   <div class="nb-meta" style="margin-top:.5rem">Deleting needs a parent's okay, so nothing goes by mistake.</div></section>
+ </aside>
+</div><span class="ex-tag">Example data</span>
+    </main>
+  </div>
+</div>
+<nav class="nb-mnav"><a class="" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>Home</a><a class="" href="#"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>Subjects</a><a class="" href="#"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="10" rx="4"/><path d="M8 11v4M6 13h4"/><circle cx="16" cy="12" r=".8"/><circle cx="18" cy="14" r=".8"/></svg>Games</a><a class="" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M5 6h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-8l-4 3v-3H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z"/><path d="M8 11h8M8 14h5"/></svg>Saathy</a><a class="" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 16v-4M12 16V8M17 16v-7"/></svg>Me</a></nav>
+</div></body></html>

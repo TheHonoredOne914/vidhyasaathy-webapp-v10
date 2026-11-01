@@ -1,5 +1,6 @@
 import { openDatabase } from './index.ts';
 import { ensureDailyLoop } from './daily-seed.ts';
+import { ensureNotebookDemo } from './notebook-seed.ts';
 import { applyDemoAccess, canonicalDemoLogins, DEMO_SCHOOL_ID, ensureDemoStudents, resetDemoLogins, seedDemo } from './demo.ts';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -19,6 +20,7 @@ try {
   }
   await ensureDemoStudents(database.db, process.env.DEMO_PIN, Date.now());
   ensureDailyLoop(database.db, DEMO_SCHOOL_ID, Date.now());
+  ensureNotebookDemo(database.db, DEMO_SCHOOL_ID, Date.now());
   await applyDemoAccess(database.db);
   const logins = canonicalDemoLogins();
   console.info(logins);

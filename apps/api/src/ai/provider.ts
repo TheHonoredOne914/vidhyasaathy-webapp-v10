@@ -33,7 +33,9 @@ export class LocalStubProvider implements LlmProvider {
 export class OpenAiProvider implements LlmProvider {
   readonly configured = true;
   readonly id: string;
-  constructor(private readonly options: { apiKey: string; model: string; apiUrl: string }) {
+  private readonly options: { apiKey: string; model: string; apiUrl: string };
+  constructor(options: { apiKey: string; model: string; apiUrl: string }) {
+    this.options = options;
     this.id = `openai:${options.model}`;
   }
 

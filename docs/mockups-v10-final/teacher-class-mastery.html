@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>VidhyaSaathy · Class mastery</title>
+<link rel="stylesheet" href="tokens.css"/><link rel="stylesheet" href="components.css"/>
+<style>
+
+.p45{display:grid;grid-template-columns:minmax(0,1fr) clamp(260px,22vw,340px);gap:var(--nb-s5) var(--nb-s6);align-items:start}
+.p45 > .nb-col, .p45 > aside{min-width:0;display:flex;flex-direction:column;gap:var(--nb-s4)}
+@media (max-width:1179px){.p45{grid-template-columns:minmax(0,1fr)}}
+.ex-tag{position:fixed;right:.8rem;bottom:.7rem;z-index:80;font-family:var(--nb-font-hand);font-weight:700;font-size:.95rem;color:var(--nb-ink-soft);background:var(--nb-paper);border:1.5px dashed var(--nb-border);border-radius:999px;padding:.1rem .7rem;transform:rotate(-1.5deg)}
+@media print{.ex-tag{display:none}}
+.lined{background:repeating-linear-gradient(180deg,transparent 0,transparent calc(var(--nb-rule) - 1px),var(--nb-rule-ink) calc(var(--nb-rule) - 1px),var(--nb-rule-ink) var(--nb-rule));line-height:var(--nb-rule);font-family:var(--nb-font-note);font-size:1.2rem;color:var(--nb-navy)}
+.hand{font-family:var(--nb-font-hand);font-weight:700}
+.note{font-family:var(--nb-font-note)}
+.chk{width:1.35rem;height:1.35rem;border:2px solid var(--nb-navy);border-radius:5px;display:inline-grid;place-items:center;flex-shrink:0;background:var(--nb-paper)}
+.chk.on{background:var(--nb-navy)} .chk.on svg{stroke:#fff;width:1rem;height:1rem;stroke-width:3}
+.row-x{display:flex;align-items:center;gap:var(--nb-s3);flex-wrap:wrap}
+.spread{display:flex;align-items:center;justify-content:space-between;gap:var(--nb-s3);flex-wrap:wrap}
+
+.filters{display:flex;gap:var(--nb-s4);flex-wrap:wrap;align-items:center;justify-content:space-between}
+.sel{display:inline-flex;align-items:center;gap:.5rem;height:2.3rem;padding:0 .9rem;border:1.75px solid var(--nb-navy);border-radius:10px;background:var(--nb-paper);font-weight:600;font-size:.95rem}
+.sel svg{width:.9rem;height:.9rem;transform:rotate(90deg)}
+.legend{display:flex;gap:.4rem .9rem;flex-wrap:wrap;align-items:center;font-size:.85rem;color:var(--nb-ink-soft)}
+.legend i{display:inline-block;width:1.4rem;height:.95rem;border-radius:4px;vertical-align:-2px;margin-right:.3rem;border:1px solid rgb(27 42 74 / 15%)}
+.mx-wrap{overflow:auto;border:1.5px solid var(--nb-border);border-radius:14px;background:var(--nb-paper);max-height:none}
+.mx{display:grid;grid-template-columns:minmax(12rem,1.3fr) repeat(6,minmax(5.6rem,1fr));min-width:0}
+.mx > div{padding:.32rem .3rem;border-bottom:1px dashed var(--nb-border)}
+.mx .hd{position:sticky;top:0;background:var(--nb-cream);z-index:2;font-family:var(--nb-font-hand);font-weight:700;font-size:1.05rem;line-height:1.1;text-align:center;padding:.6rem .3rem;border-bottom:1.5px solid var(--nb-navy);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:.15rem}
+.mx .hd small{font-family:var(--nb-font-ui);font-weight:500;font-size:.72rem;color:var(--nb-ink-soft)}
+.mx .hd.sel-col{background:#FDF0C9;box-shadow:inset 0 -3px 0 var(--nb-gold-deep)}
+.mx .hd.first{text-align:left;align-items:flex-start;left:0;z-index:3}
+.mx .nm{white-space:nowrap;position:sticky;left:0;background:var(--nb-paper);z-index:1;display:flex;align-items:center;gap:.5rem;padding-left:.7rem;font-size:.92rem;font-weight:600}
+.mx .nm small{color:var(--nb-ink-faint);font-weight:500}
+.mx .nm .stamp{font-family:var(--nb-font-hand);font-weight:700;font-size:.85rem;color:#8A6410;border:1.5px solid var(--nb-gold-deep);border-radius:6px;padding:0 .35rem;transform:rotate(-4deg);background:#FFF4CF}
+.cell{height:2.15rem;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.76rem;font-weight:600;color:var(--nb-navy);border:1px solid rgb(27 42 74 / 10%);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 .25rem}
+.t1{background:#F5D3CE radial-gradient(circle,rgb(201 67 58 / 28%) 1px,transparent 1.4px) 0 0/7px 7px}
+.t2{background:#FCE7B8 repeating-linear-gradient(135deg,rgb(181 132 30 / 18%) 0 2px,transparent 2px 7px)}
+.t3{background:#FFF4CF}
+.t4{background:#DDEFD9}
+.t5{background:#C6E6CF;box-shadow:inset 0 0 0 1.5px rgb(31 107 71 / 30%)}
+.tn{background:#EEF3FA;color:#3D6FB8;border:1.5px dashed #9CB8E0}
+.cell.pick{outline:2.5px solid var(--nb-navy);outline-offset:1px}
+.colsel{background:rgb(253 240 201 / 45%)}
+.mx .sum{font-family:var(--nb-font-hand);font-weight:700;font-size:1rem;text-align:center;background:var(--nb-cream);border-bottom:0;color:var(--nb-ink-soft)}
+.mx .sum.first{text-align:left;padding-left:.7rem;position:sticky;left:0}
+.sugg{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:var(--nb-s4);align-items:center;background:#FFF8E4;border:2px solid var(--nb-gold-deep);border-radius:6px 20px 8px 18px;padding:var(--nb-s4) var(--nb-s5);box-shadow:3px 4px 0 rgb(181 132 30 / 18%)}
+.sugg h2{font-family:var(--nb-font-hand);font-weight:700;font-size:1.7rem;line-height:1.1}
+.cbar{display:flex;height:1.3rem;border-radius:999px;overflow:hidden;border:1.5px solid var(--nb-navy)}
+.cbar i{display:block;height:100%}
+.ef{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.25rem .6rem;align-items:center;font-size:.9rem}
+.ef .nb-bar{grid-column:1 / -1;height:.4rem}
+.evt{width:100%;border-collapse:collapse;font-size:.88rem}
+.evt th{font-family:var(--nb-font-hand);font-weight:700;font-size:1.05rem;text-align:left;color:var(--nb-ink-soft);padding:.35rem .5rem;border-bottom:1.5px solid var(--nb-navy)}
+.evt td:nth-child(1),.evt td:nth-child(6){white-space:nowrap}
+.evt td{padding:.45rem .5rem;border-bottom:1px dashed var(--nb-border);vertical-align:top}
+.evt .w{color:var(--nb-redpen);font-weight:600}.evt .r{color:var(--nb-ok);font-weight:600}
+.namechips{display:flex;flex-wrap:wrap;gap:.3rem}
+.namechips span{font-size:.8rem;padding:.1rem .5rem;border-radius:999px;border:1px solid var(--nb-border);background:var(--nb-paper)}
+.moves li{margin:.3rem 0}
+@media (max-width:1179px){.sugg{grid-template-columns:minmax(0,1fr)}.sugg > svg{display:none}}
+@media (max-width:900px){.evt-wrap{overflow-x:auto}}
+
+</style></head>
+<body class=""><div id="root">
+<div class="nb-app">
+  <aside class="nb-side">
+    <div class="nb-brand"><div class="nb-brand__mark">V</div><div><div class="nb-brand__name">VidhyaSaathy</div><div class="nb-brand__tag">Teacher desk</div></div></div>
+    <nav class="nb-nav">
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>Home</a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="9" r="3"/><path d="M3 19c1-3 3.5-4.5 6-4.5s5 1.5 6 4.5"/><circle cx="17" cy="8" r="2.5"/><path d="M16 13.5c2.3 0 4 1.3 5 4"/></svg>My classes</a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>Sessions</a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M7 4h10v16l-5-3-5 3V4z"/></svg>Homework</a>
+<div class="nb-nav__sec">Insight</div>
+<a class="nb-nav__item is-active" href="#"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".8"/></svg>Class mastery</a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M5 6h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-8l-4 3v-3H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z"/><path d="M8 11h8M8 14h5"/></svg>Student doubts<span class="nb-nav__badge">2</span></a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/></svg>Lesson review<span class="nb-nav__badge">3</span></a>
+<div class="nb-nav__sec">You</div>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>Notifications</a>
+<a class="nb-nav__item" href="#"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M3 12h2M19 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Settings</a>
+    </nav>
+    
+    <div class="nb-side__foot"><div class="nb-profile"><div class="nb-avatar">S</div><div><b>Sharma Ma'am</b><span>Physics · IX-A, IX-B</span></div></div></div>
+  </aside>
+  <div class="nb-main">
+    <header class="nb-top">
+      <div class="nb-brand nb-show-m"><div class="nb-brand__mark">V</div></div>
+      <div class="nb-search"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>Search lessons, notes, questions, games…</span><kbd>/</kbd></div>
+      <div class="nb-top__right"><button class="nb-bell" aria-label="Notifications"><svg class="i" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M10 19a2 2 0 0 0 4 0"/></svg><i></i></button></div>
+    </header>
+    <main class="nb-sheet">
+
+<div class="nb-head"><div><div class="nb-head__eyebrow">Class mastery</div><h1 class="nb-h1">IX-B · Physics · Motion</h1><div class="nb-sub">Every student against every concept. Click a column for the class picture, or a cell for one child's answers.</div></div>
+<div class="row-x"><button class="nb-btn nb-btn--ghost"><svg class="i" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/></svg> Export for PTM</button></div></div>
+<div class="p45">
+ <div class="nb-col">
+  <div class="filters"><div class="nb-tabs"><button class="nb-tab">IX-A</button><button class="nb-tab is-active">IX-B</button></div>
+   <div class="row-x"><span class="sel">Physics <svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span><span class="sel">Ch: Motion <svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span><span class="sel">Last 30 days <svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div></div>
+  <section class="sugg"><svg viewBox="0 0 80 80" style="width:4.4rem;height:4.4rem" fill="none" stroke="#1B2A4A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="12" y="16" width="44" height="52" rx="4" fill="#FFFDF8"/><path d="M20 30h28M20 40h28M20 50h18"/><path d="M50 58l14-14 6 6-14 14-8 2z" fill="#E8B84A"/><circle cx="62" cy="18" r="9" fill="#FFF1A6"/><path d="M62 13v5l3 2"/></svg><div><div class="nb-label" style="color:#8A6410">Suggested for tonight</div><h2>Push a reteach on km/h ↔ m/s to 11 students</h2>
+   <div class="nb-text" style="margin-top:.2rem">They get "km/h ↔ m/s: a fresh look · 12 min" at 6:00 pm today. It isn't marked as a reteach, so nobody is told they were picked.</div></div>
+   <div class="nb-col" style="gap:.4rem;align-items:stretch"><button class="nb-btn nb-btn--primary nb-btn--lg"><svg class="i" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg> Push to 11 students</button><button class="nb-btn nb-btn--quiet nb-btn--sm">Preview the session</button></div></section>
+  <div class="legend"><span><i class="t1"></i>Needs foundation support</span><span><i class="t2"></i>Developing</span><span><i class="t3"></i>Progressing</span><span><i class="t4"></i>Consistent</span><span><i class="t5"></i>Advancing</span><span><i class="tn"></i>New</span></div>
+  <div class="mx-wrap"><div class="mx"><div class="hd first">Student<small>12 of 34 shown</small></div><div class="hd">Distance &amp; displacement<small>taught 12 Oct</small></div><div class="hd">Speed &amp; velocity<small>taught 16 Oct</small></div><div class="hd sel-col">km/h ↔ m/s<small>taught 16 Oct</small></div><div class="hd">d-t graphs<small>taught 21 Oct</small></div><div class="hd">Acceleration<small>taught 27 Oct</small></div><div class="hd">Equations of motion<small>not taught yet</small></div><div class="nm">Aarav Mehta <small>17</small></div><div class=""><div class="cell t5">Advancing</div></div><div class=""><div class="cell t4">Consistent</div></div><div class="colsel"><div class="cell t1">Needs support</div></div><div class=""><div class="cell t3">Progressing</div></div><div class=""><div class="cell t2">Developing</div></div><div class=""><div class="cell tn">New</div></div><div class="nm">Priya Verma <small>21</small></div><div class=""><div class="cell t4">Consistent</div></div><div class=""><div class="cell t3">Progressing</div></div><div class="colsel"><div class="cell t2 pick">Developing</div></div><div class=""><div class="cell t3">Progressing</div></div><div class=""><div class="cell t1">Needs support</div></div><div class=""><div class="cell tn">New</div></div><div class="nm">Rohan Gupta <small>24</small><span class="stamp">Recovered</span></div><div class=""><div class="cell t4">Consistent</div></div><div class=""><div class="cell t3">Progressing</div></div><div class="colsel"><div class="cell t3">Progressing</div></div><div class=""><div class="cell t2">Developing</div></div><div class=""><div class="cell t2">Developing</div></div><div class=""><div class="cell tn">New</div></div><div class="nm">Ananya Rao <small>3</small></div><div class=""><div class="cell t5">Advancing</div></div><div class=""><div class="cell t5">Advancing</div></div><div class="colsel"><div class="cell t4">Consistent</div></div><div class=""><div class="cell t4">Consistent</div></div><div class=""><div class="cell t3">Progressing</div></div><div class=""><div class="cell tn">New</div></div><div class="nm">Kabir Singh <small>11</small></div><div class=""><div class="cell t3">Progressing</div></div><div class=""><div class="cell t2">Developing</div></div><div class="colsel"><div class="cell t1">Needs support</div></div><div class=""><div class="cell t2">Developing</div></div><div class=""><div class="cell t1">Needs support</div></div><div class=""><div class="cell tn">New</div></div><div class="nm">Meera Iyer <small>14</small></div><div class=""><div class="cell t5">Advancing</div></div><div class=""><div class="cell t4">Consistent</div></div><div class="colsel"><div class="cell t4">Consistent</div></div><div class=""><div class="cell t5">Advancing</div></div><div class=""><div class="cell t3">Progressing</div></div><div class=""><div class="cell tn">New</div></div><div class="nm">Dev Patel <small>8</small></div><div class=""><div class="cell t4">Consistent</div></div><div class=""><div class="cell t4">Consistent</div></div><div class="colsel"><div class="cell t1">Needs support</div></div><div class=""><div class="cell t3">Progressing</div></div><div class=""><div class="cell t2">Developing</div></div><div class=""><div class="cell tn">New</div></div><div class="nm">Riya Kapoor <small>22</small></div><div class=""><div class="cell t5">Advancing</div></div><div class=""><div class="cell t5">Advancing</div></div><div class="colsel"><div class="cell t5">Advancing</div></div><div class=""><div class="cell t4">Consistent</div></div><div class=""><div class="cell t4">Consistent</div></div><div class=""><div class="cell tn">New</div></div><div class="nm">Ishaan Khan <small>10</small></div><div class=""><div class="cell t3">Progressing</div></div><div class=""><div class="cell t3">Progressing</div></div><div class="colsel"><div class="cell t2">Developing</div></div><div class=""><div class="cell t2">Developing</div></div><div class=""><div class="cell t2">Developing</div></div><div class=""><div class="cell tn">New</div></div><div class="nm">Sara Thomas <small>26</small></div><div class=""><div class="cell t4">Consistent</div></div><div class=""><div class="cell t4">Consistent</div></div><div class="colsel"><div class="cell t1">Needs support</div></div><div class=""><div class="cell t4">Consistent</div></div><div class=""><div class="cell t3">Progressing</div></div><div class=""><div class="cell tn">New</div></div><div class="nm">Arjun Nair <small>2</small></div><div class=""><div class="cell t4">Consistent</div></div><div class=""><div class="cell t3">Progressing</div></div><div class="colsel"><div class="cell t2">Developing</div></div><div class=""><div class="cell t3">Progressing</div></div><div class=""><div class="cell t2">Developing</div></div><div class=""><div class="cell tn">New</div></div><div class="nm">Zoya Ali <small>30</small></div><div class=""><div class="cell t5">Advancing</div></div><div class=""><div class="cell t4">Consistent</div></div><div class="colsel"><div class="cell t3">Progressing</div></div><div class=""><div class="cell t4">Consistent</div></div><div class=""><div class="cell t3">Progressing</div></div><div class=""><div class="cell tn">New</div></div><div class="sum first">Whole class (34)</div><div class="sum">3 need help</div><div class="sum">6 need help</div><div class="sum">11 need help</div><div class="sum">5 need help</div><div class="sum">9 need help</div><div class="sum">not started</div></div></div>
+  <div class="spread"><span class="nb-meta">Each colour has its own pattern too, so it reads in print and for colour-blind users.</span><a class="nb-link" href="#">Show all 34 students</a></div>
+  <section class="nb-card"><div class="nb-card__head"><h3 class="nb-h3">Priya Verma × km/h ↔ m/s</h3><div class="row-x"><span class="cell t2" style="height:1.7rem;padding:0 .6rem">Developing</span><a class="nb-link" href="#">Open Priya's page</a></div></div>
+   <div class="evt-wrap"><table class="evt"><thead><tr><th>When</th><th>Question</th><th>She chose</th><th>Sure?</th><th>Mistake type</th><th>Time</th><th>From</th></tr></thead><tbody>
+    <tr><td>Thu 6:40 pm</td><td>Convert 72 km/h to m/s</td><td class="w">259.2 m/s</td><td>Sure</td><td>Multiplied by 3.6</td><td>41 s</td><td>Race Track</td></tr>
+    <tr><td>Thu 6:31 pm</td><td>A car moves at 36 km/h. Speed in m/s?</td><td class="r">10 m/s</td><td>Unsure</td><td>·</td><td>58 s</td><td>Practice set</td></tr>
+    <tr><td>Wed 7:12 pm</td><td>Express 18 m/s in km/h</td><td class="w">5 km/h</td><td>Sure</td><td>Divided instead of multiplied</td><td>33 s</td><td>Homework A</td></tr>
+    <tr><td>Tue 8:05 pm</td><td>90 km/h = ? m/s</td><td class="w">324 m/s</td><td>Guess</td><td>Multiplied by 3.6</td><td>22 s</td><td>Session 2</td></tr>
+   </tbody></table></div>
+   <div class="nb-note" style="margin-top:.5rem">Only you and Priya's other subject teachers can see these answers. Parents see progress words only.</div></section>
+ </div>
+ <aside>
+  <section class="nb-card nb-card--accent"><div class="nb-card__head"><h3 class="nb-h3">km/h ↔ m/s · class picture</h3><button class="nb-btn nb-btn--quiet nb-btn--sm" aria-label="Close"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+   <div class="nb-label" style="margin-bottom:.35rem">How sure were they when wrong?</div>
+   <div class="cbar"><i style="width:47%;background:#C9433A"></i><i style="width:20%;background:#E8B84A"></i><i style="width:10%;background:#C7B8EA"></i><i style="width:23%;background:#5FB58A"></i></div>
+   <div class="legend" style="margin-top:.35rem;font-size:.78rem"><span><i style="background:#C9433A"></i>Sure, wrong</span><span><i style="background:#E8B84A"></i>Unsure, wrong</span><span><i style="background:#C7B8EA"></i>Guessed</span><span><i style="background:#5FB58A"></i>Right</span></div>
+   <div class="nb-sticky nb-sticky--pink" style="margin:.7rem .1rem 0;font-size:1.05rem"><span class="nb-sticky__who">What it means</span>Mostly sure and wrong: a misconception, not carelessness. They believe × 3.6 is right.</div>
+   <div class="nb-label" style="margin:.8rem 0 .35rem">Mistake types</div>
+   <div class="nb-col" style="gap:.55rem">
+    <div class="ef"><span>Multiplied by 3.6</span><b>7</b><div class="nb-bar"><i style="width:64%"></i></div></div>
+    <div class="ef"><span>Converted km but not hours</span><b>3</b><div class="nb-bar"><i style="width:27%"></i></div></div>
+    <div class="ef"><span>Dropped the units</span><b>1</b><div class="nb-bar"><i style="width:9%"></i></div></div></div>
+   <div class="nb-label" style="margin:.8rem 0 .2rem">Time pattern</div>
+   <div class="nb-text" style="font-size:.92rem">Wrong answers came fast: about 30 s, against 55 s for right ones.</div>
+   <div class="nb-label" style="margin:.8rem 0 .35rem">The 11 students</div>
+   <div class="namechips"><span>Aarav M.</span><span>Kabir S.</span><span>Dev P.</span><span>Sara T.</span><span>Priya V.</span><span>Ishaan K.</span><span>Arjun N.</span><span>+4</span></div>
+   <button class="nb-btn nb-btn--primary" style="width:100%;margin-top:.9rem"><svg class="i" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg> Push reteach to 11</button></section>
+  <section class="nb-card"><div class="nb-card__head"><h3 class="nb-h3">Did the last reteach land?</h3></div><div class="nb-meta" style="margin:-.3rem 0 .5rem">Distance &amp; displacement · sent 20 Oct</div>
+   <div class="nb-col" style="gap:.4rem;font-size:.92rem"><div class="spread"><span>Delivered</span><b>9 / 9</b></div><div class="spread"><span>Started</span><b>8</b></div><div class="spread"><span>Finished</span><b>7</b></div>
+   <div class="spread"><span>Most moved</span><span><span class="cell t2" style="display:inline-flex;height:1.5rem">Developing</span> → <span class="cell t4" style="display:inline-flex;height:1.5rem">Consistent</span></span></div></div></section>
+  <section class="nb-card nb-card--flat"><div class="nb-card__head"><h3 class="nb-h3">This week, in words</h3></div>
+   <ul class="moves nb-text" style="font-size:.92rem;padding-left:1.1rem;margin:0"><li>Aarav moved up: Developing → Progressing on d-t graphs.</li><li>Rohan recovered on Speed &amp; velocity after his catch-up.</li><li>Kabir needs foundation support on Acceleration. Sure and wrong 4 times.</li></ul></section>
+ </aside>
+</div><span class="ex-tag">Example data</span>
+    </main>
+  </div>
+</div>
+
+</div></body></html>
