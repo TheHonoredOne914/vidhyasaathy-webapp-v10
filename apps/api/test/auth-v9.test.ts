@@ -94,6 +94,20 @@ describe('student activation (production mode, no demo shortcuts)', () => {
     expect(again.statusCode).toBe(404);
   });
 
+  it('invalidates an earlier OTP when a new one is requested (S04)', async () => {
+    process.env.NODE_ENV = 'test';
+    const student = activatable('11');
+    const lookup = await h.post('/auth/student/lookup', { schoolId, rollNo: '11' });
+    const first = await h.post('/auth/student/activate', { lookupToken: lookup.json().lookupToken, activationCode: student.code });
+    const lookup2 = await h.post('/auth/student/lookup', { schoolId, rollNo: '11' });
+    const second = await h.post('/auth/student/activate', { lookupToken: lookup2.json().lookupToken, activationCode: student.code });
+    expect(second.statusCode).toBe(200);
+    const stale = await h.post('/auth/student/verify-otp', { otpToken: first.json().otpToken, otp: first.json().otp });
+    expect(stale.statusCode).toBeGreaterThanOrEqual(400);
+    const fresh = await h.post('/auth/student/verify-otp', { otpToken: second.json().otpToken, otp: second.json().otp });
+    expect(fresh.statusCode).toBe(200);
+  });
+
   it('refuses to guess between two students with the same roll number (S05)', async () => {
     const a = section('A'); const b = section('B');
     activatable('1', a); const second = activatable('1', b);

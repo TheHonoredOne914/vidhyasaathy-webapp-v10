@@ -28,6 +28,8 @@ const isOtpStage = (codeHash: string) => /^[0-9a-f]{64}$/.test(codeHash);
 export function registerAuthV9Routes(app: FastifyInstance, db: Db, auth: AuthService, options: AuthOptions): void {
   function issueOtp(input: { schoolId: string; profileId: string; phone: string; purpose: 'student_verify' | 'parent_login' | 'teacher_pin'; claimCodeId?: string }) {
     const rawToken = token(); const code = otpCode(); const now = options.now();
+    // A resend invalidates earlier live codes so each new request cannot add more guesses.
+    db.update(otpChallenges).set({ expiresAt: now }).where(and(eq(otpChallenges.profileId, input.profileId), eq(otpChallenges.purpose, input.purpose), gt(otpChallenges.expiresAt, now))).run();
     db.insert(otpChallenges).values({ id: randomUUID(), tokenHash: hashToken(rawToken), schoolId: input.schoolId, profileId: input.profileId, claimCodeId: input.claimCodeId ?? null, phone: input.phone, purpose: input.purpose, codeHash: hashToken(code), expiresAt: now + OTP_TTL, attempts: 0 }).run();
     // Never log or return OTP values in production; only local development shows them.
     const disclose = process.env.NODE_ENV !== 'production';
