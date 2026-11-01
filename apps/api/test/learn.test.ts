@@ -2,7 +2,7 @@ import { CheckpointResultSchema, LessonViewSchema, RevisionQueuedSchema } from '
 import { and, eq } from 'drizzle-orm';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DEMO_SCHOOL_ID, seedDemo } from '../src/db/demo.ts';
-import { concepts, profiles, revisionHooks } from '../src/db/schema.ts';
+import { answerEvidence, concepts, profiles, revisionHooks } from '../src/db/schema.ts';
 import { cookieFrom, createHarness, PASSWORD, PIN, type Harness } from './helpers.ts';
 
 describe('concept lessons', () => {
@@ -30,6 +30,26 @@ describe('concept lessons', () => {
     expect(CheckpointResultSchema.parse(result.json()).correct).toBe(true);
     const simple = LessonViewSchema.parse((await h.app.inject({ url: `/concepts/${concept.id}/lesson?simpler=1`, headers: { cookie: student } })).json());
     expect(simple.found && simple.note).toContain('विस्थापन');
+  });
+
+  it('saves a correct retry as new evidence and keeps a replayed attempt idempotent (UX01)', async () => {
+    const aarav = h.database.db.select().from(profiles).where(and(eq(profiles.schoolId, DEMO_SCHOOL_ID), eq(profiles.name, 'Aarav'))).get()!;
+    const student = cookieFrom((await h.post('/auth/pin-login', { profileId: aarav.id, pin: PIN })).headers);
+    const concept = h.database.db.select().from(concepts).where(and(eq(concepts.schoolId, DEMO_SCHOOL_ID), eq(concepts.title, 'Distance & Displacement'))).get()!;
+    const view = LessonViewSchema.parse((await h.app.inject({ url: `/concepts/${concept.id}/lesson`, headers: { cookie: student } })).json());
+    if (!view.found) throw new Error('lesson missing');
+    const step = view.steps[0]!;
+    const wrongAnswer = step.checkpoint.options.find((option) => option !== '0 m')!;
+    const url = `/concepts/${concept.id}/lesson/checkpoint`;
+    const wrong = await h.post(url, { attemptId: 'attempt-wrong-1', itemId: step.checkpoint.id, answer: wrongAnswer, confidence: 'sure', timeMs: 1000 }, student);
+    expect(CheckpointResultSchema.parse(wrong.json()).correct).toBe(false);
+    const retry = { attemptId: 'attempt-right-2', itemId: step.checkpoint.id, answer: '0 m', confidence: 'sure', timeMs: 900 };
+    expect(CheckpointResultSchema.parse((await h.post(url, retry, student)).json()).correct).toBe(true);
+    expect((await h.post(url, retry, student)).statusCode).toBe(200);
+    const rows = h.database.db.select().from(answerEvidence)
+      .where(and(eq(answerEvidence.profileId, aarav.id), eq(answerEvidence.itemId, step.checkpoint.id))).all();
+    expect(rows.map((row) => row.correct).sort()).toEqual([false, true]);
+    expect(rows.find((row) => row.correct)?.answer).toBe('0 m');
   });
 
   it('serves a Motion lesson without answer keys and queues 1, 3 and 7 day revision', async () => {

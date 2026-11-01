@@ -27,7 +27,8 @@ export function AnnouncementsPage() {
   usePageMeta(PAGE.announcements.title, PAGE.announcements.description);
   const session = useSession();
   const list = useRemote('/announcements', AnnouncementListSchema);
-  const catalog = useCatalog();
+  const isParent = session.me?.profile.role === 'parent';
+  const catalog = useCatalog(!isParent);
   const mutation = useMutation();
   const [sectionId, setSectionId] = useState('');
   const [title, setTitle] = useState('');
@@ -36,7 +37,6 @@ export function AnnouncementsPage() {
   const [picked, setPicked] = useState<NotificationChannel[]>(['in_app']);
   const sections = catalog.sections.data ?? [];
   const classes = catalog.classes.data ?? [];
-  const isParent = session.me?.profile.role === 'parent';
 
   function toggle(channel: NotificationChannel) {
     setPicked((current) => current.includes(channel) ? current.filter((item) => item !== channel) : [...current, channel]);

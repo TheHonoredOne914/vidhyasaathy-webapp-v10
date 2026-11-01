@@ -27,7 +27,7 @@ function QuickCheck({ step, index, total, conceptId }: { step: PublicLesson['ste
     if (busy.current) return;
     if (!answer || !confidence) { setError('Pick an answer and choose how sure you feel.'); return; }
     busy.current = true; setPending(true); setError('');
-    try { setResult(await postJson(`/concepts/${conceptId}/lesson/checkpoint`, CheckpointResultSchema, { itemId: step.checkpoint.id, answer, confidence, timeMs: Date.now() - started.current })); }
+    try { setResult(await postJson(`/concepts/${conceptId}/lesson/checkpoint`, CheckpointResultSchema, { attemptId: crypto.randomUUID(), itemId: step.checkpoint.id, answer, confidence, timeMs: Date.now() - started.current })); }
     catch (cause) { setError(cause instanceof ApiClientError ? cause.message : 'Could not check. Try again.'); }
     finally { busy.current = false; setPending(false); }
   }

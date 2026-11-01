@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { ZodType } from 'zod';
-import { ApiClientError, getJson } from '../api/client';
+import { ApiClientError, getJson, LEARNER_CHANGED } from '../api/client';
 import { readCached, writeCached } from '../storage';
 import { useSession } from '../session';
+
+/** Views derived from learning evidence; they refetch after a saved answer (UX02). */
+const LEARNER_VIEWS = ['/student/home', '/progress', '/notifications', '/student/badges', '/student/streak'];
 
 export type Remote<T> = {
   status: 'loading' | 'ready' | 'error';
@@ -87,6 +90,11 @@ export function useRemote<T>(path: string | null, schema: ZodType<T>): Remote<T>
   }, [attempt, owner, path, schema]);
 
   const reload = useCallback(() => { setAttempt((current) => current + 1); }, []);
+  useEffect(() => {
+    if (!path || !LEARNER_VIEWS.some((view) => path === view || path.startsWith(`${view}?`) || path.startsWith(`${view}/`))) return;
+    window.addEventListener(LEARNER_CHANGED, reload);
+    return () => { window.removeEventListener(LEARNER_CHANGED, reload); };
+  }, [path, reload]);
   if (state.key !== `${owner}${path}`) return { status: 'loading', data: null, updatedAt: null, stale: false, message: null, denied: false, reload };
   return { ...state, reload };
 }

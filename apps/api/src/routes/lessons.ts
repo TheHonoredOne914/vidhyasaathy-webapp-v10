@@ -90,7 +90,7 @@ export function registerLessonRoutes(app: FastifyInstance, db: Db, now: () => nu
     if (!step.checkpoint.options.includes(input.answer)) throw new ApiException(400, 'INVALID_ANSWER', 'Choose one of the options.');
     const correct = input.answer === step.checkpoint.answer;
     recordAnswer(db, {
-      id: `learn:${profile.id}:${input.itemId}`, schoolId: school.id, profileId: profile.id, conceptId: concept.id,
+      id: attemptKey(`learn:${profile.id}:${input.itemId}`, input.attemptId), schoolId: school.id, profileId: profile.id, conceptId: concept.id,
       chapterId: concept.chapterId, itemId: input.itemId, level: 1, correct, confidence: input.confidence as Confidence,
       source: 'session', timeMs: input.timeMs, answer: input.answer, explanation: step.checkpoint.explanation,
     }, now());
@@ -105,7 +105,7 @@ export function registerLessonRoutes(app: FastifyInstance, db: Db, now: () => nu
     if (!lesson) throw new ApiException(404, 'NOT_FOUND', 'That page has no practice yet.');
     const correct = lesson.faded.answers.some((answer) => normalize(answer) === normalize(input.answer));
     recordAnswer(db, {
-      id: `learn:${profile.id}:${lesson.faded.itemId}:${input.hinted ? 'hint' : 'plain'}`, schoolId: school.id, profileId: profile.id,
+      id: attemptKey(`learn:${profile.id}:${lesson.faded.itemId}:${input.hinted ? 'hint' : 'plain'}`, input.attemptId), schoolId: school.id, profileId: profile.id,
       conceptId: concept.id, chapterId: concept.chapterId, itemId: lesson.faded.itemId, level: input.hinted ? 1 : 2,
       correct, confidence: input.confidence as Confidence, source: 'practice', timeMs: input.timeMs, answer: input.answer,
       explanation: lesson.faded.hint, step: !input.hinted,
@@ -124,7 +124,7 @@ export function registerLessonRoutes(app: FastifyInstance, db: Db, now: () => nu
     if (!lesson) throw new ApiException(404, 'NOT_FOUND', 'That page has no explain-back yet.');
     const correct = lesson.explainBack.gapAnswers.some((answer) => normalize(answer) === normalize(input.gap));
     recordAnswer(db, {
-      id: `learn:${profile.id}:${lesson.explainBack.itemId}`, schoolId: school.id, profileId: profile.id, conceptId: concept.id,
+      id: attemptKey(`learn:${profile.id}:${lesson.explainBack.itemId}`, input.attemptId), schoolId: school.id, profileId: profile.id, conceptId: concept.id,
       chapterId: concept.chapterId, itemId: lesson.explainBack.itemId, level: 2, correct, confidence: input.confidence as Confidence,
       source: 'session', timeMs: input.timeMs, answer: [input.gap, input.ownWords], explanation: lesson.explainBack.gap,
     }, now());
@@ -144,7 +144,7 @@ export function registerLessonRoutes(app: FastifyInstance, db: Db, now: () => nu
     if (!lesson || !card) throw new ApiException(404, 'NOT_FOUND', 'That card is not on this page.');
     const confidence: Confidence = input.rating === 'knew' ? 'sure' : input.rating === 'almost' ? 'unsure' : 'guess';
     recordAnswer(db, {
-      id: `learn:${profile.id}:${card.id}`, schoolId: school.id, profileId: profile.id, conceptId: concept.id,
+      id: attemptKey(`learn:${profile.id}:${card.id}`, input.attemptId), schoolId: school.id, profileId: profile.id, conceptId: concept.id,
       chapterId: concept.chapterId, itemId: card.id, level: 1, correct: input.rating !== 'forgot', confidence,
       source: 'flashcard', timeMs: input.timeMs, answer: input.rating,
     }, now());
@@ -172,4 +172,9 @@ export function registerLessonRoutes(app: FastifyInstance, db: Db, now: () => nu
     enqueueRevision(db, school.id, profile.id, concept.id, now());
     return RevisionQueuedSchema.parse({ days: [1, 3, 7] });
   }));
+}
+
+/** One evidence row per intentional attempt; replaying the same attempt stays idempotent (UX01). */
+function attemptKey(base: string, attemptId: string | undefined) {
+  return attemptId ? `${base}:${attemptId}` : base;
 }

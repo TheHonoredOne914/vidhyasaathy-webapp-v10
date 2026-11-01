@@ -88,12 +88,19 @@ export function getJson<T>(path: string, schema: ZodType<T, ZodTypeDef, unknown>
   return apiFetch(path, signal ? { signal } : {}).then((response) => readJson(response, schema));
 }
 
+/** POSTs that save learning evidence; after the server acknowledges one, learner views (home, progress, badges) refetch. */
+const LEARNING_WRITE = /^\/(?:concepts\/[^/]+\/(?:lesson\/(?:checkpoint|faded|explain|flashcard)|remediation\/check)|games\/[^/]+\/sessions\/[^/]+\/(?:answer|finish)|chapters\/[^/]+\/diagnostic|sessions\/[^/]+\/check|ask\/quick-try\/(?:[^/]+\/)?answer|student\/(?:warmup|daily-challenge|practice))/;
+export const LEARNER_CHANGED = 'learner-changed';
+
 export function postJson<T>(path: string, schema: ZodType<T, ZodTypeDef, unknown>, body: unknown, signal?: AbortSignal): Promise<T> {
   return apiFetch(path, {
     method: 'POST',
     body: JSON.stringify(body),
     ...(signal ? { signal } : {}),
-  }).then((response) => readJson(response, schema));
+  }).then((response) => readJson(response, schema)).then((result) => {
+    if (LEARNING_WRITE.test(path) && typeof window !== 'undefined') window.dispatchEvent(new Event(LEARNER_CHANGED));
+    return result;
+  });
 }
 
 export function putJson<T>(path: string, schema: ZodType<T, ZodTypeDef, unknown>, body: unknown): Promise<T> {

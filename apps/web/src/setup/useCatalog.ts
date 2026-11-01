@@ -2,11 +2,12 @@ import { useCallback } from 'react';
 import { AcademicYearListSchema, ClassListSchema, SectionListSchema, SubjectListSchema } from './schemas';
 import { useRemote } from './useRemote';
 
-export function useCatalog() {
-  const years = useRemote('/academic-years', AcademicYearListSchema);
-  const classes = useRemote('/classes', ClassListSchema);
-  const sections = useRemote('/sections', SectionListSchema);
-  const subjects = useRemote('/subjects', SubjectListSchema);
+/** School catalog (staff only). Pass enabled=false for roles that cannot read it, e.g. parents. */
+export function useCatalog(enabled = true) {
+  const years = useRemote(enabled ? '/academic-years' : null, AcademicYearListSchema);
+  const classes = useRemote(enabled ? '/classes' : null, ClassListSchema);
+  const sections = useRemote(enabled ? '/sections' : null, SectionListSchema);
+  const subjects = useRemote(enabled ? '/subjects' : null, SubjectListSchema);
   const parts = [years, classes, sections, subjects];
   const loading = parts.some((part) => part.status === 'loading' && part.data === null);
   const failed = parts.find((part) => part.status === 'error' && part.data === null) ?? null;
