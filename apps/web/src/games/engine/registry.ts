@@ -12,6 +12,16 @@ export const GAME_REGISTRY = [
   { id: 'sound', title: 'Echo Corridor', detail: 'Trace vibrations as sound moves through a space.' },
   { id: 'energy', title: 'Energy Slide', detail: 'Move energy through a system and notice what changes.' },
   { id: 'poly', title: 'Polynomial Factory', detail: 'Build expressions one piece at a time.' },
+  { id: 'maths-war', title: 'Maths War', detail: 'Solve number and polynomial challenges.' },
+  { id: 'circleverse', title: 'Circleverse', detail: 'Explore angles, chords and arcs in a circle.' },
+  { id: 'force-series', title: 'FORCE: The Series', detail: 'Explore Newton’s three laws through motion challenges.' },
+  { id: 'chotu-motion', title: 'Chotu ki Kahani: Motion', detail: 'Follow a journey through distance, speed and graphs.' },
+  { id: 'tinker', title: 'Tinker: The Knowledge Quest', detail: 'A guided science knowledge quest.' },
+  { id: 'optics-lab', title: 'VidhyaSaathy Optics Lab', detail: 'Explore reflection and refraction with ray experiments.' },
+  { id: 'quill-blade', title: 'Quill & Blade', detail: 'Explore the images and figures of speech in Wind.' },
+  { id: 'mixtures', title: 'Mixture Detective', detail: 'Mix, filter and follow a light beam.' },
+  { id: 'tissues', title: 'Tissue Trail', detail: 'Trace growth and transport through a plant.' },
+  { id: 'linear', title: 'Line Builder', detail: 'Build solutions and see their straight-line graph.' },
 ] as const;
 
 const gameLoaders: Record<string, () => Promise<GameModule>> = {
@@ -26,6 +36,16 @@ const gameLoaders: Record<string, () => Promise<GameModule>> = {
   sound: async () => import('../sound'),
   energy: async () => import('../energy'),
   poly: async () => import('../poly'),
+  'maths-war': async () => import('../ported/maths-war'),
+  circleverse: async () => import('../ported/circleverse'),
+  'force-series': async () => import('../ported/force-series'),
+  'chotu-motion': async () => import('../ported/chotu-motion'),
+  tinker: async () => import('../ported/tinker'),
+  'optics-lab': async () => import('../ported/optics-lab'),
+  'quill-blade': async () => import('../ported/quill-blade'),
+  mixtures: async () => import('../ported/mixtures'),
+  tissues: async () => import('../ported/tissues'),
+  linear: async () => import('../ported/linear'),
 };
 
 const NAMED_KEYS = ['game', 'default', 'matterGame', 'demoGame', 'atomGame', 'newtonGame', 'energyGame', 'motionGame', 'soundGame', 'floatGame', 'graphsGame', 'polyGame', 'cellGame'] as const;

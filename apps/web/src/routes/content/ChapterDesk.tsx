@@ -19,6 +19,7 @@ import { AssignmentList } from '../../assessment/AssignmentList';
 import { ConceptMap } from '../../ai/ConceptMap';
 import { DiagnosticPanel } from './DiagnosticPanel';
 import { LessonFrame } from './LessonFrame';
+import { ChapterPlaySteps } from '../../games/ChapterPlaySteps';
 
 function toggle(list: string[], id: string): string[] {
   return list.includes(id) ? list.filter((item) => item !== id) : [...list, id];
@@ -112,6 +113,7 @@ export function ChapterPage() {
   return (
     <LessonFrame paper={student} kicker="Chapter" title={current.title} script={student ? 'Read, then check.' : 'Tag a note before you publish.'} stale={chapter}>
       <p className="lesson-actions"><Link to={`/${audience}/subjects/${current.subjectId}`}>Back to chapters</Link></p>
+      {student ? <ChapterPlaySteps chapterId={current.id} /> : null}
       {student ? null : (
         <form className="grid gap-4" noValidate aria-busy={chapterForm.pending} onSubmit={(event) => { void saveChapter(event); }}>
           <h2>Chapter title</h2>
@@ -150,7 +152,7 @@ export function ChapterPage() {
       )}
 
       <div className="lesson-card">
-        <h2>Notes</h2>
+        <h2 id="chapter-notes">Notes</h2>
         {noteRows.length === 0 ? (
           <EmptyState title={student ? 'No notes have been released for this chapter.' : 'No note yet.'}>
             <p>{student ? 'A published note will show up here.' : 'Write a note and tag at least one concept.'}</p>

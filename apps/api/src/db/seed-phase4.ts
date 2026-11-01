@@ -6,6 +6,7 @@ import { gameCheckpointMap } from './schema-phase4.ts';
 import { items, concepts, chapters, classes, profiles, sections, subjects, learningSessions, slides, notes, noteConcepts, teacherAssignments } from './schema.ts';
 import { GAME_BANK } from './game-bank.ts';
 import { DEMO_SCHOOL_ID } from './demo.ts';
+import { seedGameDiagnostics } from './game-diagnostics.ts';
 
 export async function seedPhase4(database: Database, _now: () => number) {
   const { db } = database;
@@ -41,7 +42,7 @@ export async function seedPhase4(database: Database, _now: () => number) {
       for (const [position, [key, conceptTitle, prompt, options, explanation]] of bank.questions.entries()) {
         let concept = db.select().from(concepts).where(and(eq(concepts.chapterId, chapterId), eq(concepts.title, conceptTitle))).get();
         if (!concept) {
-          concept = { id: randomUUID(), schoolId, chapterId, title: conceptTitle, description: explanation, sourceClass: 9 };
+          concept = { id: randomUUID(), schoolId, chapterId, title: conceptTitle, description: explanation, sourceClass: bank.id === 'optics-lab' ? 10 : 9 };
           db.insert(concepts).values(concept).run();
         }
         const conceptId = concept.id;
@@ -53,12 +54,13 @@ export async function seedPhase4(database: Database, _now: () => number) {
         const itemId = `game-bank:${schoolId}:${key}`;
         db.insert(items).values({ id: itemId, schoolId, chapterId, conceptId, sessionId: null, position,
           content: SaveItemSchema.parse({ type: 'mcq', conceptId, difficulty: 2, prompt, options: [...options], answer: options[0], explanation,
-            sourceRef: { noteId, locator: `NCERT Class 9: ${bank.chapter}, ${conceptTitle}` } }) }).onConflictDoNothing().run();
+            sourceRef: { noteId, locator: `NCERT Class ${bank.id === 'optics-lab' ? 10 : 9}: ${bank.chapter}, ${conceptTitle}` } }) }).onConflictDoNothing().run();
         db.insert(gameCheckpointMap).values({ schoolId, gameId: bank.id, checkpointKey: key, conceptId, itemId }).onConflictDoNothing().run();
       }
     }
   }
   // Missing bank coverage stays unavailable; never borrow unrelated questions.
+  seedGameDiagnostics(db, DEMO_SCHOOL_ID, timestamp);
   const checkpoints = [
     ['motion', 'motion.speed', 'Motion', 'Speed & Velocity'],
     ['motion', 'motion.acceleration', 'Motion', 'Acceleration'],

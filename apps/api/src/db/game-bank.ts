@@ -1,5 +1,7 @@
 /** NCERT Class 9 checkpoint bank. Correct choice and explanations stay server-side. */
-export const GAME_BANK = [
+import { PORTED_GAME_BANK } from './game-bank-port.ts';
+
+const ORIGINAL_GAME_BANK = [
   { id: 'motion', subject: 'Physics', chapter: 'Motion', questions: [
     ['motion.uniform', 'Uniform motion', 'A runner covers equal distances in equal time intervals. This is:', ['Uniform motion', 'Accelerated motion', 'Circular motion', 'Rest'], 'Uniform motion covers equal distances in equal time intervals.'],
     ['motion.speed', 'Speed & Velocity', 'A cyclist covers 120 m in 20 s. What is the average speed?', ['6 m/s', '2400 m/s', '100 m/s', '0.167 m/s'], 'Average speed is total distance divided by total time: 120/20 = 6 m/s.'],
@@ -55,3 +57,12 @@ export const GAME_BANK = [
     ['graphs.distance', 'Coordinates on axes', 'The point (0, -5) is:', ['5 units below the origin', '5 units above the origin', '5 units right of the origin', '5 units left of the origin'], 'Its x-coordinate is zero and its y-coordinate is -5.'],
   ] },
 ] as const;
+
+export const GAME_BANK = [
+  ...ORIGINAL_GAME_BANK,
+  ...PORTED_GAME_BANK,
+  ...(['force-series', 'chotu-motion'] as const).map((id) => {
+    const source = ORIGINAL_GAME_BANK.find((bank) => bank.id === (id === 'force-series' ? 'newton' : 'motion'))!;
+    return { ...source, id, questions: source.questions.map(([key, ...question]) => [`${id}.${key.split('.').slice(1).join('.')}`, ...question] as const) };
+  }),
+];
