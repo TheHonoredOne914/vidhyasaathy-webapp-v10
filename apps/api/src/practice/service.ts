@@ -63,7 +63,7 @@ export function practiceNext(db: Db, request: FastifyRequest, chapterId: string,
     ladders.map((row) => ({ conceptId: row.conceptId, level: row.ladderLevel as Level })));
   const ladder = picked ? ladders.find((row) => row.conceptId === picked.conceptId) : null;
   return {
-    chapterId, item: picked ? publicItem(picked.row) : null, level: ladder?.ladderLevel ?? picked?.level ?? 2,
+    chapterId, item: picked ? publicItem(picked.row) : null,
     word: levelWord((ladder?.masteryLevel ?? null) as Level | null), bridge: ladder?.bridge ?? null,
   };
 }

@@ -1,6 +1,7 @@
 import { RoleSchema, type AiDraft, type Answer, type AskResponse, type ConceptLesson, type NotificationChannel, type RemediationResult, type SaveItem } from '@vidhyasaathy/contracts';
 import { sql } from 'drizzle-orm';
 import { check, foreignKey, index, integer, primaryKey, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+export * from './schema-phase4.ts';
 
 export const schools = sqliteTable('school', {
   id: text('id').primaryKey(),
@@ -414,6 +415,28 @@ export const aiDraftJobs = sqliteTable('ai_draft_job', {
   foreignKey({ columns: [t.assignmentId, t.chapterId, t.schoolId], foreignColumns: [assignments.id, assignments.chapterId, assignments.schoolId] }),
 ]);
 
+export const practiceRounds = sqliteTable('practice_round', {
+  id: text('id').primaryKey(), schoolId: text('school_id').notNull(), profileId: text('profile_id').notNull(),
+  chapterId: text('chapter_id').notNull(), gameId: text('game_id').notNull().$type<import('@vidhyasaathy/contracts').GameId>(),
+  itemIds: text('item_ids', { mode: 'json' }).notNull().$type<string[]>(),
+  attemptIds: text('attempt_ids', { mode: 'json' }).notNull().$type<string[]>(), createdAt: integer('created_at').notNull(),
+}, (t) => [
+  index('practice_round_profile_idx').on(t.schoolId, t.profileId),
+  foreignKey({ columns: [t.profileId, t.schoolId], foreignColumns: [profiles.id, profiles.schoolId] }),
+  foreignKey({ columns: [t.chapterId, t.schoolId], foreignColumns: [chapters.id, chapters.schoolId] }),
+  check('practice_round_items_json', sql`json_valid(${t.itemIds})`),
+  check('practice_round_attempts_json', sql`json_valid(${t.attemptIds})`),
+]);
+
+export const learningPreferences = sqliteTable('learning_preferences', {
+  profileId: text('profile_id').primaryKey(), schoolId: text('school_id').notNull(),
+  preferences: text('preferences', { mode: 'json' }).notNull().$type<import('@vidhyasaathy/contracts').LearningPreferences>(),
+  updatedAt: integer('updated_at').notNull(),
+}, (t) => [
+  foreignKey({ columns: [t.profileId, t.schoolId], foreignColumns: [profiles.id, profiles.schoolId] }),
+  check('learning_preferences_json', sql`json_valid(${t.preferences})`),
+]);
+
 export const learningEvidence = sqliteTable('learning_evidence', {
   id: text('id').primaryKey(), schoolId: text('school_id').notNull(), profileId: text('profile_id').notNull(),
   conceptId: text('concept_id').notNull(), correct: integer('correct', { mode: 'boolean' }).notNull(),
@@ -429,7 +452,10 @@ export const answerEvidence = sqliteTable('answer_evidence', {
   conceptId: text('concept_id').notNull(), itemId: text('item_id').notNull(),
   level: integer('level').notNull(), correct: integer('correct', { mode: 'boolean' }).notNull(),
   confidence: text('confidence', { enum: ['sure', 'unsure', 'guess'] }).notNull(),
-  source: text('source').notNull(), errorType: text('error_type', { enum: ['concept_gap', 'careless', 'method', 'guess'] }),
+  source: text('source').notNull(),
+    sourceDetail: text('source_detail'),
+  weight: real('weight').notNull().default(1),
+  errorType: text('error_type', { enum: ['concept_gap', 'careless', 'method', 'guess'] }),
   timeMs: integer('time_ms').notNull(), answer: text('answer', { mode: 'json' }).notNull().$type<string | string[]>(),
   notTaught: integer('not_taught', { mode: 'boolean' }).notNull().default(false), createdAt: integer('created_at').notNull(),
 }, (t) => [

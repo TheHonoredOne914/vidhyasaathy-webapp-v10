@@ -3,6 +3,7 @@ import { AskSchema, CreateDraftJobSchema, ReviewDraftJobSchema, type AskResponse
 import { and, eq, lte } from 'drizzle-orm';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { extractAnswer } from '../ai/extract.ts';
+import { AskPipeline } from '../ai/ask-pipeline.ts';
 import { approveDraft, draftJobView, draftSource, runDraftJob } from '../ai/jobs.ts';
 import { ProviderAnswerSchema, type LlmProvider } from '../ai/provider.ts';
 import { digest, retrieveNotes } from '../ai/retrieval.ts';
@@ -24,6 +25,11 @@ export function registerAiRoutes(app: FastifyInstance, database: Database, auth:
     db.delete(doubts).where(lte(doubts.createdAt, now() - 86400000)).run();
   };
   app.post('/ask', { preHandler: requireRole('student'), config: { rateLimit } }, async (request) => {
+    if (request.body && typeof request.body === 'object' && 'text' in request.body) {
+      const events = await new AskPipeline(database, provider, now).run(request, request.body, new AbortController().signal);
+      const done = events.find((event) => event.event === 'done');
+      return done ? { ...(done.data as object), events } : { error: events.find((event) => event.event === 'error')?.data };
+    }
     const input = parseInput(AskSchema, request.body);
     const { school, profile } = requireAuth(request);
     chapterAccess(db, request, input.chapterId);

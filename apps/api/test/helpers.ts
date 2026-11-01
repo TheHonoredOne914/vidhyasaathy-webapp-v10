@@ -21,7 +21,7 @@ export function cookieFrom(headers: Record<string, string | string[] | number | 
   return cookie;
 }
 
-export async function createHarness(options: { rateLimitMax?: number; authRateLimitMax?: number; databasePath?: string; uploadsDirectory?: string; llmProvider?: LlmProvider } = {}) {
+export async function createHarness(options: { rateLimitMax?: number; authRateLimitMax?: number; databasePath?: string; uploadsDirectory?: string; llmProvider?: LlmProvider; aiDailyTokenBudget?: number } = {}) {
   let currentTime = Date.UTC(2026, 9, 24, 12);
   const now = () => currentTime;
   const database = openDatabase(options.databasePath ?? ':memory:');
@@ -29,6 +29,7 @@ export async function createHarness(options: { rateLimitMax?: number; authRateLi
     database, appOrigin: ORIGIN, now, rateLimitMax: options.rateLimitMax ?? 1000, authRateLimitMax: options.authRateLimitMax ?? 1000,
     claimCodeEncryptionKey: '11'.repeat(32),
     aiJobPollMs: 0,
+    aiDailyTokenBudget: options.aiDailyTokenBudget ?? 30000,
     ...(options.llmProvider ? { llmProvider: options.llmProvider } : {}),
     ...(options.uploadsDirectory ? { uploadsDirectory: options.uploadsDirectory } : {}),
   });

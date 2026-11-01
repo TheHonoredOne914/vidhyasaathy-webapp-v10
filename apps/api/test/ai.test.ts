@@ -25,7 +25,7 @@ describe('grounded AI, approved drafts and remediation', () => {
     conceptId, correct: false, source: 'session', createdAt: h.now() }).run();
 
   beforeEach(async () => {
-    provider = { id: 'test', configured: true,
+    provider = { id: 'test', configured: true, stream: new LocalStubProvider().stream, health: async () => true,
       ask: vi.fn(async (input: GroundedQuestion) => ({ message: 'Which parts are equal?', sources: [{ chunkId: input.sources[0]!.id, quote: input.sources[0]!.text }] })),
       draft: vi.fn(async () => draft()) };
     h = await createHarness({ llmProvider: provider });

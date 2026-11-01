@@ -16,16 +16,25 @@ const EnvironmentSchema = z.object({
   RATE_LIMIT_MAX: z.coerce.number().int().min(1).max(10000).default(120),
   AUTH_RATE_LIMIT_MAX: z.coerce.number().int().min(1).max(1000).default(20),
   UPLOAD_DIRECTORY: z.string().trim().min(1).default('./uploads'),
+  AI_PROVIDER: z.enum(['stub', 'openai', 'http']).optional(),
+  AI_HTTP_URL: z.string().url().refine((value) => ['http:', 'https:'].includes(new URL(value).protocol)).optional(),
+  AI_HTTP_TOKEN: z.string().trim().min(1).optional(),
+  AI_HTTP_MODEL: z.string().trim().min(1).default('class9'),
+  AI_VISION_PROVIDER: z.enum(['none', 'openai', 'http']).default('none'),
+  AI_TIMEOUT_MS: z.coerce.number().int().min(1).max(120000).default(12000),
+  AI_DAILY_TOKEN_BUDGET: z.coerce.number().int().min(1).max(1000000).default(30000),
   OPENAI_API_KEY: z.string().trim().min(1).optional(),
   OPENAI_MODEL: z.string().trim().min(1).default('gpt-4o-mini'),
   OPENAI_API_URL: z.string().url().refine((value) => new URL(value).protocol === 'https:', 'Use an HTTPS provider endpoint.').default('https://api.openai.com/v1/chat/completions'),
   CLAIM_CODE_ENCRYPTION_KEY: z.string().regex(/^[a-fA-F0-9]{64}$/).optional(),
 }).superRefine((env, context) => {
+  if (env.AI_PROVIDER === 'http' && !env.AI_HTTP_URL) context.addIssue({ code: 'custom', path: ['AI_HTTP_URL'], message: 'An HTTP model endpoint is required.' });
   if (env.NODE_ENV === 'production' && !env.APP_ORIGIN.startsWith('https://')) {
     context.addIssue({ code: 'custom', path: ['APP_ORIGIN'], message: 'Production requires HTTPS.' });
   }
 });
 
 export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
-  return EnvironmentSchema.parse(environment);
+  const config = EnvironmentSchema.parse(environment);
+  return { ...config, AI_PROVIDER: config.AI_PROVIDER ?? (config.OPENAI_API_KEY ? 'openai' : 'stub') };
 }

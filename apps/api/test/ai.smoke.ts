@@ -15,7 +15,7 @@ import { cookieFrom, createHarness } from './helpers.ts';
 test('P5: grounded hints, private scope, reviewed drafts, remediation gate and plan', async () => {
   let calls = 0;
   let generated: AiDraft;
-  const provider: LlmProvider = { id: 'smoke', configured: true,
+  const provider: LlmProvider = { id: 'smoke', configured: true, stream: new LocalStubProvider().stream, health: async () => true,
     ask: async (input) => { calls++; return { message: 'Which parts are equal?', sources: [{ chunkId: input.sources[0]!.id, quote: input.sources[0]!.text }] }; },
     draft: async () => generated };
   const h = await createHarness({ llmProvider: provider });
