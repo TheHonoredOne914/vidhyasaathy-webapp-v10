@@ -166,8 +166,8 @@ export function App() {
               <Route path="/student/*" element={<RoleGuard role="student"><AccessDenied /></RoleGuard>} />
               <Route path="/parent" element={<RoleGuard role="parent"><ParentHome /></RoleGuard>} />
               <Route path="/parent/children/:childId" element={<RoleGuard role="parent"><ParentChild /></RoleGuard>} />
-              <Route path="/parent/children/:childId/progress" element={<RoleGuard role="parent"><ParentChild /></RoleGuard>} />
-              <Route path="/parent/children/:childId/assignments" element={<RoleGuard role="parent"><ParentChild /></RoleGuard>} />
+              <Route path="/parent/children/:childId/progress" element={<RoleGuard role="parent"><ParentChild view="progress" /></RoleGuard>} />
+              <Route path="/parent/children/:childId/assignments" element={<RoleGuard role="parent"><ParentChild view="assignments" /></RoleGuard>} />
               <Route path="/parent/announcements" element={<RoleGuard role="parent"><AnnouncementsPage /></RoleGuard>} />
               <Route path="/parent/notifications" element={<RoleGuard role="parent"><NotificationsPage /></RoleGuard>} />
               <Route path="/parent/settings" element={<RoleGuard role="parent"><SettingsPage /></RoleGuard>} />

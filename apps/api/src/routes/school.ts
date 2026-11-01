@@ -9,7 +9,7 @@ import type { z, ZodTypeAny } from 'zod';
 import { requireAuth, requireRole } from '../auth/middleware.ts';
 import type { AuthService } from '../auth/service.ts';
 import type { Db } from '../db/index.ts';
-import { academicYears, classes, sections, subjects, teacherAssignments } from '../db/schema.ts';
+import { academicYears, classes, parentLinks, profiles, sections, subjects, teacherAssignments } from '../db/schema.ts';
 import { parseInput } from '../errors.ts';
 import { found, mutate, readSection, scope } from '../school/access.ts';
 
@@ -110,7 +110,12 @@ export function registerSchoolRoutes(app: FastifyInstance, db: Db, auth: AuthSer
     remove: (schoolId, id) => { db.delete(subjects).where(scope(subjects, schoolId, id)).run(); },
   });
 
-  const readOptions = { preHandler: requireRole('admin', 'teacher') };
+  const readOptions = { preHandler: requireRole('admin', 'teacher', 'parent') };
+  const parentSections = (schoolId: string, parentId: string) => db.select({ id: profiles.sectionId }).from(parentLinks)
+    .innerJoin(profiles, and(eq(profiles.id, parentLinks.studentProfileId), eq(profiles.schoolId, parentLinks.schoolId)))
+    .where(and(eq(parentLinks.schoolId, schoolId), eq(parentLinks.parentProfileId, parentId), eq(profiles.role, 'student')));
+  const parentClasses = (schoolId: string, parentId: string) => db.select({ id: sections.classId }).from(sections)
+    .where(and(scope(sections, schoolId), inArray(sections.id, parentSections(schoolId, parentId))));
   app.get('/sections', readOptions, async (request) => {
     const { school, profile } = requireAuth(request);
     const assigned = db.select({ id: teacherAssignments.sectionId }).from(teacherAssignments).where(and(
@@ -118,10 +123,15 @@ export function registerSchoolRoutes(app: FastifyInstance, db: Db, auth: AuthSer
     ));
     return db.select().from(sections).where(and(scope(sections, school.id),
       profile.role === 'teacher' ? inArray(sections.id, assigned) : undefined,
+      profile.role === 'parent' ? inArray(sections.id, parentSections(school.id, profile.id)) : undefined,
     )).all().map((row) => SectionSchema.parse(row));
   });
   app.get('/sections/:id', readOptions, async (request) => {
     const { id } = parseInput(ResourceParamsSchema, request.params);
+    const { school, profile } = requireAuth(request);
+    if (profile.role === 'parent') return SectionSchema.parse(found(db.select().from(sections).where(and(
+      scope(sections, school.id, id), inArray(sections.id, parentSections(school.id, profile.id)),
+    )).get()));
     return SectionSchema.parse(readSection(db, request, id));
   });
   app.get('/classes', readOptions, async (request) => {
@@ -131,11 +141,15 @@ export function registerSchoolRoutes(app: FastifyInstance, db: Db, auth: AuthSer
     ));
     return db.select().from(classes).where(and(scope(classes, school.id),
       profile.role === 'teacher' ? inArray(classes.id, assigned) : undefined,
+      profile.role === 'parent' ? inArray(classes.id, parentClasses(school.id, profile.id)) : undefined,
     )).all().map((row) => ClassSchema.parse(row));
   });
   app.get('/classes/:id', readOptions, async (request) => {
     const { id } = parseInput(ResourceParamsSchema, request.params);
     const { school, profile } = requireAuth(request);
+    if (profile.role === 'parent') return ClassSchema.parse(found(db.select().from(classes).where(and(
+      scope(classes, school.id, id), inArray(classes.id, parentClasses(school.id, profile.id)),
+    )).get()));
     if (profile.role === 'teacher') found(db.select().from(teacherAssignments).where(and(
       eq(teacherAssignments.schoolId, school.id), eq(teacherAssignments.teacherProfileId, profile.id),
       eq(teacherAssignments.classId, id),
@@ -149,6 +163,7 @@ export function registerSchoolRoutes(app: FastifyInstance, db: Db, auth: AuthSer
     ));
     return db.select().from(subjects).where(and(scope(subjects, school.id),
       profile.role === 'teacher' ? inArray(subjects.id, assigned) : undefined,
+      profile.role === 'parent' ? inArray(subjects.classId, parentClasses(school.id, profile.id)) : undefined,
     )).all().map((row) => SubjectSchema.parse(row));
   });
   app.get('/academic-years', readOptions, async (request) => {
@@ -158,6 +173,8 @@ export function registerSchoolRoutes(app: FastifyInstance, db: Db, auth: AuthSer
       .where(and(eq(teacherAssignments.schoolId, school.id), eq(teacherAssignments.teacherProfileId, profile.id)));
     return db.select().from(academicYears).where(and(scope(academicYears, school.id),
       profile.role === 'teacher' ? inArray(academicYears.id, assigned) : undefined,
+      profile.role === 'parent' ? inArray(academicYears.id, db.select({ id: classes.academicYearId }).from(classes)
+        .where(and(scope(classes, school.id), inArray(classes.id, parentClasses(school.id, profile.id))))) : undefined,
     )).all().map((row) => AcademicYearSchema.parse(row));
   });
 }

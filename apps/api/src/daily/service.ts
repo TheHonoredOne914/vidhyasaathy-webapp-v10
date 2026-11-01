@@ -456,6 +456,16 @@ function ownedEvent(db: Db, request: FastifyRequest, id: string) {
 }
 
 export function startWarmup(db: Db, request: FastifyRequest, clientEventId: string, now: number) {
+  const identity = requireAuth(request);
+  const offered = db.select().from(learningEvents).where(and(
+    eq(learningEvents.schoolId, identity.school.id), eq(learningEvents.profileId, identity.profile.id),
+    eq(learningEvents.kind, 'warmup_offered'),
+  )).all().find((row) => istDay(row.createdAt) === istDay(now));
+  if (offered && offered.id !== clientEventId) {
+    const collision = db.select().from(learningEvents).where(eq(learningEvents.id, clientEventId)).get();
+    if (collision) throw new ApiException(409, 'EVENT_CONFLICT', 'This event ID already identifies another action.');
+    return startWarmup(db, request, offered.id, now);
+  }
   const previous = db.select().from(learningEvents).where(eq(learningEvents.id, clientEventId)).get();
   if (previous) {
     const { profile } = requireAuth(request);
