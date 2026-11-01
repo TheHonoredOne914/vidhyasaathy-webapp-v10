@@ -33,7 +33,7 @@ function publishedItems(db: Db, request: FastifyRequest, timestamp: number, chap
     .sort((a, b) => a.position - b.position || a.id.localeCompare(b.id));
 }
 
-export function practiceSet(db: Db, request: FastifyRequest, chapterId: string, gameId: GameId, limit: number, timestamp: number): PracticeSet {
+export function practiceSet(db: Db, request: FastifyRequest, chapterId: string, gameId: GameId, limit: number, timestamp: number, conceptId: string | null = null): PracticeSet {
   const { school, profile } = requireAuth(request);
   const states = db.select().from(studentConceptStates).where(and(eq(studentConceptStates.schoolId, school.id),
     eq(studentConceptStates.profileId, profile.id))).all();
@@ -45,7 +45,9 @@ export function practiceSet(db: Db, request: FastifyRequest, chapterId: string, 
   ]);
   const due = new Set(states.filter((row) => row.nextReview <= timestamp && earlier.has(row.conceptId)).map((row) => row.conceptId));
   const accepted = gameModules[gameId].acceptedItemTypes;
-  const eligible = publishedItems(db, request, timestamp, chapterId).filter((row) => accepted.includes(row.content.type));
+  // A Dushman round only serves its own concept; every other set keeps the whole chapter pool.
+  const eligible = publishedItems(db, request, timestamp, chapterId)
+    .filter((row) => accepted.includes(row.content.type) && (conceptId === null || row.conceptId === conceptId));
   const fresh = eligible.filter((row) => !earlier.has(row.conceptId));
   const review = eligible.filter((row) => due.has(row.conceptId));
   const conceptIds = new Set(eligible.map((row) => row.conceptId));

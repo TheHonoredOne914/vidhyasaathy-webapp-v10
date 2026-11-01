@@ -136,7 +136,7 @@ export function AtomForgeVideo() {
     <div className="hud">
       <div className="chip"><Tag>Atom Forge</Tag><span className="chapter-name">{beat.title}</span></div>
       <Progress current={episode} titles={BEATS.map((item) => item.title)} onSelect={select} />
-      <Link className="exit" to="/student/games" aria-label="Back to games">Back to games</Link>
+      <Link className="exit" to="/student?panel=games" aria-label="Back to games">Back to games</Link>
       {episode === 0 && (phase === 'intro' || phase === 'play') && <div className="title"><h1>What is everything<br />made of?</h1><p>{beat.subtitle}</p></div>}
       {episode === 1 && <>
         <div ref={protonLine} className="lead" /><div ref={neutronLine} className="lead" />

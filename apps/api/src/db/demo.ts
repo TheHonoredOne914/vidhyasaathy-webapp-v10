@@ -125,8 +125,13 @@ export async function seedDemo(db: Db, credentials: z.input<typeof Credentials>,
     if (existing.name !== 'Demo school') throw new Error('Demo school ID is already in use.');
     // Content-only upgrade for older demo databases; accounts and progress stay untouched.
     db.transaction(() => {
+      // Older demo seeds left Session 3 releasing in the future; the demo session is meant to be explorable all day.
+      const future = db.select().from(learningSessions).all()
+        .find((row) => row.schoolId === DEMO_SCHOOL_ID && row.title.startsWith('Session 3') && row.releaseAt != null && row.releaseAt > now);
+      if (future) db.update(learningSessions).set({ releaseAt: now - 3600000 }).where(eq(learningSessions.id, future.id)).run();
       ensureMotionContent(db, now);
       ensureMotionBank(db, DEMO_SCHOOL_ID, now);
+      ensureMotionPairs(db, DEMO_SCHOOL_ID);
       ensureMotionHistories(db, DEMO_SCHOOL_ID, now);
       ensureDailyLoop(db, DEMO_SCHOOL_ID, now);
     });
@@ -216,8 +221,8 @@ export async function seedDemo(db: Db, credentials: z.input<typeof Credentials>,
     db.insert(concepts).values(motionConcepts.map((item) => ({ id: item.id, schoolId, chapterId: motionChapterId, title: item.title, description: `Class 9 Physics: ${item.title}.` }))).run();
     db.insert(conceptPrereqs).values([{ schoolId, conceptId: motionConcepts[1]!.id, prereqId: motionConcepts[0]!.id }, { schoolId, conceptId: motionConcepts[2]!.id, prereqId: motionConcepts[1]!.id }]).run();
     const session3Id = randomUUID();
-    const opensAt = new Date(now); opensAt.setTime(Date.now() - 3600000); opensAt.setHours(23, 59, 0, 0); // demo: already released so the session surface is explorable all day;
-    db.insert(learningSessions).values({ id: session3Id, schoolId, chapterId: motionChapterId, sectionId: section9aId, title: 'Session 3: Motion diagnostic', status: 'published', releaseAt: opensAt.getTime(), updatedAt: now }).run();
+    const opensAt = now - 3600000; // demo: already released so the session surface is explorable all day;
+    db.insert(learningSessions).values({ id: session3Id, schoolId, chapterId: motionChapterId, sectionId: section9aId, title: 'Session 3: Motion diagnostic', status: 'published', releaseAt: opensAt, updatedAt: now }).run();
     db.insert(items).values(SESSION_CHECKS.map((check, position) => {
       const conceptId = motionConcepts.find((concept) => concept.title === check.concept)!.id;
       return {
@@ -227,6 +232,7 @@ export async function seedDemo(db: Db, credentials: z.input<typeof Credentials>,
     })).run();
     ensureMotionContent(db, now);
     ensureMotionBank(db, schoolId, now);
+    ensureMotionPairs(db, schoolId);
     ensureMotionHistories(db, schoolId, now);
     ensureDailyLoop(db, schoolId, now);
     if (options.rich) for (const [index, key] of (['student', 'student2', 'student3', 'student4'] as const).entries()) {
@@ -335,6 +341,62 @@ function ensureTeacherReviewJobs(db: Db, chapter: typeof chapters.$inferSelect, 
       status: 'not_configured', message: 'AI not configured', draft: null, sessionId: null, assignmentId: null,
       createdAt: now, updatedAt: now }).run();
   }
+}
+
+type MotionPair = { concept: string; level: 1 | 2 | 3; prompt: string; explanation: string; pairs: { left: string; right: string }[] };
+
+// Match-the-Concept pairs so the game has a playable bank; the ids stay clear of every other Motion seed.
+const MOTION_PAIRS: MotionPair[] = [
+  { concept: 'Distance & Displacement', level: 1, prompt: 'Match each motion word to what it means.', explanation: 'Distance counts the whole path; displacement only compares the start and the finish.',
+    pairs: [{ left: 'Distance', right: 'The whole path travelled' }, { left: 'Displacement', right: 'Straight line from start to end, with direction' }, { left: 'Zero displacement', right: 'Finished where you started' }] },
+  { concept: 'Distance & Displacement', level: 2, prompt: 'Match each quantity to an example of it.', explanation: 'Distance and speed are scalars; displacement and velocity carry a direction, so they are vectors.',
+    pairs: [{ left: 'Distance', right: '400 m around the whole track' }, { left: 'Displacement', right: '0 m after one full round' }, { left: 'Speed', right: '50 km/h on a highway' }, { left: 'Velocity', right: '50 km/h towards the north' }] },
+  { concept: 'Distance & Displacement', level: 2, prompt: 'Match each walk to its displacement.', explanation: 'Displacement is the straight line from start to finish, so opposite legs can cancel.',
+    pairs: [{ left: 'One full round of a 400 m track', right: '0 m' }, { left: '6 m east then 8 m north', right: '10 m' }, { left: '3 m east then 2 m east', right: '5 m east' }] },
+  { concept: 'Speed & Velocity', level: 1, prompt: 'Match each speed idea to its formula.', explanation: 'Speed divides distance by time; average speed uses the totals for the whole trip.',
+    pairs: [{ left: 'Speed', right: 'distance / time' }, { left: 'Average speed', right: 'total distance / total time' }, { left: 'Velocity', right: 'displacement / time' }] },
+  { concept: 'Speed & Velocity', level: 2, prompt: 'Match each reading to what it tells you.', explanation: 'A speed with a direction is a velocity; the same number without direction is only a speed.',
+    pairs: [{ left: '60 km/h', right: 'Speed only' }, { left: '60 km/h towards the north', right: 'Velocity' }, { left: 'Steady 60 km/h on a circular track', right: 'Velocity is changing' }] },
+  { concept: 'Acceleration', level: 2, prompt: 'Match each motion to the acceleration it shows.', explanation: 'Acceleration is the change in velocity: positive while speeding up, negative while slowing down, zero when steady.',
+    pairs: [{ left: 'Speeding up', right: 'Positive acceleration' }, { left: 'Slowing down', right: 'Negative acceleration' }, { left: 'Steady velocity', right: 'Zero acceleration' }] },
+  { concept: 'Acceleration', level: 3, prompt: 'Match each equation of motion to what it gives you.', explanation: 'Each equation links a different pair of quantities for uniformly accelerated motion.',
+    pairs: [{ left: 'v = u + at', right: 'Velocity after time t' }, { left: 's = ut + ½at²', right: 'Distance covered in time t' }, { left: 'v² = u² + 2as', right: 'Velocity from the distance' }] },
+  { concept: 'Units and ratios', level: 1, prompt: 'Match each unit to the quantity it measures.', explanation: 'Metres per second belong to speed, metres per second squared to acceleration.',
+    pairs: [{ left: 'Metre per second (m/s)', right: 'Speed' }, { left: 'Metre per second squared (m/s²)', right: 'Acceleration' }, { left: 'Metre (m)', right: 'Distance' }, { left: 'Second (s)', right: 'Time' }] },
+  { concept: 'Reading graphs', level: 2, prompt: 'Match each distance-time graph shape to the motion.', explanation: 'On a distance-time graph the slope is the speed: rising, flat, or steep tells the whole story.',
+    pairs: [{ left: 'Straight line rising steadily', right: 'Constant speed' }, { left: 'Flat horizontal line', right: 'Standing still' }, { left: 'Steep straight line', right: 'Fast constant speed' }] },
+  { concept: 'Reading graphs', level: 3, prompt: 'Match each velocity-time graph shape to the motion.', explanation: 'On a velocity-time graph the slope is the acceleration and the area under it is the distance.',
+    pairs: [{ left: 'Horizontal line above zero', right: 'Constant velocity' }, { left: 'Line rising from the origin', right: 'Speeding up from rest' }, { left: 'Line falling to zero', right: 'Slowing to a stop' }] },
+];
+
+const motionPairId = (n: number) => `d7000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
+const MOTION_PRACTICE_ASSIGNMENT_ID = 'd7000000-0000-4000-8000-000000000301';
+
+/** Idempotently adds the Match-the-Concept pair bank and links it to the Motion practice assignment. */
+function ensureMotionPairs(db: Db, schoolId: string) {
+  const chapter = db.select().from(chapters).where(and(eq(chapters.schoolId, schoolId), eq(chapters.title, 'Motion'))).get();
+  if (!chapter) return;
+  const conceptRows = db.select().from(concepts).where(eq(concepts.chapterId, chapter.id)).all();
+  const conceptId = (title: string) => conceptRows.find((row) => row.title === title)?.id;
+  const assignment = db.select().from(assignments).where(eq(assignments.id, MOTION_PRACTICE_ASSIGNMENT_ID)).get();
+  MOTION_PAIRS.forEach((question, index) => {
+    const owner = conceptId(question.concept);
+    if (!owner) return;
+    const itemId = motionPairId(1701 + index);
+    const content = SaveItemSchema.parse({
+      type: 'match_pairs', conceptId: owner, prompt: question.prompt, difficulty: question.level, sourceRef: null,
+      explanation: question.explanation, pairs: question.pairs, role: 'practice',
+    });
+    const existing = db.select().from(items).where(eq(items.id, itemId)).get();
+    if (!existing) {
+      db.insert(items).values({ id: itemId, schoolId, chapterId: chapter.id, sessionId: null, conceptId: owner, position: 500 + index, content }).run();
+    } else if (JSON.stringify(existing.content) !== JSON.stringify(content) || existing.conceptId !== owner) {
+      db.update(items).set({ content, conceptId: owner }).where(eq(items.id, itemId)).run();
+    }
+    if (assignment && !db.select().from(assignmentItems).where(and(eq(assignmentItems.assignmentId, assignment.id), eq(assignmentItems.itemId, itemId))).get()) {
+      db.insert(assignmentItems).values({ assignmentId: assignment.id, itemId, schoolId, chapterId: chapter.id, position: 500 + index }).run();
+    }
+  });
 }
 
 /**

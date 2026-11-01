@@ -102,7 +102,7 @@ it('routes a diagnostic without punishing an untaught prerequisite', () => {
   const missed = [{ correct: false, notTaught: false }, { correct: false, notTaught: false }, { correct: true, notTaught: false }];
   expect(diagnosticEntry(missed)).toEqual({ level: 1, route: 'repair' });
   const fresh = Array.from({ length: 5 }, () => ({ correct: false, notTaught: true }));
-  expect(diagnosticEntry(fresh)).toEqual({ level: 1, route: 'repair' });
+  expect(diagnosticEntry(fresh)).toEqual({ level: 2, route: 'steady' });
   const strong = [{ correct: true, notTaught: false }, { correct: true, notTaught: false }, { correct: true, notTaught: false }, { correct: true, notTaught: false }, { correct: false, notTaught: false }];
   expect(diagnosticEntry(strong)).toEqual({ level: 3, route: 'challenge' });
   expect(diagnosticEntry([{ correct: true, notTaught: false }, { correct: false, notTaught: false }])).toEqual({ level: 2, route: 'steady' });
