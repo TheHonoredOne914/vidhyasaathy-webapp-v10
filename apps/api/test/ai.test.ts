@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { runDraftJob } from '../src/ai/jobs.ts';
 import { LocalStubProvider, type GroundedQuestion, type LlmProvider } from '../src/ai/provider.ts';
-import { retrieveNotes } from '../src/ai/retrieval.ts';
+import { retrieveGanitaManjari, retrieveNotes } from '../src/ai/retrieval.ts';
 import { academicYears, assignments, chapters, classes, conceptPrereqs, concepts, items, learningEvidence, learningSessions,
   noteConcepts, notes, profiles, sections, studentConceptStates, subjects, teacherAssignments } from '../src/db/schema.ts';
 import { cookieFrom, createHarness, type Harness } from './helpers.ts';
@@ -50,6 +50,14 @@ describe('grounded AI, approved drafts and remediation', () => {
     parent = h.roleCookie(schoolId, 'parent').cookie;
   });
   afterEach(async () => { await h.app.close(); });
+
+  it('retrieves matching Ganita Manjari sections for the active chapter', () => {
+    const sections = retrieveGanitaManjari('Coordinates', 'How do coordinates locate points on a graph?');
+    expect(sections.length).toBeGreaterThan(0);
+    expect(sections[0]?.noteId).toMatch(/^ganita-manjari-/);
+    expect(sections.every((section) => section.text.length > 0)).toBe(true);
+    expect(retrieveGanitaManjari('Fractions', 'coordinates and graph')).toEqual([]);
+  });
 
   it('refuses outside notes and excludes drafts, future releases and another school', async () => {
     expect(AskResponseSchema.parse((await ask('Explain volcanoes')).json()).status).toBe('not_in_notes');

@@ -2,7 +2,7 @@
 
 Saathy is served by the existing Fastify API and rendered at `/student/saathy`. It reuses VidhyaSaathy's authenticated Ask stream, SQLite conversation history, published-note retrieval, privacy guards, usage budget, quick checks, and shared learning evidence. Lesson and chapter entry points pass their context into the chat. The API prompt now includes only the signed-in learner's name, class, subjects, chapters, recent concept progress, recent mistakes, and current chapter, plus a short guide to app destinations. It does not query other profiles' learning evidence.
 
-Dhruv's Next.js shell, Prisma persistence, and provider setup are not carried over. This integration uses the existing provider abstraction, VidhyaSaathy's school-note corpus, SQLite schema, routes, and auth. No migration was needed for the existing Ask tables. The separate Ganita Manjari corpus, Dhruv's meta-block/artifact parser and rescue, and Level Check card flow are not integrated yet; the existing Quick Try is a single server-scored MCQ, not the full hint-ladder experience. No separate level-check tables or unsupported evidence were added.
+Dhruv's Next.js shell, Prisma persistence, and provider setup are not carried over. This integration uses the existing provider abstraction, VidhyaSaathy's SQLite schema, routes, and auth. Ganita Manjari's Grade 9 maths book is included as an additional retrieval source when active chapter and question terms match; it supplements published school notes. No migration was needed for existing Ask tables.
 
 ## Configuration
 
@@ -23,9 +23,9 @@ To use the requested local ports, set `PORT=3201` for the API and configure the 
 
 Quick Try answers are checked server-side against the stored item and recorded through the shared `recordAnswer` learning service. Chat ownership is checked against the authenticated school and profile. Student learning summaries are built from rows scoped to that same profile and school. Chat uses the existing retention and output-safety behavior.
 
-## Remaining port work
+## Remaining gaps
 
-- Import the verified Ganita Manjari retrieval corpus and integrate it with the existing school-note retrieval without displacing school materials.
 - Port and validate the structured Saathy metadata contract, safe parser/rescue, artifact rendering, and interactive cards.
-- Add a prerequisite-only Level Check that records answers through the shared evidence service, including a no-penalty `not_taught` response.
+- Add the prerequisite-only Level Check gate/cards and record answers through shared evidence, including no-penalty `not_taught` responses.
+- Expand the existing server-scored Quick Try into a hint ladder.
 - Add API and UI coverage for those features before calling the model port complete.
