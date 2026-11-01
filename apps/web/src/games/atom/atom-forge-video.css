@@ -73,6 +73,10 @@
 .afv-kz .act-controls{flex-wrap:wrap;justify-content:center;align-items:center;width:min(92vw,760px);gap:8px;font-size:14px}
 .afv-kz .act-controls button{border:2px solid #ffffff99;border-radius:22px;padding:8px 16px;background:#2d0089;color:#fff;touch-action:none}
 .afv-kz .act-controls button:disabled{opacity:.5;cursor:default}
+.afv-kz .act-controls button:not(:disabled){cursor:pointer}
+.afv-kz [data-afv-drop=neutron],.afv-kz .sort-cards button:not(:disabled){cursor:grab}
+.afv-kz [data-afv-drop=neutron]:active,.afv-kz .sort-cards button:active{cursor:grabbing}
+.afv-kz button:focus-visible,.afv-kz input:focus-visible,.afv-kz select:focus-visible{outline:3px solid currentColor;outline-offset:4px}
 .afv-kz .act-controls button[aria-pressed=true]{background:#c4246f}
 .afv-kz .act-controls p{margin:0;text-align:center;width:100%}
 .afv-kz .action-message{position:absolute;top:21vh;left:10%;width:80%;text-align:center;font-size:16px}
@@ -127,3 +131,4 @@
   .afv-kz .vignette{height:70px}
 }
 @media(prefers-reduced-motion:reduce){.afv-kz *{animation:none!important;transition:none!important}}
+@media(prefers-reduced-motion:reduce){.afv-kz .iris{display:none}}

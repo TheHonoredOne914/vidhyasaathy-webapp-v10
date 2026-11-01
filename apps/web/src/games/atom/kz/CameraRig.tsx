@@ -12,8 +12,9 @@ export function CameraRig({ beat, time, act, zoom = 0, reduced = false }: {
   const orbit = useRef({ down: false, x: 0, y: 0, yaw: 0, pitch: 0, vx: 0, vy: 0, distance: 1, released: 0 });
   const vectors = useMemo(() => ({ position: new Vector3(), target: new Vector3(), offset: new Vector3(), sphere: new Spherical() }), []);
   useEffect(() => {
+    if (!act) return;
     const element = gl.domElement, state = orbit.current;
-    const down = (event: PointerEvent) => { state.down = true; state.x = event.clientX; state.y = event.clientY; element.setPointerCapture(event.pointerId); };
+    const down = (event: PointerEvent) => { if (event.button !== 0) return; state.down = true; state.x = event.clientX; state.y = event.clientY; element.setPointerCapture(event.pointerId); };
     const move = (event: PointerEvent) => {
       if (!state.down) return;
       state.vx = (event.clientX - state.x) * 0.004; state.vy = (event.clientY - state.y) * 0.004;
@@ -24,12 +25,15 @@ export function CameraRig({ beat, time, act, zoom = 0, reduced = false }: {
     const wheel = (event: WheelEvent) => { event.preventDefault(); state.distance = Math.max(0.7, Math.min(1.4, state.distance + event.deltaY * 0.001)); state.released = performance.now(); };
     element.addEventListener('pointerdown', down); element.addEventListener('pointermove', move);
     element.addEventListener('pointerup', up); element.addEventListener('pointercancel', up); element.addEventListener('wheel', wheel, { passive: false });
+    element.addEventListener('lostpointercapture', up); window.addEventListener('blur', up);
     return () => {
+      up();
       element.removeEventListener('pointerdown', down); element.removeEventListener('pointermove', move);
       element.removeEventListener('pointerup', up); element.removeEventListener('pointercancel', up); element.removeEventListener('wheel', wheel);
+      element.removeEventListener('lostpointercapture', up); window.removeEventListener('blur', up);
     };
-  }, [gl]);
-  useEffect(() => { Object.assign(orbit.current, { yaw: 0, pitch: 0, distance: 1, vx: 0, vy: 0 }); }, [beat]);
+  }, [gl, act]);
+  useEffect(() => { Object.assign(orbit.current, { down: false, yaw: 0, pitch: 0, distance: 1, vx: 0, vy: 0 }); }, [beat]);
   useFrame(({ camera, size }, dt) => {
     const ms = time * 1000, keys = beat.camera;
     const end = keys.findIndex((key) => key.ms > ms);

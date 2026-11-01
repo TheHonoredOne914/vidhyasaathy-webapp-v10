@@ -8,11 +8,12 @@ export function Leader({ from, to }: { from: [number, number]; to: [number, numb
   const dx = to[0] - from[0], dy = to[1] - from[1];
   return <div className="lead" style={{ left: from[0], top: from[1], width: Math.hypot(dx, dy), transform: `rotate(${Math.atan2(dy, dx)}rad)` }} />;
 }
-export function Caption({ text, onAdvance }: { text: string; onAdvance?: () => void }) {
+export function Caption({ text, onAdvance }: { text: string; onAdvance?: (() => void) | undefined }) {
   const [before, term, after] = text.split(/<b>(.*?)<\/b>/);
-  return <button type="button" className="cap" onClick={onAdvance} aria-label="Next caption">
+  const Container = onAdvance ? 'button' : 'div';
+  return <Container className="cap" onClick={onAdvance} aria-label={onAdvance ? 'Next caption' : 'Caption'}>
     <SaathyLine /><span aria-live="polite">{before}{term && <b>{term}</b>}{after}</span>
-  </button>;
+  </Container>;
 }
 export function Meter({ value }: { value: number }) {
   const percent = Math.max(0, Math.min(100, value * 100));
