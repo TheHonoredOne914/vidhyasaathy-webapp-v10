@@ -77,7 +77,7 @@ export const PinLoginSchema = z.object({
 }).strict();
 export type PinLogin = z.infer<typeof PinLoginSchema>;
 
-export const StudentLookupSchema = z.object({ schoolId: IdSchema.optional(), slug: z.string().trim().min(1).max(120).optional(), rollNo: z.string().trim().min(1).max(40) }).strict().refine((v) => Boolean(v.schoolId || v.slug), { message: 'School is required.' });
+export const StudentLookupSchema = z.object({ schoolId: IdSchema.optional(), slug: z.string().trim().min(1).max(120).optional(), sectionId: IdSchema.optional(), rollNo: z.string().trim().min(1).max(40) }).strict().refine((v) => Boolean(v.schoolId || v.slug), { message: 'School is required.' });
 export const StudentActivateSchema = z.object({ lookupToken: z.string().min(20), activationCode: CodeSchema }).strict();
 export const OtpVerifySchema = z.object({ otpToken: z.string().min(20), otp: z.string().regex(/^\d{6}$/) }).strict();
 export const SetPinSchema = z.object({ pinToken: z.string().min(20), pin: PinSchema }).strict();
