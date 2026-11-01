@@ -28,7 +28,7 @@ export function ChallengeDesk() {
   const [pending, setPending] = useState(false);
   const [review, setReview] = useState<Review | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const [finished, setFinished] = useState<{ xp: number; answered: number } | null>(null);
+  const [finished, setFinished] = useState<{ status: 'completed' | 'expired'; xp: number; answered: number } | null>(null);
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
   const questionStarted = useRef(Date.now());
   const handingIn = useRef(false);
@@ -46,7 +46,7 @@ export function ChallengeDesk() {
     setNotice(null);
     try {
       const result = await postJson(`/student/daily-challenge/${data.id}/finish`, DailyChallengeFinishSchema, {});
-      setFinished({ xp: result.xp, answered: result.answered });
+      setFinished({ status: result.status, xp: result.xp, answered: result.answered });
     } catch (cause) {
       handingIn.current = false;
       setNotice(cause instanceof Error ? cause.message : 'The challenge could not be handed in. Try again.');
@@ -105,6 +105,18 @@ export function ChallengeDesk() {
   if (remote.denied) return <div className="nb-col"><NotebookState title="This challenge is not available" message="Ask your teacher to check your access." /></div>;
   if (remote.status === 'error' && !data) return <div className="nb-col"><NotebookState title="Could not open the challenge" message="Your notebook is safe. Try opening it again." retry={remote.reload} /></div>;
   if (!data) return null;
+
+  if (finished?.status === 'expired') {
+    return <div className="nb-col" data-testid="student-challenge-done">
+      <section className="nb-card">
+        <span className="nb-tape" aria-hidden="true" />
+        <Chip tone="sand">Time is up</Chip>
+        <h1 className="nb-h2" style={{ marginTop: 'var(--nb-s2)' }}>Today&apos;s five minutes have passed.</h1>
+        <p className="nb-note">No questions were tried, so nothing was added today. A new set waits for you tomorrow.</p>
+        <Link className="nb-btn nb-btn--primary" style={{ marginTop: 'var(--nb-s3)', display: 'inline-flex' }} to="/student">Back to home</Link>
+      </section>
+    </div>;
+  }
 
   if (finished) {
     return <div className="nb-col" data-testid="student-challenge-done">

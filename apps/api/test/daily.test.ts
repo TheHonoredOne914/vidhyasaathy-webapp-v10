@@ -82,6 +82,22 @@ describe('daily loop API', () => {
     expect(StudentHomeSchema.parse((await get('/student/home', 'Priya')).json()).warmup).not.toBeNull();
   });
 
+  it('closes an untried challenge after the five minutes without XP or a streak touch', async () => {
+    const served = DailyChallengeSchema.parse((await get('/student/daily-challenge', 'Aarav')).json());
+    expect((await post(`/student/daily-challenge/${served.id}/finish`, 'Aarav', {})).statusCode).toBe(409);
+    h.advance(5 * 60 * 1000 + 1000);
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      const finish = await post(`/student/daily-challenge/${served.id}/finish`, 'Aarav', {});
+      expect(finish.statusCode).toBe(200);
+      expect(finish.json()).toEqual({ status: 'expired', xp: 0, answered: 0 });
+    }
+    const again = DailyChallengeSchema.parse((await get('/student/daily-challenge', 'Aarav')).json());
+    expect(again.id).toBe(served.id);
+    expect(again.status).toBe('expired');
+    const touches = h.database.db.select().from(streakTouches).all().filter((row) => row.sourceEventId === served.id);
+    expect(touches).toEqual([]);
+  });
+
   it('serves one daily challenge per day and one streak row for a double tap', async () => {
     const first = DailyChallengeSchema.parse((await get('/student/daily-challenge', 'Aarav')).json());
     const second = DailyChallengeSchema.parse((await get('/student/daily-challenge', 'Aarav')).json());

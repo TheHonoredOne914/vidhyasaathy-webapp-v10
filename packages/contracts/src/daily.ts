@@ -93,7 +93,7 @@ export const DailyChallengeAnswerResultSchema = z.object({
   itemId: Id, outcome: z.enum(['yes', 'not_yet']), why: z.string().nullable(),
 }).strict();
 export const DailyChallengeFinishSchema = z.object({
-  status: z.literal('completed'), xp: z.number().int().nonnegative(), answered: z.number().int().nonnegative(),
+  status: z.enum(['completed', 'expired']), xp: z.number().int().nonnegative(), answered: z.number().int().nonnegative(),
 }).strict();
 
 export const DushmanListSchema = z.object({
