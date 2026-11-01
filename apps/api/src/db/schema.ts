@@ -415,6 +415,28 @@ export const aiDraftJobs = sqliteTable('ai_draft_job', {
   foreignKey({ columns: [t.assignmentId, t.chapterId, t.schoolId], foreignColumns: [assignments.id, assignments.chapterId, assignments.schoolId] }),
 ]);
 
+export const practiceRounds = sqliteTable('practice_round', {
+  id: text('id').primaryKey(), schoolId: text('school_id').notNull(), profileId: text('profile_id').notNull(),
+  chapterId: text('chapter_id').notNull(), gameId: text('game_id').notNull().$type<import('@vidhyasaathy/contracts').GameId>(),
+  itemIds: text('item_ids', { mode: 'json' }).notNull().$type<string[]>(),
+  attemptIds: text('attempt_ids', { mode: 'json' }).notNull().$type<string[]>(), createdAt: integer('created_at').notNull(),
+}, (t) => [
+  index('practice_round_profile_idx').on(t.schoolId, t.profileId),
+  foreignKey({ columns: [t.profileId, t.schoolId], foreignColumns: [profiles.id, profiles.schoolId] }),
+  foreignKey({ columns: [t.chapterId, t.schoolId], foreignColumns: [chapters.id, chapters.schoolId] }),
+  check('practice_round_items_json', sql`json_valid(${t.itemIds})`),
+  check('practice_round_attempts_json', sql`json_valid(${t.attemptIds})`),
+]);
+
+export const learningPreferences = sqliteTable('learning_preferences', {
+  profileId: text('profile_id').primaryKey(), schoolId: text('school_id').notNull(),
+  preferences: text('preferences', { mode: 'json' }).notNull().$type<import('@vidhyasaathy/contracts').LearningPreferences>(),
+  updatedAt: integer('updated_at').notNull(),
+}, (t) => [
+  foreignKey({ columns: [t.profileId, t.schoolId], foreignColumns: [profiles.id, profiles.schoolId] }),
+  check('learning_preferences_json', sql`json_valid(${t.preferences})`),
+]);
+
 export const learningEvidence = sqliteTable('learning_evidence', {
   id: text('id').primaryKey(), schoolId: text('school_id').notNull(), profileId: text('profile_id').notNull(),
   conceptId: text('concept_id').notNull(), correct: integer('correct', { mode: 'boolean' }).notNull(),

@@ -8,6 +8,7 @@ export * from './dashboard.ts';
 export * from './practice.ts';
 export * from './daily.ts';
 export * from './games.ts';
+export * from './notebook.ts';
 
 export const RoleSchema = z.enum(['admin', 'teacher', 'student', 'parent']);
 export type Role = z.infer<typeof RoleSchema>;

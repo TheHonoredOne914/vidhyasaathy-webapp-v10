@@ -31,6 +31,7 @@ import { registerDiagnosticRoutes } from './routes/diagnostic.ts';
 import { registerLessonRoutes } from './routes/lessons.ts';
 import { registerDailyRoutes } from './routes/daily.ts';
 import { registerGamesRoutes } from './routes/games.ts';
+import { registerNotebookRoutes } from './routes/notebook.ts';
 import { registerAuthV9Routes } from './routes/auth-v9.ts';
 
 export interface AppOptions {
@@ -143,6 +144,7 @@ export async function buildApp(input: AppOptions) {
     registerLessonRoutes(app, db, options.now);
     registerDailyRoutes(app, db, options.now);
     registerGamesRoutes(app, input.database, options.now);
+    registerNotebookRoutes(app, db, options.now);
     app.post('/auth/logout', async (request, reply) => {
       auth.logout(request, reply);
       return reply.code(204).send();
