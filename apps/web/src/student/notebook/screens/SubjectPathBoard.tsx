@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ChapterListSchema, ConceptListSchema } from '../../../content/schemas';
 import { SubjectListSchema } from '../../../setup/schemas';
 import { useRemote } from '../../../setup/useRemote';
+import { GamesSchema } from '../../../games/gameApi';
 import { Icon } from '../icons';
 import { Saathy } from '../Saathy';
 import { Bubble, MasteryChip, ProgressBar, SubjectIcon } from '../ui';
@@ -27,6 +28,7 @@ export function SubjectPathBoard({ subjectId }: { subjectId: string }) {
   const chapters = useRemote(subjectId ? `/subjects/${subjectId}/chapters` : null, ChapterListSchema);
   const progress = useRemote('/progress', ProgressSchema);
   const home = useRemote('/student/home', StudentHomeSchema);
+  const games = useRemote('/student/games', GamesSchema);
   const homework = useRemote('/student/homework', HomeworkListSchema);
   const subject = (subjects.data ?? []).find((item) => item.id === subjectId) ?? null;
   const list = [...(chapters.data ?? [])].sort((a, b) => a.position - b.position);
@@ -50,7 +52,7 @@ export function SubjectPathBoard({ subjectId }: { subjectId: string }) {
   const counts = ["Let's fix this", 'Almost there', 'Mastered', 'Top form', 'New'].map((word) => ({ word, n: stations.filter((station) => station.word === word).length }));
   const doneCount = stations.filter((station) => station.state === 'done').length;
   const nextChapter = current ? list.find((chapter) => chapter.position > current.position) ?? null : null;
-  const game = home.data?.todaysGame && !/atom/i.test(home.data.todaysGame.gameId) && !/atom/i.test(home.data.todaysGame.title) ? home.data.todaysGame : null;
+  const subjectGames = (games.data?.games ?? []).filter((game) => game.subjectId === subjectId);
   const due = (homework.data?.items ?? []).find((item) => item.subject === subject?.name && (item.status === 'todo' || item.status === 'overdue'));
   const fix = stations.find((station) => station.word === "Let's fix this");
   const goal = home.data?.todaysGoal;
@@ -113,7 +115,7 @@ export function SubjectPathBoard({ subjectId }: { subjectId: string }) {
         <div className="nb-card__head"><h3 className="nb-h3">Next due</h3></div>
         {due ? <p className="nb-note">{due.title}</p> : <p className="nb-empty">Nothing is due in this subject.</p>}
       </section>
-      {game ? <section className="nb-card"><div className="nb-card__head"><h3 className="nb-h3">Today's game</h3></div><p className="nb-note">{game.title}</p><div className="nb-meta">{game.conceptName}</div><Link className="nb-btn nb-btn--gold nb-btn--sm" to={game.href}>Play</Link></section> : null}
+      <section className="nb-card"><div className="nb-card__head"><h3 className="nb-h3">{subject.name} games</h3></div>{games.status === 'error' ? <p role="alert">Could not load games. <button type="button" onClick={games.reload}>Try again</button></p> : subjectGames.map((game) => <div className="nb-row" key={game.gameId}><div><p className="nb-note">{game.title}</p><div className="nb-meta">{game.topic}</div><Link className="nb-btn nb-btn--gold nb-btn--sm" to={`/student/chapters/${game.chapterId}/practice`}>Play</Link></div></div>)}{games.data && !subjectGames.length ? <p className="nb-empty">Your teacher is preparing games for this subject.</p> : null}</section>
       {fix && current ? <section className="nb-sticky" style={{ margin: '.4rem .3rem' }}><span className="nb-sticky__who">Fix-it stop</span>{fix.concept.title} is marked <b>Let's fix this</b>.<br /><Link className="nb-btn nb-btn--ghost nb-btn--sm" style={{ marginTop: '.6rem' }} to={`/student/chapters/${current.id}/concepts/${fix.concept.id}`}>Start recap</Link></section> : null}
       <section className="nb-card nb-grow">
         <div className="nb-card__head"><h3 className="nb-h3">{current ? `${current.title} at a glance` : 'At a glance'}</h3><span className="nb-meta">{stations.length} ideas</span></div>

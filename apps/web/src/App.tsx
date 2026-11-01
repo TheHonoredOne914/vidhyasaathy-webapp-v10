@@ -64,6 +64,7 @@ const WarmupDesk = lazy(() => import('./student/WarmupDesk').then((module) => ({
 const ChallengeDesk = lazy(() => import('./student/ChallengeDesk').then((module) => ({ default: module.ChallengeDesk })));
 const DushmanDesk = lazy(() => import('./student/DushmanDesk').then((module) => ({ default: module.DushmanDesk })));
 const EngineGamePage = lazy(() => import('./games/EngineGamePage').then((module) => ({ default: module.EngineGamePage })));
+const ChapterEntryGate = lazy(() => import('./games/ChapterEntryGate').then((module) => ({ default: module.ChapterEntryGate })));
 const AtomForgeVideo = lazy(() => import('./games/atom/AtomForgeVideo').then((module) => ({ default: module.AtomForgeVideo })));
 
 export function prefetchSignIn() {
@@ -77,8 +78,8 @@ export function App() {
         <AttemptSyncProvider>
         <Suspense fallback={<RouteFallback />}>
           <Routes>
-            <Route path="/student/games/atom" element={<RoleGuard role="student"><AtomForgeVideo /></RoleGuard>} />
-            <Route path="/student/chapters/:chapterId/practice/engine/:gameId" element={<RoleGuard role="student"><EngineGamePage /></RoleGuard>} />
+            <Route path="/student/games/atom" element={<RoleGuard role="student"><ForgeChapterEntry /></RoleGuard>} />
+            <Route path="/student/chapters/:chapterId/practice/engine/:gameId" element={<RoleGuard role="student"><ChapterEntryGate><EngineGamePage /></ChapterEntryGate></RoleGuard>} />
             <Route element={<Shell />}>
               <Route path="/" element={<Landing />} />
               <Route path="/signin" element={<SignIn />} />
@@ -147,11 +148,11 @@ export function App() {
               <Route path="/student" element={<RoleGuard role="student"><RoleHome role="student" /></RoleGuard>} />
               <Route path="/student/welcome" element={<RoleGuard role="student"><StudentWelcome /></RoleGuard>} />
               <Route path="/student/subjects/:subjectId" element={<RoleGuard role="student"><StudentSubject /></RoleGuard>} />
-              <Route path="/student/chapters/:chapterId/concepts/:conceptId" element={<RoleGuard role="student"><ConceptPage /></RoleGuard>} />
-              <Route path="/student/chapters/:chapterId" element={<RoleGuard role="student"><ChapterPage /></RoleGuard>} />
+              <Route path="/student/chapters/:chapterId/concepts/:conceptId" element={<RoleGuard role="student"><ChapterEntryGate><ConceptPage /></ChapterEntryGate></RoleGuard>} />
+              <Route path="/student/chapters/:chapterId" element={<RoleGuard role="student"><ChapterEntryGate><ChapterPage /></ChapterEntryGate></RoleGuard>} />
               <Route path="/student/chapters/:chapterId/diagnostic" element={<RoleGuard role="student"><DiagnosticPage /></RoleGuard>} />
-            <Route path="/student/chapters/:chapterId/practice" element={<RoleGuard role="student"><PracticeList /></RoleGuard>} />
-              <Route path="/student/chapters/:chapterId/practice/:gameId" element={<RoleGuard role="student"><PracticePlay /></RoleGuard>} />
+            <Route path="/student/chapters/:chapterId/practice" element={<RoleGuard role="student"><ChapterEntryGate><PracticeList /></ChapterEntryGate></RoleGuard>} />
+              <Route path="/student/chapters/:chapterId/practice/:gameId" element={<RoleGuard role="student"><ChapterEntryGate><PracticePlay /></ChapterEntryGate></RoleGuard>} />
               <Route path="/student/notes/:noteId" element={<RoleGuard role="student"><NotePage /></RoleGuard>} />
               <Route path="/student/sessions/:sessionId" element={<RoleGuard role="student"><SessionPlayer /></RoleGuard>} />
               <Route path="/student/assignments/:assignmentId" element={<RoleGuard role="student"><AssignmentAnswerPage /></RoleGuard>} />

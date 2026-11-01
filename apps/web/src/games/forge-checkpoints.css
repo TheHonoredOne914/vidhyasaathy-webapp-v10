@@ -1,0 +1,2 @@
+.forge-checkpoints { position: fixed; z-index: 50; right: 1rem; top: 1rem; max-width: min(30rem, calc(100vw - 2rem)); font-family: 'Patrick Hand', cursive; }
+.forge-checkpoints > section { margin-top: .5rem; padding: 1rem; max-height: calc(100dvh - 6rem); overflow-y: auto; color: #041D3D; background: #F9F6EE; border: 1px solid #517DAB; }

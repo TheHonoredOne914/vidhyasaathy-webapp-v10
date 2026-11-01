@@ -6,6 +6,7 @@ import { openDatabase } from '../src/db/index.ts';
 import { gameCheckpointMap } from '../src/db/schema-phase4.ts';
 import { concepts, items } from '../src/db/schema.ts';
 import { PASSWORD, PIN } from './helpers.ts';
+import { GAME_BANK } from '../src/db/game-bank.ts';
 
 it('maps only matching game concepts, preserving all existing content on reruns', async () => {
   const database = openDatabase(':memory:');
@@ -17,12 +18,12 @@ it('maps only matching game concepts, preserving all existing content on reruns'
     const before = database.db.select().from(items).all();
     await seedPhase4(database, () => now);
     const mappings = database.db.select().from(gameCheckpointMap).all();
-    expect(mappings).toHaveLength(36);
+    expect(mappings).toHaveLength(GAME_BANK.reduce((sum, bank) => sum + bank.questions.length, 0));
     const seeded = database.db.select().from(items).all();
     expect(seeded).toEqual(expect.arrayContaining(before));
     const conceptRows = database.db.select().from(concepts).all();
     for (const mapping of mappings) {
-      expect(['motion', 'cell', 'poly', 'newton', 'matter', 'float', 'sound', 'energy', 'graphs']).toContain(mapping.gameId);
+      expect(GAME_BANK.map((bank) => bank.id)).toContain(mapping.gameId);
       expect(mapping.checkpointKey).not.toMatch(/^q\d+$/);
       const item = database.db.select().from(items).all().find((row) => row.id === mapping.itemId)!;
       expect(item.conceptId).toBe(mapping.conceptId);

@@ -5,16 +5,20 @@ import { GameSessionStartSchema, GameAnswerSchema, GameFinishSchema, SaveItemSch
 import { xpFromEvidence } from '@vidhyasaathy/core/xp';
 import { clampLevel } from '@vidhyasaathy/core/learning';
 import { requireAuth, requireRole } from '../auth/middleware.ts';
-import { chapterAccess, isAvailable } from '../content/access.ts';
+import { chapterAccess, isAvailable, resourceId } from '../content/access.ts';
 import type { Database } from '../db/index.ts';
 import { gameSessions, gameCheckpointMap } from '../db/schema-phase4.ts';
-import { items, learningSessions, profiles } from '../db/schema.ts';
+import { concepts, conceptLadders, items, learningSessions, profiles } from '../db/schema.ts';
 import { recordAnswer, mistakeFor } from '../learning/record.ts';
 import { ApiException, parseInput } from '../errors.ts';
 
 export const GAME_TITLES: Record<string, string> = {
   motion: 'Motion Lab', newton: "Newton's Laws", matter: 'Matter Lab', cell: 'Cell Explorer',
   float: 'Float or Sink', sound: 'Sound Lab', energy: 'Energy Lab', poly: 'Polynomial Workshop', graphs: 'Coordinate Graphs',
+  atom: 'Atom Forge', 'maths-war': 'Maths War', circleverse: 'Circleverse',
+  'force-series': 'FORCE: The Series', 'chotu-motion': 'Chotu ki Kahani: Motion',
+  tinker: 'Tinker: The Knowledge Quest', 'quill-blade': 'Quill & Blade',
+  'optics-lab': 'VidhyaSaathy Optics Lab', mixtures: 'Mixture Detective', tissues: 'Tissue Trail', linear: 'Line Builder',
 };
 export const GAME_EVIDENCE_WEIGHT = 0.5;
 type Snapshot = { checkpoint_key: string; item_id: string; concept_id: string; chapter_id: string; content: string; response: string | null };
@@ -22,6 +26,26 @@ type Snapshot = { checkpoint_key: string; item_id: string; concept_id: string; c
 export function registerGamesRoutes(app: FastifyInstance, database: Database, now: () => number) {
   const { db, sqlite } = database;
   const student = { preHandler: requireRole('student') };
+  app.get('/chapters/:id/game-progress', student, async (request) => {
+    const { school, profile } = requireAuth(request);
+    const chapter = chapterAccess(db, request, resourceId(request));
+    const completed = sqlite.prepare(`SELECT DISTINCT s.game_id FROM game_session s
+      JOIN game_session_item i ON i.session_id=s.id
+      WHERE s.school_id=? AND s.profile_id=? AND s.finished_at IS NOT NULL AND i.chapter_id=?`)
+      .all(school.id, profile.id, chapter.id) as { game_id: string }[];
+    const ideas = db.select().from(concepts).where(and(eq(concepts.schoolId, school.id), eq(concepts.chapterId, chapter.id))).all()
+      .filter((row) => row.sourceClass == null || row.sourceClass >= 9);
+    const ladders = db.select().from(conceptLadders).where(and(eq(conceptLadders.schoolId, school.id), eq(conceptLadders.profileId, profile.id))).all();
+    const words = ['New', "Let's fix this", 'Almost there', 'Mastered', 'Top form'];
+    const states = ideas.map((idea) => {
+      const ladder = ladders.find((row) => row.conceptId === idea.id);
+      return { conceptId: idea.id, title: idea.title, word: words[ladder?.masteryLevel ?? 0] ?? 'New' };
+    });
+    const fix = states.find((row) => row.word === "Let's fix this" || row.word === 'Almost there');
+    return { chapterId: chapter.id, completedGames: completed.map((row) => row.game_id), playDone: completed.length > 0,
+      next: completed.length ? fix ? 'fix' : 'master' : 'play', concepts: states,
+      nextHref: fix ? `/student/concepts/${fix.conceptId}/remediation` : `/student/chapters/${chapter.id}/practice/chapter_progress_challenge` };
+  });
   function game(request: FastifyRequest) {
     const { gameId, id } = request.params as { gameId: string; id?: string };
     if (!Object.hasOwn(GAME_TITLES, gameId)) throw new ApiException(404, 'NOT_FOUND', 'This game is not available.');
@@ -79,7 +103,11 @@ export function registerGamesRoutes(app: FastifyInstance, database: Database, no
       for (const { mapping, item, content } of selected) {
         sqlite.prepare('INSERT INTO game_session_item (session_id,checkpoint_key,item_id,concept_id,chapter_id,content) VALUES (?,?,?,?,?,?)')
           .run(sessionId, mapping.checkpointKey, item.id, item.conceptId, item.chapterId, JSON.stringify(content));
-        checkpoints[mapping.checkpointKey] = { itemId: item.id, stem: content.prompt, options: content.options.map((text, index) => ({ id: String(index), text })), format: 'mcq', level: Math.min(3, content.difficulty) };
+        // Shuffle the public choices; never expose an answer position pattern.
+        const options = content.options.map((text) => ({ text, sort: Math.random() })).sort((a, b) => a.sort - b.sort).map(({ text }) => text);
+        const snapshot = { ...content, options };
+        sqlite.prepare('UPDATE game_session_item SET content=? WHERE session_id=? AND checkpoint_key=?').run(JSON.stringify(snapshot), sessionId, mapping.checkpointKey);
+        checkpoints[mapping.checkpointKey] = { itemId: item.id, stem: content.prompt, options: options.map((text, index) => ({ id: String(index), text })), format: 'mcq', level: Math.min(3, content.difficulty) };
       }
       return { sessionId, checkpoints };
     });

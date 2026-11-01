@@ -12,12 +12,13 @@ import { useReducedMotion } from './useReducedMotion';
 import './theme.css';
 import { ArenaShell } from '../arena/ArenaShell';
 import { AtomForgeVideo } from '../atom/AtomForgeVideo';
+import { ForgeCheckpoints } from '../ForgeCheckpoints';
 
 type Attempt = { count: number; hintUsed: boolean; reteachUsed: boolean };
 const EMPTY_ATTEMPT: Attempt = { count: 0, hintUsed: false, reteachUsed: false };
 
 export function InteractiveVideo({ game }: { game: GameDef }) {
-  if (game.id === 'atom') return <AtomForgeVideo />;
+  if (game.id === 'atom') return <><AtomForgeVideo /><ForgeCheckpoints /></>;
   if (game.arena) return <ArenaShell game={game} />;
   const error = useMemo(() => {
     try { validateGame(game); return null; } catch (cause) { return cause instanceof Error ? cause.message : 'Invalid game definition.'; }

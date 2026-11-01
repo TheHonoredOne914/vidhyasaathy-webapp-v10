@@ -1,7 +1,7 @@
 import { ChapterSchema, DiagnosticOfferSchema, DiagnosticResultSchema } from '@vidhyasaathy/contracts';
 import { NOT_TAUGHT } from '@vidhyasaathy/core/learning';
 import { useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { postJson } from '../../../api/client';
 import { usePageMeta } from '../../../meta';
 import { AccessDenied } from '../../../routes/AccessDenied';
@@ -19,6 +19,9 @@ export function DiagnosticPage() {
 }
 
 function ChapterDiagnostic({ chapterId }: { chapterId: string }) {
+  const location = useLocation();
+  const requestedReturn = (location.state as { returnTo?: string } | null)?.returnTo;
+  const returnTo = requestedReturn?.startsWith(`/student/chapters/${chapterId}`) && !requestedReturn.includes('/diagnostic') ? requestedReturn : `/student/chapters/${chapterId}`;
   const chapter = useRemote(chapterId ? `/chapters/${chapterId}` : null, ChapterSchema);
   const offer = useRemote(chapterId ? `/chapters/${chapterId}/diagnostic` : null, DiagnosticOfferSchema);
   const [index, setIndex] = useState(0);
@@ -32,11 +35,11 @@ function ChapterDiagnostic({ chapterId }: { chapterId: string }) {
   const times = useRef<Record<string, number>>({});
   const prompt = useRef<HTMLHeadingElement>(null);
   usePageMeta('Before we start — VidhyaSaathy', 'No marks. This only tells Saathy where to start.');
-  const back = <Link className="nb-link" to={`/student/chapters/${chapterId}`}>Back to the chapter</Link>;
+  const back = <Link className="nb-link" to={returnTo}>Continue to the chapter</Link>;
   if (offer.denied || chapter.denied) return <AccessDenied />;
   if ((offer.status === 'error' && !offer.data) || (chapter.status === 'error' && !chapter.data)) return <Card title="Before we start"><p className="nb-empty" role="alert">Could not load this check.</p><NbButton onClick={() => { offer.reload(); chapter.reload(); }}>Try again</NbButton>{back}</Card>;
   if (!offer.data || !chapter.data) return <div className="pg-quiz"><div className="nb-grid"><div className="nb-skel" /><div className="nb-skel" /></div></div>;
-  if (!offer.data.offered) return <Card title="No earlier-class check"><p className="nb-text">This chapter does not have a prerequisite check yet.</p>{back}</Card>;
+  if (!offer.data.offered) return <Card title="Ready to continue"><p className="nb-text">Your chapter is ready.</p>{back}</Card>;
   if (message) return <Card title="Where to start"><p className="nb-note" role="status">{message}</p>{back}</Card>;
   const questions = offer.data.questions.filter((item) => item.type === 'mcq');
   const item = questions[index];
