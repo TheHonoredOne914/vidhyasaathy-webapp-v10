@@ -107,4 +107,46 @@ export function AskPanel() {
       if (request.snapId) await confirmSnap(request.snapId, request.text, abort.signal);
       await streamAsk(request, (event) => {
         switch (event.type) {
-... (+43 lines) [see remaining: rtk proxy git show 'rebuild-local:apps/web/src/ai/AskPanel.tsx' | tail -n +110]
+          case 'thread': setThread({ id: event.data.threadId, title: event.data.title, concept: event.data.concept, style: request.style, mode: request.mode, purged: false, messages: [] }); setMessages((rows) => rows.map((row) => row.role === 'student' && row.id === rows.at(-2)?.id ? { ...row, id: event.data.studentMessageId, fromLabel: event.data.fromLabel } : row)); break;
+          case 'token': update((row) => ({ text: row.text + event.data.text })); break;
+          case 'citation': update((row) => ({ citations: [...row.citations, event.data] })); break;
+          case 'quickTry': update({ quickTry: event.data }); break;
+          case 'followups': update({ followups: event.data.chips }); break;
+          case 'done': update({ id: event.data.messageId, text: event.data.text, flags: event.data.flags }); break;
+          case 'error': fail(event.data.code); break;
+        }
+      }, abort.signal);
+      recent.reload(); setSnapId(undefined);
+    } catch (cause) { if (!abort.signal.aborted) fail(cause instanceof ApiClientError && cause.code in errors ? cause.code : 'provider_down'); }
+    finally { busy.current = false; if (!abort.signal.aborted) setPending(false); }
+  }
+  async function upload(photo: File) {
+    if (busy.current) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(photo.type) || photo.size > 4 * 1024 * 1024) { setMessages((rows) => [...rows, emptyMessage('Choose a JPG, PNG or WebP photo smaller than 4 MB.')]); return; }
+    busy.current = true; setPending(true);
+    const abort = new AbortController(); controller.current = abort;
+    try {
+      const result = await snapDoubt(photo, abort.signal);
+      if (result.status === 'extracted') { setText(result.extractedText ?? ''); setSnapId(result.snapId); }
+      else setMessages((rows) => [...rows, emptyMessage(result.status === 'not_configured' ? "I can't read photos yet. Type your doubt instead." : "I couldn't read that photo. Try again in better light, or type it.")]);
+    } catch { if (!abort.signal.aborted) setMessages((rows) => [...rows, emptyMessage("I couldn't read that photo. Try again in better light, or type it.")]); }
+    finally { busy.current = false; if (!abort.signal.aborted) setPending(false); }
+  }
+  const last = messages.filter((row) => row.role === 'saathy').at(-1);
+  const locked = homework || thread?.mode === 'homework';
+  const currentPath = params.has('chapterId') ? null : home.data?.learningPath;
+  const contextId = params.get('conceptId') ?? home.data?.nextAction?.conceptId ?? home.data?.warmup?.conceptId ?? currentPath?.nodes[0]?.conceptId;
+  const currentTopic = currentPath?.nodes.find((node) => node.conceptId === contextId);
+  return <div className="nb-grid pg-ask"><div className="chat">
+    <div className="ask-head"><PageHead title="Ask Saathy" sub="Hints first. You do the thinking, I'll keep you on track." /><div className="nb-tabs" role="tablist">{(['hints', 'explain'] as const).map((id) => <button type="button" role="tab" aria-selected={(locked ? 'hints' : style) === id} className={`nb-tab${(locked ? 'hints' : style) === id ? ' is-active' : ''}`} key={id} disabled={pending || !!locked} onClick={() => setStyle(id)}>{id === 'hints' ? 'Hints mode' : 'Explain fully'}</button>)}</div></div>
+    <div className="thread" aria-live="polite">{!messages.length ? <div className="msg"><Saathy mood="think" size="3rem" /><div><div className="meta">Saathy</div><div className="b">{thread?.purged ? 'This chat has been cleared for your privacy. You can ask about this topic again.' : `Hi${me?.profile.name ? ` ${me.profile.name}` : ''}! What are you thinking about?`}</div></div></div> : null}
+      {messages.map((row) => <div className={`msg${row.role === 'student' ? ' me' : ''}`} key={row.id}>{row.role === 'saathy' ? <Saathy mood="think" size="3rem" /> : null}<div><div className="meta">{row.role === 'student' ? `You · ${new Date(row.createdAt).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' })}${row.fromLabel ? ` · ${row.fromLabel}` : ''}` : 'Saathy'}</div><div className="b"><span className="ask-copy">{row.text || 'Saathy is thinking…'}</span>{row.citations.map((citation) => <div className="nb-meta" key={citation.chunkId}>{citation.noteTitle}{citation.page !== undefined ? ` · p. ${citation.page}` : ''}</div>)}{row.quickTry && thread ? <QuickQuestion key={row.quickTry.itemId} item={row.quickTry} threadId={thread.id} /> : null}{row.id === 'ask-error' && retry ? <button className="nb-btn nb-btn--ghost nb-btn--sm" disabled={pending} onClick={() => { void send(retry.text, undefined, retry); }}>Retry</button> : null}</div></div>{row.role === 'student' ? <span className="nb-avatar">{me?.profile.name?.slice(0, 1)}</span> : null}</div>)}
+    </div>
+    <div className="ask-suggestions">{!messages.length && !thread && currentTopic ? <button className="nb-chip nb-chip--sky" disabled={pending} onClick={() => { void send(`Help me understand ${currentTopic.name}`); }}>{currentTopic.name}</button> : null}{last?.followups?.filter((chip) => chip.kind !== 'ask_teacher').map((chip) => <button className="nb-chip nb-chip--sky" key={chip.kind} disabled={pending} onClick={() => { if (chip.kind !== 'ask_teacher') void send(chip.label, chip.kind); }}>{chip.label}</button>)}</div>
+    <form className="composer" onSubmit={(event) => { event.preventDefault(); void send(); }}><input ref={file} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" hidden onChange={(event) => { const photo = event.target.files?.[0]; if (photo) void upload(photo); event.target.value = ''; }} /><button type="button" className="nb-btn nb-btn--quiet nb-btn--sm" aria-label="Snap your notebook" disabled={pending} onClick={() => file.current?.click()}><svg className="i" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M8 7l2-3h4l2 3" /><circle cx="12" cy="13" r="3.5" /></svg></button><textarea className="nb-text" aria-label="Your doubt" rows={2} maxLength={800} placeholder="Ask a doubt, or snap your notebook…" value={text} disabled={pending} onChange={(event) => setText(event.target.value)} /><button className="nb-btn nb-btn--primary" disabled={pending || !text.trim()}><svg className="i" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6" /></svg> Send</button></form>
+  </div><aside className="nb-col"><Card title="Recent doubts" meta={<button type="button" className="nb-link" aria-expanded={allRecent} onClick={() => setAllRecent((value) => !value)}>{allRecent ? 'Recent' : 'All'}</button>}>{recent.data?.threads.length ? recent.data.threads.slice(0, allRecent ? 20 : 3).map((row) => <button className="doubt" key={row.id} disabled={pending} onClick={() => { void open(row.id); }}><b>{row.title}</b><span className="nb-meta">{row.subjectName} · {relativeDay(row.updatedAt)}</span></button>) : <p className="nb-note">Your recent doubts will appear here.</p>}{recent.error ? <button className="nb-btn nb-btn--ghost nb-btn--sm" onClick={recent.reload}>Retry</button> : null}</Card>
+    <Card title="Talking about">{thread?.concept ? <div className="nb-row ask-context"><SubjectIcon subject={thread.concept.subjectName} /><div><div className="nb-row__t">{thread.concept.name}</div><div className="nb-row__s">{thread.concept.subjectName} · {thread.concept.chapterLabel}</div></div></div> : currentTopic && currentPath ? <div className="nb-row ask-context"><SubjectIcon subject={currentPath.subject} /><div><div className="nb-row__t">{currentTopic.name}</div><div className="nb-row__s">{currentPath.subject} · {currentPath.chapter}</div></div></div> : <p className="nb-note">Your current topic will appear here.</p>}</Card>
+    <Sticky color="lilac" who="How Saathy helps">1. Asks what you already know<br />2. Gives one hint at a time<br />3. Lets you finish the step<br /><br />Your chats stay private. Teachers and parents only see which topics you asked about.</Sticky>
+    <Card title="Saved explanations" meta={saved.data ? String(saved.data.items.length) : undefined} grow>{saved.data?.items.length ? saved.data.items.map((row) => <div className="doubt" key={row.id}><b>{row.title}</b><span className="nb-meta">{row.subjectName} · saved {relativeDay(row.savedAt)}</span></div>) : <p className="nb-note">No saved explanations here yet.</p>}{saved.error ? <button className="nb-btn nb-btn--ghost nb-btn--sm" onClick={saved.reload}>Retry</button> : null}</Card>
+  </aside></div>;
+}

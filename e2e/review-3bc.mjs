@@ -49,10 +49,14 @@ try {
     if (screen === 'homework' && routes.worksheet) {
       await page.goto(routes.worksheet);
       await page.waitForLoadState('networkidle');
-      for (const width of [390, 1600]) {
+      for (const width of [390, 1024, 1280, 1600, 1920]) {
         await page.setViewportSize({ width, height: width === 390 ? 844 : 900 });
-        await page.screenshot({ path: `${out}/worksheet-${width}.png` });
+        const result = await page.evaluate(() => ({ width: innerWidth, scrollWidth: document.documentElement.scrollWidth }));
+        measurements.push({ screen: 'worksheet', ...result });
+        if (result.scrollWidth > width) errors.push(`Worksheet overflow: ${JSON.stringify(result)}`);
+        if ([390, 1600].includes(width)) await page.screenshot({ path: `${out}/worksheet-${width}.png` });
       }
+      await writeFile(`${out}/measurements-worksheet.json`, JSON.stringify({ measurements: measurements.filter((row) => row.screen === 'worksheet'), errors }, null, 2));
     }
     console.log(screen, JSON.stringify(measurements.filter((row) => row.screen === screen)), errors);
     await writeFile(`${out}/measurements-${screen}.json`, JSON.stringify({ measurements: measurements.filter((row) => row.screen === screen), errors }, null, 2));

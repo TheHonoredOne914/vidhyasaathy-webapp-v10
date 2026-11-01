@@ -17,7 +17,8 @@
 @media (max-width:1023px){.pr-rings{grid-template-columns:repeat(3,1fr)}}
 .pg-progress{grid-template-columns:minmax(0,1fr) clamp(260px,22vw,340px);min-height:100%}
 .pg-progress :is(.nb-col,.nb-card,.cc>*){min-width:0}
-.pg-progress .pr-rings{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));align-items:start}
+.nb-app .pg-progress .nb-col>.nb-card{align-self:stretch}
+.pg-progress .pr-rings{grid-template-columns:repeat(auto-fit,minmax(120px,1fr));align-items:start}
 .pg-progress .pr-ring{color:inherit;text-decoration:none;overflow-wrap:anywhere}
 .pg-progress .pr-ring svg{width:88px;height:88px}
 .pg-progress .pr-ring text{font-family:var(--nb-font-hand);font-size:24px;fill:var(--nb-navy)}
