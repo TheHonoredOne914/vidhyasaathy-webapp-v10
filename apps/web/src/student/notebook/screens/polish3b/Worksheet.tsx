@@ -1,4 +1,4 @@
-import { AssignmentDetailSchema, HomeworkDraftSavedSchema, type Answer } from '@vidhyasaathy/contracts';
+import { AssignmentDetailSchema, SaveHomeworkDraftSchema, HomeworkDraftSavedSchema, type Answer } from '@vidhyasaathy/contracts';
 import { useEffect, useRef, useState } from 'react';
 import { putJson } from '../../../../api/client';
 import { useAttemptSync } from '../../../../assessment/AttemptSync';
@@ -11,6 +11,8 @@ import { Chip } from '../../ui';
 import { NotebookState } from './NotebookState';
 import { QuizStrip, type QuizStep } from './QuizStrip';
 import '../../pages/homework.css';
+
+const HomeworkDraftListSchema = SaveHomeworkDraftSchema.extend({ updatedAt: HomeworkDraftSavedSchema.shape.updatedAt }).array();
 
 export function dueChip(dueAt: number) {
   const date = new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata' }).format(new Date(dueAt));
@@ -27,6 +29,7 @@ export function worksheetAnswer(view: QuestionView, draft: string, matches: stri
 export function Worksheet({ assignmentId, subject }: { assignmentId: string; subject?: string }) {
   const assignment = useRemote(assignmentId ? `/assignments/${assignmentId}` : null, AssignmentDetailSchema);
   const attempts = useRemote(assignmentId ? `/assignments/${assignmentId}/attempts` : null, AttemptListSchema);
+  const storedDrafts = useRemote(assignmentId ? `/student/homework/${assignmentId}/draft` : null, HomeworkDraftListSchema);
   const sync = useAttemptSync();
   const [index, setIndex] = useState(0);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
@@ -36,15 +39,32 @@ export function Worksheet({ assignmentId, subject }: { assignmentId: string; sub
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
   const started = useRef(Date.now());
+  useEffect(() => {
+    setIndex(0); setDrafts({}); setMatches({}); setWorking({}); setSaved({}); setNotice('');
+  }, [assignmentId]);
+  useEffect(() => {
+    if (!storedDrafts.data) return;
+    const strings: Record<string, string> = {};
+    const pairs: Record<string, string[]> = {};
+    const times: Record<string, number> = {};
+    for (const draft of storedDrafts.data) {
+      if (typeof draft.answer === 'string') strings[draft.itemId] = draft.answer;
+      else if (Array.isArray(draft.answer)) pairs[draft.itemId] = draft.answer;
+      times[draft.itemId] = draft.updatedAt;
+    }
+    setDrafts((current) => ({ ...strings, ...current }));
+    setMatches((current) => ({ ...pairs, ...current }));
+    setSaved((current) => ({ ...times, ...current }));
+  }, [storedDrafts.data]);
   useEffect(() => { started.current = Date.now(); setNotice(''); }, [index]);
   useEffect(() => {
     if (!sync.revision) return;
     assignment.reload(); attempts.reload();
   }, [assignment.reload, attempts.reload, sync.revision]);
-  const retry = () => { assignment.reload(); attempts.reload(); };
-  if (!assignmentId || assignment.denied || attempts.denied) return <NotebookState title="Worksheet" message="This worksheet is not available. Ask your teacher to check your access." />;
-  if (assignment.status === 'error' || attempts.status === 'error') return <NotebookState title="Worksheet" message="Could not open this worksheet. Your saved answers are safe." retry={retry} />;
-  if (!assignment.data || !attempts.data) return <NotebookState title="Worksheet" loading />;
+  const retry = () => { assignment.reload(); attempts.reload(); storedDrafts.reload(); };
+  if (!assignmentId || assignment.denied || attempts.denied || storedDrafts.denied) return <NotebookState title="Worksheet" message="This worksheet is not available. Ask your teacher to check your access." />;
+  if (assignment.status === 'error' || attempts.status === 'error' || storedDrafts.status === 'error') return <NotebookState title="Worksheet" message="Could not open this worksheet. Your saved answers are safe." retry={retry} />;
+  if (!assignment.data || !attempts.data || !storedDrafts.data) return <NotebookState title="Worksheet" loading />;
   const detail = assignment.data;
   const views = detail.items.map(questionView);
   const view = views[index];

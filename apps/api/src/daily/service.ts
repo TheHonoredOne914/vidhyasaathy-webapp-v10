@@ -868,6 +868,15 @@ export function studentHomework(db: Db, request: FastifyRequest, tab: 'all' | 't
   return { counts, items: tab === 'all' ? rows : rows.filter((row) => bucket(row.status) === tab) };
 }
 
+export function homeworkDrafts(db: Db, request: FastifyRequest, assignmentId: string) {
+  const { school, profile } = requireAuth(request);
+  const assignment = assignmentAccess(db, request, assignmentId);
+  const itemIds = new Set(assignmentQuestions(db, assignment.id).map((item) => item.id));
+  return db.select({ itemId: assignmentDrafts.itemId, answer: assignmentDrafts.answer, updatedAt: assignmentDrafts.updatedAt })
+    .from(assignmentDrafts).where(and(eq(assignmentDrafts.schoolId, school.id), eq(assignmentDrafts.profileId, profile.id), eq(assignmentDrafts.assignmentId, assignment.id)))
+    .all().filter((draft) => itemIds.has(draft.itemId));
+}
+
 export function saveHomeworkDraft(db: Db, request: FastifyRequest, assignmentId: string, itemId: string, answer: Answer, now: number) {
   const { school, profile } = requireAuth(request);
   const assignment = assignmentAccess(db, request, assignmentId);

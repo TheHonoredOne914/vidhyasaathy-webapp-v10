@@ -10,7 +10,7 @@ import type { FastifyInstance } from 'fastify';
 import { requireRole } from '../auth/middleware.ts';
 import type { Db } from '../db/index.ts';
 import {
-  answerChallenge, completeCatchup, completePlanItem, completeWarmup, finishChallenge, saveHomeworkDraft,
+  answerChallenge, completeCatchup, completePlanItem, completeWarmup, finishChallenge, homeworkDrafts, saveHomeworkDraft,
   saveStudyPlan, seeBadge, serveChallenge, skipWarmup, startWarmup, studentBadges, studentCatchup,
   studentDushman, studentHome, studentHomework, studentStreak, studentStudyPlan,
 } from '../daily/service.ts';
@@ -18,6 +18,7 @@ import { parseInput } from '../errors.ts';
 import { mutate } from '../school/access.ts';
 
 const AwardParams = z.object({ id: z.string().trim().min(1).max(200) }).strict();
+const HomeworkDraftListSchema = SaveHomeworkDraftSchema.extend({ updatedAt: HomeworkDraftSavedSchema.shape.updatedAt }).array();
 
 export function registerDailyRoutes(app: FastifyInstance, db: Db, now: () => number) {
   const student = { preHandler: requireRole('student') };
@@ -69,6 +70,10 @@ export function registerDailyRoutes(app: FastifyInstance, db: Db, now: () => num
   app.get('/student/homework', student, async (request) => {
     const query = parseInput(HomeworkQuerySchema, request.query);
     return HomeworkListSchema.parse(studentHomework(db, request, query.tab, now()));
+  });
+  app.get('/student/homework/:id/draft', student, async (request) => {
+    const { id } = parseInput(AwardParams, request.params);
+    return HomeworkDraftListSchema.parse(homeworkDrafts(db, request, id));
   });
   app.put('/student/homework/:id/draft', student, async (request) => {
     const input = parseInput(SaveHomeworkDraftSchema, request.body);

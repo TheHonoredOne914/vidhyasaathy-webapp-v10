@@ -44,6 +44,22 @@ describe('assignments, attempts and differential sync', () => {
     if (publish) expect((await h.post(`/assignments/${row.id}/publish`, {}, cookie)).statusCode).toBe(200);
     return row;
   }
+  it('restores only the signed-in student drafts for an accessible worksheet', async () => {
+    const item = await createItem();
+    const worksheet = await createAssignment([item.id]);
+    const url = `/student/homework/${worksheet.id}/draft`;
+    expect((await get(url)).json()).toEqual([]);
+    expect((await put(url, { itemId: item.id, answer: 'third' }, student)).statusCode).toBe(200);
+    expect((await get(url)).json()).toEqual([{ itemId: item.id, answer: 'third', updatedAt: h.now() }]);
+    expect((await get(url, peer)).json()).toEqual([]);
+    expect((await get(url, otherStudent)).statusCode).toBe(403);
+    expect((await get(url, teacher)).statusCode).toBe(403);
+    expect((await get(url, parent)).statusCode).toBe(403);
+    expect((await put(url, { itemId: randomUUID(), answer: 'half' }, student)).statusCode).toBe(404);
+    expect((await put(url, { itemId: item.id, answer: 'half' }, student)).statusCode).toBe(200);
+    expect((await get(url)).json()).toEqual([{ itemId: item.id, answer: 'half', updatedAt: h.now() }]);
+  });
+
   const event = (assignmentId: string, itemId: string, answer: SubmitAttempt['answer'] = 'half'): SubmitAttempt => ({
     clientEventId: randomUUID(), assignmentId, itemId, answer, timeMs: 50, clientTs: h.now() - 100,
   });

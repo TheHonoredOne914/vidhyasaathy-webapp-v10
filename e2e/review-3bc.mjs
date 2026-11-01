@@ -1,5 +1,5 @@
 import { chromium } from '@playwright/test';
-import Database from 'better-sqlite3';
+import { createRequire } from 'node:module';
 import { mkdir, writeFile } from 'node:fs/promises';
 
 const baseURL = 'http://127.0.0.1:5187';
@@ -10,7 +10,9 @@ const routes = {
   'teacher-home': '/teacher', 'parent-home': '/parent',
   'signin-student': '/signin/student', 'signin-teacher': '/signin?role=teacher', 'signin-parent': '/signin?role=parent',
 };
-const db = new Database('apps/api/data/vidhyasaathy.db', { readonly: true });
+const require = createRequire(new URL('../apps/api/package.json', import.meta.url));
+const Database = require('better-sqlite3');
+const db = new Database('apps/api/data/review-qa.db', { readonly: true });
 const browser = await chromium.launch();
 const measurements = [];
 await mkdir(out, { recursive: true });
@@ -23,7 +25,7 @@ try {
     if (!screen.startsWith('signin-')) {
       const staff = screen === 'teacher-home' || screen === 'parent-home';
       const body = staff ? { email: `${screen === 'teacher-home' ? 'teacher' : 'parent'}@demo.invalid`, password: 'Saathy@2026!' }
-        : { profileId: db.prepare("SELECT id FROM profile WHERE role = 'student' AND name = 'Aarav'").get().id, pin: '2468' };
+        : { profileId: db.prepare("SELECT id FROM profile WHERE role = 'student' AND name LIKE 'Aarav%'").get().id, pin: '2468' };
       const response = await context.request.post(`/api/auth/${staff ? 'login' : 'pin-login'}`, { data: body });
       if (!response.ok()) throw new Error(`${screen} login: ${response.status()} ${await response.text()}`);
     }
