@@ -1,7 +1,7 @@
 import { Suspense, useMemo, useRef, useState } from 'react';
 import { Canvas, createPortal, useFrame, useThree } from '@react-three/fiber';
 import { Bloom, EffectComposer, Vignette } from '@react-three/postprocessing';
-import { PerspectiveCamera, Scene } from 'three';
+import { PerspectiveCamera, Scene, type Group } from 'three';
 import { CameraRig } from './kz/CameraRig';
 import { BEATS } from './kz/beats';
 import { Backdrop } from './kz/Backdrop';
@@ -11,6 +11,7 @@ import { Nucleus } from './kz/NucleusView';
 import { ShellRing } from './kz/ShellRing';
 import { Sparkles } from './kz/Sparkles';
 import { KZ } from './kz/palette';
+import { rejectedElectronProgress } from './kz/interaction';
 import { isotopeStability } from './validators';
 import type { ParticleKind } from './kz/Particle';
 import type { ScreenAnchor } from './kz/useProjected';
@@ -23,6 +24,7 @@ export type SceneApi = {
   onShellDrop: (shell: 'k' | 'l' | 'm' | 'cl', ok: boolean) => void;
   targetShell: 'k' | 'l' | 'm' | 'cl' | null;
   beat?: number; protons?: number; neutrons?: number; electrons?: number; zoom?: number; reduced?: boolean;
+  reaction?: number; shellAttempt?: { id: number; shell: string } | null;
   onParticleTap?: (kind: ParticleKind) => void; onAnchor?: (kind: ParticleKind, point: ScreenAnchor) => void;
 };
 
@@ -54,6 +56,20 @@ function Orbitals({ counts, radius = 1, reduced, onShell }: { counts: number[]; 
   })}</>;
 }
 
+function ElectronAttempt({ shell, reduced }: { shell: string; reduced?: boolean | undefined }) {
+  const root = useRef<Group>(null);
+  const age = useRef(0);
+  const radius = 1.65 + ['k', 'l', 'm'].indexOf(shell) * 0.95;
+  useFrame((_, dt) => {
+    age.current += dt;
+    if (!root.current) return;
+    const { approach, scale } = rejectedElectronProgress(age.current);
+    root.current.position.set(5 - (5 - radius) * approach, 0, 0);
+    root.current.scale.setScalar(reduced ? 0 : scale);
+  });
+  return <group ref={root}><Electron radius={0.01} angle={0} speed={0} reduced /></group>;
+}
+
 function Atom({ api, beat }: { api: SceneApi; beat: number }) {
   const p = api.protons ?? (beat === 3 ? 11 : 6);
   const n = api.neutrons ?? (beat === 2 ? 4 : beat === 3 ? 12 : 6);
@@ -64,7 +80,8 @@ function Atom({ api, beat }: { api: SceneApi; beat: number }) {
   return <group position={beat === 0 ? [0, -2.1, 0] : [0, 0, 0]}>
     <Nucleus p={p} n={n} radius={beat === 0 ? 0.34 : beat === 3 || beat === 5 ? 0.25 : 0.5}
       faces={3} mood={beat === 2 && !stable ? 'worried' : 'smile'} wobble={beat === 2 && !stable ? 0.1 : 0}
-      reduced={api.reduced} onTap={(kind) => { api.onNucleusTap(); api.onParticleTap?.(kind); }} onProject={api.onAnchor} />
+      reduced={api.reduced} reaction={api.reaction} onTap={(kind) => { api.onNucleusTap(); api.onParticleTap?.(kind); }} onProject={api.onAnchor} />
+    {beat === 3 && api.shellAttempt && <ElectronAttempt key={api.shellAttempt.id} shell={api.shellAttempt.shell} reduced={api.reduced} />}
     {showShells && <Orbitals counts={shells} radius={beat === 0 ? 0.9 : 1} reduced={api.reduced}
       onShell={beat === 3 && api.phase === 'act' ? (shell) => api.onShellDrop(shell, shell === 'm') : undefined} />}
     {beat === 2 && <group rotation={[Math.PI / 2, 0, 0]}><ShellRing radius={2.05} active /></group>}
@@ -107,7 +124,7 @@ export function AtomForgeScene(api: SceneApi) {
       <Suspense fallback={null}>
         <PerfGuard onSlow={() => setSlow(true)} />
         {beat === 4 ? <IsotopePanels reduced={api.reduced} /> : <>
-          <CameraRig beat={BEATS[beat]!} time={api.t} act={api.phase === 'act'} zoom={api.zoom} reduced={api.reduced} />
+          <CameraRig beat={BEATS[beat]!} time={api.t} act={api.phase === 'act'} interactive={api.phase !== 'play'} zoom={api.zoom} reduced={api.reduced} />
           <Backdrop inner={inner} outer={outer} />
           <Bokeh count={slow ? 9 : 18} color={beat === 2 ? '#ffad13' : '#9967ee'} />
           <Bokeh count={slow ? 1 : 3} color={beat === 2 ? '#ff9800' : '#7d3ad5'} near />

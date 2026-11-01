@@ -13,6 +13,7 @@ export function Particle({ kind, radius = 0.5, position = [0, 0, 0], face = fals
 }) {
   const root = useRef<Group>(null);
   const bounce = useRef(0);
+  const age = useRef(0);
   const lookUntil = useRef(0);
   const material = useMemo(() => makeParticleMaterial(kind === 'p'
     ? { base: KZ.pBase, lit: KZ.pLit, shade: KZ.pShade, hi: KZ.pHi, rim: KZ.pRim, plus: true }
@@ -30,13 +31,15 @@ export function Particle({ kind, radius = 0.5, position = [0, 0, 0], face = fals
     u.uBlink.value = reduced ? 0 : Math.max(0, 1 - Math.abs(blink - 0.1) / 0.1);
     u.uLook.value.lerp(time < lookUntil.current ? pointer : { x: 0, y: 0 }, 1 - Math.exp(-dt * 10));
     if (!root.current) return;
+    age.current += dt;
     root.current.position.lerp(target, 1 - Math.exp(-dt * 9));
     if (!reduced) {
       root.current.position.x += Math.sin(time * 9 + seed) * wobble * dt * 6;
       root.current.position.y += Math.cos(time * 11 + seed) * wobble * dt * 6;
     }
     bounce.current = Math.max(0, bounce.current - dt * 4);
-    root.current.scale.setScalar(radius * (1 + Math.sin(bounce.current * Math.PI) * 0.12));
+    const entry = reduced ? 1 : 1 - Math.exp(-age.current * 12);
+    root.current.scale.setScalar(radius * entry * (1 + Math.sin(bounce.current * Math.PI) * 0.12));
   });
   const tap = (event: ThreeEvent<MouseEvent>) => {
     event.stopPropagation();

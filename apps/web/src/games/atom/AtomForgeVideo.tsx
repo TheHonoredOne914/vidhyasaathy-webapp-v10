@@ -30,10 +30,22 @@ export function AtomForgeVideo() {
   const [build, setBuild] = useState({ p: 6, n: 6, e: 6 });
   const [quiz, setQuiz] = useState<Record<string, string>>({});
   const [dragging, setDragging] = useState(false);
+  const [reaction, setReaction] = useState(0);
+  const [shellAttempt, setShellAttempt] = useState<{ id: number; shell: string } | null>(null);
+  const [motionOverride, setMotionOverride] = useState<boolean | null>(null);
+  const reduceMotion = motionOverride ?? reduced;
+  const react = () => setReaction((value) => value + 1);
+  const changeNeutrons = (step: number) => {
+    const next = Math.max(0, Math.min(10, neutrons + step));
+    if (next === neutrons) return;
+    setNeutrons(next); react();
+    setMessage(next === 6 ? 'Carbon-12 settles. Keep this nucleus to continue.' : next === 7 ? 'Carbon-13 is stable too! Remove one neutron to make carbon-12.' : `Carbon-${6 + next} is unstable: watch it wobble. Try 6 neutrons.`);
+  };
   const trayStart = useRef<{ x: number; y: number } | null>(null);
   const resetActivity = useCallback(() => {
     setZoom(0); setHolding(false); setTapped([]); setNeutrons(4); setPlaced(false); setMessage(''); setSort({}); setCard('c12'); setQuiz({}); setDragging(false);
     trayStart.current = null;
+    setShellAttempt(null); setReaction(0);
   }, []);
   useEffect(resetActivity, [episode, resetActivity]);
   useEffect(() => {
@@ -78,21 +90,24 @@ export function AtomForgeVideo() {
   const tapParticle = (kind: ParticleKind) => {
     if (episode !== 1 || phase !== 'act') return;
     const next = [...new Set([...tapped, kind])]; setTapped(next);
+    react();
     setMessage(kind === 'p' ? 'Proton pinned · charge +1' : 'Neutron pinned · no charge');
     if (next.length === 2) complete();
   };
   const shell = (target: string) => {
     if (episode !== 3 || phase !== 'act') return;
+    react();
     const answer: Record<string, string> = {};
     for (let i = 0; i < 23; i++) answer['n' + i] = 'nucleus';
     for (let i = 0; i < 10; i++) answer['e' + i] = i < 2 ? 'k' : 'l';
     answer.e10 = target;
-    if (atomBuild(answer).correct) { setPlaced(true); setMessage(''); complete(); }
-    else setMessage("Let's fix this: " + target.toUpperCase() + ' is full');
+    if (atomBuild(answer).correct) { setShellAttempt(null); setPlaced(true); setMessage(''); complete(); }
+    else { setShellAttempt((previous) => ({ id: (previous?.id ?? 0) + 1, shell: target })); setMessage("Let's fix this: " + target.toUpperCase() + ' is full'); }
   };
   const sortCard = (bin: string, selected = card) => {
     if (episode !== 4 || phase !== 'act' || !['c12', 'c14', 'ca40', 'ar40'].includes(selected) || sort[selected]) return;
     const next = { ...sort, [selected]: bin };
+    react();
     if ((selected.startsWith('c1') ? 'isotope' : 'isobar') !== bin) { setMessage("Let's fix this: compare Z and A"); return; }
     setSort(next); setMessage('');
     const remaining = ['c12', 'c14', 'ca40', 'ar40'].find((id) => !next[id]);
@@ -116,7 +131,7 @@ export function AtomForgeVideo() {
   }, []);
   const caption = phase === 'branch' || phase === 'done' ? beat.payoff : beat.captions[Math.max(0, Math.min(beat.captions.length - 1, Math.floor(time / 3.5)))]!;
 
-  return <main className="afv-kz" aria-label="Atom Forge" data-afv-episode={beat.id} data-afv-phase={phase} data-afv-playing={playing ? '1' : '0'}
+  return <main className="afv-kz" aria-label="Atom Forge" data-afv-episode={beat.id} data-afv-phase={phase} data-afv-playing={playing ? '1' : '0'} data-afv-motion={reduceMotion ? 'reduced' : 'full'}
     onPointerDown={(event) => {
       if ((event.target as HTMLElement).closest('button,input,select,a')) return;
       if (event.button !== 0) return;
@@ -126,20 +141,21 @@ export function AtomForgeVideo() {
       if (dragging && episode === 2 && phase === 'act') {
         const x = event.clientX / window.innerWidth, y = event.clientY / window.innerHeight;
         const moved = trayStart.current && Math.hypot(event.clientX - trayStart.current.x, event.clientY - trayStart.current.y) > 12;
-        if (!moved || (x > 0.2 && x < 0.8 && y > 0.2 && y < 0.7)) { setNeutrons((n) => Math.min(10, n + 1)); setMessage('Neutron added · proton count stays 6'); }
+        if (!moved || (x > 0.2 && x < 0.8 && y > 0.2 && y < 0.7)) changeNeutrons(1);
         else setMessage('Drop inside the ring, or tap Add neutron.');
       }
       setDragging(false); trayStart.current = null;
     }} onPointerCancel={() => { setHolding(false); setDragging(false); trayStart.current = null; }} onLostPointerCapture={() => { setHolding(false); setDragging(false); trayStart.current = null; }}>
-    <AtomForgeScene episode={beat.id} beat={episode} phase={phase} t={time} branchKind={branchKind} reduced={reduced}
+    <AtomForgeScene episode={beat.id} beat={episode} phase={phase} t={time} branchKind={branchKind} reduced={reduceMotion} reaction={reaction} shellAttempt={shellAttempt}
       zoom={zoom} protons={episode === 5 ? build.p : episode === 3 ? 11 : 6} neutrons={episode === 5 ? build.n : episode === 2 ? neutrons : episode === 3 ? 12 : 6}
       electrons={episode === 5 ? build.e : episode === 3 ? placed ? 11 : 10 : 6}
-      dragElectron={false} targetShell={null} onNucleusTap={() => { if (episode === 2 && phase === 'act') { setNeutrons((n) => Math.min(10, n + 1)); setMessage('Neutron added · proton count stays 6'); } }} onParticleTap={tapParticle} onShellDrop={(target) => shell(target)} onAnchor={project} />
+      dragElectron={false} targetShell={null} onNucleusTap={() => { if (episode === 2 && phase === 'act') changeNeutrons(1); else react(); }} onParticleTap={tapParticle} onShellDrop={(target) => shell(target)} onAnchor={project} />
     <div key={episode} className="iris" aria-hidden="true" />
     <div className="hud">
       <div className="chip"><Tag>Atom Forge</Tag><span className="chapter-name">{beat.title}</span></div>
       <Progress current={episode} titles={BEATS.map((item) => item.title)} onSelect={select} />
       <Link className="exit" to="/student?panel=games" aria-label="Back to games">Back to games</Link>
+      <button type="button" className="motion-control" aria-pressed={!reduceMotion} onClick={() => setMotionOverride(!reduceMotion)}>{reduceMotion ? 'Animate atom' : 'Reduce motion'}</button>
       {episode === 0 && (phase === 'intro' || phase === 'play') && <div className="title"><h1>What is everything<br />made of?</h1><p>{beat.subtitle}</p></div>}
       {episode === 1 && <>
         <div ref={protonLine} className="lead" /><div ref={neutronLine} className="lead" />
@@ -154,23 +170,19 @@ export function AtomForgeVideo() {
       </div>)}
       {phase === 'intro' && <button type="button" className="primary begin" data-afv-begin="1" onClick={() => { setPhase('play'); setPlaying(true); }}>Enter the atom</button>}
       {episode === 2 && phase !== 'done' && <div className={'push-arrows' + (neutrons === 6 || neutrons === 7 ? ' stable' : '')} aria-hidden="true"><i /><i /></div>}
-      {phase === 'act' && <>{episode !== 0 && <Hint>{episode === 2 ? dragging ? 'Release inside the ring to add a neutron' : 'Tap Add neutron or the nucleus · make carbon-12' : episode === 4 ? 'Tap a card, then its group · or drag it into the group' : beat.hint}</Hint>}<div className="act-controls" data-afv-prompt="1">
+      {phase === 'intro' && <p className="explore-hint">Drag to turn · tap a particle</p>}
+      {phase === 'act' && <>{episode !== 0 && <Hint>{episode === 2 ? dragging ? 'Release inside the ring to add your neutron' : 'Add or remove neutrons · watch the nucleus react' : episode === 4 ? 'Select a card, then choose its group · or drag it' : beat.hint}</Hint>}<div className="act-controls" data-afv-prompt="1">
         {episode === 0 && <button type="button" className="primary" aria-label="Hold to zoom" onPointerDown={(event) => { if (event.button !== 0) return; event.currentTarget.setPointerCapture(event.pointerId); setHolding(true); }} onPointerUp={() => setHolding(false)} onPointerCancel={() => setHolding(false)} onKeyDown={(event) => { if ([' ', 'Enter', 'ArrowUp'].includes(event.key)) { event.preventDefault(); setHolding(true); } }} onKeyUp={() => setHolding(false)} onBlur={() => setHolding(false)}>Hold to zoom · {Math.round(zoom * 100)}%</button>}
-        {episode === 1 && <>{(['p', 'n'] as const).map((kind) => <button type="button" key={kind} data-afv-hotspot={kind} aria-pressed={tapped.includes(kind)} onClick={() => tapParticle(kind)}>{tapped.includes(kind) ? 'Pinned' : 'Tap'} {kind === 'p' ? 'proton' : 'neutron'}</button>)}</>}
-        {episode === 2 && <>
-          <button type="button" data-afv-drop="neutron" disabled={neutrons === 10} onPointerDown={(event) => { if (event.button !== 0) return; event.currentTarget.setPointerCapture(event.pointerId); trayStart.current = { x: event.clientX, y: event.clientY }; setDragging(true); }} onClick={(event) => { if (event.detail === 0) { setNeutrons((n) => Math.min(10, n + 1)); setMessage('Neutron added · proton count stays 6'); } }}>Add neutron</button>
-          <button type="button" disabled={neutrons === 0} onClick={() => { setNeutrons((n) => Math.max(0, n - 1)); setMessage('Neutron removed · proton count stays 6'); }}>Remove neutron</button>
-          <button type="button" disabled={neutrons !== 6} onClick={complete}>Keep this nucleus</button>
-          <span role="status">{neutrons === 6 ? 'Carbon-12 is ready · keep this nucleus' : neutrons > 6 ? `Remove ${neutrons - 6} to make carbon-12` : `Add ${6 - neutrons} to make carbon-12`}</span>
-        </>}
+        {episode === 1 && <>{(['p', 'n'] as const).map((kind) => <button type="button" key={kind} data-afv-hotspot={kind} aria-pressed={tapped.includes(kind)} onClick={() => tapParticle(kind)}>{tapped.includes(kind) ? 'Pinned ' : 'Tap '}{kind === 'p' ? 'proton' : 'neutron'}</button>)}</>}
+        {episode === 2 && <><button type="button" data-afv-drop="neutron" disabled={neutrons >= 10} onPointerDown={(event) => { if (event.button !== 0) return; event.currentTarget.setPointerCapture(event.pointerId); trayStart.current = { x: event.clientX, y: event.clientY }; setDragging(true); }} onClick={(event) => { if (event.detail === 0) changeNeutrons(1); }}>Add neutron</button><button type="button" disabled={neutrons === 0} onClick={() => changeNeutrons(-1)}>Remove neutron</button><button type="button" onClick={() => { if (neutrons === 6) complete(); else { react(); setMessage(neutrons === 7 ? 'This is stable carbon-13, not carbon-12. Remove one neutron.' : `Carbon-${6 + neutrons} is unstable. Add or remove neutrons to reach 6.`); } }}>Keep this nucleus</button><span>Make carbon-12 · {neutrons} / 6 neutrons</span></>}
         {episode === 3 && <>{['k', 'l', 'm'].map((target) => <button type="button" data-afv-electron={target} className={target === 'm' && message ? 'slot-hint' : ''} key={target} onClick={() => shell(target)}>Shell {target.toUpperCase()}</button>)}</>}
-        {episode === 4 && <><div className="sort-cards">{[['c12', 'C-12 · Z 6'], ['c14', 'C-14 · Z 6'], ['ca40', 'Ca-40 · Z 20'], ['ar40', 'Ar-40 · Z 18']].map(([id, label]) => <button type="button" key={id} disabled={!!sort[id!]} aria-pressed={!sort[id!] && card === id} draggable onDragStart={(event) => { setCard(id!); event.dataTransfer.setData('text/plain', id!); }} onClick={() => { setCard(id!); setMessage(''); }}>{label}{sort[id!] ? ' · placed' : ''}</button>)}</div>{['isotope', 'isobar'].map((bin) => <button type="button" className="sort-bin" key={bin} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); sortCard(bin, event.dataTransfer.getData('text/plain')); }} onClick={() => sortCard(bin)}>{bin === 'isotope' ? 'Isotopes' : 'Isobars'}</button>)}</>}
-        {episode === 5 && <><div className="build-controls">{(['p', 'n', 'e'] as const).map((kind) => <div key={kind}><span>{kind === 'p' ? 'Protons' : kind === 'n' ? 'Neutrons' : 'Electrons'} {build[kind]}</span>{[-1, 1].map((step) => <button type="button" key={step} aria-label={(step > 0 ? 'Add ' : 'Remove ') + (kind === 'p' ? 'proton' : kind === 'n' ? 'neutron' : 'electron')} disabled={step > 0 ? build[kind] === 18 : build[kind] === (kind === 'p' ? 1 : 0)} onClick={() => setBuild((value) => ({ ...value, [kind]: Math.max(kind === 'p' ? 1 : 0, Math.min(18, value[kind] + step)) }))}>{step > 0 ? '+' : '−'}</button>)}</div>)}</div><p aria-live="polite">{elements[build.p]} · Z {build.p} · A {build.p + build.n} · {configuration.join(', ')} · {isotopeStability(build.p, build.n)}</p><div className="quiz">{[
+        {episode === 4 && <><div data-reaction={reaction % 2} className={'sort-cards' + (message ? ' rejected' : '')}>{[['c12', 'C-12 · Z 6'], ['c14', 'C-14 · Z 6'], ['ca40', 'Ca-40 · Z 20'], ['ar40', 'Ar-40 · Z 18']].map(([id, label]) => <button type="button" key={id} disabled={!!sort[id!]} aria-pressed={card === id && !sort[id!]} draggable={!sort[id!]} onDragStart={(event) => { setCard(id!); event.dataTransfer.setData('text/plain', id!); }} onClick={() => { setCard(id!); setMessage(''); }}>{label}{sort[id!] ? ' · placed' : ''}</button>)}</div>{['isotope', 'isobar'].map((bin) => <button type="button" className="sort-bin" key={bin} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); sortCard(bin, event.dataTransfer.getData('text/plain')); }} onClick={() => sortCard(bin)}>{bin === 'isotope' ? 'Isotopes' : 'Isobars'} · {Object.values(sort).filter((value) => value === bin).length} / 2</button>)}</>}
+        {episode === 5 && <><div className="build-controls">{(['p', 'n', 'e'] as const).map((kind) => <div key={kind}><span>{kind === 'p' ? 'Protons' : kind === 'n' ? 'Neutrons' : 'Electrons'} {build[kind]}</span>{[-1, 1].map((step) => <button type="button" key={step} disabled={step < 0 ? build[kind] <= (kind === 'p' ? 1 : 0) : build[kind] >= 18} aria-label={(step > 0 ? 'Add ' : 'Remove ') + (kind === 'p' ? 'proton' : kind === 'n' ? 'neutron' : 'electron')} onClick={() => { setBuild((value) => ({ ...value, [kind]: Math.max(kind === 'p' ? 1 : 0, Math.min(18, value[kind] + step)) })); react(); }}>{step > 0 ? '+' : '−'}</button>)}</div>)}</div><p aria-live="polite">{elements[build.p]} · Z {build.p} · A {build.p + build.n} · {configuration.join(', ')} · {isotopeStability(build.p, build.n)}</p><div className="quiz">{[
           { id: 'q1', text: 'What sets Z?', options: ['protons', 'neutrons', 'electrons'] },
           { id: 'q2', text: '6 protons + 8 neutrons: A?', options: ['six', 'eight', 'fourteen'] },
           { id: 'q3', text: 'Same Z, different A?', options: ['isotopes', 'isobars', 'ions'] },
-        ].map((question) => <label key={question.id}>{question.text}<select aria-label={question.text} value={quiz[question.id] ?? ''} onChange={(event) => { setQuiz({ ...quiz, [question.id]: event.target.value }); setMessage(''); }}><option value="">Choose</option>{question.options.map((option) => <option key={option}>{option}</option>)}</select></label>)}</div><button type="button" disabled={!quiz.q1 || !quiz.q2 || !quiz.q3} onClick={() => { const result = conceptQuiz(quiz); if (result.correct) complete(); else setMessage(result.feedback); }}>Check my recall</button></>}
-      </div>{message && <p className="action-message" role="status">{message}</p>}</>}
+        ].map((question) => <label key={question.id}>{question.text}<select aria-label={question.text} value={quiz[question.id] ?? ''} onChange={(event) => { setQuiz({ ...quiz, [question.id]: event.target.value }); setMessage(''); }}><option value="">Choose</option>{question.options.map((option) => <option key={option}>{option}</option>)}</select></label>)}</div><button type="button" disabled={!quiz.q1 || !quiz.q2 || !quiz.q3} onClick={() => { const result = conceptQuiz(quiz); react(); if (result.correct) complete(); else setMessage(result.feedback); }}>Check my recall</button></>}
+      </div>{message && <p key={reaction} className="action-message reaction-message" role="status">{message}</p>}</>}
       {phase === 'branch' && <><div className="payoff" role="status" data-afv-branch={branchKind ?? 'ok'}>That's it · take a look at what changed</div><div className="act-controls"><button type="button" className="primary" onClick={nextBeat}>{episode === BEATS.length - 1 ? 'See my recap' : 'Continue'}</button></div></>}
       {phase === 'done' && <section className="recap" aria-label="Atom recap"><h1>Your atom recap</h1><div className="recap-grid">{RECAP.map((card) => <article key={card.kind}>
         <div className={'vignette ' + card.kind} aria-hidden="true"><i>+</i><i>0</i><i>−</i></div><h2>{card.title}</h2><p>{card.text}</p>

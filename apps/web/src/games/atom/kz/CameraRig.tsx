@@ -5,14 +5,14 @@ import type { Beat } from './beats';
 
 export const cubicInOut = (t: number) => t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2;
 
-export function CameraRig({ beat, time, act, zoom = 0, reduced = false }: {
-  beat: Beat; time: number; act: boolean; zoom?: number | undefined; reduced?: boolean | undefined;
+export function CameraRig({ beat, time, act, interactive = act, zoom = 0, reduced = false }: {
+  beat: Beat; time: number; act: boolean; interactive?: boolean; zoom?: number | undefined; reduced?: boolean | undefined;
 }) {
   const { gl } = useThree();
   const orbit = useRef({ down: false, x: 0, y: 0, yaw: 0, pitch: 0, vx: 0, vy: 0, distance: 1, released: 0 });
   const vectors = useMemo(() => ({ position: new Vector3(), target: new Vector3(), offset: new Vector3(), sphere: new Spherical() }), []);
   useEffect(() => {
-    if (!act) return;
+    if (!interactive) return;
     const element = gl.domElement, state = orbit.current;
     const down = (event: PointerEvent) => { if (event.button !== 0) return; state.down = true; state.x = event.clientX; state.y = event.clientY; element.setPointerCapture(event.pointerId); };
     const move = (event: PointerEvent) => {
@@ -32,7 +32,7 @@ export function CameraRig({ beat, time, act, zoom = 0, reduced = false }: {
       element.removeEventListener('pointerup', up); element.removeEventListener('pointercancel', up); element.removeEventListener('wheel', wheel);
       element.removeEventListener('lostpointercapture', up); window.removeEventListener('blur', up);
     };
-  }, [gl, act]);
+  }, [gl, interactive]);
   useEffect(() => { Object.assign(orbit.current, { down: false, yaw: 0, pitch: 0, distance: 1, vx: 0, vy: 0 }); }, [beat]);
   useFrame(({ camera, size }, dt) => {
     const ms = time * 1000, keys = beat.camera;
@@ -46,7 +46,7 @@ export function CameraRig({ beat, time, act, zoom = 0, reduced = false }: {
     if (!state.down) {
       state.vx *= Math.exp(-dt * 10); state.vy *= Math.exp(-dt * 10);
       state.yaw = Math.max(-0.61, Math.min(0.61, state.yaw + state.vx)); state.pitch = Math.max(-0.61, Math.min(0.61, state.pitch + state.vy));
-      if (!act && performance.now() - state.released > 100) { state.yaw *= Math.exp(-dt * 8); state.pitch *= Math.exp(-dt * 8); }
+      if (!interactive && performance.now() - state.released > 100) { state.yaw *= Math.exp(-dt * 8); state.pitch *= Math.exp(-dt * 8); }
     }
     vectors.offset.copy(vectors.position).sub(vectors.target);
     vectors.sphere.setFromVector3(vectors.offset);

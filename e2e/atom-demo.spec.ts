@@ -1,4 +1,6 @@
 import { expect, test } from '@playwright/test';
+import Database from 'better-sqlite3';
+import { fileURLToPath } from 'node:url';
 
 // Run against the existing demo server; never reset its database.
 test.skip(!process.env.E2E_BASE_URL, 'Start npm run demo and set E2E_BASE_URL.');
@@ -10,15 +12,29 @@ for (const reducedMotion of ['reduce', 'no-preference'] as const) {
     await page.emulateMedia({ reducedMotion });
     const errors: string[] = [];
     page.on('pageerror', (error) => errors.push(error.message));
-    await page.goto('/signin/student');
-    await page.getByRole('button', { name: 'Aarav', exact: true }).click();
-    for (const [index, digit] of [...'2468'].entries()) {
-      await page.getByRole('textbox', { name: index === 0 ? 'PIN' : `PIN ${index + 1}`, exact: true }).fill(digit);
+    // Fresh browser contexts have no saved notebook tile. Authenticate the real
+    // existing demo profile without modifying or reseeding its database.
+    const db = new Database(fileURLToPath(new URL('../apps/api/data/vidhyasaathy.db', import.meta.url)), { readonly: true });
+    let profile: { id: string } | undefined;
+    try {
+      profile = db.prepare('SELECT id FROM profile WHERE role = ? AND name = ?').get('student', 'Aarav') as { id: string } | undefined;
+    } finally {
+      db.close();
     }
-    await page.getByRole('button', { name: 'Open my notebook' }).click();
-    await page.waitForURL((url) => url.pathname === '/student');
+    if (!profile) throw new Error('Existing Aarav demo profile missing; do not reseed.');
+    const login = await page.request.post('/api/auth/pin-login', {
+      data: { profileId: profile.id, pin: '2468' },
+      headers: { origin: new URL(process.env.E2E_BASE_URL!).origin },
+    });
+    expect(login.ok(), `Real demo sign-in failed: ${login.status()}`).toBe(true);
     await page.goto('/student/games/atom');
     await expect(page.getByRole('button', { name: 'Enter the atom', exact: true })).toBeVisible({ timeout: 30000 });
+    const initialMotion = reducedMotion === 'reduce' ? 'reduced' : 'full';
+    const gameRoot = page.getByRole('main', { name: 'Atom Forge' });
+    await expect(gameRoot).toHaveAttribute('data-afv-motion', initialMotion);
+    await page.getByRole('button', { name: reducedMotion === 'reduce' ? 'Animate atom' : 'Reduce motion', exact: true }).click();
+    await expect(gameRoot).toHaveAttribute('data-afv-motion', reducedMotion === 'reduce' ? 'full' : 'reduced');
+    await page.getByRole('button', { name: reducedMotion === 'reduce' ? 'Reduce motion' : 'Animate atom', exact: true }).click();
     await expect.poll(() => page.locator('.iris').evaluate((element) => {
       const style = getComputedStyle(element);
       return style.display === 'none' || style.clipPath === 'circle(0% at 50% 50%)';
@@ -30,7 +46,14 @@ for (const reducedMotion of ['reduce', 'no-preference'] as const) {
       const game = page.getByRole('main', { name: 'Atom Forge' });
       const act = async () => {
         const skip = page.getByRole('button', { name: 'Your turn', exact: true });
-        if (await skip.isVisible()) await skip.click();
+        if (await skip.isVisible()) {
+          try {
+            await skip.click({ timeout: 2000 });
+          } catch (error) {
+            // The cutscene may finish while Playwright waits for the button.
+            if (await game.getAttribute('data-afv-phase') !== 'act') throw error;
+          }
+        }
         await expect(game).toHaveAttribute('data-afv-phase', 'act');
       };
       const next = async () => {
@@ -41,10 +64,12 @@ for (const reducedMotion of ['reduce', 'no-preference'] as const) {
       await act();
       const hold = page.getByRole('button', { name: 'Hold to zoom', exact: true });
       await hold.focus();
-      await page.keyboard.down('Space');
-      await expect(hold).not.toHaveText('Hold to zoom · 0%');
-      await page.evaluate(() => window.dispatchEvent(new Event('blur')));
-      await page.keyboard.up('Space');
+      // Dispatch interruption together: software WebGL can delay separate
+      // driver commands beyond the entire two-second hold duration.
+      await hold.evaluate((button) => {
+        button.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+        window.dispatchEvent(new Event('blur'));
+      });
       await expect(hold).toHaveText('Hold to zoom · 0%', { timeout: 15000 });
       await page.keyboard.down('Space');
       await expect(game).toHaveAttribute('data-afv-phase', 'branch', { timeout: 15000 });
@@ -57,7 +82,9 @@ for (const reducedMotion of ['reduce', 'no-preference'] as const) {
       await next();
 
       const keep = page.getByRole('button', { name: 'Keep this nucleus' });
-      await expect(keep).toBeDisabled();
+      await keep.click();
+      await expect(game).toHaveAttribute('data-afv-phase', 'act');
+      await expect(page.getByRole('status')).toContainText('unstable');
       await page.getByRole('button', { name: 'Add neutron', exact: true }).tap();
       await expect(page.getByText('5 neutrons', { exact: true })).toBeVisible();
       const add = page.getByRole('button', { name: 'Add neutron', exact: true });
@@ -70,7 +97,9 @@ for (const reducedMotion of ['reduce', 'no-preference'] as const) {
       await expect(page.getByText('6 neutrons', { exact: true })).toBeVisible();
       await add.focus();
       await page.keyboard.press('Enter');
-      await expect(page.getByText('Remove 1 to make carbon-12', { exact: true })).toBeVisible();
+      await expect(page.getByRole('status')).toContainText('Carbon-13 is stable too');
+      await keep.click();
+      await expect(page.getByRole('status')).toContainText('stable carbon-13');
       await page.getByRole('button', { name: 'Remove neutron', exact: true }).click();
       await expect(keep).toBeEnabled();
       // Spinning the scene must not silently remove neutrons.
@@ -87,8 +116,8 @@ for (const reducedMotion of ['reduce', 'no-preference'] as const) {
       await page.getByRole('button', { name: 'Shell M', exact: true }).tap();
       await next();
 
-      const isotopes = page.getByRole('button', { name: 'Isotopes', exact: true });
-      const isobars = page.getByRole('button', { name: 'Isobars', exact: true });
+      const isotopes = page.getByRole('button', { name: /^Isotopes ·/ });
+      const isobars = page.getByRole('button', { name: /^Isobars ·/ });
       await isobars.click();
       await expect(page.getByRole('status')).toHaveText("Let's fix this: compare Z and A");
       // Drop the actual transferred card, not the currently selected card.

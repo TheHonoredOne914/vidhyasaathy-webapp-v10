@@ -18,3 +18,15 @@
 
 ## Resume browser verification
 With the existing demo services running, set `E2E_BASE_URL=http://127.0.0.1:5173` and run `npx playwright test e2e/atom-demo.spec.ts --workers=1`. It signs in as the existing Aarav demo student; preserve the database.
+
+## Live mechanics follow-up — 2026-11-01
+- Preserve the approved artwork, geometry, palette and camera framing. Enable turning/tapping from the opening scene, not just after its cutscene.
+- Add damped nucleus recoil, gentle idle bobbing, particle/electron arrival easing, and unstable-nucleus wobble. Changing counts has an immediate visible consequence.
+- Let students test an incorrect nucleus and retry. Carbon-13 correctly settles as stable; it does not explode merely because the task asks for carbon-12. Instability is an illustrative wobble, not a simulated decay timescale.
+- Full shells visibly repel the attempted electron; the correct outer shell accepts it. Sorting gives rejection motion, placed-card feedback and live group counts. Builder changes update particles and readouts immediately.
+- Respect reduced motion, with an explicit Animate atom / Reduce motion control. Restore local regressions in keyboard controls, drag payloads, count bounds, pinned labels and incomplete quiz submission; preserve the pre-edit file in `%TEMP%/vs-atom-before-live-motion-20261101.tsx`.
+- Root typecheck and final web typecheck passed. Web unit suite: 37 files / 133 tests passed, including recoil, rejection trajectory and stable carbon-13 checks. Browser verification pending below.
+- Final root typecheck and complete web suite passed again (37 files / 133 tests). `git diff --check` passed.
+- Fixed this machine's missing client API configuration with an ignored `apps/web/.env.local` (`VITE_API_URL=/api`, existing API origin on port 3001). No database changes or service replacement.
+- Browser: normal-motion intro, motion toggle and exit passed against the real API. Full reduced-motion six-beat verification remains incomplete: software-rendering delays exposed driver-command timing and an auto-finished cutscene detaching Your turn. Hardened those test races without removing phase assertions; do not claim the complete browser flow passed.
+- Preserve keyboard focus while restarting sorting rejection animation; no card-list remounts.
