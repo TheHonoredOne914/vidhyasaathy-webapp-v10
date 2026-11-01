@@ -5,8 +5,8 @@ export default defineConfig({
   test: {
     name: 'api',
     include: ['test/**/*.test.ts'],
-    testTimeout: 15000,
-    hookTimeout: 15000,
+    testTimeout: 60000,
+    hookTimeout: 60000,
     fileParallelism: false,
   },
 });

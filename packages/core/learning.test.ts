@@ -108,6 +108,16 @@ it('routes a diagnostic without punishing an untaught prerequisite', () => {
   expect(diagnosticEntry([{ correct: true, notTaught: false }, { correct: false, notTaught: false }])).toEqual({ level: 2, route: 'steady' });
 });
 
+it('weights game evidence lightly and cannot establish mastery through games alone', () => {
+  const game = { ...sure(true, 4), weight: 0.5 };
+  expect(masteryFromEvents([game, game, game]).level).toBeNull();
+  const lessons = [sure(false, 2), sure(true, 2)];
+  const before = masteryFromEvents(lessons);
+  const after = masteryFromEvents([...lessons, game, game]);
+  expect(after.score).toBeGreaterThan(before.score);
+  expect(after.level).toBeLessThanOrEqual(before.level!);
+});
+
 it('picks the question closest to the ladder', () => {
   const items = [
     { id: 'a', conceptId: 'speed', level: 1 as const },

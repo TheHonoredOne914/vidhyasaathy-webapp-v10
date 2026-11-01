@@ -9,7 +9,7 @@ import { actForSource, touchStreak } from '../daily/streak-store.ts';
 import type { Db } from '../db/index.ts';
 import { answerEvidence, bandEvents, chapterBands, conceptLadders, concepts, diagnosticResults } from '../db/schema.ts';
 
-export type EvidenceSource = 'session' | 'quiz' | 'homework' | 'diagnostic' | 'flashcard' | 'remediation' | 'practice' | `game:${string}`;
+export type EvidenceSource = 'session' | 'quiz' | 'homework' | 'diagnostic' | 'flashcard' | 'remediation' | 'practice' | 'ask' | `game:${string}`;
 
 const FALLBACK = 'Look at this idea again, then try a simpler question.';
 
@@ -24,8 +24,8 @@ export function mistakeFor(content: SaveItem, answer: unknown) {
   return { errorType: tagged?.errorType ?? null, explanation, fix };
 }
 
-function asEvent(row: { correct: boolean; confidence: Confidence; level: number; timeMs: number; notTaught: boolean }): LearningEvent {
-  return { correct: row.correct, confidence: row.confidence, level: clampLevel(row.level), timeMs: row.timeMs, notTaught: row.notTaught };
+function asEvent(row: { correct: boolean; confidence: Confidence; level: number; timeMs: number; notTaught: boolean; weight?: number }): LearningEvent {
+  return { correct: row.correct, confidence: row.confidence, level: clampLevel(row.level), timeMs: row.timeMs, notTaught: row.notTaught, weight: row.weight ?? 1 };
 }
 
 export function refreshChapterBand(db: Db, schoolId: string, profileId: string, chapterId: string, timestamp: number) {
@@ -54,6 +54,7 @@ export function recordAnswer(db: Db, input: {
   id: string; schoolId: string; profileId: string; conceptId: string; chapterId: string; itemId: string;
   level: Level; correct: boolean; confidence: Confidence; source: EvidenceSource; timeMs: number;
   answer: string | string[]; markedFamily?: ErrorFamily | null; explanation?: string | null; step?: boolean;
+  weight?: number;
 }, timestamp: number) {
   const notTaught = isNotTaughtAnswer(input.answer);
   const existing = db.select().from(answerEvidence).where(eq(answerEvidence.id, input.id)).get();
@@ -65,11 +66,16 @@ export function recordAnswer(db: Db, input: {
     }, (prior?.masteryLevel ?? null) as Level | null);
     db.insert(answerEvidence).values({
       id: input.id, schoolId: input.schoolId, profileId: input.profileId, conceptId: input.conceptId, itemId: input.itemId,
-      level: input.level, correct: notTaught ? false : input.correct, confidence: input.confidence, source: input.source,
-      errorType, timeMs: input.timeMs, answer: input.answer, notTaught, createdAt: timestamp,
+      level: input.level, correct: notTaught ? false : input.correct, confidence: input.confidence,
+      source: input.source === 'ask' ? 'practice' : input.source, sourceDetail: input.source === 'ask' ? 'ask' : null,
+      errorType, timeMs: input.timeMs, answer: input.answer, notTaught, weight: input.weight ?? 1, createdAt: timestamp,
     }).run();
     if (input.step !== false && !notTaught) {
-      const next = stepLadder(prior
+      const next = (input.weight ?? 1) < 1 ? {
+        level: (prior?.ladderLevel ?? initialLadder().level) as Level,
+        streakCorrect: prior?.streakCorrect ?? 0, streakWrong: prior?.streakWrong ?? 0,
+        dropped: false, bridge: prior?.bridge ?? null,
+      } : stepLadder(prior
         ? { level: prior.ladderLevel as Level, streakCorrect: prior.streakCorrect, streakWrong: prior.streakWrong }
         : initialLadder(), input.correct);
       const history = db.select().from(answerEvidence).where(and(eq(answerEvidence.profileId, input.profileId), eq(answerEvidence.conceptId, input.conceptId))).all();
@@ -109,7 +115,7 @@ export function rebuildLearner(db: Db, schoolId: string, profileId: string, time
     let state = initialLadder();
     let bridge: string | null = null;
     for (const event of events) {
-      if (event.notTaught) continue;
+      if (event.notTaught || event.weight < 1) continue;
       const next = stepLadder(state, event.correct);
       if (next.dropped) bridge = next.bridge;
       else if (next.level > state.level) bridge = null;

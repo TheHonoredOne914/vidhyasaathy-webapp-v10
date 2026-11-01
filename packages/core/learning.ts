@@ -19,6 +19,7 @@ export type LevelWord = (typeof LEVEL_WORDS)[Level] | typeof NEW_WORD;
 export type DiagnosticRoute = 'challenge' | 'steady' | 'repair';
 
 export interface LearningEvent {
+  weight?: number;
   correct: boolean;
   confidence: Confidence;
   level: Level;
@@ -53,14 +54,14 @@ export function isMisconception(event: Pick<LearningEvent, 'correct' | 'confiden
   return !event.correct && event.confidence === 'sure' && !event.notTaught;
 }
 
-export function masteryFromEvents(events: readonly LearningEvent[]) {
+export function masteryFromEvents(events: readonly LearningEvent[]): { score: number; level: Level | null; misconception: boolean } {
   const counted = events.filter((event) => !event.notTaught);
   if (!counted.length) return { score: 0, level: null as Level | null, misconception: false };
   const recent = counted.slice(-10);
   let credit = 0;
   let weight = 0;
   for (const event of recent) {
-    const itemWeight = event.level;
+    const itemWeight = event.level * (event.weight ?? 1);
     weight += itemWeight;
     if (event.correct && event.confidence === 'sure') credit += itemWeight;
     else if (event.correct && event.confidence === 'unsure') credit += itemWeight * 0.5;
@@ -71,7 +72,10 @@ export function masteryFromEvents(events: readonly LearningEvent[]) {
   if (score >= 0.75 && sureAt(4) >= 2) level = 4;
   else if (score >= 0.6 && sureAt(3) >= 2) level = 3;
   else if (score >= SESSION_PASS_RATIO) level = 2;
-  return { score, level, misconception: recent.some((event) => isMisconception(event)) };
+  const fullWeight = counted.filter((event) => (event.weight ?? 1) >= 1);
+  // Games support learning, but cannot establish or promote mastery alone.
+  const ceiling = fullWeight.length === counted.length ? level : masteryFromEvents(fullWeight).level;
+  return { score, level: ceiling === null ? null : Math.min(level, ceiling) as Level, misconception: recent.some((event) => isMisconception(event)) };
 }
 
 export function stepLadder(state: LadderState, correct: boolean) {

@@ -1,11 +1,13 @@
 import { CATCHUP_COPY } from './catchup.ts';
 import { buildStudyPlan, type StudyPlanItem } from './study-plan.ts';
 import { ABSENCE_DAYS, endOfTomorrowIst } from './streak.ts';
+import { getFollowupCandidates, type FollowupCandidate, type FollowupItemRow } from './next-action-followup.ts';
 
-export { ABSENCE_DAYS };
+export { ABSENCE_DAYS, getFollowupCandidates };
+export type { FollowupCandidate, FollowupItemRow };
 
 export interface NextAction {
-  kind: 'catchup' | 'unfinished' | 'due' | 'revision' | 'new' | 'game';
+  kind: 'catchup' | 'unfinished' | 'due' | 'revision' | 'new' | 'game' | 'followup';
   title: string;
   conceptId: string | null;
   conceptName: string | null;
@@ -16,7 +18,7 @@ export interface NextAction {
 
 export interface NextActionCandidate {
   id: string;
-  kind: 'unfinished' | 'due' | 'revision' | 'new' | 'game';
+  kind: 'unfinished' | 'due' | 'revision' | 'new' | 'game' | 'followup';
   title: string;
   conceptId: string | null;
   conceptName: string | null;
@@ -46,7 +48,7 @@ function toStudy(item: NextActionCandidate): StudyPlanItem {
     id: item.id,
     chapterId: item.conceptId ?? 'chapter',
     title: item.title,
-    kind: item.kind === 'due' ? 'assignment' : item.kind === 'revision' ? 'review' : item.kind === 'game' ? 'game' : 'session',
+    kind: item.kind === 'due' ? 'assignment' : item.kind === 'revision' ? 'review' : item.kind === 'game' ? 'game' : item.kind === 'followup' ? 'review' : 'session',
     required: item.kind === 'unfinished' || item.kind === 'due' || item.kind === 'new',
     dueAt: item.kind === 'due' ? item.dueAt : null,
     resumeAt: item.kind === 'unfinished' ? Math.max(item.resumeAt, 1) : 0,

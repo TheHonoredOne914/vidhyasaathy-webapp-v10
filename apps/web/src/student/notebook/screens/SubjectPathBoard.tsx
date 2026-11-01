@@ -75,7 +75,7 @@ export function SubjectPathBoard({ subjectId }: { subjectId: string }) {
     <aside className="nb-col sp-left">
       <Link className="nb-link" to="/student?panel=subjects"><Icon name="back" /> All subjects</Link>
       <section className="nb-card">
-        <div className="subj"><SubjectIcon subject={subject.name} large /><div><h2 className="nb-h2" style={{ fontSize: '1.8rem' }}>{subject.name}</h2></div></div>
+        <div className="subj"><SubjectIcon subject={subject.name} large /><div><h1 className="nb-h2" style={{ fontSize: '1.8rem' }}>{subject.name}</h1></div></div>
         {current ? <><div style={{ display: 'flex', justifyContent: 'space-between', margin: '.8rem 0 .3rem' }}><b className="nb-label" style={{ color: 'var(--nb-navy)' }}>{current.title}</b><span className="nb-meta">{doneCount} of {stations.length} ideas completed</span></div><ProgressBar value={stations.length ? (doneCount / stations.length) * 100 : 0} color="var(--nb-blue)" /></> : <p className="nb-empty">No chapter yet.</p>}
       </section>
       <section className="nb-card nb-grow">

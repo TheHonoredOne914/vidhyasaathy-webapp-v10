@@ -1,5 +1,6 @@
 import { useId, useState } from 'react';
 import type { Checkpoint, CheckpointAnswer } from './types';
+export { SessionQuestion as ServerCheckpointPanel } from './SessionQuestion';
 
 export function CheckpointPanel({ checkpoint, onAnswer, onHint, hintUsed }: {
   checkpoint: Checkpoint;

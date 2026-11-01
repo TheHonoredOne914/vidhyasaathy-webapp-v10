@@ -1,5 +1,5 @@
 import { ApiErrorSchema } from '@vidhyasaathy/contracts';
-import { ZodError, type ZodType } from 'zod';
+import { ZodError, type ZodType, type ZodTypeDef } from 'zod';
 
 export class ApiClientError extends Error {
   readonly status: number;
@@ -76,7 +76,7 @@ export async function apiFetch(path: string, init: RequestInit = {}): Promise<Re
   }
 }
 
-async function readJson<T>(response: Response, schema: ZodType<T>): Promise<T> {
+async function readJson<T>(response: Response, schema: ZodType<T, ZodTypeDef, unknown>): Promise<T> {
   if (!response.ok) throw await errorFrom(response);
   const payload: unknown = await response.json().catch(() => null);
   const parsed = schema.safeParse(payload);
@@ -84,11 +84,11 @@ async function readJson<T>(response: Response, schema: ZodType<T>): Promise<T> {
   return parsed.data;
 }
 
-export function getJson<T>(path: string, schema: ZodType<T>, signal?: AbortSignal): Promise<T> {
+export function getJson<T>(path: string, schema: ZodType<T, ZodTypeDef, unknown>, signal?: AbortSignal): Promise<T> {
   return apiFetch(path, signal ? { signal } : {}).then((response) => readJson(response, schema));
 }
 
-export function postJson<T>(path: string, schema: ZodType<T>, body: unknown, signal?: AbortSignal): Promise<T> {
+export function postJson<T>(path: string, schema: ZodType<T, ZodTypeDef, unknown>, body: unknown, signal?: AbortSignal): Promise<T> {
   return apiFetch(path, {
     method: 'POST',
     body: JSON.stringify(body),
@@ -96,7 +96,7 @@ export function postJson<T>(path: string, schema: ZodType<T>, body: unknown, sig
   }).then((response) => readJson(response, schema));
 }
 
-export function putJson<T>(path: string, schema: ZodType<T>, body: unknown): Promise<T> {
+export function putJson<T>(path: string, schema: ZodType<T, ZodTypeDef, unknown>, body: unknown): Promise<T> {
   return apiFetch(path, { method: 'PUT', body: JSON.stringify(body) }).then((response) => readJson(response, schema));
 }
 
@@ -113,4 +113,18 @@ export function inlineFieldErrors(fields: Record<string, string[]>): Record<stri
     if (message) result[key] = friendlyMessage(message);
   }
   return result;
+}
+
+export { errorFrom };
+
+// Unlike JSON requests, multipart uploads need the browser-generated boundary.
+export async function uploadForm(path: string, body: FormData, signal: AbortSignal): Promise<Response> {
+  try {
+    const response = await fetch(`${apiBase()}${path}`, { method: 'POST', body, signal, credentials: 'include' });
+    if (response.status === 401) window.dispatchEvent(new Event('session-expired'));
+    return response;
+  } catch (error) {
+    if (signal.aborted) throw error;
+    throw new ApiClientError(0, 'NETWORK', 'The network request failed. Check your connection and try again.');
+  }
 }

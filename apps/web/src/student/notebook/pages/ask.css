@@ -14,7 +14,6 @@
 .pg-ask{grid-template-columns:minmax(0,1fr) clamp(260px,22vw,340px);align-items:start}
 .pg-ask :is(.chat,.nb-col,.msg,.msg>div,.b,.composer,.ask-input){min-width:0}
 .pg-ask .chat{gap:var(--nb-s4)}
-.pg-ask .thread{gap:var(--nb-s5)}
 .pg-ask .ask-turn{display:flex;flex-direction:column;gap:var(--nb-s4);min-width:0}
 .pg-ask .msg{width:100%;overflow-wrap:anywhere}
 .pg-ask .msg.me{width:auto;max-width:85%}
@@ -30,4 +29,9 @@
 .pg-ask select{width:100%;min-width:0;background:var(--nb-paper);border:1.5px solid var(--nb-border);border-radius:.4rem;padding:.35rem;color:var(--nb-ink);font:inherit}
 .pg-ask .nb-sticky{margin:.4rem .3rem}
 @media(max-width:1179px){.pg-ask{grid-template-columns:minmax(0,1fr)}}
-@media(max-width:1023px){.pg-ask .chat .nb-tabs{flex-wrap:wrap;white-space:normal}.pg-ask .composer{grid-template-columns:auto minmax(0,1fr);padding:var(--nb-s3)}.pg-ask .composer>button[type=submit]{grid-column:2;justify-self:end}.pg-ask .msg{gap:.5rem}.pg-ask .msg.me{max-width:95%}}
+.pg-ask .ask-head{display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;flex-wrap:wrap;min-width:0}
+.pg-ask .ask-head .nb-head{margin:0}.pg-ask .ask-head .nb-tabs{max-width:100%;flex-wrap:nowrap;white-space:nowrap;overflow-x:auto}
+.pg-ask .ask-copy{white-space:pre-wrap;overflow-wrap:anywhere}
+.pg-ask .mini-q button{width:auto;padding:.4rem .9rem;border-radius:10px;font-size:.9rem}
+.pg-ask .composer textarea{width:100%;min-width:0;resize:vertical;font-family:var(--nb-font-note)}
+@media(max-width:1023px){.pg-ask .composer{gap:.5rem;padding:var(--nb-s3)}.pg-ask .msg{gap:.5rem}.pg-ask .msg.me{max-width:95%}}

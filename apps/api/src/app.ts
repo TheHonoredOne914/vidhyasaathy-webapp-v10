@@ -23,12 +23,18 @@ import { registerSyncRoutes } from './routes/sync.ts';
 import { createClaimIssuance } from './school/claims.ts';
 import { LocalStubProvider, type LlmProvider } from './ai/provider.ts';
 import { registerAiRoutes } from './routes/ai.ts';
+import { registerAskRoutes } from './routes/ask.ts';
+import { registerAskEscalations } from './routes/ask-escalations.ts';
+import { registerAskSnapRoutes } from './routes/ask-snap.ts';
+import type { VisionProvider } from './ai/provider.ts';
 import { registerRemediationRoutes } from './routes/remediation.ts';
 import { registerDashboardRoutes } from './routes/dashboard.ts';
 import { registerPracticeRoutes } from './routes/practice.ts';
 import { registerDiagnosticRoutes } from './routes/diagnostic.ts';
 import { registerLessonRoutes } from './routes/lessons.ts';
 import { registerDailyRoutes } from './routes/daily.ts';
+import { registerGamesRoutes } from './routes/games.ts';
+import { registerNotebookRoutes } from './routes/notebook.ts';
 import { registerAuthV9Routes } from './routes/auth-v9.ts';
 
 export interface AppOptions {
@@ -46,7 +52,10 @@ export interface AppOptions {
   claimCodeEncryptionKey?: string;
   uploadsDirectory?: string;
   llmProvider?: LlmProvider;
+  visionProvider?: VisionProvider;
+  snapConfigured?: boolean;
   aiJobPollMs?: number;
+  aiDailyTokenBudget?: number;
 }
 
 export async function buildApp(input: AppOptions) {
@@ -132,12 +141,17 @@ export async function buildApp(input: AppOptions) {
     registerAssessmentRoutes(app, db, auth, options.now);
     registerSyncRoutes(app, db, options.now);
     registerAiRoutes(app, input.database, auth, input.llmProvider ?? new LocalStubProvider(), options.now, input.aiJobPollMs ?? 1000);
+    registerAskRoutes(app, input.database, input.llmProvider ?? new LocalStubProvider(), options.now, input.aiDailyTokenBudget, input.snapConfigured);
+    registerAskEscalations(app, input.database, options.now);
+    registerAskSnapRoutes(app, input.database, input.visionProvider ?? { async extractText() { return { status: 'not_configured' }; } }, options.now);
     registerRemediationRoutes(app, input.database, options.now);
     registerDashboardRoutes(app, input.database, auth, options.now);
     registerPracticeRoutes(app, db, auth, options.now);
     registerDiagnosticRoutes(app, db, options.now);
     registerLessonRoutes(app, db, options.now);
     registerDailyRoutes(app, db, options.now);
+    registerGamesRoutes(app, input.database, options.now);
+    registerNotebookRoutes(app, db, options.now);
     app.post('/auth/logout', async (request, reply) => {
       auth.logout(request, reply);
       return reply.code(204).send();
