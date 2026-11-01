@@ -11,6 +11,7 @@ do not restart from the historical WIP branches.
 
 ```powershell
 npm install
+$env:DEMO_LOOSE_AUTH = 'true'
 npm run demo
 ```
 
@@ -21,11 +22,24 @@ are local fixtures, not production credentials. The launcher backs up an existin
 database before additive migration/seeding, restores documented demo logins,
 and starts API `3001` plus web `5173`. Stop with Ctrl+C.
 Backups default to `~/vidhyasaathy-demo-backups`; override `BACKUP_DIRECTORY` if needed.
+The local demo accepts any student PIN and any password for the demo staff sign-in. Set `DEMO_LOOSE_AUTH=false` in `apps/api/.env` to turn this off; production always disables it.
 Fresh-browser demo names are read from the seeded database, only in this explicit
 development launcher. Normal and production sign-in still uses activated browser profiles.
 Provider-dependent AI/OCR requires server configuration; unavailable services show honest states.
 
 ## Manual API setup (PowerShell)
+
+### Run the preview on Windows
+
+```powershell
+npm install
+$env:DEMO_LOOSE_AUTH = 'true'
+npm run demo
+```
+
+Open `http://127.0.0.1:5173`. To use normal authentication locally, set
+`DEMO_LOOSE_AUTH=false` in `apps/api/.env` and restart the demo. Production
+always disables open authentication.
 
 Use Node.js 24 or newer and npm 11. Install dependencies from the repo root:
 

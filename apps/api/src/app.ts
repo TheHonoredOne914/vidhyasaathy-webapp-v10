@@ -5,6 +5,7 @@ import Fastify, { type FastifyRequest } from 'fastify';
 import { requireAuth, requireRole, requireSchool } from './auth/middleware.ts';
 import { generateSessionToken, hashCredential, hashToken } from './auth/security.ts';
 import { createAuthService, type AuthOptions } from './auth/service.ts';
+import { demoLooseAuthEnabled } from './auth/demo-loose.ts';
 import type { Database } from './db/index.ts';
 import { ApiException, parseInput } from './errors.ts';
 import { sqliteRateLimitStore } from './rate-limit.ts';
@@ -109,7 +110,7 @@ export async function buildApp(input: AppOptions) {
     app.addHook('onRequest', auth.authenticateRequest);
     // Must run before the rate-limit plugin's own onRoute hook: credential routes share one stricter bucket.
     const authRateLimit = {
-      max: input.authRateLimitMax ?? 20,
+      max: demoLooseAuthEnabled() ? Number.MAX_SAFE_INTEGER : input.authRateLimitMax ?? 20,
       timeWindow: 60000,
       keyGenerator: (request: FastifyRequest) => `auth:${hashToken(request.ip)}`,
     };
