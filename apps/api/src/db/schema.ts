@@ -453,6 +453,7 @@ export const answerEvidence = sqliteTable('answer_evidence', {
   level: integer('level').notNull(), correct: integer('correct', { mode: 'boolean' }).notNull(),
   confidence: text('confidence', { enum: ['sure', 'unsure', 'guess'] }).notNull(),
   source: text('source').notNull(),
+    sourceDetail: text('source_detail'),
   weight: real('weight').notNull().default(1),
   errorType: text('error_type', { enum: ['concept_gap', 'careless', 'method', 'guess'] }),
   timeMs: integer('time_ms').notNull(), answer: text('answer', { mode: 'json' }).notNull().$type<string | string[]>(),

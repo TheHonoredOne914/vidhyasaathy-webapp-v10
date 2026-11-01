@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import type { FastifyRequest } from 'fastify';
 import { AskStreamSchema, type AskStreamInput } from '../../../../packages/contracts/src/ask.ts';
 import { detectLanguage, guardAnswer, homeworkMatches, injectionScreen, needsClarification, scrubPii, UNSURE_COPY } from '../../../../packages/core/ask.ts';
@@ -9,6 +9,7 @@ import { ApiException } from '../errors.ts';
 import type { LlmProvider } from './provider.ts';
 import { retrieveNotes } from './retrieval.ts';
 import { followupItems } from '../db/schema-phase4.ts';
+import { offerQuickTry } from './ask-quick.ts';
 
 export type AskEvent = { event: string; data: unknown };
 type Thread = { id: string; chapter_id: string | null; concept_id: string | null; title: string; style: string; mode: string; updated_at: number };
@@ -16,10 +17,23 @@ type Message = { id: string; role: string; text: string; metadata: string; creat
 export const RETENTION_MS = 86_400_000;
 
 export class AskPipeline {
+  private readonly pending = new Map<string, { fingerprint: string; result: Promise<AskEvent[]> }>();
   constructor(readonly database: Database, readonly provider: LlmProvider, readonly now: () => number, readonly dailyLimit = 30_000) {}
 
   purge() {
-    this.database.sqlite.prepare('DELETE FROM ask_message WHERE created_at < ?').run(this.now() - RETENTION_MS);
+    const { sqlite } = this.database;
+    sqlite.transaction(() => {
+      // Every expiry path aggregates first, without retaining raw student text.
+      sqlite.prepare(`INSERT INTO doubt_cluster_counter (school_id,section_id,concept_id,subtag,day,count,snippets)
+        SELECT t.school_id,p.section_id,t.concept_id,'question',date(m.created_at/1000,'unixepoch'),COUNT(DISTINCT t.profile_id),'[]'
+        FROM ask_thread t JOIN ask_message m ON m.thread_id=t.id AND m.role='student'
+        JOIN profile p ON p.id=t.profile_id AND p.school_id=t.school_id
+        WHERE t.concept_id IS NOT NULL AND p.section_id IS NOT NULL
+        GROUP BY t.school_id,p.section_id,t.concept_id,date(m.created_at/1000,'unixepoch')
+        ON CONFLICT (school_id,section_id,concept_id,subtag,day) DO UPDATE SET count=MAX(count,excluded.count)`).run();
+      sqlite.prepare('DELETE FROM ask_quick_try WHERE created_at < ?').run(this.now() - RETENTION_MS);
+      sqlite.prepare('DELETE FROM ask_message WHERE created_at < ?').run(this.now() - RETENTION_MS);
+    })();
   }
 
   owner(request: FastifyRequest, id: string): Thread {
@@ -27,6 +41,12 @@ export class AskPipeline {
     const row = this.database.sqlite.prepare('SELECT * FROM ask_thread WHERE id=? AND school_id=? AND profile_id=?').get(id, school.id, profile.id) as Thread | undefined;
     if (!row) throw new ApiException(404, 'NOT_FOUND', 'This conversation is not available.');
     return row;
+  }
+
+  concept(thread: Thread) {
+    return this.database.sqlite.prepare(`SELECT co.id,co.title AS name,s.name AS subjectName,c.title AS chapterLabel
+      FROM concept co JOIN chapter c ON c.id=co.chapter_id JOIN subject s ON s.id=c.subject_id
+      WHERE co.id=? AND c.id=?`).get(thread.concept_id, thread.chapter_id) ?? null;
   }
 
   budget(request: FastifyRequest) {
@@ -38,6 +58,22 @@ export class AskPipeline {
 
   async run(request: FastifyRequest, body: unknown, signal: AbortSignal): Promise<AskEvent[]> {
     const parsed = AskStreamSchema.safeParse(body);
+    if (!parsed.success) return this.execute(request, body, signal);
+    const auth = requireAuth(request);
+    const key = `${auth.school.id}:${auth.profile.id}:${parsed.data.clientEventId}`;
+    const fingerprint = createHash('sha256').update(JSON.stringify(parsed.data)).digest('hex');
+    const previous = this.pending.get(key);
+    if (previous) {
+      if (previous.fingerprint !== fingerprint) throw new ApiException(409, 'EVENT_CONFLICT', 'Use a new event ID for a different question.');
+      return previous.result;
+    }
+    const result = this.execute(request, body, signal, fingerprint);
+    this.pending.set(key, { fingerprint, result });
+    try { return await result; } finally { this.pending.delete(key); }
+  }
+
+  private async execute(request: FastifyRequest, body: unknown, signal: AbortSignal, fingerprint?: string): Promise<AskEvent[]> {
+    const parsed = AskStreamSchema.safeParse(body);
     if (!parsed.success) return [{ event: 'error', data: { code: 'invalid', message: 'Please ask a question of up to 800 characters.' } }];
     const input: AskStreamInput = parsed.data;
     const { school, profile } = requireAuth(request);
@@ -45,9 +81,15 @@ export class AskPipeline {
     this.purge();
     const retry = sqlite.prepare(`SELECT m.metadata FROM ask_message m JOIN ask_thread t ON t.id=m.thread_id
       WHERE t.school_id=? AND t.profile_id=? AND m.client_event_id=? AND m.role='saathy'`).get(school.id, profile.id, input.clientEventId) as { metadata: string } | undefined;
-    if (retry) return JSON.parse(retry.metadata) as AskEvent[];
+    if (retry) {
+      const original = sqlite.prepare(`SELECT m.metadata FROM ask_message m JOIN ask_thread t ON t.id=m.thread_id
+        WHERE t.school_id=? AND t.profile_id=? AND m.client_event_id=? AND m.role='student'`).get(school.id, profile.id, input.clientEventId) as { metadata: string } | undefined;
+      if (original && (JSON.parse(original.metadata) as { fingerprint?: string }).fingerprint !== fingerprint) throw new ApiException(409, 'EVENT_CONFLICT', 'Use a new event ID for a different question.');
+      return JSON.parse(retry.metadata) as AskEvent[];
+    }
     let thread = input.threadId ? this.owner(request, input.threadId) : undefined;
-    const chapterId = thread?.chapter_id ?? input.chapterId;
+    const conceptChapter = input.conceptId ? sqlite.prepare('SELECT chapter_id FROM concept WHERE id=? AND school_id=?').get(input.conceptId, school.id) as { chapter_id: string } | undefined : undefined;
+    const chapterId = thread?.chapter_id ?? input.chapterId ?? conceptChapter?.chapter_id;
     if (!chapterId) return [{ event: 'error', data: { code: 'invalid', message: 'Choose a chapter so I can use your notes.' } }];
     chapterAccess(db, request, chapterId);
     if (input.conceptId) {
@@ -89,7 +131,7 @@ export class AskPipeline {
     if (!reserved.changes) return [{ event: 'error', data: { code: 'budget', message: 'Your daily asking allowance is used. Try your notes or teacher.' } }];
     const studentMessageId = randomUUID();
     sqlite.prepare('INSERT INTO ask_message (id,school_id,thread_id,role,text,client_event_id,metadata,created_at) VALUES (?,?,?,?,?,?,?,?)')
-      .run(studentMessageId, school.id, thread.id, 'student', question, input.clientEventId, JSON.stringify({ fromLabel: input.from?.label }), time);
+      .run(studentMessageId, school.id, thread.id, 'student', question, input.clientEventId, JSON.stringify({ fromLabel: input.from?.label ? scrubPii(input.from.label, names) : undefined, fingerprint }), time);
     let output = '';
     const clarifying = needsClarification(question, sources.length ? [1] : []);
     try {
@@ -128,10 +170,13 @@ export class AskPipeline {
       }).run();
     }
     
+    const quickTry = !homework && !guarded.flags.honestUnsure && !clarifying
+      ? offerQuickTry(this.database, thread.id, school.id, profile.id, chapterId, thread.concept_id, time) : null;
     const events: AskEvent[] = [
-      { event: 'thread', data: { threadId: thread.id, title: thread.title, concept: null, studentMessageId, fromLabel: input.from?.label } },
+      { event: 'thread', data: { threadId: thread.id, title: thread.title, concept: this.concept(thread), studentMessageId, fromLabel: input.from?.label ? scrubPii(input.from.label, names) : undefined } },
       { event: 'thinking', data: {} },
       { event: 'token', data: { text: guarded.text } },
+      ...(quickTry ? [{ event: 'quickTry', data: quickTry }] : []),
       ...sources.filter((source) => !homework && !guarded.flags.honestUnsure && guarded.text.includes(`[chunk:${source.id}]`)).map((source) => ({ event: 'citation', data: { chunkId: source.id, noteTitle: source.title } })),
       { event: 'followups', data: { chips: guarded.flags.honestUnsure ? [{ kind: 'ask_teacher', label: 'Ask my teacher' }] : [{ kind: 'simpler', label: 'A simpler explanation' }, { kind: 'example', label: 'Another example' }] } },
       { event: 'done', data: { messageId, text: guarded.text, flags: guarded.flags } },

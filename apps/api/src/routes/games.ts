@@ -1,185 +1,129 @@
 import { randomUUID } from 'node:crypto';
-import type { FastifyInstance } from 'fastify';
-import { GameSessionStartSchema, GameAnswerSchema, GameFinishSchema, type GameSessionStartResponse, type GameAnswerResponse, type GameFinishResponse } from '@vidhyasaathy/contracts';
-import { requireAuth, requireRole } from '../auth/middleware.ts';
-import type { Database } from '../db/index.ts';
-import { gameSessions } from '../db/schema-phase4.ts';
-import { ApiException, parseInput } from '../errors.ts';
+import { and, eq } from 'drizzle-orm';
+import type { FastifyInstance, FastifyRequest } from 'fastify';
+import { GameSessionStartSchema, GameAnswerSchema, GameFinishSchema, SaveItemSchema, type GameAnswerResponse, type GameFinishResponse, type GameSessionStartResponse } from '@vidhyasaathy/contracts';
 import { xpFromEvidence } from '@vidhyasaathy/core/xp';
+import { clampLevel } from '@vidhyasaathy/core/learning';
+import { requireAuth, requireRole } from '../auth/middleware.ts';
+import { chapterAccess, isAvailable } from '../content/access.ts';
+import type { Database } from '../db/index.ts';
+import { gameSessions, gameCheckpointMap } from '../db/schema-phase4.ts';
+import { items, learningSessions, profiles } from '../db/schema.ts';
+import { recordAnswer, mistakeFor } from '../learning/record.ts';
+import { ApiException, parseInput } from '../errors.ts';
 
-const GAME_CONFIG: Record<string, { conceptId: string; title: string; subjectId: string; subjectName: string; topic: string; chapterId: string; estMinutes: number; bestKind: 'time' | 'stars' | 'score'; checkpointKeys: string[] }> = {
-  motion: { conceptId: 'motion_concept', title: 'Motion Graphs', subjectId: 'science', subjectName: 'Science', topic: 'Motion · graphs', chapterId: 'motion_chapter', estMinutes: 5, bestKind: 'score', checkpointKeys: ['q1', 'q2', 'q3', 'q4', 'q5'] },
-  graphs: { conceptId: 'graphs_concept', title: 'Graph Reading', subjectId: 'science', subjectName: 'Science', topic: 'Motion · graph reading', chapterId: 'motion_chapter', estMinutes: 5, bestKind: 'score', checkpointKeys: ['q1', 'q2', 'q3', 'q4', 'q5'] },
-  newton: { conceptId: 'newton_concept', title: 'Newton\'s Laws', subjectId: 'science', subjectName: 'Science', topic: 'Force · laws', chapterId: 'force_chapter', estMinutes: 5, bestKind: 'score', checkpointKeys: ['q1', 'q2', 'q3', 'q4', 'q5'] },
-  energy: { conceptId: 'energy_concept', title: 'Energy Forms', subjectId: 'science', subjectName: 'Science', topic: 'Work & Energy', chapterId: 'energy_chapter', estMinutes: 5, bestKind: 'score', checkpointKeys: ['q1', 'q2', 'q3', 'q4', 'q5'] },
-  matter: { conceptId: 'matter_concept', title: 'States of Matter', subjectId: 'science', subjectName: 'Science', topic: 'Matter · states', chapterId: 'matter_chapter', estMinutes: 5, bestKind: 'score', checkpointKeys: ['q1', 'q2', 'q3', 'q4', 'q5'] },
-  float: { conceptId: 'float_concept', title: 'Floating & Sinking', subjectId: 'science', subjectName: 'Science', topic: 'Matter · density', chapterId: 'matter_chapter', estMinutes: 5, bestKind: 'score', checkpointKeys: ['q1', 'q2', 'q3', 'q4', 'q5'] },
-  cell: { conceptId: 'cell_concept', title: 'Cell Structure', subjectId: 'science', subjectName: 'Science', topic: 'Cells · structure', chapterId: 'cell_chapter', estMinutes: 5, bestKind: 'score', checkpointKeys: ['q1', 'q2', 'q3', 'q4', 'q5'] },
-  poly: { conceptId: 'poly_concept', title: 'Polynomials', subjectId: 'maths', subjectName: 'Maths', topic: 'Algebra · polynomials', chapterId: 'poly_chapter', estMinutes: 5, bestKind: 'score', checkpointKeys: ['q1', 'q2', 'q3', 'q4', 'q5'] },
-  engine: { conceptId: 'engine_concept', title: 'Simple Machines', subjectId: 'science', subjectName: 'Science', topic: 'Work · machines', chapterId: 'work_chapter', estMinutes: 5, bestKind: 'score', checkpointKeys: ['q1', 'q2', 'q3', 'q4', 'q5'] },
-  atom: { conceptId: 'atom_concept', title: 'Atom Forge', subjectId: 'science', subjectName: 'Science', topic: 'Atoms · structure', chapterId: 'atom_chapter', estMinutes: 5, bestKind: 'score', checkpointKeys: [] },
-  arena: { conceptId: 'arena_concept', title: 'Arena', subjectId: 'science', subjectName: 'Science', topic: 'Mixed practice', chapterId: 'arena_chapter', estMinutes: 5, bestKind: 'score', checkpointKeys: ['q1', 'q2', 'q3', 'q4', 'q5'] },
-  sound: { conceptId: 'sound_concept', title: 'Sound Waves', subjectId: 'science', subjectName: 'Science', topic: 'Waves · sound', chapterId: 'sound_chapter', estMinutes: 5, bestKind: 'score', checkpointKeys: ['q1', 'q2', 'q3', 'q4', 'q5'] },
+export const GAME_TITLES: Record<string, string> = {
+  motion: 'Motion Lab', newton: "Newton's Laws", matter: 'Matter Lab', cell: 'Cell Explorer',
+  float: 'Float or Sink', sound: 'Sound Lab', energy: 'Energy Lab', poly: 'Polynomial Workshop', graphs: 'Coordinate Graphs',
 };
-
-function getCheckpointItem(sqlite: Database['sqlite'], schoolId: string, gameId: string, checkpointKey: string) {
-  const row = sqlite.prepare('SELECT * FROM game_checkpoint_map WHERE school_id=? AND game_id=? AND checkpoint_key=?').get(schoolId, gameId, checkpointKey) as { conceptId: string; itemId: string } | undefined;
-  if (!row) return null;
-  const item = sqlite.prepare('SELECT * FROM item WHERE id=? AND concept_id=? AND school_id=?').get(row.itemId, row.conceptId, schoolId) as { id: string; content: string } | undefined;
-  if (!item) return null;
-  return item;
-}
+export const GAME_EVIDENCE_WEIGHT = 0.5;
+type Snapshot = { checkpoint_key: string; item_id: string; concept_id: string; chapter_id: string; content: string; response: string | null };
 
 export function registerGamesRoutes(app: FastifyInstance, database: Database, now: () => number) {
   const { db, sqlite } = database;
   const student = { preHandler: requireRole('student') };
-
-  app.post('/games/:gameId/sessions', student, async (request, reply) => {
-    const { gameId } = request.params as { gameId: string };
-    const config = GAME_CONFIG[gameId];
-    if (!config || gameId === 'atom') throw new ApiException(404, 'NOT_FOUND', 'This game is not available.');
-    
-    parseInput(GameSessionStartSchema, request.body);
+  function game(request: FastifyRequest) {
+    const { gameId, id } = request.params as { gameId: string; id?: string };
+    if (!Object.hasOwn(GAME_TITLES, gameId)) throw new ApiException(404, 'NOT_FOUND', 'This game is not available.');
+    return { gameId, id };
+  }
+  function session(request: FastifyRequest) {
+    const { gameId, id } = game(request);
     const { school, profile } = requireAuth(request);
-    
-    const sessionId = randomUUID();
-    const time = now();
-    
-    db.insert(gameSessions).values({
-      id: sessionId, schoolId: school.id, profileId: profile.id,
-      gameId, conceptId: config.conceptId, startedAt: time,
-      answered: 0, correct: 0,
-    }).run();
-    
-    const checkpoints: Record<string, { itemId: string; stem: string; options: { id: string; text: string }[]; format: 'mcq' | 'numeric' | 'text'; level: number }> = {};
-    for (const key of config.checkpointKeys) {
-      const item = getCheckpointItem(database.sqlite, school.id, gameId, key);
-      if (item) {
-        const itemContent = JSON.parse(item.content) as { type: string; prompt: string; options: string[] };
-        checkpoints[key] = {
-          itemId: item.id,
-          stem: itemContent.prompt,
-          options: itemContent.options.map((opt, i) => ({ id: String(i), text: opt })),
-          format: 'mcq',
-          level: 1,
-        };
+    const row = db.select().from(gameSessions).where(and(eq(gameSessions.id, id ?? ''), eq(gameSessions.gameId, gameId), eq(gameSessions.schoolId, school.id), eq(gameSessions.profileId, profile.id))).get();
+    if (!row) throw new ApiException(404, 'NOT_FOUND', 'This game session is not available.');
+    return row;
+  }
+  function replay<T>(request: FastifyRequest, clientEventId: string, input: unknown, work: () => T): T {
+    const { school, profile } = requireAuth(request);
+    const fingerprint = JSON.stringify([request.url, input]);
+    return sqlite.transaction(() => {
+      const previous = sqlite.prepare('SELECT request,response FROM game_event WHERE school_id=? AND profile_id=? AND client_event_id=?')
+        .get(school.id, profile.id, clientEventId) as { request: string; response: string } | undefined;
+      if (previous) {
+        if (previous.request !== fingerprint) throw new ApiException(409, 'EVENT_CONFLICT', 'Use a new event ID for a different action.');
+        return JSON.parse(previous.response) as T;
       }
-    }
-    
-    return reply.send({ sessionId, checkpoints } as GameSessionStartResponse);
+      const response = work();
+      sqlite.prepare('INSERT INTO game_event VALUES (?,?,?,?,?)').run(school.id, profile.id, clientEventId, fingerprint, JSON.stringify(response));
+      return response;
+    })();
+  }
+  function best(schoolId: string, profileId: string, gameId: string) {
+    const row = sqlite.prepare('SELECT best_value,best_label FROM game_session WHERE school_id=? AND profile_id=? AND game_id=? AND finished_at IS NOT NULL AND best_value IS NOT NULL ORDER BY best_value DESC,finished_at LIMIT 1')
+      .get(schoolId, profileId, gameId) as { best_value: number; best_label: string } | undefined;
+    return row ? { kind: 'score' as const, value: row.best_value, label: row.best_label } : null;
+  }
+
+  app.post('/games/:gameId/sessions', student, async (request) => {
+    const { gameId } = game(request);
+    const input = parseInput(GameSessionStartSchema, request.body);
+    return replay(request, input.clientEventId, input, (): GameSessionStartResponse => {
+      const { school, profile } = requireAuth(request);
+      const mappings = db.select().from(gameCheckpointMap).where(and(eq(gameCheckpointMap.schoolId, school.id), eq(gameCheckpointMap.gameId, gameId))).all();
+      if (!mappings.length) throw new ApiException(503, 'BANK_UNAVAILABLE', 'Your teacher is preparing this game.');
+      const selected = mappings.map((mapping) => {
+        const item = db.select().from(items).where(and(eq(items.schoolId, school.id), eq(items.id, mapping.itemId), eq(items.conceptId, mapping.conceptId))).get();
+        if (!item) throw new ApiException(503, 'BANK_UNAVAILABLE', 'This question is being prepared.');
+        chapterAccess(db, request, item.chapterId);
+        const sectionId = db.select().from(profiles).where(eq(profiles.id, profile.id)).get()?.sectionId;
+        const released = db.select().from(learningSessions).where(and(eq(learningSessions.schoolId, school.id), eq(learningSessions.chapterId, item.chapterId), eq(learningSessions.sectionId, sectionId ?? ''))).all().some((row) => isAvailable(row, now()));
+        if (!released) throw new ApiException(403, 'CONTENT_UNAVAILABLE', 'Finish the released lesson before playing.');
+        const content = SaveItemSchema.parse(item.content);
+        if (content.type !== 'mcq' || content.options.length > 4) throw new ApiException(503, 'BANK_UNAVAILABLE', 'This question is being prepared.');
+        return { mapping, item, content };
+      });
+      const sessionId = randomUUID();
+      db.insert(gameSessions).values({ id: sessionId, schoolId: school.id, profileId: profile.id, gameId, conceptId: selected[0]!.mapping.conceptId, startedAt: now() }).run();
+      const checkpoints: GameSessionStartResponse['checkpoints'] = {};
+      for (const { mapping, item, content } of selected) {
+        sqlite.prepare('INSERT INTO game_session_item (session_id,checkpoint_key,item_id,concept_id,chapter_id,content) VALUES (?,?,?,?,?,?)')
+          .run(sessionId, mapping.checkpointKey, item.id, item.conceptId, item.chapterId, JSON.stringify(content));
+        checkpoints[mapping.checkpointKey] = { itemId: item.id, stem: content.prompt, options: content.options.map((text, index) => ({ id: String(index), text })), format: 'mcq', level: Math.min(3, content.difficulty) };
+      }
+      return { sessionId, checkpoints };
+    });
   });
 
-  app.post('/games/:gameId/sessions/:id/answer', student, async (request, reply) => {
-    const { gameId, id } = request.params as { gameId: string; id: string };
-    const config = GAME_CONFIG[gameId];
-    if (!config || gameId === 'atom') throw new ApiException(404, 'NOT_FOUND', 'This game is not available.');
-    
+  app.post('/games/:gameId/sessions/:id/answer', student, async (request) => {
     const input = parseInput(GameAnswerSchema, request.body);
-    const { school, profile } = requireAuth(request);
-    
-    const session = sqlite.prepare('SELECT * FROM game_session WHERE id=? AND school_id=? AND profile_id=?').get(id, school.id, profile.id) as { answered: number; correct: number; bestKind?: string; bestValue?: number; bestLabel?: string } | undefined;
-    if (!session) throw new ApiException(404, 'NOT_FOUND', 'This game session is not available.');
-    
-    const checkpointMap = sqlite.prepare('SELECT * FROM game_checkpoint_map WHERE school_id=? AND game_id=? AND checkpoint_key=?').get(school.id, gameId, input.checkpointKey) as { conceptId: string; itemId: string } | undefined;
-    if (!checkpointMap) throw new ApiException(404, 'NOT_FOUND', 'This checkpoint is not available.');
-    
-    const item = sqlite.prepare('SELECT * FROM item WHERE id=? AND concept_id=? AND school_id=?').get(checkpointMap.itemId, checkpointMap.conceptId, school.id) as { content: string } | undefined;
-    if (!item) throw new ApiException(404, 'NOT_FOUND', 'This question is not available.');
-    
-    const itemContent = JSON.parse(item.content) as { type: string; options?: string[]; answer: string; explanation?: string };
-    const correctOptionId = itemContent.options?.findIndex((opt) => opt === itemContent.answer) ?? 0;
-    const isCorrect = input.answer && typeof input.answer === 'object' && 'optionId' in input.answer
-      ? input.answer.optionId === String(correctOptionId)
-      : false;
-    
-    const newAnswered = session.answered + 1;
-    const newCorrect = session.correct + (isCorrect ? 1 : 0);
-    
-    sqlite.prepare('UPDATE game_session SET answered=?, correct=? WHERE id=?').run(newAnswered, newCorrect, id);
-    
-    const evidenceId = randomUUID();
-    sqlite.prepare('INSERT INTO answer_evidence (id,school_id,profile_id,concept_id,item_id,level,correct,confidence,source,weight,time_ms,answer,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)')
-      .run(evidenceId, school.id, profile.id, checkpointMap.conceptId, checkpointMap.itemId, 1, isCorrect ? 1 : 0, input.confidence, 'game', 0.5, input.timeMs, JSON.stringify(input.answer), now());
-    
-    const xp = xpFromEvidence([{ kind: 'answer', correct: isCorrect, confidence: input.confidence }]);
-    sqlite.prepare('INSERT INTO learning_evidence (id,school_id,profile_id,concept_id,correct,source,created_at) VALUES (?,?,?,?,?,?,?)')
-      .run(randomUUID(), school.id, profile.id, checkpointMap.conceptId, isCorrect ? 1 : 0, 'game', now());
-    
-    // Record streak touch
-    const day = new Date(now() + 330 * 60000).toISOString().slice(0, 10);
-    sqlite.prepare('INSERT OR IGNORE INTO streak_touch (profile_id, school_id, day, act, source_event_id, created_at) VALUES (?,?,?,?,?,?)')
-      .run(profile.id, school.id, day, 'game_round', id, now());
-    
-    return reply.send({
-      correct: isCorrect,
-      correctOptionId: isCorrect ? undefined : String(correctOptionId),
-      explanation: itemContent.explanation ?? 'Keep practicing!',
-      misconceptionNote: isCorrect ? undefined : 'Review this concept.',
-      errorType: isCorrect ? undefined : 'concept_gap',
-      xp,
-    } as GameAnswerResponse);
+    return replay(request, input.clientEventId, input, (): GameAnswerResponse => {
+      const row = session(request);
+      if (row.finishedAt !== null) throw new ApiException(409, 'SESSION_FINISHED', 'This round has finished.');
+      const snapshot = sqlite.prepare('SELECT * FROM game_session_item WHERE session_id=? AND checkpoint_key=?').get(row.id, input.checkpointKey) as Snapshot | undefined;
+      if (!snapshot) throw new ApiException(404, 'NOT_FOUND', 'This checkpoint is not available.');
+      if (snapshot.response) throw new ApiException(409, 'ALREADY_ANSWERED', 'This checkpoint has already been answered.');
+      const content = SaveItemSchema.parse(JSON.parse(snapshot.content));
+      if (content.type !== 'mcq' || !('optionId' in input.answer) || !/^[0-3]$/.test(input.answer.optionId) || !content.options[Number(input.answer.optionId)]) throw new ApiException(400, 'INVALID_ANSWER', 'Choose an offered answer.');
+      const answer = content.options[Number(input.answer.optionId)]!;
+      const correct = answer === content.answer;
+      const feedback = recordAnswer(db, { id: `game:${row.id}:${input.checkpointKey}`, schoolId: row.schoolId, profileId: row.profileId, chapterId: snapshot.chapter_id, conceptId: snapshot.concept_id, itemId: snapshot.item_id, level: clampLevel(content.difficulty), correct, confidence: input.confidence, source: `game:${row.gameId}`, weight: GAME_EVIDENCE_WEIGHT, answer, timeMs: input.timeMs, ...mistakeFor(content, answer) }, now());
+      const response: GameAnswerResponse = { correct, correctOptionId: String(content.options.indexOf(content.answer)), explanation: content.explanation || (correct ? 'Yes, that follows the idea.' : 'Look at this idea again before the next checkpoint.'), xp: xpFromEvidence([{ kind: 'answer', correct, confidence: input.confidence }]), ...(feedback.errorType ? { errorType: feedback.errorType } : {}) };
+      sqlite.prepare('UPDATE game_session_item SET response=? WHERE session_id=? AND checkpoint_key=?').run(JSON.stringify(response), row.id, input.checkpointKey);
+      sqlite.prepare('UPDATE game_session SET answered=answered+1,correct=correct+? WHERE id=?').run(correct ? 1 : 0, row.id);
+      return response;
+    });
   });
 
-  app.post('/games/:gameId/sessions/:id/finish', student, async (request, reply) => {
-    const { gameId, id } = request.params as { gameId: string; id: string };
-    const config = GAME_CONFIG[gameId];
-    if (!config || gameId === 'atom') throw new ApiException(404, 'NOT_FOUND', 'This game is not available.');
-    
-    parseInput(GameFinishSchema, request.body);
-    const { school, profile } = requireAuth(request);
-    
-    const session = sqlite.prepare('SELECT * FROM game_session WHERE id=? AND school_id=? AND profile_id=?').get(id, school.id, profile.id) as { answered: number; correct: number; bestKind?: string; bestValue?: number; bestLabel?: string; startedAt: number } | undefined;
-    if (!session) throw new ApiException(404, 'NOT_FOUND', 'This game session is not available.');
-    
-    const time = now();
-    let personalBest = false;
-    let bestKind = config.bestKind;
-    let bestValue: number;
-    let bestLabel: string;
-    
-    if (bestKind === 'time') {
-      bestValue = time - session.startedAt;
-      bestLabel = `Best ${bestValue} s`;
-    } else if (bestKind === 'stars') {
-      bestValue = Math.max(1, Math.ceil((session.correct / Math.max(1, session.answered)) * 3));
-      bestLabel = `${bestValue} stars`;
-    } else {
-      bestValue = session.correct;
-      bestLabel = `Best ${bestValue}/10`;
-    }
-    
-    const hasPreviousBest = session.bestValue != null;
-    if (!hasPreviousBest || (bestKind === 'time' && bestValue < session.bestValue!) || (bestKind !== 'time' && bestValue > session.bestValue!)) {
-      personalBest = true;
-      sqlite.prepare('UPDATE game_session SET finished_at=?, best_kind=?, best_value=?, best_label=? WHERE id=?').run(time, bestKind, bestValue, bestLabel, id);
-    } else {
-      sqlite.prepare('UPDATE game_session SET finished_at=? WHERE id=?').run(time, id);
-    }
-    
-    const xp = xpFromEvidence([{ kind: 'answer', correct: session.correct > 0, confidence: 'sure' }]);
-    
-    return reply.send({
-      answered: session.answered,
-      correct: session.correct,
-      personalBest,
-      best: { kind: bestKind, value: bestValue, label: bestLabel },
-      xp,
-    } as GameFinishResponse);
+  app.post('/games/:gameId/sessions/:id/finish', student, async (request) => {
+    const input = parseInput(GameFinishSchema, request.body);
+    return replay(request, input.clientEventId, input, (): GameFinishResponse => {
+      const row = session(request);
+      const snapshots = sqlite.prepare('SELECT response FROM game_session_item WHERE session_id=?').all(row.id) as { response: string | null }[];
+      if (!snapshots.length || snapshots.some((item) => !item.response)) throw new ApiException(409, 'ROUND_INCOMPLETE', 'Answer every checkpoint before finishing.');
+      const previous = best(row.schoolId, row.profileId, row.gameId);
+      const value = Math.round(100 * row.correct / row.answered);
+      const label = `Best ${row.correct}/${row.answered}`;
+      const personalBest = row.finishedAt === null && (!previous || value > previous.value);
+      if (row.finishedAt === null) sqlite.prepare('UPDATE game_session SET finished_at=?,best_kind=?,best_value=?,best_label=? WHERE id=?').run(now(), 'score', value, label, row.id);
+      return { answered: row.answered, correct: row.correct, personalBest, best: best(row.schoolId, row.profileId, row.gameId)!, xp: snapshots.reduce((sum, item) => sum + (JSON.parse(item.response!) as GameAnswerResponse).xp, 0) };
+    });
   });
-
   app.get('/games/:gameId/best', student, async (request) => {
-    const { gameId } = request.params as { gameId: string };
-    const config = GAME_CONFIG[gameId];
-    if (!config || gameId === 'atom') throw new ApiException(404, 'NOT_FOUND', 'This game is not available.');
-    
+    const { gameId } = game(request);
     const { school, profile } = requireAuth(request);
-    const session = sqlite.prepare('SELECT best_kind, best_value, best_label FROM game_session WHERE school_id=? AND profile_id=? AND game_id=? AND best_value IS NOT NULL ORDER BY finished_at DESC LIMIT 1').get(school.id, profile.id, gameId) as { bestKind: string; bestValue: number; bestLabel: string } | undefined;
-    
-    if (!session) return { best: null, conceptName: config.title };
-    
-    return {
-      best: { kind: session.bestKind as 'time' | 'stars' | 'score', value: session.bestValue, label: session.bestLabel },
-      conceptName: config.title,
-    };
+    const concept = sqlite.prepare(`SELECT c.title FROM game_checkpoint_map m JOIN concept c ON c.id=m.concept_id
+      WHERE m.school_id=? AND m.game_id=? ORDER BY m.checkpoint_key LIMIT 1`).get(school.id, gameId) as { title: string } | undefined;
+    return { best: best(school.id, profile.id, gameId), conceptName: concept?.title ?? '' };
   });
 }

@@ -97,7 +97,7 @@ export const GamesBoardSchema = z.object({
       label: z.string(),
     }).optional(),
   })),
-}).strict();
+});
 
 export type GameSessionStart = z.infer<typeof GameSessionStartSchema>;
 export type GameAnswer = z.infer<typeof GameAnswerSchema>;

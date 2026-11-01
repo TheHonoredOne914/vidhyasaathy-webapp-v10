@@ -1,7 +1,7 @@
 import { buildApp } from './app.ts';
 import { loadConfig } from './config.ts';
 import { openDatabase } from './db/index.ts';
-import { createProvider } from './ai/provider.ts';
+import { createProvider, createVisionProvider } from './ai/provider.ts';
 
 const config = loadConfig();
 const database = openDatabase(config.DATABASE_PATH);
@@ -15,6 +15,8 @@ const app = await buildApp({
   authRateLimitMax: config.AUTH_RATE_LIMIT_MAX,
   uploadsDirectory: config.UPLOAD_DIRECTORY,
   llmProvider: createProvider(config),
+  visionProvider: createVisionProvider(config),
+  snapConfigured: config.AI_VISION_PROVIDER === 'openai' ? !!config.OPENAI_API_KEY : config.AI_VISION_PROVIDER === 'http' && !!config.AI_HTTP_URL,
   aiDailyTokenBudget: config.AI_DAILY_TOKEN_BUDGET,
   ...(config.CLAIM_CODE_ENCRYPTION_KEY ? { claimCodeEncryptionKey: config.CLAIM_CODE_ENCRYPTION_KEY } : {}),
   logger: true,

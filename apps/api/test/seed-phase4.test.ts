@@ -17,22 +17,24 @@ it('maps only matching game concepts, preserving all existing content on reruns'
     const before = database.db.select().from(items).all();
     await seedPhase4(database, () => now);
     const mappings = database.db.select().from(gameCheckpointMap).all();
-    expect(mappings.length).toBeGreaterThan(0);
+    expect(mappings).toHaveLength(36);
+    const seeded = database.db.select().from(items).all();
+    expect(seeded).toEqual(expect.arrayContaining(before));
     const conceptRows = database.db.select().from(concepts).all();
     for (const mapping of mappings) {
-      expect(['motion', 'cell', 'poly']).toContain(mapping.gameId);
+      expect(['motion', 'cell', 'poly', 'newton', 'matter', 'float', 'sound', 'energy', 'graphs']).toContain(mapping.gameId);
       expect(mapping.checkpointKey).not.toMatch(/^q\d+$/);
-      const item = before.find((row) => row.id === mapping.itemId)!;
+      const item = database.db.select().from(items).all().find((row) => row.id === mapping.itemId)!;
       expect(item.conceptId).toBe(mapping.conceptId);
       expect(item.schoolId).toBe(mapping.schoolId);
       expect(conceptRows.find((row) => row.id === mapping.conceptId)?.chapterId).toBe(item.chapterId);
-      if (mapping.gameId === 'cell') expect(['Plasma membrane', 'Osmosis'])
+      if (mapping.gameId === 'cell') expect(['Plasma membrane', 'Osmosis', 'Diffusion', 'Mitochondria'])
         .toContain(conceptRows.find((row) => row.id === mapping.conceptId)?.title);
-      if (mapping.gameId === 'poly') expect(['Degree of a polynomial', 'Zero of a polynomial'])
+      if (mapping.gameId === 'poly') expect(['Degree of a polynomial', 'Zero of a polynomial', 'Value of a polynomial', 'Factor theorem'])
         .toContain(conceptRows.find((row) => row.id === mapping.conceptId)?.title);
     }
     await seedPhase4(database, () => now + 86_400_000);
     expect(database.db.select().from(gameCheckpointMap).all()).toEqual(mappings);
-    expect(database.db.select().from(items).all()).toEqual(before);
+    expect(database.db.select().from(items).all()).toEqual(seeded);
   } finally { database.sqlite.close(); }
 });

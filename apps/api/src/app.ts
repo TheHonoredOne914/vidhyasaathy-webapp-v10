@@ -24,6 +24,9 @@ import { createClaimIssuance } from './school/claims.ts';
 import { LocalStubProvider, type LlmProvider } from './ai/provider.ts';
 import { registerAiRoutes } from './routes/ai.ts';
 import { registerAskRoutes } from './routes/ask.ts';
+import { registerAskEscalations } from './routes/ask-escalations.ts';
+import { registerAskSnapRoutes } from './routes/ask-snap.ts';
+import type { VisionProvider } from './ai/provider.ts';
 import { registerRemediationRoutes } from './routes/remediation.ts';
 import { registerDashboardRoutes } from './routes/dashboard.ts';
 import { registerPracticeRoutes } from './routes/practice.ts';
@@ -49,6 +52,8 @@ export interface AppOptions {
   claimCodeEncryptionKey?: string;
   uploadsDirectory?: string;
   llmProvider?: LlmProvider;
+  visionProvider?: VisionProvider;
+  snapConfigured?: boolean;
   aiJobPollMs?: number;
   aiDailyTokenBudget?: number;
 }
@@ -136,7 +141,9 @@ export async function buildApp(input: AppOptions) {
     registerAssessmentRoutes(app, db, auth, options.now);
     registerSyncRoutes(app, db, options.now);
     registerAiRoutes(app, input.database, auth, input.llmProvider ?? new LocalStubProvider(), options.now, input.aiJobPollMs ?? 1000);
-    registerAskRoutes(app, input.database, input.llmProvider ?? new LocalStubProvider(), options.now, input.aiDailyTokenBudget);
+    registerAskRoutes(app, input.database, input.llmProvider ?? new LocalStubProvider(), options.now, input.aiDailyTokenBudget, input.snapConfigured);
+    registerAskEscalations(app, input.database, options.now);
+    registerAskSnapRoutes(app, input.database, input.visionProvider ?? { async extractText() { return { status: 'not_configured' }; } }, options.now);
     registerRemediationRoutes(app, input.database, options.now);
     registerDashboardRoutes(app, input.database, auth, options.now);
     registerPracticeRoutes(app, db, auth, options.now);

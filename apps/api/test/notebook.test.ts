@@ -192,11 +192,11 @@ describe('school-scoped notebook read models', () => {
     expect((await get(url, pupil.cookie)).json().strip[0].state).toBe('correct');
   });
 
-  it('lists only the existing games, keeps Atom Forge paused, and enforces roles', async () => {
+  it('lists only the existing games, keeps the approved Atom Forge available, and enforces roles', async () => {
     const games = await get('/student/games', aarav);
     expect(games.statusCode).toBe(200);
-    expect(games.json().atomForge).toEqual({ status: 'paused', label: 'Coming back soon' });
-    expect(games.json().todaysGame?.gameId).not.toMatch(/atom/i);
+    expect(games.json().atomForge).toEqual({ status: 'ready', label: 'Enter the atom', href: '/student/games/atom' });
+    expect(games.json().todaysGame).toBeNull(); // This school's fixture has no game checkpoint bank.
     for (const url of ['/student/subjects-board', '/student/progress', '/student/games']) {
       expect((await h.app.inject({ url })).statusCode).toBe(401);
       for (const cookie of [teacher, parent]) expect((await get(url, cookie)).statusCode).toBe(403);

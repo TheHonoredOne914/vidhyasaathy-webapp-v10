@@ -36,7 +36,8 @@ describe('Ask conversations', () => {
     const tokenEvent = response.body.match(/event: token\ndata: ({.*})/)?.[1];
     const tokenData = tokenEvent ? JSON.parse(tokenEvent) : null;
     expect(tokenData?.text).not.toContain('2.5');
-    expect((await ask({ clientEventId })).body).toBe(response.body);
+    expect((await ask({ clientEventId, mode: 'homework', text: 'Calculate acceleration 2.5 m/s²' })).body).toBe(response.body);
+    expect((await ask({ clientEventId })).statusCode).toBe(409);
     expect(h.database.sqlite.prepare("SELECT count(*) AS n FROM ask_message WHERE role='saathy'").get()).toEqual({ n: 1 });
     const status = await h.app.inject({ url: '/ask/status', headers: { cookie: student } });
     expect(status.json()).toMatchObject({ provider: 'stub', configured: false, snapConfigured: false });
