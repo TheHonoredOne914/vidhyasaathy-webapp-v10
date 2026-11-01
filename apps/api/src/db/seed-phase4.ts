@@ -1,63 +1,34 @@
+import { and, eq } from 'drizzle-orm';
+import { SaveItemSchema } from '@vidhyasaathy/contracts';
 import type { Database } from './index.ts';
 import { gameCheckpointMap } from './schema-phase4.ts';
-import { items, concepts, chapters, subjects, sections, profiles } from './schema.ts';
+import { items, concepts, chapters } from './schema.ts';
 
-export async function seedPhase4(database: Database, now: () => number) {
+export async function seedPhase4(database: Database, _now: () => number) {
   const { db } = database;
-  const schoolId = db.select({ id: subjects.schoolId }).from(subjects).limit(1).get()?.schoolId;
-  if (!schoolId) return;
-  
-  const conceptRows = db.select().from(concepts).where(concepts.schoolId.eq(schoolId)).all();
-  const itemRows = db.select().from(items).where(items.schoolId.eq(schoolId)).all();
-  
-  if (conceptRows.length === 0 || itemRows.length === 0) return;
-  
-  const conceptByTitle = new Map(conceptRows.map((c) => [c.title, c]));
-  const itemsByConcept = new Map<string, typeof itemRows>();
-  for (const item of itemRows) {
-    const arr = itemsByConcept.get(item.conceptId) ?? [];
-    arr.push(item);
-    itemsByConcept.set(item.conceptId, arr);
-  }
-  
-  const gameCheckpoints: Record<string, { conceptTitle: string; keys: string[] }> = {
-    motion: { conceptTitle: 'Speed & Velocity', keys: ['q1', 'q2', 'q3', 'q4', 'q5'] },
-    graphs: { conceptTitle: 'Distance-time graphs', keys: ['q1', 'q2', 'q3', 'q4', 'q5'] },
-    newton: { conceptTitle: 'Uniform and non-uniform motion', keys: ['q1', 'q2', 'q3', 'q4', 'q5'] },
-    energy: { conceptTitle: 'Speed & Velocity', keys: ['q1', 'q2', 'q3', 'q4', 'q5'] },
-    matter: { conceptTitle: 'Distance & Displacement', keys: ['q1', 'q2', 'q3', 'q4', 'q5'] },
-    float: { conceptTitle: 'Speed & Velocity', keys: ['q1', 'q2', 'q3', 'q4', 'q5'] },
-    cell: { conceptTitle: 'One half', keys: ['q1', 'q2', 'q3', 'q4', 'q5'] },
-    poly: { conceptTitle: 'Equal parts', keys: ['q1', 'q2', 'q3', 'q4', 'q5'] },
-    engine: { conceptTitle: 'Distance & Displacement', keys: ['q1', 'q2', 'q3', 'q4', 'q5'] },
-    arena: { conceptTitle: 'Speed & Velocity', keys: ['q1', 'q2', 'q3', 'q4', 'q5'] },
-    sound: { conceptTitle: 'Distance-time graphs', keys: ['q1', 'q2', 'q3', 'q4', 'q5'] },
-  };
-  
-  for (const [gameId, { conceptTitle, keys }] of Object.entries(gameCheckpoints)) {
-    const concept = conceptByTitle.get(conceptTitle);
-    if (!concept) {
-      console.log(`Concept not found: ${conceptTitle}`);
-      continue;
-    }
-    
-    const conceptItems = itemsByConcept.get(concept.id);
-    if (!conceptItems || conceptItems.length === 0) {
-      console.log(`No items for concept: ${conceptTitle} (${concept.id})`);
-      continue;
-    }
-    
-    console.log(`Seeding ${gameId} with ${keys.length} checkpoints for concept ${conceptTitle}`);
-    for (let i = 0; i < keys.length; i++) {
-      const item = conceptItems[i % conceptItems.length];
-      const result = db.insert(gameCheckpointMap).values({
-        schoolId,
-        gameId,
-        checkpointKey: keys[i],
-        conceptId: concept.id,
-        itemId: item.id,
-      }).onConflictDoNothing().run();
-      console.log(`  ${keys[i]}: changes=${result.changes}`);
+  // Missing bank coverage stays unavailable; never borrow unrelated questions.
+  const checkpoints = [
+    ['motion', 'motion.speed', 'Motion', 'Speed & Velocity'],
+    ['motion', 'motion.acceleration', 'Motion', 'Acceleration'],
+    ['cell', 'cell-membrane-selective-permeability', 'The Fundamental Unit of Life', 'Plasma membrane'],
+    ['cell', 'osmosis-hypotonic', 'The Fundamental Unit of Life', 'Osmosis'],
+    ['poly', 'poly.degree', 'Polynomials', 'Degree of a polynomial'],
+    ['poly', 'poly.zeroes', 'Polynomials', 'Zero of a polynomial'],
+  ] as const;
+  for (const [gameId, checkpointKey, chapterTitle, conceptTitle] of checkpoints) {
+    const matches = db.select({ concept: concepts }).from(concepts).innerJoin(chapters,
+      and(eq(chapters.id, concepts.chapterId), eq(chapters.schoolId, concepts.schoolId)))
+      .where(and(eq(chapters.title, chapterTitle), eq(concepts.title, conceptTitle))).all();
+    for (const { concept } of matches) {
+      const candidates = db.select().from(items).where(and(eq(items.schoolId, concept.schoolId),
+        eq(items.chapterId, concept.chapterId), eq(items.conceptId, concept.id))).all();
+      const item = candidates.find((row) => {
+        const parsed = SaveItemSchema.safeParse(row.content);
+        return parsed.success && parsed.data.type === 'mcq' && parsed.data.options.length <= 4;
+      });
+      if (!item) continue;
+      db.insert(gameCheckpointMap).values({ schoolId: concept.schoolId, gameId, checkpointKey,
+        conceptId: concept.id, itemId: item.id }).onConflictDoNothing().run();
     }
   }
 }
