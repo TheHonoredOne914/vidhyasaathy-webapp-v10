@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SaathyArtifactSchema } from '../../../../../packages/contracts/src/ask';
 import { apiFetch, ApiClientError, errorFrom, getJson, postJson, uploadForm } from '../../api/client';
 
 export const OptionSchema = z.object({ id: z.string(), text: z.string() });
@@ -13,7 +14,7 @@ export const QuickTrySchema = z.object({
 export const MessageSchema = z.object({
   id: z.string(), role: z.enum(['student', 'saathy']), text: z.string(), createdAt: z.string(), fromLabel: z.string().optional(),
   citations: z.array(CitationSchema).optional(), flags: FlagsSchema.nullish(),
-  quickTry: QuickTrySchema.optional(), followups: z.array(ChipSchema).optional(),
+  quickTry: QuickTrySchema.optional(), followups: z.array(ChipSchema).optional(), artifacts: z.array(SaathyArtifactSchema).optional(), levelCheck: z.object({ chapterId: z.string() }).optional(),
 }).transform((value) => ({ ...value, citations: value.citations ?? [] }));
 export const ThreadSchema = z.object({
   id: z.string(), title: z.string(), style: z.enum(['hints', 'explain']), mode: z.enum(['learn', 'homework']),
@@ -33,6 +34,8 @@ const EventSchemas = {
   token: z.object({ text: z.string() }),
   citation: CitationSchema,
   quickTry: QuickTrySchema,
+  artifacts: z.array(SaathyArtifactSchema).max(4),
+  levelCheck: z.object({ chapterId: z.string() }),
   followups: z.object({ chips: z.array(ChipSchema) }),
   done: z.object({ messageId: z.string(), text: z.string(), flags: FlagsSchema }),
   error: z.object({ code: z.enum(['provider_down', 'timeout', 'budget', 'rate_limit', 'invalid']), message: z.string() }),
@@ -112,6 +115,9 @@ export async function streamAsk(request: AskRequest, onEvent: (event: AskEvent) 
 export const getThread = (id: string, signal?: AbortSignal): Promise<AskThread> => getJson(`/ask/threads/${encodeURIComponent(id)}`, ThreadSchema, signal);
 export const answerQuickTry = (itemId: string, body: { clientEventId: string; threadId: string; optionId: string }, signal?: AbortSignal) =>
   postJson(`/ask/quick-try/${encodeURIComponent(itemId)}/answer`, QuickTryResultSchema, body, signal);
+
+export const getQuickHint = (itemId: string, threadId: string, stage: 'nudge' | 'hint' | 'worked-step') =>
+  postJson(`/ask/quick-try/${encodeURIComponent(itemId)}/hint`, z.object({ stage: z.enum(['nudge', 'hint', 'worked-step']), text: z.string() }), { threadId, stage });
 
 export async function snapDoubt(file: File, signal: AbortSignal) {
   const body = new FormData();

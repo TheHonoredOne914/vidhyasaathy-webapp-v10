@@ -11,6 +11,9 @@ import { Card, PageHead, SubjectIcon } from '../student/notebook/ui';
 import { answerQuickTry, confirmSnap, getThread, relativeDay, SavedSchema, snapDoubt, streamAsk, ThreadsSchema, type AskMessage, type AskRequest, type AskThread, type QuickTry, type QuickTryResult } from '../student/ask/askApi';
 import '../student/notebook/pages/ask.css';
 import './ask-v2.css';
+import { ArtifactCard, MathText } from './SaathyArtifacts';
+import { getQuickHint } from '../student/ask/askApi';
+import { SaathyLevelCheck } from './SaathyLevelCheck';
 
 // Chats and saved explanations must never enter the offline/localStorage cache.
 function usePrivateList<T>(path: string, schema: Parameters<typeof getJson<T>>[1]) {
@@ -36,7 +39,19 @@ function QuickQuestion({ item, threadId }: { item: QuickTry; threadId: string })
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(false);
   const eventId = useRef(crypto.randomUUID());
+  const [hints, setHints] = useState<string[]>([]);
+  const [hintError, setHintError] = useState(false);
   const busy = useRef(false);
+  async function hint() {
+    if (busy.current || hints.length >= 3) return;
+    busy.current = true; setPending(true); setHintError(false);
+    try {
+      const stage = (['nudge', 'hint', 'worked-step'] as const)[hints.length]!;
+      const response = await getQuickHint(item.itemId, threadId, stage);
+      setHints((rows) => [...rows, response.text]);
+    } catch { setHintError(true); }
+    finally { busy.current = false; setPending(false); }
+  }
   async function answer(optionId: string) {
     if (busy.current || result || item.answered) return;
     busy.current = true; setPending(true); setSelected(optionId); setError(false);
@@ -44,13 +59,16 @@ function QuickQuestion({ item, threadId }: { item: QuickTry; threadId: string })
     catch { setError(true); }
     finally { busy.current = false; setPending(false); }
   }
-  return <><div className="nb-q__label"><span className="nb-label">Quick try</span></div><div>{item.stem}</div>
+  return <section className="saathy-card" aria-label="Quick check"><div className="nb-q__label"><span className="nb-label">Quick check</span></div><div><MathText text={item.stem} /></div>
     <div className="mini-q">{item.options.map((option) => {
       const right = result ? result.correctOptionId === option.id : item.answered?.optionId === option.id && item.answered.correct;
       const wrong = selected === option.id && (result ? !result.correct : item.answered?.correct === false);
       return <button type="button" className={`nb-opt${right ? ' is-right' : wrong ? ' is-wrong' : selected === option.id ? ' is-picked' : ''}`} key={option.id} disabled={pending || !!result || !!item.answered || (error && selected !== option.id)} onClick={() => { void answer(option.id); }}>{option.text}</button>;
     })}</div>{result ? <p role="status">{result.explanation}</p> : null}
-    {error ? <p className="nb-note">Your answer has not been confirmed. <button className="nb-btn nb-btn--ghost nb-btn--sm" onClick={() => { void answer(selected); }}>Retry</button></p> : null}</>;
+    {hints.map((text, i) => <p className="nb-note" key={i}><b>{['Nudge', 'Hint', 'Worked step'][i]}: </b><MathText text={text} /></p>)}
+    {!result && !item.answered && hints.length < 3 ? <button type="button" className="nb-btn nb-btn--ghost nb-btn--sm" disabled={pending} onClick={() => { void hint(); }}>{['Give me a nudge', 'Give me a hint', 'Show a worked step'][hints.length]}</button> : null}
+    {hintError ? <p role="alert">The hint could not load. Try again.</p> : null}
+    {error ? <p className="nb-note">Your answer has not been confirmed. <button className="nb-btn nb-btn--ghost nb-btn--sm" onClick={() => { void answer(selected); }}>Retry</button></p> : null}</section>;
 }
 
 const errors: Record<string, string> = {
@@ -74,7 +92,7 @@ export function AskPanel() {
   const [thread, setThread] = useState<AskThread | null>(null);
   const [messages, setMessages] = useState<AskMessage[]>([]);
   const [allRecent, setAllRecent] = useState(false);
-  const emptyMessage = (text: string): AskMessage => ({ id: crypto.randomUUID(), role: 'saathy' as const, text, createdAt: new Date().toISOString(), citations: [], flags: undefined, quickTry: undefined, followups: undefined });
+  const emptyMessage = (text: string): AskMessage => ({ id: crypto.randomUUID(), role: 'saathy' as const, text, createdAt: new Date().toISOString(), citations: [], flags: undefined, quickTry: undefined, followups: undefined, artifacts: undefined, levelCheck: undefined });
   const [text, setText] = useState(params.get('q') ?? '');
   const homework = params.get('from') === 'homework' || params.get('mode') === 'homework' || !!params.get('assignmentItemId') || !!params.get('item');
   const [style, setStyle] = useState<'hints' | 'explain'>('hints');
@@ -124,6 +142,8 @@ export function AskPanel() {
           case 'token': update((row) => ({ text: row.text + event.data.text })); break;
           case 'citation': update((row) => ({ citations: [...row.citations, event.data] })); break;
           case 'quickTry': update({ quickTry: event.data }); break;
+          case 'artifacts': update({ artifacts: event.data }); break;
+          case 'levelCheck': update({ levelCheck: event.data }); break;
           case 'followups': update({ followups: event.data.chips }); break;
           case 'done': update({ id: event.data.messageId, text: event.data.text, flags: event.data.flags }); break;
           case 'error': fail(event.data.code); break;
@@ -170,7 +190,7 @@ export function AskPanel() {
         {fresh ? <div className="av2-hero">
           <p className="av2-hero__kicker">Ask Saathy · Today · {today()}</p>
           <Saathy mood="happy" size="7rem" label="Saathy, your learning companion" />
-          <h2 className="av2-hero__title">{greeting()}, {me?.profile.name ?? 'there'} — ready when you are ☁</h2>
+          <h2 className="av2-hero__title">{greeting()}, {me?.profile.name ?? 'there'} — ready when you are</h2>
           <p className="av2-hero__sub">{currentTopic ? `I've read ${currentTopic.name} properly — every section. Ask me anything from it, or start below. Pehle main check kar lungi tum kahan ho, phir waise hi samjhaungi.` : 'Jo poochna hai poochho — I first see where you stand, then teach it your way. Hints pehle, poori answer baad me.'}</p>
           <div className="av2-hero__chips">
             {currentPath ? <span className="av2-chip">{currentPath.subject} · {currentPath.chapter}</span> : null}
@@ -210,7 +230,7 @@ export function AskPanel() {
             {isSaathy ? <Saathy mood={mood} size="3rem" /> : null}
             <div>
               <div className="meta">{isSaathy ? 'Saathy' : `You · ${new Date(row.createdAt).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' })}${row.fromLabel ? ` · ${row.fromLabel}` : ''}`}</div>
-              <div className="b"><span className="ask-copy">{row.text || (row.id === streamingId ? 'Saathy is thinking…' : '')}</span>{row.citations.map((citation) => <div className="nb-meta" key={citation.chunkId}>{citation.noteTitle}{citation.page !== undefined ? ` · p. ${citation.page}` : ''}</div>)}{row.quickTry && thread ? <QuickQuestion key={row.quickTry.itemId} item={row.quickTry} threadId={thread.id} /> : null}{isError && retry ? <button className="nb-btn nb-btn--ghost nb-btn--sm" disabled={pending} onClick={() => { void send(retry.text, undefined, retry); }}>Retry</button> : null}</div>
+              <div className="b"><span className="ask-copy"><MathText text={row.text || (row.id === streamingId ? 'Saathy is thinking…' : '')} /></span>{row.citations.map((citation) => <div className="nb-meta" key={citation.chunkId}>{citation.noteTitle}{citation.page !== undefined ? ` · p. ${citation.page}` : ''}</div>)}{row.levelCheck ? <SaathyLevelCheck chapterId={row.levelCheck.chapterId} busy={pending} onContinue={() => { void send(messages.slice(0, messages.indexOf(row)).filter((message) => message.role === 'student').at(-1)?.text ?? 'Help me explore this chapter'); }} /> : null}{row.artifacts?.map((artifact, i) => <ArtifactCard key={i} artifact={artifact} />)}{row.quickTry && thread ? <QuickQuestion key={row.quickTry.itemId} item={row.quickTry} threadId={thread.id} /> : null}{isError && retry ? <button className="nb-btn nb-btn--ghost nb-btn--sm" disabled={pending} onClick={() => { void send(retry.text, undefined, retry); }}>Retry</button> : null}</div>
             </div>
             {row.role === 'student' ? <span className="nb-avatar">{me?.profile.name?.slice(0, 1)}</span> : null}
           </div>;
@@ -230,7 +250,7 @@ export function AskPanel() {
         <button type="submit" className="av2-send" aria-label="Send" disabled={pending || !text.trim()}>
           <svg className="i" viewBox="0 0 24 24" aria-hidden><path d="M12 19V5M6 11l6-6 6 6" /></svg>
         </button>
-        <p className="av2-note">Saathy answers from your class books &amp; teacher&apos;s notes — always double-check important steps. ☁</p>
+        <p className="av2-note">Saathy answers from your class books &amp; teacher&apos;s notes — always double-check important steps.</p>
       </form>
     </section>
 

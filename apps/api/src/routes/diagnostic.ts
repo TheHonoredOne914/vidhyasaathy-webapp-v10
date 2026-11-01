@@ -12,7 +12,7 @@ import { ApiException, parseInput } from '../errors.ts';
 import { diagnosticMessage, mistakeFor, placeDiagnostic, recordAnswer } from '../learning/record.ts';
 import { mutate } from '../school/access.ts';
 
-function diagnosticItems(db: Db, schoolId: string, chapterId: string) {
+export function diagnosticItems(db: Db, schoolId: string, chapterId: string) {
   const chapterRows = db.select().from(chapters).where(eq(chapters.schoolId, schoolId)).all();
   const chapter = chapterRows.find((row) => row.id === chapterId)!;
   const subject = db.select().from(subjects).where(and(eq(subjects.schoolId, schoolId), eq(subjects.id, chapter.subjectId))).get()!;

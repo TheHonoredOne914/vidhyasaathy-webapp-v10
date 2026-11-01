@@ -275,3 +275,23 @@
 @media (prefers-reduced-motion: reduce) {
   .ask-v2 .av2-hero > svg, .ask-v2 .av2-card, .ask-v2 .av2-msg { animation: none; }
 }
+
+.ask-v2 .saathy-card {
+  margin-top: 1rem;
+  padding: 1rem 1rem 1rem 1.6rem;
+  border: 1px solid #D6E2E6;
+  border-left: 2px solid var(--nb-margin, #b0552f);
+  border-radius: 4px;
+  background: repeating-linear-gradient(transparent 0 31px, rgb(81 125 171 / .12) 31px 32px), #F9F6EE;
+  color: #041D3D;
+  font-family: 'Patrick Hand', cursive;
+  overflow-wrap: anywhere;
+}
+.ask-v2 .saathy-card .nb-h3 { margin: .4rem 0; }
+.ask-v2 .saathy-card li { margin: .45rem 0; }
+.ask-v2 .saathy-diagram { display: flex; flex-wrap: wrap; gap: .65rem; padding: 0; list-style: none; }
+.ask-v2 .saathy-diagram li { border: 1px solid #517DAB; border-radius: 4px; padding: .5rem; flex: 1 1 8rem; }
+.ask-v2 .saathy-diagram li + li::before { content: '→ '; }
+.ask-v2 .saathy-math { display: inline-block; font-style: italic; white-space: pre-wrap; padding: 0 .2rem; }
+.ask-v2 .av2-msg > div { min-width: 0; }
+.ask-v2 .saathy-card button { white-space: normal; }
