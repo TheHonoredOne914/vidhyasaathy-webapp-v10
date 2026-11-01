@@ -1,6 +1,5 @@
 import type { Me } from '@vidhyasaathy/contracts';
 import { Navigate, useSearchParams } from 'react-router-dom';
-import { AskPanel } from '../ai/AskPanel';
 import { HomeDesk } from '../student/HomeDesk';
 import { GamesBoard } from '../student/notebook/screens/GamesBoard';
 import { HomeworkBoard } from '../student/notebook/screens/HomeworkBoard';
@@ -17,6 +16,6 @@ export function StudentHome({ me, stale, updatedAt, message }: { me: Me; stale: 
   if (panel === 'subjects') return <SubjectsBoard query={params.get('q') ?? ''} />;
   if (panel === 'games') return <GamesBoard />;
   if (panel === 'homework' || panel === 'study') return <HomeworkBoard />;
-  if (panel === 'ask') return <AskPanel />;
+  if (panel === 'ask') return <Navigate to={`/student/saathy${window.location.search}`} replace />;
   return <HomeDesk me={me} stale={stale} updatedAt={updatedAt} message={message} />;
 }

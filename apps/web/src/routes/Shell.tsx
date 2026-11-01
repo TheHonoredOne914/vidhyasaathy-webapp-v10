@@ -247,7 +247,7 @@ export function Shell() {
           <main id="content" className={`app-main ${me.profile.role === 'admin' || me.profile.role === 'teacher' ? 'staff-main' : ''} ${pathname === '/admin/setup' ? 'setup-main' : ''}`}>
             <OfflineBanner />
             <Outlet />
-            {me.profile.role === 'student' && !pathname.startsWith('/student/sessions/') && new URLSearchParams(search).get('panel') !== 'ask' ? <AskDock /> : null}
+            {me.profile.role === 'student' && !pathname.startsWith('/student/sessions/') && !pathname.startsWith('/student/saathy') && new URLSearchParams(search).get('panel') !== 'ask' ? <AskDock /> : null}
             <footer className="app-help no-print"><Link className="text-link" to="/recover">Help with your account</Link><Link className="text-link" to="/privacy">Privacy</Link></footer>
           </main>
           <nav className="app-bottom-tabs no-print" aria-label="Quick navigation">

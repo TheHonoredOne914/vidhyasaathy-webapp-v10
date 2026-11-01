@@ -48,6 +48,7 @@ const ExaminerHome = lazy(() => import('./examiner/ExaminerHome').then((module) 
 const PaperReview = lazy(() => import('./examiner/PaperReview').then((module) => ({ default: module.PaperReview })));
 const ModerationSummary = lazy(() => import('./examiner/ModerationSummary').then((module) => ({ default: module.ModerationSummary })));
 const RemediationPage = lazy(() => import('./ai/RemediationPage').then((module) => ({ default: module.RemediationPage })));
+const AskPanel = lazy(() => import('./ai/AskPanel').then((module) => ({ default: module.AskPanel })));
 const DraftReviewPage = lazy(() => import('./ai/DraftReview').then((module) => ({ default: module.DraftReviewPage })));
 const AnnouncementsPage = lazy(() => import('./dashboard/AnnouncementsPage').then((module) => ({ default: module.AnnouncementsPage })));
 const AuditPage = lazy(() => import('./dashboard/AuditPage').then((module) => ({ default: module.AuditPage })));
@@ -145,6 +146,7 @@ export function App() {
                 <Route path="/teacher/*" element={<AccessDenied />} />
               </Route>
               <Route path="/student" element={<RoleGuard role="student"><RoleHome role="student" /></RoleGuard>} />
+              <Route path="/student/saathy" element={<RoleGuard role="student"><AskPanel /></RoleGuard>} />
               <Route path="/student/welcome" element={<RoleGuard role="student"><StudentWelcome /></RoleGuard>} />
               <Route path="/student/subjects/:subjectId" element={<RoleGuard role="student"><StudentSubject /></RoleGuard>} />
               <Route path="/student/chapters/:chapterId/concepts/:conceptId" element={<RoleGuard role="student"><ConceptPage /></RoleGuard>} />
