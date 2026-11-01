@@ -14,7 +14,7 @@ export const PracticeSetSchema = z.object({
   bridge: z.string().nullable(),
 }).strict();
 export const PracticeNextSchema = z.object({
-  chapterId: z.string().uuid(), item: PublicItemSchema.nullable(), level: z.number().int().min(1).max(4),
+  chapterId: z.string().uuid(), item: PublicItemSchema.nullable(),
   word: z.string(), bridge: z.string().nullable(),
 }).strict();
 // Games emit the same answer event as assignments, without an assignment/deadline.
@@ -22,6 +22,7 @@ export const SubmitPracticeAttemptSchema = SubmitAttemptSchema.omit({ assignment
 export const PracticeAttemptSchema = AttemptSchema.omit({ assignmentId: true }).extend({
   assignmentId: z.null(), explanation: z.string().nullable(), fix: z.string().nullable(),
   correctOption: z.string().nullable(), errorType: ErrorFamilySchema.nullable(), bridge: z.string().nullable(),
+  repeatedError: z.boolean(),
 }).strict();
 export const StreakSchema = z.object({
   timezone: z.literal('Asia/Kolkata'), currentDays: z.number().int().nonnegative(), longestDays: z.number().int().nonnegative(),

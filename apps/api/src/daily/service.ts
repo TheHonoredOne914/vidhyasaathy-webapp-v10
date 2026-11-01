@@ -607,6 +607,7 @@ export function answerChallenge(db: Db, request: FastifyRequest, challengeId: st
   const { school, profile } = studentRow(db, request);
   const challenge = found(db.select().from(dailyChallenges).where(eq(dailyChallenges.id, challengeId)).get());
   if (challenge.profileId !== profile.id || challenge.schoolId !== school.id) throw new ApiException(404, 'NOT_FOUND', 'Resource not found.');
+  if (challenge.day !== istDay(now)) throw new ApiException(409, 'CHALLENGE_CLOSED', 'This challenge belongs to an earlier day.');
   if (challenge.status !== 'served') throw new ApiException(409, 'CHALLENGE_CLOSED', 'This challenge is already finished.');
   if (!challenge.itemIds.includes(input.itemId)) throw new ApiException(400, 'INVALID_ITEM', 'That question is not in today’s challenge.');
   if (challenge.startedAt != null && now > challenge.startedAt + CHALLENGE_MS) throw new ApiException(409, 'CHALLENGE_CLOSED', 'The five minutes are over.');
@@ -616,6 +617,12 @@ export function answerChallenge(db: Db, request: FastifyRequest, challengeId: st
     const item = found(db.select().from(items).where(eq(items.id, existing.itemId)).get());
     const feedback = mistakeForSafe(item.content, existing.answer);
     return { itemId: existing.itemId, outcome: existing.correct ? 'yes' as const : 'not_yet' as const, why: existing.correct ? null : feedback };
+  }
+  const evidenceId = `challenge:${challenge.id}:${input.itemId}`;
+  const answered = db.select().from(answerEvidence).where(eq(answerEvidence.id, evidenceId)).get();
+  if (answered) {
+    const item = found(db.select().from(items).where(scope(items, school.id, input.itemId)).get());
+    return { itemId: item.id, outcome: answered.correct ? 'yes' as const : 'not_yet' as const, why: answered.correct ? null : mistakeForSafe(item.content, answered.answer) };
   }
   const item = found(db.select().from(items).where(scope(items, school.id, input.itemId)).get());
   const marked = markItem(item.content, input.answer);
@@ -627,7 +634,7 @@ export function answerChallenge(db: Db, request: FastifyRequest, challengeId: st
     timeMs: input.timeMs, clientTs: now, serverTs: now, updatedAt: now, gradedBy: null, gradedAt: null,
   }).run();
   recordAnswer(db, {
-    id: `challenge:${input.clientEventId}`, schoolId: school.id, profileId: profile.id, conceptId: item.conceptId,
+    id: evidenceId, schoolId: school.id, profileId: profile.id, conceptId: item.conceptId,
     chapterId: item.chapterId, itemId: item.id, level: clampLevel(item.content.difficulty), correct: marked,
     confidence: input.confidence, source: 'game:daily_challenge', timeMs: input.timeMs,
     answer: typeof input.answer === 'string' ? input.answer : input.answer,
@@ -645,8 +652,12 @@ export function finishChallenge(db: Db, request: FastifyRequest, challengeId: st
   const challenge = found(db.select().from(dailyChallenges).where(eq(dailyChallenges.id, challengeId)).get());
   if (challenge.profileId !== profile.id || challenge.schoolId !== school.id) throw new ApiException(404, 'NOT_FOUND', 'Resource not found.');
   const answered = db.select().from(answerEvidence).where(and(eq(answerEvidence.profileId, profile.id), eq(answerEvidence.schoolId, school.id))).all()
-    .filter((row) => row.source === 'game:daily_challenge' && challenge.itemIds.includes(row.itemId) && (challenge.startedAt == null || row.createdAt >= challenge.startedAt));
+    .filter((row) => row.source === 'game:daily_challenge' && challenge.itemIds.includes(row.itemId) && istDay(row.createdAt) === challenge.day && (challenge.startedAt == null || row.createdAt >= challenge.startedAt));
   if (challenge.status !== 'completed') {
+    if (challenge.day !== istDay(now)) throw new ApiException(409, 'CHALLENGE_CLOSED', 'This challenge belongs to an earlier day.');
+    if (!answered.length || (answered.length < challenge.itemIds.length && (challenge.startedAt == null || now < challenge.startedAt + CHALLENGE_MS))) {
+      throw new ApiException(409, 'CHALLENGE_INCOMPLETE', 'Try the questions before finishing.');
+    }
     const right = answered.filter((row) => row.correct).length;
     db.update(dailyChallenges).set({ status: 'completed', correct: right, total: challenge.itemIds.length, completedAt: now })
       .where(eq(dailyChallenges.id, challenge.id)).run();

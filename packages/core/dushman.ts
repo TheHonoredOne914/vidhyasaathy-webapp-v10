@@ -35,7 +35,7 @@ export function selectDushman(states: readonly DushmanState[], evidence: readonl
   const minimum = band === '0-25' ? 1 : DUSHMAN_EVIDENCE_MIN;
   const ranked: DushmanPick[] = [];
   for (const state of states) {
-    if (state.level == null) continue;
+    if (state.level == null || state.level >= 3) continue;
     const rows = counted(evidence, state.conceptId);
     if (rows.length < minimum) continue;
     const recent = rows.slice(-10);
