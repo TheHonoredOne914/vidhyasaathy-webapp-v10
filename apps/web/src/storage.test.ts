@@ -1,6 +1,26 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
-import { parseCached, parseCachedMe } from './storage';
+import { parseCached, parseCachedMe, readStudentProfiles } from './storage';
+
+afterEach(() => { vi.unstubAllEnvs(); vi.unstubAllGlobals(); });
+
+describe('local demo student names', () => {
+  const students = [{ id: '6e6f1d5b-3f4c-4d2e-9a7b-0c1d2e3f4a5b', name: 'A student', school: 'Demo school' }];
+  it('accepts validated, explicitly supplied names only in development', () => {
+    vi.stubEnv('DEV', true);
+    vi.stubEnv('VITE_DEMO_STUDENTS', JSON.stringify(students));
+    expect(readStudentProfiles()).toEqual(students);
+    vi.stubEnv('DEV', false);
+    expect(readStudentProfiles()).toEqual([]);
+  });
+  it('rejects malformed demo names and prefers saved browser profiles', () => {
+    vi.stubEnv('DEV', true);
+    vi.stubEnv('VITE_DEMO_STUDENTS', 'not json');
+    expect(readStudentProfiles()).toEqual([]);
+    vi.stubGlobal('localStorage', { getItem: () => JSON.stringify(students) });
+    expect(readStudentProfiles()).toEqual(students);
+  });
+});
 
 const cached = {
   updatedAt: '2026-10-24T12:00:00.000Z',

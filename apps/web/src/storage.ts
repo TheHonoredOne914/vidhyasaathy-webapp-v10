@@ -66,12 +66,15 @@ const CachedShape = z.object({ data: z.unknown(), updatedAt: z.string() }).stric
 const StudentProfilesSchema = z.array(z.object({ id: z.string().uuid(), name: z.string(), school: z.string() }).strict());
 
 export function readStudentProfiles(): z.infer<typeof StudentProfilesSchema> {
-  try {
-    const result = StudentProfilesSchema.safeParse(JSON.parse(readStorage(STUDENTS_KEY) ?? '[]'));
-    return result.success ? result.data : [];
-  } catch {
-    return [];
-  }
+  const parse = (raw: string | null | undefined): z.infer<typeof StudentProfilesSchema> => {
+    try {
+      const result = StudentProfilesSchema.safeParse(JSON.parse(raw ?? '[]'));
+      return result.success ? result.data : [];
+    } catch { return []; }
+  };
+  const saved = parse(readStorage(STUDENTS_KEY));
+  const demo = import.meta.env.DEV ? parse(import.meta.env.VITE_DEMO_STUDENTS) : [];
+  return [...saved, ...demo.filter((student) => !saved.some((profile) => profile.id === student.id))];
 }
 
 function cacheKey(key: string): string {

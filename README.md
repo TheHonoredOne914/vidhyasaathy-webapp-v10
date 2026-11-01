@@ -1,12 +1,31 @@
 # VidhyaSaathy
 
-Phase 1 API foundation: school registration, administrator password login,
-student claim/PIN login, cookie sessions, and school/role authorization.
-The web application and Playwright scenarios belong to the separate web track;
-neither is present in this initial checkout. No roster import or claim-issuance
-endpoint ships in this phase. API tests provision their own claim-code fixtures.
+Notebook learning app: React/Vite web, Fastify/SQLite API, shared TypeScript
+contracts, real learning evidence, teacher/parent workspaces, Ask Saathy and games.
 
-## Setup (PowerShell)
+**Future agents:** read [AGENTS.md](AGENTS.md), then
+[the current handoff](docs/codex/AGENT_HANDOFF.md). `rebuild-local` is the integrated branch;
+do not restart from the historical WIP branches.
+
+## Local demo
+
+```powershell
+npm install
+npm run demo
+```
+
+Use Node.js 24+. Open `http://127.0.0.1:5173/signin/student` and choose a seeded
+name. PINs: Aarav `2468`, Meera `3579`, Kabir `4680`, Priya `5791`, Rohan `6802`.
+Teacher: `teacher@demo.invalid` / `Saathy@2026!` (PIN `1357`). Demo credentials
+are local fixtures, not production credentials. The launcher backs up an existing
+database before additive migration/seeding, restores documented demo logins,
+and starts API `3001` plus web `5173`. Stop with Ctrl+C.
+Backups default to `~/vidhyasaathy-demo-backups`; override `BACKUP_DIRECTORY` if needed.
+Fresh-browser demo names are read from the seeded database, only in this explicit
+development launcher. Normal and production sign-in still uses activated browser profiles.
+Provider-dependent AI/OCR requires server configuration; unavailable services show honest states.
+
+## Manual API setup (PowerShell)
 
 Use Node.js 24 or newer and npm 11. Install dependencies from the repo root:
 
@@ -17,8 +36,7 @@ npm run db:migrate -w apps/api
 npm run dev -w apps/api
 ```
 
-`npm run dev` starts both the web and API workspaces using `concurrently`,
-once the web track has added `apps/web` and its `dev` script. For the web,
+`npm run dev` starts both the web and API workspaces using `concurrently`. For the web,
 copy the public values in root `.env.example` into `apps/web/.env`. Its dev
 proxy must forward `/api` to `VITE_API_PROXY_TARGET`, stripping `/api`, and
 preserve the browser's `Origin` and session cookie. Do not enable Vite's
