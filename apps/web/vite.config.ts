@@ -41,8 +41,10 @@ export default defineConfig(({ command, mode }) => {
         rewrite: (path) => path.replace(/^\/api/, '') || '/',
         configure: (proxy) => {
           proxy.on('proxyReq', (proxyReq, req) => {
-            const origin = req.headers.origin;
-            if (typeof origin === 'string') proxyReq.setHeader('origin', origin);
+            // The API's CSRF check requires this exact origin. Same-origin through
+            // the dev proxy/preview tunnel may carry a different host, so always
+            // present the app origin to the API.
+            proxyReq.setHeader('origin', process.env.VITE_APP_ORIGIN || 'http://127.0.0.1:5173');
           });
         },
       },

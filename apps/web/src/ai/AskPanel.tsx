@@ -1,4 +1,5 @@
 import { StudentHomeSchema } from '@vidhyasaathy/contracts';
+import { BookOpen, Camera, Lightbulb, ListChecks, Map, PenLine, Sparkles, StickyNote } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ApiClientError, getJson } from '../api/client';
@@ -6,9 +7,10 @@ import { useSession } from '../session';
 import { useRemote } from '../setup/useRemote';
 import { usePageMeta } from '../meta';
 import { Saathy } from '../student/notebook/Saathy';
-import { Card, PageHead, Sticky, SubjectIcon } from '../student/notebook/ui';
+import { Card, PageHead, SubjectIcon } from '../student/notebook/ui';
 import { answerQuickTry, confirmSnap, getThread, relativeDay, SavedSchema, snapDoubt, streamAsk, ThreadsSchema, type AskMessage, type AskRequest, type AskThread, type QuickTry, type QuickTryResult } from '../student/ask/askApi';
 import '../student/notebook/pages/ask.css';
+import './ask-v2.css';
 
 // Chats and saved explanations must never enter the offline/localStorage cache.
 function usePrivateList<T>(path: string, schema: Parameters<typeof getJson<T>>[1]) {
@@ -56,6 +58,13 @@ const errors: Record<string, string> = {
   budget: "That's enough questions for today. Your teacher can help, or try again tomorrow.", rate_limit: 'Slow down a little, then ask again.',
 };
 
+const greeting = () => {
+  const h = new Date().getHours();
+  return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+};
+
+const today = () => new Date().toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+
 export function AskPanel() {
   const [params] = useSearchParams();
   const { me } = useSession();
@@ -75,8 +84,12 @@ export function AskPanel() {
   const controller = useRef<AbortController | null>(null);
   const busy = useRef(false);
   const file = useRef<HTMLInputElement>(null);
+  const bottom = useRef<HTMLDivElement>(null);
+  const input = useRef<HTMLTextAreaElement>(null);
   useEffect(() => () => controller.current?.abort(), []);
   usePageMeta('Ask Saathy — VidhyaSaathy', "Hints first. You do the thinking, I'll keep you on track.");
+  // keep the newest turn in view while Saathy streams (only once a thread exists)
+  useEffect(() => { if (messages.length || thread) bottom.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, [messages.length, pending, thread?.id]);
   async function open(id: string) {
     if (busy.current) return;
     busy.current = true; setPending(true); setRetry(null);
@@ -137,16 +150,121 @@ export function AskPanel() {
   const currentPath = params.has('chapterId') ? null : home.data?.learningPath;
   const contextId = params.get('conceptId') ?? home.data?.nextAction?.conceptId ?? home.data?.warmup?.conceptId ?? currentPath?.nodes[0]?.conceptId;
   const currentTopic = currentPath?.nodes.find((node) => node.conceptId === contextId);
-  return <div className="nb-grid pg-ask"><div className="chat">
-    <div className="ask-head"><PageHead title="Ask Saathy" sub="Hints first. You do the thinking, I'll keep you on track." /><div className="nb-tabs" role="tablist">{(['hints', 'explain'] as const).map((id) => <button type="button" role="tab" aria-selected={(locked ? 'hints' : style) === id} className={`nb-tab${(locked ? 'hints' : style) === id ? ' is-active' : ''}`} key={id} disabled={pending || !!locked} onClick={() => setStyle(id)}>{id === 'hints' ? 'Hints mode' : 'Explain fully'}</button>)}</div></div>
-    <div className="thread" aria-live="polite">{!messages.length ? <div className="msg"><Saathy mood="think" size="3rem" /><div><div className="meta">Saathy</div><div className="b">{thread?.purged ? 'This chat has been cleared for your privacy. You can ask about this topic again.' : `Hi${me?.profile.name ? ` ${me.profile.name}` : ''}! What are you thinking about?`}</div></div></div> : null}
-      {messages.map((row) => <div className={`msg${row.role === 'student' ? ' me' : ''}`} key={row.id}>{row.role === 'saathy' ? <Saathy mood="think" size="3rem" /> : null}<div><div className="meta">{row.role === 'student' ? `You · ${new Date(row.createdAt).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' })}${row.fromLabel ? ` · ${row.fromLabel}` : ''}` : 'Saathy'}</div><div className="b"><span className="ask-copy">{row.text || 'Saathy is thinking…'}</span>{row.citations.map((citation) => <div className="nb-meta" key={citation.chunkId}>{citation.noteTitle}{citation.page !== undefined ? ` · p. ${citation.page}` : ''}</div>)}{row.quickTry && thread ? <QuickQuestion key={row.quickTry.itemId} item={row.quickTry} threadId={thread.id} /> : null}{row.id === 'ask-error' && retry ? <button className="nb-btn nb-btn--ghost nb-btn--sm" disabled={pending} onClick={() => { void send(retry.text, undefined, retry); }}>Retry</button> : null}</div></div>{row.role === 'student' ? <span className="nb-avatar">{me?.profile.name?.slice(0, 1)}</span> : null}</div>)}
-    </div>
-    <div className="ask-suggestions">{!messages.length && !thread && currentTopic ? <button className="nb-chip nb-chip--sky" disabled={pending} onClick={() => { void send(`Help me understand ${currentTopic.name}`); }}>{currentTopic.name}</button> : null}{last?.followups?.filter((chip) => chip.kind !== 'ask_teacher').map((chip) => <button className="nb-chip nb-chip--sky" key={chip.kind} disabled={pending} onClick={() => { if (chip.kind !== 'ask_teacher') void send(chip.label, chip.kind); }}>{chip.label}</button>)}</div>
-    <form className="composer" onSubmit={(event) => { event.preventDefault(); void send(); }}><input ref={file} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" hidden onChange={(event) => { const photo = event.target.files?.[0]; if (photo) void upload(photo); event.target.value = ''; }} /><button type="button" className="nb-btn nb-btn--quiet nb-btn--sm" aria-label="Snap your notebook" disabled={pending} onClick={() => file.current?.click()}><svg className="i" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M8 7l2-3h4l2 3" /><circle cx="12" cy="13" r="3.5" /></svg></button><textarea className="nb-text" aria-label="Your doubt" rows={2} maxLength={800} placeholder="Ask a doubt, or snap your notebook…" value={text} disabled={pending} onChange={(event) => setText(event.target.value)} /><button className="nb-btn nb-btn--primary" disabled={pending || !text.trim()}><svg className="i" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6" /></svg> Send</button></form>
-  </div><aside className="nb-col"><Card title="Recent doubts" meta={<button type="button" className="nb-link" aria-expanded={allRecent} onClick={() => setAllRecent((value) => !value)}>{allRecent ? 'Recent' : 'All'}</button>}>{recent.data?.threads.length ? recent.data.threads.slice(0, allRecent ? 20 : 3).map((row) => <button className="doubt" key={row.id} disabled={pending} onClick={() => { void open(row.id); }}><b>{row.title}</b><span className="nb-meta">{row.subjectName} · {relativeDay(row.updatedAt)}</span></button>) : <p className="nb-note">Your recent doubts will appear here.</p>}{recent.error ? <button className="nb-btn nb-btn--ghost nb-btn--sm" onClick={recent.reload}>Retry</button> : null}</Card>
-    <Card title="Talking about">{thread?.concept ? <div className="nb-row ask-context"><SubjectIcon subject={thread.concept.subjectName} /><div><div className="nb-row__t">{thread.concept.name}</div><div className="nb-row__s">{thread.concept.subjectName} · {thread.concept.chapterLabel}</div></div></div> : currentTopic && currentPath ? <div className="nb-row ask-context"><SubjectIcon subject={currentPath.subject} /><div><div className="nb-row__t">{currentTopic.name}</div><div className="nb-row__s">{currentPath.subject} · {currentPath.chapter}</div></div></div> : <p className="nb-note">Your current topic will appear here.</p>}</Card>
-    <Sticky color="lilac" who="How Saathy helps">1. Asks what you already know<br />2. Gives one hint at a time<br />3. Lets you finish the step<br /><br />Your chats stay private. Teachers and parents only see which topics you asked about.</Sticky>
-    <Card title="Saved explanations" meta={saved.data ? String(saved.data.items.length) : undefined} grow>{saved.data?.items.length ? saved.data.items.map((row) => <div className="doubt" key={row.id}><b>{row.title}</b><span className="nb-meta">{row.subjectName} · saved {relativeDay(row.savedAt)}</span></div>) : <p className="nb-note">No saved explanations here yet.</p>}{saved.error ? <button className="nb-btn nb-btn--ghost nb-btn--sm" onClick={saved.reload}>Retry</button> : null}</Card>
-  </aside></div>;
+  const topicName = thread?.concept?.name ?? currentTopic?.name ?? currentPath?.chapter ?? 'my chapter';
+  const streamingId = pending ? last?.id : undefined;
+  const prefill = (value: string) => { setText(value); input.current?.focus(); };
+  const chipSend = (value: string) => { void send(value); };
+  const fresh = !messages.length && !thread;
+  return <div className="nb-grid pg-ask ask-v2">
+    <section className="chat av2-chat" aria-label="Ask Saathy chat">
+      <div className="av2-head">
+        <span className="av2-head__mascot"><Saathy mood={pending ? 'think' : 'happy'} size="2.6rem" label="" /></span>
+        <PageHead title="Ask Saathy" sub="Hints first. You do the thinking, I'll keep you on track." />
+        <div className="av2-mode" role="tablist" aria-label="Answer style">
+          <button type="button" role="tab" aria-selected={(locked ? 'hints' : style) === 'hints'} className={`av2-mode__btn${(locked ? 'hints' : style) === 'hints' ? ' is-on' : ''}`} disabled={pending || !!locked} onClick={() => setStyle('hints')}><Lightbulb className="i" />Hints mode</button>
+          <button type="button" role="tab" aria-selected={(locked ? 'hints' : style) === 'explain'} className={`av2-mode__btn${(locked ? 'hints' : style) === 'explain' ? ' is-on' : ''}`} disabled={pending || !!locked} onClick={() => setStyle('explain')}>Explain fully</button>
+        </div>
+      </div>
+
+      <div className="thread av2-thread" aria-live="polite">
+        {fresh ? <div className="av2-hero">
+          <p className="av2-hero__kicker">Ask Saathy · Today · {today()}</p>
+          <Saathy mood="happy" size="7rem" label="Saathy, your learning companion" />
+          <h2 className="av2-hero__title">{greeting()}, {me?.profile.name ?? 'there'} — ready when you are ☁</h2>
+          <p className="av2-hero__sub">{currentTopic ? `I've read ${currentTopic.name} properly — every section. Ask me anything from it, or start below. Pehle main check kar lungi tum kahan ho, phir waise hi samjhaungi.` : 'Jo poochna hai poochho — I first see where you stand, then teach it your way. Hints pehle, poori answer baad me.'}</p>
+          <div className="av2-hero__chips">
+            {currentPath ? <span className="av2-chip">{currentPath.subject} · {currentPath.chapter}</span> : null}
+            <span className="av2-chip">trained on your books</span>
+            <span className="av2-chip">Saathy v.1</span>
+          </div>
+          <div className="av2-cards">
+            {([
+              { label: 'Samjha do', desc: 'step by step, your book, your pace', Icon: BookOpen, act: () => chipSend(`Help me understand ${topicName}`) },
+              { label: 'Yeh solve karo', desc: 'guided — no copy-paste answers', Icon: PenLine, act: () => prefill('Solve this: ') },
+              { label: 'Test me', desc: 'quick questions at my level', Icon: ListChecks, act: () => chipSend(`Give me one quick practice question on ${topicName}`) },
+              { label: 'Notebook snap', desc: 'photo likho, main padh lungi', Icon: Camera, act: () => file.current?.click() },
+              { label: 'Seedha point me', desc: '5 short revise points', Icon: StickyNote, act: () => chipSend(`Summarise ${topicName} in 5 short points I can revise`) },
+              { label: 'Meri position', desc: 'what to revise, what is strong', Icon: Map, act: () => chipSend('What are my weakest topics right now, and what should I revise first?') },
+            ] as const).map((card, i) => <button type="button" key={card.label} className="av2-card" style={{ animationDelay: `${i * 70}ms` }} onClick={card.act}>
+              <span className="av2-card__icon"><card.Icon className="i" /></span>
+              <span className="av2-card__t">{card.label}</span>
+              <span className="av2-card__d">{card.desc}</span>
+            </button>)}
+          </div>
+          <div className="av2-how">
+            <p className="av2-how__who"><Sparkles className="i" />How Saathy works</p>
+            <ol>
+              <li><b>Ask anything</b> from your books — main pehle level check karungi, phir exactly usi depth pe samjhaungi.</li>
+              <li><b>Ek baar ek hint</b> — hints mode me poori answer nahi, sirf agla step. Sochna tumhe hi hai.</li>
+              <li><b>Notebook snap</b> — photo bhejo, main padh kar doubt nikaal dungi.</li>
+              <li>Your chats stay private. Teachers and parents only see which topics you asked about.</li>
+            </ol>
+          </div>
+        </div> : null}
+        {!messages.length && thread?.purged ? <div className="msg"><Saathy mood="sleep" size="3rem" /><div><div className="meta">Saathy</div><div className="b">This chat has been cleared for your privacy. You can ask about this topic again.</div></div></div> : null}
+        {messages.map((row) => {
+          const isSaathy = row.role === 'saathy';
+          const isError = row.id === 'ask-error';
+          const mood = isError ? 'oops' : row.id === streamingId ? 'think' : 'happy';
+          return <div className={`msg av2-msg${row.role === 'student' ? ' me' : ''}`} key={row.id}>
+            {isSaathy ? <Saathy mood={mood} size="3rem" /> : null}
+            <div>
+              <div className="meta">{isSaathy ? 'Saathy' : `You · ${new Date(row.createdAt).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' })}${row.fromLabel ? ` · ${row.fromLabel}` : ''}`}</div>
+              <div className="b"><span className="ask-copy">{row.text || (row.id === streamingId ? 'Saathy is thinking…' : '')}</span>{row.citations.map((citation) => <div className="nb-meta" key={citation.chunkId}>{citation.noteTitle}{citation.page !== undefined ? ` · p. ${citation.page}` : ''}</div>)}{row.quickTry && thread ? <QuickQuestion key={row.quickTry.itemId} item={row.quickTry} threadId={thread.id} /> : null}{isError && retry ? <button className="nb-btn nb-btn--ghost nb-btn--sm" disabled={pending} onClick={() => { void send(retry.text, undefined, retry); }}>Retry</button> : null}</div>
+            </div>
+            {row.role === 'student' ? <span className="nb-avatar">{me?.profile.name?.slice(0, 1)}</span> : null}
+          </div>;
+        })}
+        <div ref={bottom} />
+      </div>
+
+      <div className="ask-suggestions">{!messages.length && !thread && currentTopic ? <button className="nb-chip nb-chip--sky" disabled={pending} onClick={() => { void send(`Help me understand ${currentTopic.name}`); }}>{currentTopic.name}</button> : null}{last?.followups?.filter((chip) => chip.kind !== 'ask_teacher').map((chip) => <button className="nb-chip nb-chip--sky" key={chip.kind} disabled={pending} onClick={() => { if (chip.kind !== 'ask_teacher') void send(chip.label, chip.kind); }}>{chip.label}</button>)}</div>
+
+      <form className="composer av2-composer" onSubmit={(event) => { event.preventDefault(); void send(); }}>
+        <input ref={file} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" hidden onChange={(event) => { const photo = event.target.files?.[0]; if (photo) void upload(photo); event.target.value = ''; }} />
+        <div className="av2-composer__tools">
+          <button type="button" className="av2-tool" aria-label="Snap your notebook" disabled={pending} onClick={() => file.current?.click()}><Camera className="i" /></button>
+          <span className={`av2-tool av2-hint${(locked ? 'hints' : style) === 'hints' ? ' is-on' : ''}`} title="Hints mode: sirf agla step, poori answer nahi"><Lightbulb className="i" />Hints</span>
+        </div>
+        <textarea ref={input} className="av2-input" aria-label="Your doubt" rows={2} maxLength={800} placeholder="Ask Saathy anything… (Enter to send, Shift+Enter for a new line)" value={text} disabled={pending} onChange={(event) => setText(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); void send(); } }} />
+        <button type="submit" className="av2-send" aria-label="Send" disabled={pending || !text.trim()}>
+          <svg className="i" viewBox="0 0 24 24" aria-hidden><path d="M12 19V5M6 11l6-6 6 6" /></svg>
+        </button>
+        <p className="av2-note">Saathy answers from your class books &amp; teacher&apos;s notes — always double-check important steps. ☁</p>
+      </form>
+    </section>
+
+    <aside className="nb-col av2-rail">
+      <div className="av2-id">
+        <Saathy mood="happy" size="4.2rem" label="" />
+        <p className="av2-id__name">Saathy</p>
+        <p className="av2-id__role">VidhyaSaathy&apos;s AI Tutor</p>
+        <p className="av2-id__tag">Ask. Learn. Grow.</p>
+        <p className="av2-id__about">Trained on your school books and teacher notes to give accurate, context-aware answers — at exactly your depth.</p>
+      </div>
+      <Card title="Model information" tape>
+        <dl className="av2-facts">
+          <div><dt>Model name</dt><dd>Saathy v.1</dd></div>
+          <div><dt>Trained on</dt><dd>Your books + NCERT</dd></div>
+          <div><dt>Answer style</dt><dd>Hints first, honesty always</dd></div>
+          <div><dt>Subjects</dt><dd>Maths · Science · SST</dd></div>
+        </dl>
+      </Card>
+      <Card title="Key features">
+        <ul className="av2-features">
+          <li><b>Level-first teaching</b> — checks your depth, then teaches at it</li>
+          <li><b>Context aware</b> — knows your class, chapter and current topic</li>
+          <li><b>One hint at a time</b> — you finish the step, no copy-paste</li>
+          <li><b>Safe &amp; honest</b> — school-appropriate, admits what it doesn&apos;t know</li>
+        </ul>
+      </Card>
+      <Card title="Recent doubts" meta={<button type="button" className="nb-link" aria-expanded={allRecent} onClick={() => setAllRecent((value) => !value)}>{allRecent ? 'Recent' : 'All'}</button>}>{recent.data?.threads.length ? recent.data.threads.slice(0, allRecent ? 20 : 3).map((row) => <button className="doubt" key={row.id} disabled={pending} onClick={() => { void open(row.id); }}><b>{row.title}</b><span className="nb-meta">{row.subjectName} · {relativeDay(row.updatedAt)}</span></button>) : <p className="nb-note">Your recent doubts will appear here.</p>}{recent.error ? <button className="nb-btn nb-btn--ghost nb-btn--sm" onClick={recent.reload}>Retry</button> : null}</Card>
+      <Card title="Talking about">{thread?.concept ? <div className="nb-row ask-context"><SubjectIcon subject={thread.concept.subjectName} /><div><div className="nb-row__t">{thread.concept.name}</div><div className="nb-row__s">{thread.concept.subjectName} · {thread.concept.chapterLabel}</div></div></div> : currentTopic && currentPath ? <div className="nb-row ask-context"><SubjectIcon subject={currentPath.subject} /><div><div className="nb-row__t">{currentTopic.name}</div><div className="nb-row__s">{currentPath.subject} · {currentPath.chapter}</div></div></div> : <p className="nb-note">Your current topic will appear here.</p>}</Card>
+      <Card title="Saved explanations" meta={saved.data ? String(saved.data.items.length) : undefined} grow>{saved.data?.items.length ? saved.data.items.map((row) => <div className="doubt" key={row.id}><b>{row.title}</b><span className="nb-meta">{row.subjectName} · saved {relativeDay(row.savedAt)}</span></div>) : <p className="nb-note">No saved explanations here yet.</p>}{saved.error ? <button className="nb-btn nb-btn--ghost nb-btn--sm" onClick={saved.reload}>Retry</button> : null}</Card>
+      <div className="av2-honest">
+        <p className="av2-honest__who"><Sparkles className="i" />Only from your books</p>
+        <p>Saathy answers from your class books and your teacher&apos;s notes — aur jab kuch pata na ho, seedha bol deta hai.</p>
+      </div>
+    </aside>
+  </div>;
 }
