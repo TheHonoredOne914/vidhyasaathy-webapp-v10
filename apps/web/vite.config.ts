@@ -42,7 +42,9 @@ export default defineConfig(({ command, mode }) => {
         configure: (proxy) => {
           proxy.on('proxyReq', (proxyReq, req) => {
             const origin = req.headers.origin;
-            if (typeof origin === 'string') proxyReq.setHeader('origin', origin);
+            // Real browsers always send Origin on POSTs; headless drivers may not.
+            // Fall back to the app origin so the API's CSRF origin check still passes.
+            proxyReq.setHeader('origin', typeof origin === 'string' && origin ? origin : (process.env.VITE_APP_ORIGIN || 'http://127.0.0.1:5173'));
           });
         },
       },

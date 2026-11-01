@@ -1,0 +1,277 @@
+/* ask-v2.css — Ask Saathy, redesigned with the Saathy chat identity.
+   Palette: deep navy ink, powder blue, warm peach, warm cream — on the
+   existing notebook tokens. Loaded after pages/ask.css so it can refine it. */
+
+.ask-v2 {
+  --av2-navy: #16305b;
+  --av2-navy-deep: #102b4c;
+  --av2-blue: #2a5298;
+  --av2-powder: #d7e9f5;
+  --av2-sky: #a9cee8;
+  --av2-peach: #f6d5c6;
+  --av2-peach-soft: #fff1e7;
+  --av2-cream: #fff5ed;
+  --av2-ink-soft: #637c96;
+  --av2-green: #3e7d4d;
+  --av2-terra: #b0552f;
+}
+
+/* ---------- chat column: the back page of a school copy ---------- */
+.ask-v2 .av2-chat {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 34px, rgb(81 125 171 / 0.10) 34px 35px),
+    var(--av2-cream);
+  border: 1.5px solid var(--av2-powder);
+  border-radius: 18px;
+  box-shadow: 0 14px 34px -18px rgb(16 43 76 / 0.25), inset 0 1px 0 #fff;
+  padding: clamp(0.9rem, 2.4vw, 1.6rem);
+  position: relative;
+}
+
+/* header — mascot + title + style toggle */
+.ask-v2 .av2-head {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  border-bottom: 2px dashed rgb(81 125 171 / 0.28);
+  padding-bottom: 0.7rem;
+}
+.ask-v2 .av2-head .nb-head { margin: 0; flex: 1 1 auto; min-width: 0; }
+.ask-v2 .av2-head .nb-h1 { font-size: clamp(1.7rem, 3.4vw, 2.15rem); }
+.ask-v2 .av2-head__mascot { flex: 0 0 auto; transform: rotate(-3deg); }
+.ask-v2 .av2-head__mascot svg { filter: drop-shadow(0 3px 5px rgb(16 43 76 / 0.14)); }
+
+.ask-v2 .av2-mode {
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.28rem;
+  border: 1.5px solid var(--av2-powder);
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgb(16 43 76 / 0.07);
+}
+.ask-v2 .av2-mode__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--av2-ink-soft);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.32rem 0.75rem;
+  cursor: pointer;
+  transition: background 160ms var(--vs-ease, ease), color 160ms var(--vs-ease, ease), box-shadow 160ms var(--vs-ease, ease);
+}
+.ask-v2 .av2-mode__btn .i { width: 0.85rem; height: 0.85rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ask-v2 .av2-mode__btn:hover:not(:disabled) { color: var(--av2-blue); }
+.ask-v2 .av2-mode__btn.is-on {
+  background: var(--av2-navy);
+  color: #fff;
+  box-shadow: 0 2px 6px rgb(16 43 76 / 0.28);
+}
+.ask-v2 .av2-mode__btn:disabled { cursor: default; opacity: 0.75; }
+
+/* ---------- hero (fresh chat) ---------- */
+.ask-v2 .av2-hero { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 1.4rem 0.2rem 0.4rem; }
+.ask-v2 .av2-hero__kicker { font-family: var(--nb-font-hand, 'Caveat', cursive); font-size: 1.05rem; font-weight: 700; color: var(--av2-terra); margin: 0 0 0.4rem; }
+.ask-v2 .av2-hero > svg { filter: drop-shadow(0 8px 14px rgb(16 43 76 / 0.16)); animation: av2-float 4.5s ease-in-out infinite; }
+@keyframes av2-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+.ask-v2 .av2-hero__title { font-family: 'Patrick Hand', cursive; font-size: clamp(1.5rem, 3.6vw, 1.95rem); line-height: 1.2; color: var(--av2-navy); margin: 0.7rem 0 0; font-weight: 700; }
+.ask-v2 .av2-hero__sub { max-width: 46ch; font-size: 0.98rem; line-height: 1.5; color: var(--av2-ink-soft); margin: 0.45rem 0 0; }
+.ask-v2 .av2-hero__chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem; margin-top: 0.8rem; }
+.ask-v2 .av2-chip {
+  border: 1.5px solid var(--av2-powder);
+  background: rgb(255 255 255 / 0.75);
+  color: #4a6a94;
+  border-radius: 999px;
+  padding: 0.18rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.ask-v2 .av2-chip:nth-last-child(-n + 2) { border-color: var(--av2-peach); background: var(--av2-peach-soft); color: var(--av2-terra); }
+
+/* action cards — the six doors */
+.ask-v2 .av2-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+  width: min(34rem, 100%);
+  margin-top: 1.3rem;
+  text-align: left;
+}
+.ask-v2 .av2-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 0.7rem;
+  align-items: center;
+  border: 1.5px solid #ece7e0;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.92);
+  padding: 0.65rem 0.8rem;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 1px 6px rgb(30 58 138 / 0.05);
+  animation: av2-card-in 420ms var(--vs-ease, ease) both;
+  transition: transform 180ms var(--vs-ease, ease), border-color 180ms var(--vs-ease, ease), box-shadow 180ms var(--vs-ease, ease);
+}
+@keyframes av2-card-in { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: none; } }
+.ask-v2 .av2-card:hover { transform: translateY(-2px); border-color: var(--av2-sky); box-shadow: 0 8px 18px rgb(127 179 255 / 0.28); }
+.ask-v2 .av2-card:focus-visible { outline: 2px solid var(--av2-blue); outline-offset: 2px; }
+.ask-v2 .av2-card__icon {
+  grid-row: 1 / span 2;
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 11px;
+  background: var(--av2-powder);
+  color: var(--av2-blue);
+}
+.ask-v2 .av2-card__icon .i { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ask-v2 .av2-card__t { font-size: 0.9rem; font-weight: 700; color: var(--av2-navy); }
+.ask-v2 .av2-card__d { font-size: 0.78rem; font-weight: 600; color: #8a94a8; }
+@media (max-width: 640px) { .ask-v2 .av2-cards { grid-template-columns: 1fr; } }
+
+/* how Saathy works — washi-taped instructions card */
+.ask-v2 .av2-how {
+  position: relative;
+  width: min(34rem, 100%);
+  margin-top: 1.1rem;
+  border: 1.5px solid #ece7e0;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.92);
+  padding: 0.9rem 1.1rem 1rem;
+  text-align: left;
+  box-shadow: 0 1px 6px rgb(30 58 138 / 0.05);
+}
+.ask-v2 .av2-how::before {
+  content: '';
+  position: absolute;
+  top: -9px;
+  left: 1.4rem;
+  width: 3.6rem;
+  height: 1.05rem;
+  background: rgb(246 213 198 / 0.85);
+  transform: rotate(-2.5deg);
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgb(16 43 76 / 0.10);
+}
+.ask-v2 .av2-how__who { display: flex; align-items: center; gap: 0.35rem; margin: 0; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--av2-blue); }
+.ask-v2 .av2-how__who .i { width: 0.85rem; height: 0.85rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ask-v2 .av2-how ol { margin: 0.5rem 0 0; padding-left: 1.2rem; display: grid; gap: 0.32rem; font-size: 0.82rem; line-height: 1.45; color: var(--av2-ink-soft); }
+.ask-v2 .av2-how b { color: var(--av2-navy); }
+
+/* ---------- messages ---------- */
+.ask-v2 .av2-msg { animation: av2-msg-in 340ms var(--vs-ease, ease) both; }
+@keyframes av2-msg-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.ask-v2 .av2-msg > svg { filter: drop-shadow(0 2px 4px rgb(16 43 76 / 0.12)); }
+.ask-v2 .av2-msg .b { border-radius: 4px 16px 16px 16px; background: #fffdf8; }
+.ask-v2 .av2-msg.me .b { background: #fff8df; border-color: var(--av2-navy); }
+
+/* ---------- composer ---------- */
+.ask-v2 .av2-composer {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: 'tools input send' 'note note note';
+  align-items: center;
+  gap: 0.6rem 0.7rem;
+  background: #fffdf8;
+  border: 2px solid var(--av2-navy);
+  border-radius: 16px;
+  padding: 0.7rem 0.8rem 0.45rem;
+  box-shadow: 0 10px 24px -14px rgb(16 43 76 / 0.35);
+}
+.ask-v2 .av2-composer__tools { grid-area: tools; display: flex; align-items: center; gap: 0.4rem; }
+.ask-v2 .av2-tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  height: 2.3rem;
+  border: 1.5px solid var(--av2-powder);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--av2-blue);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0 0.6rem;
+  cursor: pointer;
+  transition: border-color 160ms var(--vs-ease, ease), background 160ms var(--vs-ease, ease), transform 160ms var(--vs-ease, ease);
+}
+.ask-v2 .av2-tool .i { width: 0.95rem; height: 0.95rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ask-v2 .av2-tool:hover:not(:disabled) { border-color: var(--av2-sky); background: #f3f9ff; transform: translateY(-1px); }
+.ask-v2 .av2-tool:disabled { opacity: 0.55; cursor: default; }
+.ask-v2 .av2-hint.is-on { background: var(--av2-peach-soft); border-color: var(--av2-peach); color: var(--av2-terra); }
+.ask-v2 .av2-input {
+  grid-area: input;
+  width: 100%;
+  min-width: 0;
+  resize: none;
+  border: 0;
+  background: transparent;
+  color: var(--nb-ink, #1b2a4a);
+  font-family: var(--nb-font-note, inherit);
+  font-size: 1.02rem;
+  line-height: 1.45;
+}
+.ask-v2 .av2-input:focus-visible { outline: none; }
+.ask-v2 .av2-input::placeholder { color: #a8b4c8; }
+.ask-v2 .av2-send {
+  grid-area: send;
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--av2-navy);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgb(16 43 76 / 0.32);
+  transition: transform 160ms var(--vs-ease, ease), background 160ms var(--vs-ease, ease), opacity 160ms var(--vs-ease, ease);
+}
+.ask-v2 .av2-send .i { width: 1.15rem; height: 1.15rem; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.ask-v2 .av2-send:hover:not(:disabled) { transform: translateY(-2px); background: var(--av2-blue); }
+.ask-v2 .av2-send:disabled { opacity: 0.45; cursor: default; }
+.ask-v2 .av2-note { grid-area: note; margin: 0; font-size: 0.72rem; font-weight: 600; color: #a8b4c8; text-align: center; padding-bottom: 0.15rem; }
+
+/* ---------- right rail: identity ---------- */
+.ask-v2 .av2-id {
+  border: 1.5px solid #ece7e0;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.9);
+  padding: 1.1rem 1rem;
+  text-align: center;
+  box-shadow: 0 1px 8px rgb(30 58 138 / 0.05);
+}
+.ask-v2 .av2-id > svg { filter: drop-shadow(0 4px 8px rgb(16 43 76 / 0.14)); }
+.ask-v2 .av2-id__name { margin: 0.35rem 0 0; font-family: 'Patrick Hand', cursive; font-size: 1.25rem; font-weight: 700; color: var(--av2-navy); }
+.ask-v2 .av2-id__role { margin: 0; font-size: 0.8rem; font-weight: 600; color: var(--av2-ink-soft); }
+.ask-v2 .av2-id__tag { margin: 0.5rem 0 0; font-family: var(--nb-font-hand, 'Caveat', cursive); font-size: 1.15rem; font-weight: 700; color: var(--av2-blue); }
+.ask-v2 .av2-id__about { margin: 0.4rem 0 0; font-size: 0.8rem; line-height: 1.5; color: var(--av2-ink-soft); }
+
+.ask-v2 .av2-facts { display: grid; gap: 0.42rem; margin: 0; font-size: 0.8rem; }
+.ask-v2 .av2-facts div { display: flex; justify-content: space-between; gap: 0.6rem; }
+.ask-v2 .av2-facts dt { color: #8a94a8; font-weight: 600; }
+.ask-v2 .av2-facts dd { margin: 0; text-align: right; font-weight: 700; color: var(--av2-navy); }
+
+.ask-v2 .av2-features { display: grid; gap: 0.5rem; margin: 0; padding: 0; list-style: none; font-size: 0.8rem; line-height: 1.45; color: var(--av2-ink-soft); }
+.ask-v2 .av2-features li { position: relative; padding-left: 1.15rem; }
+.ask-v2 .av2-features li::before { content: '✓'; position: absolute; left: 0; top: 0; color: var(--av2-green); font-weight: 700; }
+.ask-v2 .av2-features b { color: var(--av2-navy); }
+
+.ask-v2 .av2-honest { border: 1.5px solid #bfe3c4; border-radius: 14px; background: #edf7ee; padding: 0.8rem 0.9rem; }
+.ask-v2 .av2-honest__who { display: flex; align-items: center; gap: 0.35rem; margin: 0 0 0.25rem; font-size: 0.8rem; font-weight: 700; color: #227031; }
+.ask-v2 .av2-honest__who .i { width: 0.85rem; height: 0.85rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ask-v2 .av2-honest p:not(.av2-honest__who) { margin: 0; font-size: 0.8rem; line-height: 1.5; color: #3e6b46; }
+
+/* thread gets breathing room between turns */
+.ask-v2 .av2-thread { gap: 1.05rem; }
+@media (prefers-reduced-motion: reduce) {
+  .ask-v2 .av2-hero > svg, .ask-v2 .av2-card, .ask-v2 .av2-msg { animation: none; }
+}
