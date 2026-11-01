@@ -216,7 +216,7 @@ export async function seedDemo(db: Db, credentials: z.input<typeof Credentials>,
     db.insert(concepts).values(motionConcepts.map((item) => ({ id: item.id, schoolId, chapterId: motionChapterId, title: item.title, description: `Class 9 Physics: ${item.title}.` }))).run();
     db.insert(conceptPrereqs).values([{ schoolId, conceptId: motionConcepts[1]!.id, prereqId: motionConcepts[0]!.id }, { schoolId, conceptId: motionConcepts[2]!.id, prereqId: motionConcepts[1]!.id }]).run();
     const session3Id = randomUUID();
-    const opensAt = new Date(now); opensAt.setHours(18, 0, 0, 0);
+    const opensAt = new Date(now); opensAt.setTime(Date.now() - 3600000); opensAt.setHours(23, 59, 0, 0); // demo: already released so the session surface is explorable all day;
     db.insert(learningSessions).values({ id: session3Id, schoolId, chapterId: motionChapterId, sectionId: section9aId, title: 'Session 3: Motion diagnostic', status: 'published', releaseAt: opensAt.getTime(), updatedAt: now }).run();
     db.insert(items).values(SESSION_CHECKS.map((check, position) => {
       const conceptId = motionConcepts.find((concept) => concept.title === check.concept)!.id;
