@@ -24,6 +24,7 @@ export interface LegacyLlmProvider {
   draft(input: DraftSource): Promise<AiDraft | null>;
 }
 export interface LlmProvider extends LegacyLlmProvider {
+  readonly cacheKey?: string;
   stream(input: GroundedQuestion, signal: AbortSignal): AsyncIterable<ProviderEvent>;
   health(): Promise<boolean>;
 }

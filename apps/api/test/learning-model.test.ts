@@ -58,9 +58,13 @@ describe('learning provider selection', () => {
       await prepareLearningSettings(database);
       const fallback = new LocalStubProvider();
       const provider = founderProvider(database, fallback);
+      expect(provider.id).toBe('stub');
+      const initialCache = provider.cacheKey;
       const input = { schoolId: 'school', question: 'What is speed?', hintLevel: 3, socratic: false,
         sources: [{ id: 1, noteId: 'note', title: 'Motion', position: 0, text: 'Speed is distance travelled per unit time.' }] };
       database.sqlite.prepare('INSERT INTO proto_founder_settings VALUES (?,?,?,?)').run('school', 'test-founder', '', 1);
+      expect(provider.id).toBe('gemini');
+      expect(provider.cacheKey).not.toBe(initialCache);
       mocks.generate.mockResolvedValue({ text: JSON.stringify({ message: 'Use distance divided by time.', sources: [{ chunkId: 1, quote: 'Speed is distance travelled per unit time.' }] }) });
       expect((await provider.ask(input))?.message).toContain('divided');
       expect(mocks.keys).toEqual(['test-founder']);

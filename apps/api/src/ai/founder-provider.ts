@@ -5,6 +5,10 @@ import { GeminiProvider, type DraftSource, type GroundedQuestion, type LlmProvid
 
 /** Existing tutor entry points also see founder key changes without restarting. */
 export function founderProvider(database: Database, fallback: LlmProvider): LlmProvider {
+  function hasGemini() {
+    return !!learningEnvironment().GEMINI_API_KEY?.trim()
+      || !!database.sqlite.prepare("SELECT 1 FROM proto_founder_settings WHERE gemini_key<>'' LIMIT 1").get();
+  }
   function selected(schoolId?: string) {
     const saved = schoolId ? learningSettings(database, schoolId) : undefined;
     const env = learningEnvironment();
@@ -18,13 +22,15 @@ export function founderProvider(database: Database, fallback: LlmProvider): LlmP
   }
   return {
     get id() {
+      return hasGemini() ? 'gemini' : fallback.id;
+    },
+    get cacheKey() {
       // Invalidate the legacy response cache when an administrator saves settings.
       const revision = database.sqlite.prepare('SELECT sum(updated_at) AS value FROM proto_founder_settings').get() as { value: number | null };
       return `${fallback.id}:founder:${revision.value ?? 0}`;
     },
     get configured() {
-      return fallback.configured || !!learningEnvironment().GEMINI_API_KEY?.trim()
-        || !!database.sqlite.prepare("SELECT 1 FROM proto_founder_settings WHERE gemini_key<>'' LIMIT 1").get();
+      return fallback.configured || hasGemini();
     },
     ask: (input: GroundedQuestion) => selected(input.schoolId).ask(input),
     draft: (input: DraftSource) => selected(input.schoolId).draft(input),
