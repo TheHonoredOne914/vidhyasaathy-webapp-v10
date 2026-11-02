@@ -35,6 +35,8 @@ const TeacherSubjects = lazy(() => import('./routes/content/TeacherSubjects').th
 const TeacherSubjectPage = lazy(() => import('./routes/content/SubjectLessons').then((module) => ({ default: module.TeacherSubjectPage })));
 const StudentSubject = lazy(() => import('./routes/content/SubjectLessons').then((module) => ({ default: module.StudentSubject })));
 const ChapterPage = lazy(() => import('./routes/content/ChapterDesk').then((module) => ({ default: module.ChapterPage })));
+const LearningChapter = lazy(() => import('./proto/LearningChapter').then((module) => ({ default: module.LearningChapter })));
+const LearningPlayer = lazy(() => import('./proto/LearningPlayer').then((module) => ({ default: module.LearningPlayer })));
 const ConceptPage = lazy(() => import('./routes/content/ConceptPage').then((module) => ({ default: module.ConceptPage })));
 const NotePage = lazy(() => import('./routes/content/NotePage').then((module) => ({ default: module.NotePage })));
 const SessionFormPage = lazy(() => import('./routes/content/SessionForm').then((module) => ({ default: module.SessionFormPage })));
@@ -150,6 +152,8 @@ export function App() {
               <Route path="/student/saathy" element={<RoleGuard role="student"><AskPanel /></RoleGuard>} />
               <Route path="/student/welcome" element={<RoleGuard role="student"><StudentWelcome /></RoleGuard>} />
               <Route path="/student/subjects/:subjectId" element={<RoleGuard role="student"><StudentSubject /></RoleGuard>} />
+              <Route path="/student/chapters/:chapterId/learn" element={<RoleGuard role="student"><LearningChapter /></RoleGuard>} />
+              <Route path="/student/learning/sessions/:sessionId" element={<RoleGuard role="student"><LearningPlayer /></RoleGuard>} />
               <Route path="/student/chapters/:chapterId/concepts/:conceptId" element={<RoleGuard role="student"><ChapterEntryGate><ConceptPage /></ChapterEntryGate></RoleGuard>} />
               <Route path="/student/chapters/:chapterId" element={<RoleGuard role="student"><ChapterEntryGate><ChapterPage /></ChapterEntryGate></RoleGuard>} />
               <Route path="/student/chapters/:chapterId/diagnostic" element={<RoleGuard role="student"><DiagnosticPage /></RoleGuard>} />

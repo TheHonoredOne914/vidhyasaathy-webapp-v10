@@ -6,6 +6,7 @@ import { HomeworkBoard } from '../student/notebook/screens/HomeworkBoard';
 import { StudySessionsBoard } from '../student/notebook/screens/StudySessionsBoard';
 import { SubjectsBoard } from '../student/notebook/screens/SubjectsBoard';
 import { AccessDenied } from './AccessDenied';
+import { ContinueLearning } from '../proto/ContinueLearning';
 
 const PANELS = new Set(['', 'subjects', 'study', 'homework', 'ask', 'games']);
 
@@ -17,7 +18,7 @@ export function StudentHome({ me, stale, updatedAt, message }: { me: Me; stale: 
   if (panel === 'subjects') return <SubjectsBoard query={params.get('q') ?? ''} />;
   if (panel === 'games') return <GamesBoard />;
   if (panel === 'homework') return <HomeworkBoard />;
-  if (panel === 'study') return <StudySessionsBoard />;
+  if (panel === 'study') return <><ContinueLearning list /><StudySessionsBoard /></>;
   if (panel === 'ask') return <Navigate to={`/student/saathy${window.location.search}`} replace />;
-  return <HomeDesk me={me} stale={stale} updatedAt={updatedAt} message={message} />;
+  return <><ContinueLearning /><HomeDesk me={me} stale={stale} updatedAt={updatedAt} message={message} /></>;
 }
