@@ -260,7 +260,7 @@ export function AtomWidget({ params, prompt }: { params: Record<string, number |
           });
         })}
         {/* shell labels */}
-        {shells.map((count, si) => (
+        {shells.map((_count, si) => (
           <text key={`l${si}`} x={cx + 30 + (si + 1) * 26 - 8} y={cy - 4} fontSize={9.5} fontWeight={900} fill="#5c6f8a">
             {['K', 'L', 'M', 'N'][si]}
           </text>

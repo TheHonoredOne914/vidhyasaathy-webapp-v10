@@ -199,7 +199,7 @@ export class AskPipeline {
     const guarded = guardAnswer(structured.text, sources.map((source) => source.id), homework);
     const artifacts = levelCheck || homework || guarded.flags.honestUnsure || clarifying ? [] : structured.artifacts.filter((artifact) => {
       // Apply the same output guards to every field of a provider-created card.
-      const parts = artifact.type === 'explanation' ? [artifact.title, artifact.body] : [artifact.title, ...(artifact.type === 'notes' ? artifact.points : artifact.type === 'diagram' ? artifact.nodes : artifact.steps)];
+      const parts = artifact.type === 'explanation' ? [artifact.title, artifact.body] : [artifact.title, ...('points' in artifact ? artifact.points : 'nodes' in artifact ? artifact.nodes : 'steps' in artifact ? artifact.steps : [])];
       return parts.every((part) => { const checked = guardAnswer(part, sources.map((source) => source.id), false); return !checked.flags.honestUnsure && checked.text === part; });
     });
     if (!artifacts.length && !levelCheck && !homework && !guarded.flags.honestUnsure && !clarifying) {
