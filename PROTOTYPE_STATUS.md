@@ -99,5 +99,7 @@ Not started. The be-pass agent updates only this section. Task list: prompts/BAC
 - Reference limitation: `C:\Users\HP\dhruv-model` is absent; parity must use existing repo components. Gemini is UNVERIFIED (stub provider, no key). No push; laptop overrides apply.
 - P0(a) follow-up: Skip is available during streaming and does not resend an already answered question. Verification: web typecheck and unit suite (see local commit gates). Answer-first server work remains BE-owned.
 - P0(b) DONE: chapter context follows explicit chapter/concept, then current learning path; Physics/Motion is the default rather than first Biology entry. Unit tests cover current/default selection.
-- Remaining P0/P1: NOT STARTED.
+- P0(c): explorer steps use the chapter game registry, with direct game links carrying the saved session/step; game exit and confirmed finish return to that plan. Server-confirmed game results feed activity_finished; 400/404 compatibility queue is session-local, never mastery. Browser verification pending.
+- Remaining P0/P1: in progress.
+- P0(d): Home paints a notebook loading state before session/home queries finish, uses one next-step hero from /student/today (typed source:mock fallback from /student/home), never renders raw resumeState. Removed the competing ContinueLearning widget; goal rail is capped at three. Browser verification pending.
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
+import { planReturn } from '../proto/gameReturn';
 import { useRemote } from '../setup/useRemote';
 import { GamesSchema } from './gameApi';
 import { Link } from 'react-router-dom';
@@ -10,6 +11,8 @@ import type { GameDef } from './engine/types';
 
 export function EngineGamePage() {
   const { gameId = '', chapterId = '' } = useParams();
+  const [params] = useSearchParams();
+  const returnTo = planReturn(params);
   const board = useRemote(gameId !== 'demo' ? '/student/games' : null, GamesSchema);
   const [game, setGame] = useState<GameDef | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,5 +29,5 @@ export function EngineGamePage() {
     if (!board.data) return <section className="iv-game"><p>Opening the chapter’s games…</p></section>;
     if (!board.data.games.some((row) => row.gameId === gameId && row.chapterId === chapterId)) return <section className="iv-game"><p role="alert">This game belongs to another chapter.</p><Link to={`/student/chapters/${chapterId}/practice`}>See this chapter’s games</Link></section>;
   }
-  return <GameSessionProvider key={gameId} gameId={gameId}><InteractiveVideo game={game} /></GameSessionProvider>;
+  return <GameSessionProvider key={gameId} gameId={gameId}><Link className="nb-btn nb-btn--ghost" to={returnTo ?? '/student?panel=games'}>{returnTo ? 'Back to my plan' : 'Back to PlayLab'}</Link><InteractiveVideo game={game} /></GameSessionProvider>;
 }

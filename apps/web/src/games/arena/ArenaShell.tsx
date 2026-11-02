@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import { planReturn } from '../../proto/gameReturn';
 import { ServerCheckpointPanel } from '../engine/CheckpointPanel';
 import { GameFinishSummary, useGameSession } from '../engine/GameSession';
 import type { ArenaApi, ArenaStat, GameDef } from '../engine/types';
@@ -9,7 +10,8 @@ import './fix2.css';
 export function ArenaShell({ game }: { game: GameDef }) {
   const arena = game.arena!;
   const context = useGameSession();
-  const { chapterId } = useParams<{ chapterId: string }>();
+  const [params] = useSearchParams();
+  const returnTo = planReturn(params);
   const [index, setIndex] = useState(0);
   const [answered, setAnswered] = useState(false);
   const [finished, setFinished] = useState(false);
@@ -37,7 +39,7 @@ export function ArenaShell({ game }: { game: GameDef }) {
   const level = arena.levels[Math.min(index, arena.levels.length - 1)]!;
   const best = context?.best;
   return <main className="arena-page">
-    <header className="arena-top"><div className="arena-brand"><Link className="arena-back" to={chapterId ? `/student/chapters/${chapterId}` : '/student?panel=games'}>← Back to subject</Link><img src="/img/logo.webp" alt="VidhyaSaathy" /><div><strong>{arena.name}</strong><small>{best?.conceptName ?? game.chapterRef}</small></div></div>{best?.best ? <p>Your best: {best.best.label.replace(/^Best\s+/i, '')}</p> : null}</header>
+    <header className="arena-top"><div className="arena-brand"><Link className="arena-back" to={returnTo ?? '/student?panel=games'}>{returnTo ? 'Back to my plan' : 'Back to PlayLab'}</Link><img src="/img/logo.webp" alt="VidhyaSaathy" /><div><strong>{arena.name}</strong><small>{best?.conceptName ?? game.chapterRef}</small></div></div>{best?.best ? <p>Your best: {best.best.label.replace(/^Best\s+/i, '')}</p> : null}</header>
     <div className="arena-wrap"><p className="arena-crumb">{arena.chapterLabel}</p><h1>{level.title}</h1><p className="arena-subtitle">{level.subtitle}</p>
       <div className="arena-grid"><section className="arena-main"><div className="arena-stage"><level.Stage key={index} api={api} /></div><footer className="arena-footer"><span>{stat?.label ?? 'Explore'} <b>{stat?.value ?? '—'}</b></span><span>Time <b>{String(Math.floor(elapsed / 60)).padStart(2, '0')}:{String(elapsed % 60).padStart(2, '0')}</b></span></footer></section>
         <aside className="arena-side"><section className="arena-card task"><small className="arena-kicker">YOUR TASK</small><h2>{level.taskTitle}</h2><p>{level.taskText}</p>{typeof level.taskBody === 'function' ? level.taskBody(api) : level.taskBody}</section>
