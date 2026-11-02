@@ -1,0 +1,23 @@
+.saathy-studio { width: min(1100px, 96vw); max-height: 94dvh; padding: 0; border: 1px solid var(--nb-line, #D6E2E6); border-radius: 1rem; background: var(--nb-paper, #F9F6EE); color: #041D3D; }
+.saathy-studio::backdrop { background: #041D3D80; }
+.studio-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem; border-bottom: 1px solid #D6E2E6; }
+.studio-header p { margin: 0; }
+.saathy-studio > nav { padding: 0 1rem; }
+.saathy-studio [aria-current="step"], .studio-dots [aria-pressed="true"] { background: #193E69; color: #F9F6EE; }
+.studio-body { padding: 1.5rem clamp(1rem, 4vw, 3rem) 2rem; min-height: 55vh; }
+.studio-paper { display: block; position: relative; padding: 2rem; margin: 1.5rem auto; width: 100%; color: inherit; text-align: left; font: inherit; border: 1px solid #D6E2E6; border-radius: .75rem; background: repeating-linear-gradient(transparent 0 31px, #D6E2E660 31px 32px), #F9F6EE; box-shadow: 0 6px 18px #041D3D12; }
+.studio-paper::before { content: ''; position: absolute; top: -.5rem; left: 2rem; width: 4rem; height: 1rem; background: var(--nb-gold, #D6E2E6); opacity: .65; transform: rotate(-3deg); }
+.studio-paper h2 { font-size: clamp(1.5rem, 4vw, 2.2rem); }
+.studio-paper li { padding: .5rem 0; font-size: 1.25rem; }
+.studio-dots { display: flex; flex-wrap: wrap; gap: .5rem; }
+.studio-dots button { border: 1px solid #517DAB; border-radius: 50%; width: 2rem; height: 2rem; color: #193E69; background: #F9F6EE; font: inherit; }
+.studio-flash { min-height: 19rem; text-align: center; cursor: pointer; transition: transform .2s; }
+.studio-flash.is-flipped { transform: rotate(-.5deg); }
+.studio-map { margin: 2rem 0; text-align: center; }
+.studio-map > strong { display: inline-block; border-radius: 50%; background: #193E69; color: #F9F6EE; padding: 2rem; font-size: 1.6rem; }
+.studio-map > div { display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; padding: 2rem 0; border-top: 2px dashed #517DAB; margin-top: 1rem; }
+.studio-map button { max-width: 18rem; white-space: normal; }
+.studio-flow li { padding: 1rem; border-left: 2px dashed #517DAB; }
+.studio-flow summary { cursor: pointer; font-size: 1.3rem; }
+@media (max-width: 600px) { .saathy-studio { width: 100%; max-width: 100%; max-height: 100dvh; height: 100dvh; border-radius: 0; } .studio-header { flex-wrap: wrap; } .studio-paper { padding: 1.25rem; } }
+@media (prefers-reduced-motion: reduce) { .studio-flash { transition: none; } }

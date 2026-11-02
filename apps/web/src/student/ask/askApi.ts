@@ -24,7 +24,7 @@ export const ThreadsSchema = z.object({ threads: z.array(z.object({
   id: z.string(), title: z.string(), subjectName: z.string().nullable(), conceptName: z.string().nullable(), updatedAt: z.string(),
 })) });
 export const SavedSchema = z.object({ items: z.array(z.object({
-  id: z.string(), title: z.string(), subjectName: z.string().nullable(), savedAt: z.string(), messageId: z.string(),
+    id: z.string(), title: z.string(), subjectName: z.string().nullable(), savedAt: z.string(), messageId: z.string(), text: z.string().optional(),
 })) });
 export const QuickTryResultSchema = z.object({ correct: z.boolean(), correctOptionId: z.string(), explanation: z.string(), xp: z.number() });
 const SnapSchema = z.object({ snapId: z.string(), status: z.enum(['extracted', 'failed', 'not_configured']), extractedText: z.string().optional() });

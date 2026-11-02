@@ -80,6 +80,12 @@ export function registerContentRoutes(app: FastifyInstance, db: Db, auth: AuthSe
     const chapter = chapterAccess(db, request, resourceId(request));
     return db.select().from(concepts).where(and(eq(concepts.schoolId, chapter.schoolId), eq(concepts.chapterId, chapter.id))).all().map(conceptView);
   });
+  app.get('/concepts/:id', read, async (request) => {
+    const { school } = requireAuth(request);
+    const concept = found(db.select().from(concepts).where(scope(concepts, school.id, resourceId(request))).get());
+    chapterAccess(db, request, concept.chapterId);
+    return concept;
+  });
   app.post('/chapters/:id/concepts', write, async (request, reply) => {
     const chapter = chapterAccess(db, request, resourceId(request), true);
     const { prerequisiteIds, ...input } = parseInput(SaveConceptSchema, request.body);
