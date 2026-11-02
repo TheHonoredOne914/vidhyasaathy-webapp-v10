@@ -4,10 +4,12 @@ Scope: shared fictional dashboard dataset, Parent/Teacher/Admin demo workspaces,
 
 | Feature | REAL/DEMO | Status | Route | Files | Test |
 | --- | --- | --- | --- | --- | --- |
-| Shared sample school, validated browser persistence, scoped reset | DEMO | Implemented | `/demo/*` | `apps/web/src/demo/data.ts`, `store.tsx`, `DemoLayout.tsx` | `data.test.ts`; verification in progress |
-| Parent notebook, two linked children, filters, charts, Translator, drill-ins | DEMO | Implemented | `/demo/parent` | `apps/web/src/demo/ParentWorkspace.tsx` | Verification in progress |
-| Teacher roster, reports, Radar, assignment creation | DEMO | Implemented | `/demo/teacher` | `apps/web/src/demo/TeacherWorkspace.tsx` | Verification in progress |
-| Admin search/filter and add/edit for all four record types | DEMO | Implemented | `/demo/admin` | `apps/web/src/demo/AdminWorkspace.tsx` | Verification in progress |
-| Four sign-in entries; existing API for Aarav, standalone demos for adults | REAL/DEMO | Implemented | `/signin`, `/signin/student` | `apps/web/src/demo/DemoEntryButtons.tsx`, `App.tsx`, `NotebookSignIn.tsx` | Verification in progress |
+| Shared sample school, validated browser persistence, scoped reset | DEMO | Complete | `/demo/*` | `apps/web/src/demo/data.ts`, `store.tsx`, `DemoLayout.tsx` | 5 new data tests + browser persistence/reset pass |
+| Parent notebook, two linked children, filters, charts, Translator, drill-ins | DEMO | Complete | `/demo/parent` | `apps/web/src/demo/ParentWorkspace.tsx` | Browser/mobile/axe pass |
+| Teacher roster, reports, Radar, assignment creation | DEMO | Complete | `/demo/teacher` | `apps/web/src/demo/TeacherWorkspace.tsx` | Browser/mobile/axe pass |
+| Admin search/filter and add/edit for all four record types | DEMO | Complete | `/demo/admin` | `apps/web/src/demo/AdminWorkspace.tsx` | Browser/mobile/axe pass |
+| Four sign-in entries; existing API for Aarav, standalone demos for adults | REAL/DEMO | Complete | `/signin`, `/signin/student` | `apps/web/src/demo/DemoEntryButtons.tsx`, `App.tsx`, `NotebookSignIn.tsx` | Entries verified; Student requires existing API |
+
+Validation: root typecheck PASS; web unit tests 39 files / 140 tests PASS; web production build PASS; focused browser checks PASS, zero page errors and zero tested WCAG A/AA violations. No full E2E run. Repeat browser checks with `node apps/web/scripts/demo-smoke.mjs` against a server on port 5373 (or set `DEMO_URL`).
 
 See [PROTOTYPE_STATUS-dash.md](PROTOTYPE_STATUS-dash.md) for the dashboard handoff and final validation results.
