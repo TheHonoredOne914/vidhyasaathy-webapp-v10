@@ -95,5 +95,7 @@ Not started. The be-pass agent updates only this section. Task list: prompts/BAC
 
 ## FE pass (fe-pass agent)
 
-Not started. The fe-pass agent updates only this section. Task list: prompts/FRONTEND-PROMPT.md.
+- P0(a) PARTIAL: optional prerequisite check tolerates nullable/missing sourceClass and empty offers; permanent Skip and error retry; chat stays usable. Skip resends the original question without inventing diagnostic evidence. First real answer still requires BE ask-pipeline answer-first change.
+- Reference limitation: `C:\Users\HP\dhruv-model` is absent; parity must use existing repo components. Gemini is UNVERIFIED (stub provider, no key). No push; laptop overrides apply.
+- Remaining P0/P1: NOT STARTED.
 

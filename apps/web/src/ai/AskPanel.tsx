@@ -102,6 +102,7 @@ export function AskPanel() {
   const [historyQuery, setHistoryQuery] = useState('');
   const [notice, setNotice] = useState('');
   const [studioOpen, setStudioOpen] = useState(false);
+  const [skippedChecks, setSkippedChecks] = useState<string[]>([]);
   const [selectedChapter, setSelectedChapter] = useState(params.get('chapterId') ?? '');
   const [focusId, setFocusId] = useState(params.get('conceptId') ?? '');
   const focus = useRemote(focusId ? `/concepts/${encodeURIComponent(focusId)}` : null, ConceptSchema);
@@ -253,7 +254,7 @@ export function AskPanel() {
           <div className="av2-how">
             <p className="av2-how__who"><Sparkles className="i" />How Saathy works</p>
             <ol>
-              <li><b>Ask anything</b> from your books — main pehle level check karungi, phir exactly usi depth pe samjhaungi.</li>
+                <li><b>Ask anything</b> from your books. An optional check of earlier ideas can help me tailor the explanation.</li>
               <li><b>Ek baar ek hint</b> — hints mode me poori answer nahi, sirf agla step. Sochna tumhe hi hai.</li>
               <li><b>Notebook snap</b> — photo bhejo, main padh kar doubt nikaal dungi.</li>
               <li>Your chats stay private. Teachers and parents only see which topics you asked about.</li>
@@ -269,7 +270,11 @@ export function AskPanel() {
             {isSaathy ? <Saathy mood={mood} size="3rem" /> : null}
             <div>
               <div className="meta">{isSaathy ? 'Saathy' : `You · ${new Date(row.createdAt).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' })}${row.fromLabel ? ` · ${row.fromLabel}` : ''}`}{isSaathy && !pending && !isError && row.text ? <span className="saathy-reply-tools"><button className="nb-link" onClick={() => { void navigator.clipboard.writeText(row.text).then(() => setNotice('Reply copied.')).catch(() => setNotice('Copy was unavailable. You can select the reply text.')); }}>Copy reply</button><button className="nb-link" onClick={() => { void saveReply(row.id); }}>Save reply</button></span> : null}</div>
-              <div className="b"><SaathyMarkdown text={row.text || (row.id === streamingId ? 'Saathy is thinking…' : '')} />{row.citations.map((citation) => <div className="nb-meta" key={citation.chunkId}>{citation.noteTitle}{citation.page !== undefined ? ` · p. ${citation.page}` : ''}</div>)}{row.levelCheck ? <SaathyLevelCheck chapterId={row.levelCheck.chapterId} busy={pending} onContinue={() => { void send(messages.slice(0, messages.indexOf(row)).filter((message) => message.role === 'student').at(-1)?.text ?? 'Help me explore this chapter'); }} /> : null}{row.artifacts?.map((artifact, i) => <ArtifactCard key={i} artifact={artifact} />)}{row.quickTry && thread ? <QuickQuestion key={row.quickTry.itemId} item={row.quickTry} threadId={thread.id} /> : null}{isError && retry ? <button className="nb-btn nb-btn--ghost nb-btn--sm" disabled={pending} onClick={() => { void send(retry.text, undefined, retry); }}>Retry</button> : null}</div>
+              <div className="b"><SaathyMarkdown text={row.text || (row.id === streamingId ? 'Saathy is thinking…' : '')} />{row.citations.map((citation) => <div className="nb-meta" key={citation.chunkId}>{citation.noteTitle}{citation.page !== undefined ? ` · p. ${citation.page}` : ''}</div>)}{row.levelCheck && !skippedChecks.includes(row.levelCheck.chapterId) ? <SaathyLevelCheck chapterId={row.levelCheck.chapterId} busy={pending} onContinue={() => {
+                setSkippedChecks((ids) => [...ids, row.levelCheck!.chapterId]);
+                setNotice('Check skipped. You can keep chatting. If this server still asks for a check, its answer-first update is not available yet.');
+                void send(messages.slice(0, messages.indexOf(row)).filter((message) => message.role === 'student').at(-1)?.text ?? 'Help me explore this chapter');
+              }} /> : null}{row.artifacts?.map((artifact, i) => <ArtifactCard key={i} artifact={artifact} />)}{row.quickTry && thread ? <QuickQuestion key={row.quickTry.itemId} item={row.quickTry} threadId={thread.id} /> : null}{isError && retry ? <button className="nb-btn nb-btn--ghost nb-btn--sm" disabled={pending} onClick={() => { void send(retry.text, undefined, retry); }}>Retry</button> : null}</div>
             </div>
             {row.role === 'student' ? <span className="nb-avatar">{me?.profile.name?.slice(0, 1)}</span> : null}
           </div>;
