@@ -8,6 +8,7 @@ import { Icon } from './notebook/icons';
 import { Saathy } from './notebook/Saathy';
 import { Bubble, Chip, MasteryChip, ProgressBar, SUBJECT_COLOR, SubjectIcon, subjectKey } from './notebook/ui';
 import './notebook/pages/home.css';
+import { useTodayPlan } from '../api/today';
 
 type Desk = StudentHome;
 
@@ -28,13 +29,6 @@ function dayLetter(iso: string) {
 
 function firstName(name: string) {
   return name.trim().split(/\s+/)[0] ?? name;
-}
-
-function nodeState(word: string, current: boolean) {
-  if (word === 'Mastered' || word === 'Top form') return 'done';
-  if (word === "Let's fix this") return 'fix';
-  if (current || word === 'Almost there') return 'now';
-  return 'new';
 }
 
 function atomGame(game: Desk['todaysGame']) {
@@ -61,6 +55,7 @@ function Thumb() {
 
 export function HomeDesk({ stale, updatedAt, message }: { me: { profile: { id: string; name: string } }; stale: boolean; updatedAt: string | null; message: string | null }) {
   const home = useRemote('/student/home', StudentHomeSchema);
+  const today = useTodayPlan(home.data);
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
@@ -85,18 +80,12 @@ export function HomeDesk({ stale, updatedAt, message }: { me: { profile: { id: s
   if (home.denied) return <section className="nb-card"><h1 className="nb-h1">This page is closed</h1><p className="nb-note">This notebook page is not open for this login.</p></section>;
   if (home.status === 'loading' && !home.data) return <div className="pg-home" data-testid="student-home"><div className="nb-grid"><div className="nb-skel" /><div className="nb-skel" /><div className="nb-skel" /></div></div>;
   if (home.status === 'error' && !home.data) return <div className="pg-home"><Retry what="home" onRetry={home.reload} /></div>;
-  if (!home.data) return null;
+  if (!home.data) return <div className="pg-home" role="status"><h1 className="nb-h1">Your learning notebook</h1><p>Opening your next step…</p><Link to="/student?panel=subjects">Open your subjects</Link></div>;
 
   const data = home.data;
+  const primary = today.data?.primary;
   const game = atomGame(data.todaysGame);
   const path = data.learningPath;
-  let currentGiven = false;
-  const nodes = (path?.nodes ?? []).map((node) => {
-    const done = node.word === 'Mastered' || node.word === 'Top form';
-    const current = !done && !currentGiven;
-    if (current) currentGiven = true;
-    return { node, state: nodeState(node.word, current) };
-  });
   const goalPct = data.todaysGoal.total ? Math.round((data.todaysGoal.done / data.todaysGoal.total) * 100) : 0;
   const weekDays = data.streak.currentDays === 1 ? '1 day' : `${data.streak.currentDays} days`;
 
@@ -115,14 +104,14 @@ export function HomeDesk({ stale, updatedAt, message }: { me: { profile: { id: s
 
       <section className="nb-card home-continue">
         <span className="nb-tape nb-tape--left" />
-        {data.nextAction ? <>
+          {primary ? <>
           <div>
             <Chip tone="orange">Your next step{path ? ` · ${path.subject}` : ''}</Chip>
-            <h2>{data.nextAction.title}</h2>
-            <p className="why"><Icon name="bulb" /><span>{data.nextAction.kind === 'catchup' && data.catchUp ? data.catchUp.copy : data.nextAction.resumeState ?? 'This is your next step.'}</span></p>
+              <h2>{primary.title}</h2>
+              <p className="why"><Icon name="bulb" /><span>{primary.subtitle}</span></p>
             <div className="row">
-              <Link className="nb-btn nb-btn--primary nb-btn--lg" to={data.nextAction.href}>Continue <Icon name="arrow" /></Link>
-              <Chip tone="sky" dashed><Icon name="clock" /> {data.nextAction.estMinutes} min left</Chip>
+                <Link className="nb-btn nb-btn--primary nb-btn--lg" to={primary.href}>Continue <Icon name="arrow" /></Link>
+                <Chip tone="sky" dashed><Icon name="clock" /> {primary.estMinutes} min</Chip>
             </div>
           </div>
           <Thumb />
@@ -144,7 +133,7 @@ export function HomeDesk({ stale, updatedAt, message }: { me: { profile: { id: s
 
       <section className="nb-card home-path">
         <div className="nb-card__head"><h3 className="nb-h3">Your path{path ? ` · ${path.subject}: ${path.chapter}` : ''}</h3>{data.subjects[0] ? <Link className="nb-link" to={`/student/subjects/${data.subjects[0].id}`}>See full map <Icon name="arrow" /></Link> : null}</div>
-        {nodes.length ? <div className="path">{nodes.map(({ node, state }) => <Link className={`pnode ${state}`} key={node.conceptId} to={data.nextAction?.conceptId === node.conceptId ? data.nextAction.href : `/student?panel=subjects`}><div className="orb"><Icon name={state === 'done' ? 'check' : state === 'fix' ? 'refresh' : state === 'now' ? 'book' : 'sparkle'} /></div><MasteryChip level={node.word} /><b>{node.name}</b>{node.note ? <span>{node.note}</span> : null}</Link>)}</div> : <p className="nb-empty">Pick a subject to see your path.</p>}
+          <nav className="path" aria-label="Your six chapter stops">{['Explore', 'Learn', 'Try', 'Fix', 'Play', 'Master'].map((stop) => <Link className="pnode" key={stop} to={primary?.chapterId ? `/student/chapters/${primary.chapterId}` : '/student?panel=subjects'}><div className="orb"><Icon name={stop === 'Play' ? 'game' : stop === 'Fix' ? 'refresh' : 'book'} /></div><b>{stop}</b></Link>)}</nav>
         {data.dushman.length ? <div className="nb-meta" style={{ marginTop: 'var(--nb-s3)' }}>Still tricky: {data.dushman.map((row) => row.name).join(', ')}</div> : null}
       </section>
 
@@ -152,7 +141,7 @@ export function HomeDesk({ stale, updatedAt, message }: { me: { profile: { id: s
         <section className="nb-card">
           <div className="nb-card__head"><h3 className="nb-h3">Today's goal</h3><span className="nb-meta">{data.todaysGoal.done} / {data.todaysGoal.total}</span></div>
           {data.todaysGoal.total ? <div style={{ marginBottom: 'var(--nb-s3)' }}><ProgressBar value={goalPct} /></div> : null}
-          {data.todaysGoal.items.length ? data.todaysGoal.items.map((item) => <Link className={item.done ? 'goal done' : 'goal'} key={item.id} to={item.href}><div className="ck">{item.done ? <Icon name="check" /> : null}</div><span>{item.label}</span></Link>) : <p className="nb-empty">Nothing is lined up for today.</p>}
+            {today.data?.next.length ? today.data.next.map((item, index) => <Link className="goal" key={`${item.href}:${index}`} to={item.href}><div className="ck" /><span>{item.title}</span></Link>) : <p className="nb-empty">Nothing is lined up for today.</p>}
           {data.newBadges.length ? <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: 'var(--nb-s3)' }}>{data.newBadges.map((badge) => <Link key={badge.id} className="nb-chip nb-chip--sand" to="/student/progress">{badge.name}</Link>)}</div> : null}
         </section>
 
@@ -191,7 +180,7 @@ export function HomeDesk({ stale, updatedAt, message }: { me: { profile: { id: s
             const badge = BADGE[item.badge];
             return <Link className="nb-row" style={{ gridTemplateColumns: 'minmax(0,1fr) auto' }} key={item.id} to={item.href}><div><div className="nb-row__t" style={{ fontSize: '1.12rem' }}>{item.title}</div><div className="nb-row__s">{item.subject}</div></div><Chip tone={badge.tone}>{badge.label}</Chip></Link>;
           }) : <p className="nb-empty">Nothing from your teacher right now.</p>}
-          <Link className="nb-saathy-tip" style={{ marginTop: 'var(--nb-s3)' }} to="/student?panel=ask"><Saathy mood="happy" size="3.4rem" /><div><b className="nb-h3" style={{ fontSize: '1.2rem' }}>Stuck on something?</b><div className="nb-text">Ask Saathy. Hints first, never just answers.</div></div></Link>
+          <Link className="nb-saathy-tip" style={{ marginTop: 'var(--nb-s3)' }} to="/student/saathy"><Saathy mood="happy" size="3.4rem" /><div><b className="nb-h3" style={{ fontSize: '1.2rem' }}>Stuck on something?</b><div className="nb-text">Ask Saathy. Hints first, never just answers.</div></div></Link>
         </section>
       </aside>
     </div>

@@ -27,7 +27,7 @@ export function RoleHome({ role }: { role: Role }) {
   usePageMeta(page.title, page.description);
   const session = useSession();
   const me = session.me;
-  if (!me) return null;
+  if (!me) return <section className="nb-card" role="status" aria-busy="true"><h1 className="nb-h1">Opening your notebook</h1><p>Your saved work will be here in a moment.</p></section>;
   if (role === 'student') {
     return <StudentHome me={me} stale={session.stale} updatedAt={session.updatedAt} message={session.message} />;
   }

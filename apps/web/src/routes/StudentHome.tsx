@@ -20,5 +20,5 @@ export function StudentHome({ me, stale, updatedAt, message }: { me: Me; stale: 
   if (panel === 'homework') return <HomeworkBoard />;
   if (panel === 'study') return <><ContinueLearning list /><StudySessionsBoard /></>;
   if (panel === 'ask') return <Navigate to={`/student/saathy${window.location.search}`} replace />;
-  return <><ContinueLearning /><HomeDesk me={me} stale={stale} updatedAt={updatedAt} message={message} /></>;
+  return <HomeDesk me={me} stale={stale} updatedAt={updatedAt} message={message} />;
 }
