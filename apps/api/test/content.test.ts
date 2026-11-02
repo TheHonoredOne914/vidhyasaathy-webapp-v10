@@ -119,6 +119,7 @@ describe('content and learning sessions', () => {
       expect.objectContaining({ id: chapterId, position: 2, status: 'not_started' }),
     ]);
     expect((await get(`/chapters/${chapterId}/concepts`, teacher)).json()).toHaveLength(1);
+    expect((await get(`/concepts/${conceptId}`, student)).json()).toMatchObject({ id: conceptId, chapterId, title: 'Halves' });
     expect((await put(`/notes/${noteId}`, { title: 'Updated note', body: 'A half is an equal part.', conceptIds: [conceptId] })).statusCode).toBe(200);
     const draft = await createSession();
     expect((await put(`/sessions/${draft.id}`, { ...sessionInput(), title: 'Updated study' })).statusCode).toBe(200);
@@ -128,7 +129,7 @@ describe('content and learning sessions', () => {
   it('enforces author roles, teacher subject assignments and parent denial on every surface', async () => {
     const session = await createSession();
     const readPaths = [
-      `/subjects/${subjectId}/chapters`, `/chapters/${chapterId}`, `/chapters/${chapterId}/concepts`,
+      `/subjects/${subjectId}/chapters`, `/chapters/${chapterId}`, `/chapters/${chapterId}/concepts`, `/concepts/${conceptId}`,
       `/chapters/${chapterId}/notes`, `/notes/${noteId}`, `/notes/${noteId}/file`,
       `/chapters/${chapterId}/sessions`, `/sessions/${session.id}`,
     ];

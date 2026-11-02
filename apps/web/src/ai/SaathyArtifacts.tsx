@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { SaathyArtifact } from '../../../../packages/contracts/src/ask';
+import { InteractiveArtifact } from './visuals/artifact-card';
 
 // Text is rendered by React, never as provider-supplied markup.
 export function MathText({ text }: { text: string }) {
@@ -13,6 +14,7 @@ export function MathText({ text }: { text: string }) {
 
 export function ArtifactCard({ artifact }: { artifact: SaathyArtifact }) {
   const [visible, setVisible] = useState(1);
+  if (artifact.type === 'chart' || artifact.type === 'demo') return <InteractiveArtifact artifact={artifact} />;
   return <section className="saathy-card" aria-label={artifact.title}>
     <p className="nb-label">{artifact.type === 'worked-example' ? 'Worked example' : artifact.type === 'diagram' ? 'Diagram' : artifact.type === 'notes' ? 'Notebook notes' : 'Explanation'}</p>
     <h3 className="nb-h3">{artifact.title}</h3>

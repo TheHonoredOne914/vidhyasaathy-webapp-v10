@@ -79,6 +79,7 @@ export function SubjectPathBoard({ subjectId }: { subjectId: string }) {
       <section className="nb-card">
         <div className="subj"><SubjectIcon subject={subject.name} large /><div><h1 className="nb-h2" style={{ fontSize: '1.8rem' }}>{subject.name}</h1></div></div>
         {current ? <><div style={{ display: 'flex', justifyContent: 'space-between', margin: '.8rem 0 .3rem' }}><b className="nb-label" style={{ color: 'var(--nb-navy)' }}>{current.title}</b><span className="nb-meta">{doneCount} of {stations.length} ideas completed</span></div><ProgressBar value={stations.length ? (doneCount / stations.length) * 100 : 0} color="var(--nb-blue)" /></> : <p className="nb-empty">No chapter yet.</p>}
+        {current ? <p><Link className="nb-btn nb-btn--ghost" to={`/student/chapters/${current.id}/learn`}>Learn with Saathy</Link></p> : null}
       </section>
       <section className="nb-card nb-grow">
         <div className="nb-card__head"><h3 className="nb-h3">Jump to chapter</h3></div>

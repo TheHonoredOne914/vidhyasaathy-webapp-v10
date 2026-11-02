@@ -81,6 +81,7 @@ function activeKey(role: Role, pathname: string, search: string, hash: string): 
   if (pathname.startsWith('/student/settings')) return 'settings';
   if (pathname.startsWith('/student/assignments')) return 'homework';
   if (pathname.startsWith('/student/sessions')) return 'sessions';
+  if (pathname.startsWith('/student/learning/sessions')) return 'sessions';
   if (pathname.includes('/practice/engine/')) return 'games';
   if (pathname.startsWith('/student/subjects') || pathname.startsWith('/student/chapters') || pathname.startsWith('/student/notes') || pathname.startsWith('/student/concepts')) return 'subjects';
   if (panel === 'subjects') return 'subjects';
