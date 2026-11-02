@@ -91,7 +91,12 @@ Final regression pass: 41 tests in learning-proto, learning-model, ask, ai and a
 
 ## BE pass (be-pass agent)
 
-Not started. The be-pass agent updates only this section. Task list: prompts/BACKEND-PROMPT.md.
+- P0(a): DONE (verified: `npm run typecheck`; Ask route tests 12/12). Recovered WIP answers before optional checks, seven-day skip, general questions and empty diagnostic responses. Live verification pending.
+- P0(b): BLOCKED here: chapter-picker default is FE-owned; no `apps/web` edits permitted.
+- P0(c): IN PROGRESS: adaptive backend plans and real registry game links; game Back navigation is FE-owned.
+- P0(d): NOT STARTED: today endpoint; Home render/skeleton is FE-owned.
+- Remaining P0/P1/P2: NOT STARTED.
+- UNVERIFIED: no Gemini key on this machine. Missing dhruv-model reference skipped per laptop overrides. No push.
 
 ## FE pass (fe-pass agent)
 
