@@ -123,7 +123,7 @@ export function NotebookSignIn() {
     })();
   }, [autoDemo, session, navigate]);
   if (autoPending) return <div className="si" aria-busy="true">Opening Aarav’s workspace…</div>;
-  if (session.status === 'loading') return <div className="si"><section className="si-l" aria-busy="true" aria-label="Opening sign-in"><div className="si-form"><div className="nb-skel" /><div className="nb-skel" /></div></section><Night role={role} /></div>;
+  if (session.status === 'loading') return <div className="si"><section className="si-l" aria-label="Opening sign-in"><div className="si-form"><div aria-busy="true"><div className="nb-skel" /><div className="nb-skel" /></div><DemoEntryButtons /></div></section><Night role={role} /></div>;
   if (session.me && !session.stale) return <Navigate to={ROLE_HOME[session.me.profile.role]} replace />;
 
   async function submit(event: FormEvent) {

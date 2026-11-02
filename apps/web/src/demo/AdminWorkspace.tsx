@@ -45,7 +45,7 @@ export function AdminWorkspace() {
 }
 function replace<T extends { id: string }>(rows: T[], row: T): T[] { return rows.some((item) => item.id === row.id) ? rows.map((item) => item.id === row.id ? row : item) : [...rows, row]; }
 
-function RecordEditor({ collection, row, onClose, onSave }: { collection: Collection; row?: RecordRow; onClose: () => void; onSave: (row: RecordRow) => void }) {
+function RecordEditor({ collection, row, onClose, onSave }: { collection: Collection; row: RecordRow | undefined; onClose: () => void; onSave: (row: RecordRow) => void }) {
   const { data } = useDemo();
   const [name, setName] = useState(row?.name ?? '');
   const [classId, setClassId] = useState(row && 'classId' in row ? row.classId : data.classes[0]!.id);
