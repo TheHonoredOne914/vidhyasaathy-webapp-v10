@@ -132,6 +132,7 @@ describe('learning prototype', () => {
     expect((await h!.post(`/learning/sessions/${session.sessionId}/events`, { id: randomUUID(), type: 'answer_submitted', moduleId: module.id }, cookie)).statusCode).toBe(400);
     const summary = await h!.app.inject({ url: `/learning/sessions/${session.sessionId}/summary`, headers: { cookie } });
     expect(summary.json()).toMatchObject({ attempted: 2, correct: 1, notTaught: 1 });
+    expect(summary.json().concepts.find((row: { conceptId: string }) => row.conceptId === practice.conceptId).word).toBe('Mastered');
     expect(summary.body).not.toContain('"band"');
     const other = h!.roleCookie(DEMO_SCHOOL_ID, 'student');
     expect((await h!.app.inject({ url: `/learning/sessions/${session.sessionId}`, headers: { cookie: other.cookie } })).statusCode).toBe(404);

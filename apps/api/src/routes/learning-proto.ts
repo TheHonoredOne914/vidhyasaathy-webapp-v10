@@ -92,7 +92,7 @@ export async function registerLearningProtoRoutes(app: FastifyInstance, database
     return { ...sessionResponse(row), attempted: answers.length, correct: answers.filter((event) => event.result?.correct === true).length,
       notTaught: answers.filter((event) => event.result?.notTaught === true).length,
       concepts: [...new Set(history.map((event) => event.conceptId))].map((conceptId) => {
-        const latest = answers.filter((event) => event.conceptId === conceptId).at(-1);
+        const latest = answers.filter((event) => event.conceptId === conceptId && event.result?.notTaught !== true).at(-1);
         return { conceptId, word: latest?.result?.word ?? 'New' };
       }) };
   });
