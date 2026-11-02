@@ -8,6 +8,7 @@ import { useSession } from '../../../session';
 import { readStorage, readStudentProfiles, removeStorage, writeStorage } from '../../../storage';
 import { Icon } from '../icons';
 import { Saathy } from '../Saathy';
+import { DemoEntryButtons } from '../../../demo/DemoEntryButtons';
 import '../pages/signin-student.css';
 import '../shell.css';
 
@@ -122,7 +123,7 @@ export function NotebookSignIn() {
     })();
   }, [autoDemo, session, navigate]);
   if (autoPending) return <div className="si" aria-busy="true">Opening Aarav’s workspace…</div>;
-  if (session.status === 'loading') return <div className="si"><section className="si-l" aria-busy="true" aria-label="Opening sign-in"><div className="si-form"><div className="nb-skel" /><div className="nb-skel" /></div></section><Night role={role} /></div>;
+  if (session.status === 'loading') return <div className="si"><section className="si-l" aria-label="Opening sign-in"><div className="si-form"><div aria-busy="true"><div className="nb-skel" /><div className="nb-skel" /></div><DemoEntryButtons /></div></section><Night role={role} /></div>;
   if (session.me && !session.stale) return <Navigate to={ROLE_HOME[session.me.profile.role]} replace />;
 
   async function submit(event: FormEvent) {
@@ -215,6 +216,7 @@ export function NotebookSignIn() {
             <div className="si-foot"><span>New school? Your admin sends you an invite.</span><button type="button" className="nb-link" style={{ fontSize: '1rem' }} onClick={() => { setAdmin((current) => !current); setError(null); }}>{admin ? 'Teacher sign-in' : 'School admin sign-in'}</button></div>
           </>}
         </div>
+        <DemoEntryButtons />
       </form>
     </section>
     <Night role={role} />
