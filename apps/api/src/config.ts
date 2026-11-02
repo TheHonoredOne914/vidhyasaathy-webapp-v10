@@ -16,7 +16,9 @@ const EnvironmentSchema = z.object({
   RATE_LIMIT_MAX: z.coerce.number().int().min(1).max(10000).default(120),
   AUTH_RATE_LIMIT_MAX: z.coerce.number().int().min(1).max(1000).default(20),
   UPLOAD_DIRECTORY: z.string().trim().min(1).default('./uploads'),
-  AI_PROVIDER: z.enum(['stub', 'openai', 'http']).optional(),
+  AI_PROVIDER: z.enum(['stub', 'openai', 'http', 'gemini']).optional(),
+  GEMINI_API_KEY: z.string().trim().min(1).optional(),
+  GEMINI_MODEL: z.string().trim().min(1).default('gemini-2.5-flash'),
   AI_HTTP_URL: z.string().url().refine((value) => ['http:', 'https:'].includes(new URL(value).protocol)).optional(),
   AI_HTTP_TOKEN: z.string().trim().min(1).optional(),
   AI_HTTP_MODEL: z.string().trim().min(1).default('class9'),
@@ -36,5 +38,5 @@ const EnvironmentSchema = z.object({
 
 export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
   const config = EnvironmentSchema.parse(environment);
-  return { ...config, AI_PROVIDER: config.AI_PROVIDER ?? (config.OPENAI_API_KEY ? 'openai' : 'stub') };
+  return { ...config, AI_PROVIDER: config.AI_PROVIDER ?? (config.GEMINI_API_KEY ? 'gemini' : config.OPENAI_API_KEY ? 'openai' : 'stub') };
 }

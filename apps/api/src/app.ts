@@ -37,6 +37,8 @@ import { registerDailyRoutes } from './routes/daily.ts';
 import { registerGamesRoutes } from './routes/games.ts';
 import { registerNotebookRoutes } from './routes/notebook.ts';
 import { registerAuthV9Routes } from './routes/auth-v9.ts';
+import { registerLearningProtoRoutes } from './routes/learning-proto.ts';
+import type { JsonModel } from './learning/proto-model.ts';
 
 export interface AppOptions {
   database: Database;
@@ -57,6 +59,7 @@ export interface AppOptions {
   snapConfigured?: boolean;
   aiJobPollMs?: number;
   aiDailyTokenBudget?: number;
+  learningModel?: JsonModel;
 }
 
 export async function buildApp(input: AppOptions) {
@@ -153,6 +156,7 @@ export async function buildApp(input: AppOptions) {
     registerDailyRoutes(app, db, options.now);
     registerGamesRoutes(app, input.database, options.now);
     registerNotebookRoutes(app, db, options.now);
+    await registerLearningProtoRoutes(app, input.database, options.now, input.learningModel);
     app.post('/auth/logout', async (request, reply) => {
       auth.logout(request, reply);
       return reply.code(204).send();
