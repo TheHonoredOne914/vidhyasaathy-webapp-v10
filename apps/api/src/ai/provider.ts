@@ -6,10 +6,11 @@ import { createLearningModel, type JsonModel } from '../learning/proto-model.ts'
 
 export interface SourceChunk { id: number; noteId: string; title: string; position: number; text: string }
 export interface GroundedQuestion {
+  schoolId?: string;
   question: string; hintLevel: number; socratic: boolean; sources: SourceChunk[];
   style?: 'hints' | 'explain'; mode?: 'learn' | 'homework'; system?: string; maxTokens?: number;
 }
-export interface DraftSource { noteId: string; title: string; body: string; concepts: { id: string; title: string }[] }
+export interface DraftSource { schoolId?: string; noteId: string; title: string; body: string; concepts: { id: string; title: string }[] }
 export interface ProviderAnswer { message: string; sources: { chunkId: number; quote: string }[] }
 export const ProviderAnswerSchema = z.object({
   message: z.string().trim().min(1).max(4000),

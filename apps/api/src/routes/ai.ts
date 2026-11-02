@@ -66,7 +66,7 @@ export function registerAiRoutes(app: FastifyInstance, database: Database, auth:
       if (cached) response = { ...cached.response, cached: true };
       else {
         try {
-          const answer = await provider.ask({ ...input, sources });
+          const answer = await provider.ask({ ...input, schoolId: school.id, sources });
           if (answer) {
             const valid = ProviderAnswerSchema.parse(answer);
             const citations = valid.sources.map((citation) => {

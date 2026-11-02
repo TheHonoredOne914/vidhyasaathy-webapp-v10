@@ -12,7 +12,7 @@ import { prepareLearningStore } from '../src/learning/proto-store.ts';
 import { openDatabase } from '../src/db/index.ts';
 import { DEMO_SCHOOL_ID, seedDemo } from '../src/db/demo.ts';
 import { chapters } from '../src/db/schema.ts';
-import { cookieFrom, createHarness, PASSWORD, PIN, type Harness } from './helpers.ts';
+import { cookieFrom, createHarness, ORIGIN, PASSWORD, PIN, type Harness } from './helpers.ts';
 
 const offline = async () => { throw new Error('offline'); };
 let h: Harness | undefined;
@@ -31,6 +31,23 @@ async function setup() {
 }
 
 describe('learning prototype', () => {
+  it('keeps founder credentials masked, school scoped and writable only by administrators', async () => {
+    const { cookie } = await setup();
+    const admin = h!.roleCookie(DEMO_SCHOOL_ID, 'admin').cookie;
+    const put = (payload: Record<string, unknown>, role = admin) => h!.app.inject({
+      method: 'PUT', url: '/founder/settings', headers: { cookie: role, origin: ORIGIN }, payload,
+    });
+    expect((await put({ geminiApiKey: 'test-founder-secret' }, cookie)).statusCode).toBe(403);
+    const saved = await put({ geminiApiKey: 'test-founder-secret', geminiModel: 'gemini-2.5-flash' });
+    expect(saved.statusCode).toBe(200);
+    expect(saved.json()).toMatchObject({ geminiConfigured: true, geminiKeyMasked: '********cret', source: 'founder' });
+    expect(saved.body).not.toContain('test-founder-secret');
+    expect((await put({ geminiModel: 'another-model' })).json().geminiConfigured).toBe(true);
+    const otherAdmin = cookieFrom((await h!.register('another-admin@example.test')).headers);
+    const other = await h!.app.inject({ url: '/founder/settings', headers: { cookie: otherAdmin } });
+    expect(other.json().source).not.toBe('founder');
+    expect((await put({ geminiApiKey: null })).json().source).not.toBe('founder');
+  });
   it('builds schema-valid flagship and generic modules without exposing keys', async () => {
     const { bank } = await setup();
     const catalog = h!.database.db.select().from(chapters).all();

@@ -8,7 +8,7 @@ import type { Database } from '../db/index.ts';
 import { ApiException, parseInput } from '../errors.ts';
 import { moduleBank, scoreAnswer } from '../learning/proto-content.ts';
 import { gameRegistry } from '../learning/proto-games.ts';
-import { createLearningModel, type JsonModel } from '../learning/proto-model.ts';
+import { schoolLearningModel, type JsonModel } from '../learning/proto-model.ts';
 import { buildLearningPlan } from '../learning/proto-plan.ts';
 import { prepareLearningStore, sessionPlan, type StudySession } from '../learning/proto-store.ts';
 import { tutorReply } from '../learning/proto-tutor.ts';
@@ -19,7 +19,8 @@ const ChapterInput = z.object({ chapterId: Id, subjectId: Id.optional() });
 export async function registerLearningProtoRoutes(app: FastifyInstance, database: Database, now: () => number, model?: JsonModel) {
   await prepareLearningStore(database);
   const { db, sqlite } = database;
-  const generate = model ?? createLearningModel().generate;
+  const generateFor = (request: FastifyRequest): JsonModel => model ?? ((system, input) =>
+    schoolLearningModel(database, requireAuth(request).school.id).generate(system, input));
   const student = { preHandler: requireRole('student') };
   const unavailable = () => new ApiException(404, 'NOT_FOUND', 'This learning resource is not available.');
   function bankFor(request: FastifyRequest, chapterId: string) {
@@ -61,7 +62,7 @@ export async function registerLearningProtoRoutes(app: FastifyInstance, database
     const input = parseInput(ChapterInput, request.body);
     const { school, profile } = requireAuth(request);
     const bank = bankFor(request, input.chapterId);
-    const plan = await buildLearningPlan(bank.modules, gameRegistry(db, school.id).filter((row) => row.chapterId === input.chapterId), generate);
+    const plan = await buildLearningPlan(bank.modules, gameRegistry(db, school.id).filter((row) => row.chapterId === input.chapterId), generateFor(request));
     sqlite.prepare('INSERT INTO proto_learning_plan VALUES (?,?,?,?,?)').run(plan.id, school.id, profile.id, input.chapterId, JSON.stringify(plan));
     return plan;
   });
@@ -156,7 +157,7 @@ export async function registerLearningProtoRoutes(app: FastifyInstance, database
     const result = await tutorReply({ ...input, module, plan: sessionPlan(row),
       context: { ...input.context, step: sessionPlan(row).currentStep,
         recentAttempts: history.slice(-5).map((event) => ({ questionId: String(event.result?.questionId), answer: String(event.result?.answer), correct: event.result?.correct === true })) },
-      lastWrongAttempt: lastWrong ? { questionId: String(lastWrong.result?.questionId), answer: String(lastWrong.result?.answer) } : null }, generate);
+      lastWrongAttempt: lastWrong ? { questionId: String(lastWrong.result?.questionId), answer: String(lastWrong.result?.answer) } : null }, generateFor(request));
     append(row.id, 'tutor_requested', module.conceptId, { mode: input.mode, moduleId: module.id });
     return result;
   });
