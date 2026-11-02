@@ -1,10 +1,9 @@
 import { openDatabase } from './index.ts';
+import { ensureDemoStory } from './demo-bootstrap.ts';
 import { ensureDailyLoop } from './daily-seed.ts';
 import { seedPhase4 } from './seed-phase4.ts';
 import { ensureNotebookDemo } from './notebook-seed.ts';
 import { applyDemoAccess, canonicalDemoLogins, DEMO_SCHOOL_ID, ensureDemoStudents, resetDemoLogins, seedDemo } from './demo.ts';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 if (process.env.NODE_ENV === 'production' || process.env.DEMO_SEED !== 'true') {
   throw new Error('Demo seeding requires DEMO_SEED=true and a non-production environment.');
@@ -24,13 +23,9 @@ try {
   ensureNotebookDemo(database.db, DEMO_SCHOOL_ID, Date.now());
   await seedPhase4(database, Date.now);
   await applyDemoAccess(database.db);
+  await ensureDemoStory(database, Date.now());
   const logins = canonicalDemoLogins();
   console.info(logins);
-  const { mkdir, writeFile } = await import('node:fs/promises');
-  const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
-  const scriptsDir = resolve(repoRoot, 'apps/scripts');
-  await mkdir(scriptsDir, { recursive: true });
-  await writeFile(resolve(scriptsDir, 'DEMO_LOGINS.md'), `# Demo logins\n\n\`\`\`text\n${logins}\n\`\`\`\n`, 'utf8');
 } finally {
   database.close();
 }

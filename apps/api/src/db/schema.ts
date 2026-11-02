@@ -516,6 +516,7 @@ export const revisionHooks = sqliteTable('revision_hook', {
 ]);
 
 export const diagnosticResults = sqliteTable('diagnostic_result', {
+  skipped: integer('skipped', { mode: 'boolean' }).notNull().default(false),
   schoolId: text('school_id').notNull(), profileId: text('profile_id').notNull(), chapterId: text('chapter_id').notNull(),
   route: text('route', { enum: ['challenge', 'steady', 'repair'] }).notNull(), createdAt: integer('created_at').notNull(),
 }, (t) => [

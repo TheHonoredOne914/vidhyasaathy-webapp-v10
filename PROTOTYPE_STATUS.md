@@ -91,7 +91,13 @@ Final regression pass: 41 tests in learning-proto, learning-model, ask, ai and a
 
 ## BE pass (be-pass agent)
 
-Not started. The be-pass agent updates only this section. Task list: prompts/BACKEND-PROMPT.md.
+- P0(a): DONE (verified: `npm run typecheck`; Ask route tests 12/12). Recovered WIP answers before optional checks, seven-day skip, general questions and empty diagnostic responses. Live verification pending.
+- P0(b): BLOCKED here: chapter-picker default is FE-owned; no `apps/web` edits permitted.
+- P0(c): DONE backend: evidence-adaptive short plans, shorter mastered paths and validated registry game links. Game Back navigation is FE-owned. Content audit confirms quill-blade teaches Wind and optics-lab teaches Light; audited chapter names now override stale checkpoint mappings.
+- P0(d): DONE backend: scoped `/student/today` with active session/homework/repair/catch-up/chapter priorities; human home resume text. Flashcard priority follows P1. Home rendering is FE-owned.
+- P0-4: DONE: owned session context and distinct teaching instructions in Ask, preserving guardrails.
+- Verification: root `npm run typecheck` passed; affected Ask/learning/student-flow tests 29/29 passed. Live and preview pending. P1/P2 pending.
+- UNVERIFIED: no Gemini key on this machine. Missing dhruv-model reference skipped per laptop overrides. No push.
 
 ## FE pass (fe-pass agent)
 

@@ -1,4 +1,5 @@
 import { DiagnosticOfferSchema, DiagnosticResultSchema, SubmitDiagnosticSchema } from '@vidhyasaathy/contracts';
+import { DiagnosticSkipSchema, DiagnosticSkipResultSchema } from '../../../../packages/contracts/src/student-flow.ts';
 import { clampLevel, isNotTaughtAnswer, NEW_WORD, type Confidence } from '@vidhyasaathy/core/learning';
 import { and, eq } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
@@ -36,17 +37,33 @@ export function diagnosticItems(db: Db, schoolId: string, chapterId: string) {
 
 export function registerDiagnosticRoutes(app: FastifyInstance, db: Db, now: () => number) {
   const student = { preHandler: requireRole('student') };
+  function taken(schoolId: string, profileId: string, chapterId: string) {
+    const row = db.select().from(diagnosticResults).where(and(eq(diagnosticResults.schoolId, schoolId),
+      eq(diagnosticResults.profileId, profileId), eq(diagnosticResults.chapterId, chapterId))).get();
+    return row && (!row.skipped || row.createdAt > now() - 7 * 86_400_000) ? row : undefined;
+  }
+  app.post('/chapters/:id/diagnostic/skip', student, async (request) => {
+    parseInput(DiagnosticSkipSchema, request.body ?? {});
+    const { school, profile } = requireAuth(request);
+    const chapter = chapterAccess(db, request, resourceId(request));
+    const timestamp = now();
+    db.insert(diagnosticResults).values({ schoolId: school.id, profileId: profile.id, chapterId: chapter.id,
+      route: 'steady', skipped: true, createdAt: timestamp }).onConflictDoUpdate({
+      target: [diagnosticResults.profileId, diagnosticResults.chapterId], set: { skipped: true, createdAt: timestamp },
+      setWhere: eq(diagnosticResults.skipped, true),
+    }).run();
+    return DiagnosticSkipResultSchema.parse({ offered: false, nextOfferAt: new Date(timestamp + 7 * 86_400_000).toISOString() });
+  });
   app.get('/chapters/:id/notebook-diagnostic', student, async (request) => {
     const { school, profile } = requireAuth(request);
     const chapter = chapterAccess(db, request, resourceId(request));
     const questions = diagnosticItems(db, school.id, chapter.id);
-    const taken = db.select().from(diagnosticResults).where(and(eq(diagnosticResults.schoolId, school.id),
-      eq(diagnosticResults.profileId, profile.id), eq(diagnosticResults.chapterId, chapter.id))).get();
+    const completed = taken(school.id, profile.id, chapter.id);
     const ids = new Set(questions.map((row) => row.id));
     const evidence = db.select().from(answerEvidence).where(and(eq(answerEvidence.schoolId, school.id),
       eq(answerEvidence.profileId, profile.id), eq(answerEvidence.source, 'diagnostic'))).all().filter((row) => ids.has(row.itemId));
-    return { chapterId: chapter.id, offered: !taken && questions.length >= 5, title: "Let's see what you already know",
-      questions: taken || questions.length < 5 ? [] : questions.map((row) => ({ ...publicItem(row),
+    return { chapterId: chapter.id, offered: !completed && questions.length >= 5, title: "Let's see what you already know",
+      questions: completed || questions.length < 5 ? [] : questions.map((row) => ({ ...publicItem(row),
         sourceClass: db.select().from(concepts).where(and(eq(concepts.schoolId, school.id), eq(concepts.id, row.conceptId))).get()!.sourceClass })),
       soFar: { answered: evidence.length, total: questions.length, gotIt: evidence.filter((row) => row.correct && !row.notTaught).length,
         workingOn: evidence.filter((row) => row.correct === false && !row.notTaught).length,
@@ -56,18 +73,18 @@ export function registerDiagnosticRoutes(app: FastifyInstance, db: Db, now: () =
   app.get('/chapters/:id/diagnostic', student, async (request) => {
     const { school, profile } = requireAuth(request);
     const chapter = chapterAccess(db, request, resourceId(request));
-    const taken = db.select().from(diagnosticResults).where(and(eq(diagnosticResults.profileId, profile.id), eq(diagnosticResults.chapterId, chapter.id))).get();
+    const completed = taken(school.id, profile.id, chapter.id);
     const questions = diagnosticItems(db, school.id, chapter.id);
     return DiagnosticOfferSchema.parse({
-      chapterId: chapter.id, offered: !taken && questions.length >= 5, title: "Let's see what you already know",
-      questions: taken || questions.length < 5 ? [] : questions.map(publicItem),
+      chapterId: chapter.id, offered: !completed && questions.length >= 5, title: "Let's see what you already know",
+      questions: completed || questions.length < 5 ? [] : questions.map(publicItem),
     });
   });
   app.post('/chapters/:id/diagnostic', student, async (request) => mutate(() => {
     const input = parseInput(SubmitDiagnosticSchema, request.body);
     const { school, profile } = requireAuth(request);
     const chapter = chapterAccess(db, request, resourceId(request));
-    if (db.select().from(diagnosticResults).where(and(eq(diagnosticResults.profileId, profile.id), eq(diagnosticResults.chapterId, chapter.id))).get()) {
+    if (taken(school.id, profile.id, chapter.id)?.skipped === false) {
       throw new ApiException(409, 'DIAGNOSTIC_DONE', 'This chapter check is already saved.');
     }
     const questions = diagnosticItems(db, school.id, chapter.id);
@@ -90,6 +107,7 @@ export function registerDiagnosticRoutes(app: FastifyInstance, db: Db, now: () =
       }, timestamp);
       return { correct, notTaught };
     });
+    db.delete(diagnosticResults).where(and(eq(diagnosticResults.schoolId, school.id), eq(diagnosticResults.profileId, profile.id), eq(diagnosticResults.chapterId, chapter.id), eq(diagnosticResults.skipped, true))).run();
     const entry = placeDiagnostic(db, school.id, profile.id, chapter.id, results, timestamp);
     return DiagnosticResultSchema.parse({ chapterId: chapter.id, route: entry.route, word: NEW_WORD, message: diagnosticMessage(entry.route) });
   }));

@@ -78,13 +78,26 @@ describe('learning prototype', () => {
     expect(scoreAnswer(bank, bank.modules[0]!.id, question.id, '10 m and 0 m')).toBeNull();
   });
 
-  it('retries invalid plan JSON once then returns the full labelled fallback', async () => {
+  it('retries invalid plan JSON once then returns a short labelled fallback', async () => {
     const { bank } = await setup();
     const invalid = vi.fn(async () => ({ steps: 'not a plan' }));
     const plan = LearningPlanSchema.parse(await buildLearningPlan(bank.modules, [], invalid));
     expect(invalid).toHaveBeenCalledTimes(2);
     expect(plan.status).toBe('fallback');
-    expect(plan.steps.map((step) => step.moduleId)).toEqual(bank.modules.map((module) => module.id));
+    expect(plan.steps.length).toBeGreaterThanOrEqual(8);
+    expect(plan.steps.length).toBeLessThanOrEqual(12);
+    expect(plan.steps.every((step) => bank.modules.some((module) => module.id === step.moduleId))).toBe(true);
+  });
+
+  it('uses evidence to shorten mastered chapters and preserves real game links', async () => {
+    const { bank, chapter } = await setup();
+    await seedPhase4(h!.database, h!.now);
+    const games = gameRegistry(h!.database.db, DEMO_SCHOOL_ID).filter((row) => row.chapterId === chapter.id);
+    const fresh = await buildLearningPlan(bank.modules, games, offline);
+    const mastered = await buildLearningPlan(bank.modules, games, offline, { states: [...new Set(bank.modules.map((row) => row.conceptId))].map((conceptId) => ({ conceptId, mastery: 0.9, attempts: 5 })) });
+    expect(mastered.steps.length).toBeLessThan(fresh.steps.length);
+    expect(fresh.steps.filter((step) => step.activityId).length).toBeGreaterThan(0);
+    expect(fresh.steps.filter((step) => step.activityId).every((step) => games.some((game) => game.id === step.activityId && game.route === step.href))).toBe(true);
   });
 
   it('accepts a valid model plan and replaces invented or cross-chapter IDs', async () => {
@@ -118,7 +131,7 @@ describe('learning prototype', () => {
     const session = start.json();
     const resume = await h!.post('/learning/sessions', { chapterId: chapter.id }, cookie);
     expect(resume.json().sessionId).toBe(session.sessionId);
-    const module = bank.modules[0]!;
+    const module = bank.modules.find((row) => row.id === session.plan.steps[0].moduleId)!;
     const complete = { id: randomUUID(), type: 'module_completed', moduleId: module.id };
     expect((await h!.post(`/learning/sessions/${session.sessionId}/events`, complete, cookie)).json().plan.currentStep).toBe(1);
     expect((await h!.post(`/learning/sessions/${session.sessionId}/events`, complete, cookie)).json().plan.currentStep).toBe(1);

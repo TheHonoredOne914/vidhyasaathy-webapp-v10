@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { academicYears, chapters, classes, concepts, notes, profiles, sections, subjects } from '../src/db/schema.ts';
 import { createHarness, type Harness } from './helpers.ts';
+import { seedGameDiagnostics } from '../src/db/game-diagnostics.ts';
 
 describe('Ask conversations', () => {
   let h: Harness;
@@ -26,6 +27,31 @@ describe('Ask conversations', () => {
   });
   afterEach(async () => { await h.app.close(); });
   const ask = (extra: Record<string, unknown> = {}) => h.post('/ask/stream', { clientEventId: randomUUID(), chapterId, conceptId, text: 'Explain speed distance time', ...extra }, student);
+
+  it('answers before offering an optional check, and respects a seven-day skip', async () => {
+    seedGameDiagnostics(h.database.db, schoolId, h.now());
+    const first = await ask({ style: 'explain' });
+    expect(first.body).toContain('"offered":true');
+    expect(first.body).not.toContain('Before we explore this chapter');
+    expect(first.body.indexOf('event: token')).toBeLessThan(first.body.indexOf('event: levelCheck'));
+    expect((await h.post(`/chapters/${chapterId}/diagnostic/skip`, {}, student)).statusCode).toBe(200);
+    expect((await ask()).body).toContain('"offered":false');
+    expect(h.database.sqlite.prepare('SELECT count(*) AS n FROM answer_evidence').get()).toEqual({ n: 0 });
+    h.advance(7 * 86_400_000 + 1);
+    h.database.sqlite.prepare('UPDATE session SET expires_at=?').run(h.now() + 60_000);
+    expect((await ask()).body).toContain('"offered":true');
+  });
+
+  it('allows general questions and empty chapter checks without blocking', async () => {
+    const general = await h.post('/ask/stream', { clientEventId: randomUUID(), text: 'What is displacement?' }, student);
+    expect(general.body).toContain('event: token');
+    expect(general.body).not.toContain('Choose a chapter');
+    for (const suffix of ['diagnostic', 'notebook-diagnostic']) {
+      const response = await h.app.inject({ url: `/chapters/${chapterId}/${suffix}`, headers: { cookie: student } });
+      expect(response.statusCode).toBe(200);
+      expect(response.json()).toMatchObject({ offered: false, questions: [] });
+    }
+  });
 
   it('keeps the Ask allowance separate from ordinary notebook requests', async () => {
     for (let index = 0; index < 15; index++) {

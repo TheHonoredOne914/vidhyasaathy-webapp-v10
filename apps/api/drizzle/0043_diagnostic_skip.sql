@@ -1,0 +1,1 @@
+ALTER TABLE diagnostic_result ADD COLUMN skipped INTEGER NOT NULL DEFAULT 0;

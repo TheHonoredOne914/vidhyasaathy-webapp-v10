@@ -23,7 +23,7 @@ export function gameRegistry(db: Db, schoolId: string): GameRegistryEntry[] {
   return Object.entries(GAME_TITLES).flatMap(([id, title]) => {
     const mapped = mappings.filter((row) => row.gameId === id);
     const chapterIds = new Set(mapped.flatMap((row) => ideas.filter((idea) => idea.id === row.conceptId).map((idea) => idea.chapterId)));
-    const matches = catalog.filter((chapter) => chapterIds.has(chapter.id) || chapterNames[id]?.test(chapter.title));
+      const matches = catalog.filter((chapter) => chapterNames[id] ? chapterNames[id]!.test(chapter.title) : chapterIds.has(chapter.id));
     return matches.map((chapter) => {
       const conceptIds = [...new Set(mapped.filter((row) => ideas.some((idea) => idea.id === row.conceptId && idea.chapterId === chapter.id)).map((row) => row.conceptId))];
       return { id, title, subjectId: chapter.subjectId, chapterId: chapter.id,

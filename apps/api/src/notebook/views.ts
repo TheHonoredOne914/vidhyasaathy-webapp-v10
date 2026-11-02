@@ -185,7 +185,7 @@ export function teacherHome(db: Db, request: FastifyRequest, now: number) {
     world.homework = world.homework.filter((row) => chapterIds.has(row.chapterId));
     return world;
   });
-  const diagnostics = db.select().from(diagnosticResults).where(eq(diagnosticResults.schoolId, school.id)).all();
+  const diagnostics = db.select().from(diagnosticResults).where(and(eq(diagnosticResults.schoolId, school.id), eq(diagnosticResults.skipped, false))).all();
   const errors = new Map<string, number>();
   for (const row of worlds.flatMap((world) => world.week).filter((row) => row.correct === false && !row.notTaught && row.errorType)) {
     errors.set(row.errorType!, (errors.get(row.errorType!) ?? 0) + 1);

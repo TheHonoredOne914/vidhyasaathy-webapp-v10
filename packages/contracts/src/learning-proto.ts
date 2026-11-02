@@ -9,7 +9,7 @@ export const LearningContextSchema = z.object({
   recentAttempts: z.array(z.object({ questionId: Ref, answer: z.string(), correct: z.boolean().optional() })),
 });
 export type LearningContext = z.infer<typeof LearningContextSchema>;
-export const ModuleRefSchema = z.object({ moduleId: Ref, activityId: Ref.optional() });
+export const ModuleRefSchema = z.object({ moduleId: Ref, activityId: Ref.optional(), href: Ref.optional() });
 export type ModuleRef = z.infer<typeof ModuleRefSchema>;
 export const LearningPlanSchema = z.object({
   id: Ref, subjectId: Ref, chapterId: Ref, objectives: z.array(z.string()),

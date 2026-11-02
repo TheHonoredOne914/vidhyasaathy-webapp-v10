@@ -26,6 +26,13 @@ export async function registerLearningProtoRoutes(app: FastifyInstance, database
   function bankFor(request: FastifyRequest, chapterId: string) {
     return moduleBank(db, requireAuth(request).school.id, chapterAccess(db, request, chapterId));
   }
+  function planFor(request: FastifyRequest, chapterId: string) {
+    const { school, profile } = requireAuth(request);
+    const states = sqlite.prepare('SELECT concept_id AS conceptId,mastery,attempts FROM student_concept_state WHERE school_id=? AND profile_id=?').all(school.id, profile.id) as { conceptId: string; mastery: number; attempts: number }[];
+    const diagnostic = sqlite.prepare('SELECT route FROM diagnostic_result WHERE school_id=? AND profile_id=? AND chapter_id=? AND skipped=0').get(school.id, profile.id, chapterId);
+    const mistakes = sqlite.prepare('SELECT e.concept_id,e.result FROM proto_learning_event e JOIN proto_study_session s ON s.id=e.session_id WHERE s.school_id=? AND s.profile_id=? AND s.chapter_id=? AND e.type=? ORDER BY e.ts DESC LIMIT 5').all(school.id, profile.id, chapterId, 'answer_submitted');
+    return buildLearningPlan(bankFor(request, chapterId).modules, gameRegistry(db, school.id).filter((row) => row.chapterId === chapterId), generateFor(request), { states, diagnostic, mistakes }, (message) => request.log.debug({ validation: message }, 'Learning plan rejected'));
+  }
   function ownedSession(request: FastifyRequest, id: string) {
     const { school, profile } = requireAuth(request);
     const row = sqlite.prepare('SELECT * FROM proto_study_session WHERE id=? AND school_id=? AND profile_id=?').get(id, school.id, profile.id) as StudySession | undefined;
@@ -61,15 +68,14 @@ export async function registerLearningProtoRoutes(app: FastifyInstance, database
   app.post('/learning/plan', student, async (request) => {
     const input = parseInput(ChapterInput, request.body);
     const { school, profile } = requireAuth(request);
-    const bank = bankFor(request, input.chapterId);
-    const plan = await buildLearningPlan(bank.modules, gameRegistry(db, school.id).filter((row) => row.chapterId === input.chapterId), generateFor(request));
+    const plan = await planFor(request, input.chapterId);
     sqlite.prepare('INSERT INTO proto_learning_plan VALUES (?,?,?,?,?)').run(plan.id, school.id, profile.id, input.chapterId, JSON.stringify(plan));
     return plan;
   });
   app.post('/learning/sessions', student, async (request) => {
     const input = parseInput(ChapterInput.extend({ planId: Id.optional(), sessionId: Id.optional() }), request.body);
     const { school, profile } = requireAuth(request);
-    const bank = bankFor(request, input.chapterId);
+      bankFor(request, input.chapterId);
     if (input.sessionId) {
       const row = ownedSession(request, input.sessionId);
       if (row.chapter_id !== input.chapterId) throw unavailable();
@@ -79,7 +85,7 @@ export async function registerLearningProtoRoutes(app: FastifyInstance, database
     if (existing && sessionPlan(existing).status !== 'completed' && (!input.planId || sessionPlan(existing).id === input.planId)) return sessionResponse(existing);
     const stored = input.planId ? sqlite.prepare('SELECT plan FROM proto_learning_plan WHERE id=? AND school_id=? AND profile_id=? AND chapter_id=?').get(input.planId, school.id, profile.id, input.chapterId) as { plan: string } | undefined : undefined;
     if (input.planId && !stored) throw unavailable();
-    const plan = stored ? LearningPlanSchema.parse(JSON.parse(stored.plan)) : await buildLearningPlan(bank.modules, [], async () => { throw new Error('Deterministic start'); });
+    const plan = stored ? LearningPlanSchema.parse(JSON.parse(stored.plan)) : await planFor(request, input.chapterId);
     const id = randomUUID();
     sqlite.prepare('INSERT INTO proto_study_session VALUES (?,?,?,?,?,?,?)').run(id, school.id, profile.id, input.chapterId, JSON.stringify(plan), now(), now());
     return sessionResponse(ownedSession(request, id));
