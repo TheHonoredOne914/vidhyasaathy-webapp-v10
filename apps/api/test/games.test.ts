@@ -33,12 +33,16 @@ it('scores frozen real checkpoints once, writes light evidence and finishes with
   const url = `/games/motion/sessions/${sessionId}`;
   expect((await h.post(`${url}/finish`, { clientEventId: randomUUID() }, cookie)).statusCode).toBe(409);
   for (const checkpointKey of Object.keys(checkpoints)) {
-    const input = { clientEventId: randomUUID(), checkpointKey, answer: { optionId: '0' }, confidence: 'sure', timeMs: 4000 };
+    const row = h.database.sqlite.prepare('SELECT content FROM game_session_item WHERE session_id=? AND checkpoint_key=?').get(sessionId, checkpointKey) as { content: string };
+    const frozen = JSON.parse(row.content) as { options: string[]; answer: string };
+    const right = String(frozen.options.indexOf(frozen.answer));
+    const wrong = right === '0' ? '1' : '0';
+    const input = { clientEventId: randomUUID(), checkpointKey, answer: { optionId: right }, confidence: 'sure', timeMs: 4000 };
     const answer = await h.post(`${url}/answer`, input, cookie);
     expect(answer.statusCode).toBe(200);
     expect(answer.json().correct).toBe(true);
     expect((await h.post(`${url}/answer`, input, cookie)).body).toBe(answer.body);
-    expect((await h.post(`${url}/answer`, { ...input, answer: { optionId: '1' } }, cookie)).statusCode).toBe(409);
+    expect((await h.post(`${url}/answer`, { ...input, answer: { optionId: wrong } }, cookie)).statusCode).toBe(409);
     expect((await h.post(`${url}/answer`, { ...input, clientEventId: randomUUID() }, cookie)).statusCode).toBe(409);
   }
   const rows = h.database.sqlite.prepare("SELECT weight,source FROM answer_evidence WHERE source='game:motion'").all();
@@ -58,7 +62,7 @@ it('rejects wrong owners, game/session mismatches, unsupported games and non-stu
   expect((await h.post(`/games/newton/sessions/${id}/finish`, input, cookie)).statusCode).toBe(404);
   const other = h.roleCookie(DEMO_SCHOOL_ID, 'student');
   expect((await h.post(`/games/motion/sessions/${id}/finish`, input, other.cookie)).statusCode).toBe(404);
-  expect((await h.post('/games/atom/sessions', input, cookie)).statusCode).toBe(404);
+  expect((await h.post('/games/not-a-game/sessions', input, cookie)).statusCode).toBe(404);
   for (const role of ['teacher', 'parent', 'admin'] as const) {
     expect((await h.post('/games/motion/sessions', input, h.roleCookie(DEMO_SCHOOL_ID, role).cookie)).statusCode).toBe(403);
   }

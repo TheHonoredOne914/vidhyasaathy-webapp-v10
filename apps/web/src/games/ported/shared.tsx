@@ -1,9 +1,9 @@
-import type { ComponentType } from 'react';
+import type { ReactNode } from 'react';
 import type { ArenaApi, GameDef } from '../engine/types';
 import './ported.css';
 
 /** Simulations teach; SessionQuestion is the only source of scored answers. */
-export function experiment(id: string, title: string, chapter: string, Stage: ComponentType<{ api: ArenaApi }>, tasks: readonly [string, string][]): GameDef {
+export function experiment(id: string, title: string, chapter: string, Stage: (props: { api: ArenaApi }) => ReactNode, tasks: readonly [string, string][]): GameDef {
   return { id, title, chapterRef: chapter, conceptIds: [], scenes: [], arena: {
     name: title, world: chapter, chapterLabel: chapter,
     levels: tasks.map(([name, task]) => ({ title: name, subtitle: 'Explore the idea, then try your checkpoint.',

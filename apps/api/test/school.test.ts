@@ -323,7 +323,7 @@ describe('school CRUD and role enforcement', () => {
     for (const path of ['classes', 'sections', 'subjects', 'academic-years']) {
       expect((await get(`/${path}`)).json()).toEqual([]);
     }
-    h.database.db.update(profiles).set({ sectionId: school.section.id }).where(eq(profiles.id, student.profileId)).run();
+    h.database.db.update(profiles).set({ sectionId: school.section.id, rollNumber: '1' }).where(eq(profiles.id, student.profileId)).run();
     const link = { id: randomUUID(), schoolId: school.identity.school.id, parentProfileId: parent.profileId, studentProfileId: student.profileId };
     h.database.db.insert(parentLinks).values(link).run();
     for (const [path, row] of [['classes', school.schoolClass], ['sections', school.section], ['subjects', school.subject], ['academic-years', school.academicYear]] as const) {

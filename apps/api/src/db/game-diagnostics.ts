@@ -1,3 +1,10 @@
+import { createHash } from 'node:crypto';
+
+/** Deterministic UUID (v5-shaped) so reruns stay idempotent and ids pass contract validation. */
+function stableUuid(key: string) {
+  const h = createHash('sha1').update(key).digest('hex');
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-5${h.slice(13, 16)}-${((parseInt(h[16]!, 16) & 3) | 8).toString(16)}${h.slice(17, 20)}-${h.slice(20, 32)}`;
+}
 import { and, eq } from 'drizzle-orm';
 import { SaveItemSchema } from '@vidhyasaathy/contracts';
 import { NOT_TAUGHT } from '@vidhyasaathy/core/learning';
@@ -95,12 +102,12 @@ export function seedGameDiagnostics(db: Db, schoolId: string, timestamp: number)
       : subject.name === 'Chemistry' ? CHEMISTRY : subject.name === 'Biology' ? BIOLOGY : subject.name === 'Civics' ? CIVICS : subject.name === 'English' ? ENGLISH : null;
     if (!bank) continue;
     for (const [position, [title, prompt, options, explanation, sourceClass, sourceChapter]] of bank.entries()) {
-      const conceptId = `game-prereq:${chapter.id}:${position}`;
-      const noteId = `${conceptId}:note`;
+      const conceptId = stableUuid(`game-prereq:${chapter.id}:${position}`);
+      const noteId = stableUuid(`${conceptId}:note`);
       db.insert(concepts).values({ id: conceptId, schoolId, chapterId: chapter.id, title: `Class ${sourceClass}: ${title}`, description: explanation, sourceClass }).onConflictDoNothing().run();
       for (const target of targets) db.insert(conceptPrereqs).values({ schoolId, conceptId: target.id, prereqId: conceptId }).onConflictDoNothing().run();
       db.insert(notes).values({ id: noteId, schoolId, chapterId: chapter.id, title: `Before we start: ${title}`, body: explanation, status: 'published', releaseAt: timestamp - 1, updatedAt: timestamp }).onConflictDoNothing().run();
-      db.insert(items).values({ id: `${conceptId}:item`, schoolId, chapterId: chapter.id, conceptId, sessionId: null, position,
+      db.insert(items).values({ id: stableUuid(`${conceptId}:item`), schoolId, chapterId: chapter.id, conceptId, sessionId: null, position,
         content: SaveItemSchema.parse({ type: 'mcq', conceptId, difficulty: 1, role: 'diagnostic', prompt, options: [...options, NOT_TAUGHT], answer: options[0], explanation,
           sourceRef: { noteId, locator: `NCERT Class ${sourceClass}: ${sourceChapter}` } }) }).onConflictDoNothing().run();
     }

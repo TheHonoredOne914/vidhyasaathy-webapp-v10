@@ -79,7 +79,7 @@ export function App() {
         <AttemptSyncProvider>
         <Suspense fallback={<RouteFallback />}>
           <Routes>
-            <Route path="/student/games/atom" element={<RoleGuard role="student"><ForgeChapterEntry /></RoleGuard>} />
+            <Route path="/student/games/atom" element={<RoleGuard role="student"><AtomForgeVideo /></RoleGuard>} />
             <Route path="/student/chapters/:chapterId/practice/engine/:gameId" element={<RoleGuard role="student"><ChapterEntryGate><EngineGamePage /></ChapterEntryGate></RoleGuard>} />
             <Route element={<Shell />}>
               <Route path="/" element={<Landing />} />
