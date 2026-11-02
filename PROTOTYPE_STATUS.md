@@ -97,5 +97,6 @@ Not started. The be-pass agent updates only this section. Task list: prompts/BAC
 
 - P0(a) PARTIAL: optional prerequisite check tolerates nullable/missing sourceClass and empty offers; permanent Skip and error retry; chat stays usable. Skip resends the original question without inventing diagnostic evidence. First real answer still requires BE ask-pipeline answer-first change.
 - Reference limitation: `C:\Users\HP\dhruv-model` is absent; parity must use existing repo components. Gemini is UNVERIFIED (stub provider, no key). No push; laptop overrides apply.
+- P0(a) follow-up: Skip is available during streaming and does not resend an already answered question. Verification: web typecheck and unit suite (see local commit gates). Answer-first server work remains BE-owned.
 - Remaining P0/P1: NOT STARTED.
 

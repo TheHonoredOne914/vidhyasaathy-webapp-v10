@@ -45,6 +45,6 @@ export function SaathyLevelCheck({ chapterId, onContinue, busy: chatBusy }: { ch
       <button type="button" className="nb-btn nb-btn--sm" disabled={!selected || pending} onClick={() => { void next(); }}>{pending ? 'Saving…' : answers.length + 1 === offer.data.questions.length ? 'Save my check' : 'Next idea'}</button>
     </> : null}
     {error ? <p role="alert">{error}</p> : null}
-    <button type="button" className={offer.status === 'error' ? 'nb-btn nb-btn--sm' : 'nb-link'} disabled={chatBusy} onClick={onContinue}>{offer.status === 'error' ? 'Skip for now' : 'Skip level check'}</button>
+    <button type="button" className={offer.status === 'error' ? 'nb-btn nb-btn--sm' : 'nb-link'} onClick={onContinue}>{offer.status === 'error' ? 'Skip for now' : 'Skip level check'}</button>
   </section>;
 }
