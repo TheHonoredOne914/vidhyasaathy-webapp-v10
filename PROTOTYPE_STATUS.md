@@ -88,3 +88,12 @@ Gemini live check: Skipped: no Gemini key in founder settings for LEARNING_SCHOO
 
 Final regression pass: 41 tests in learning-proto, learning-model, ask, ai and ai-provider passed. Public provider names stay stable; key revisions invalidate only the internal response cache. Unfamiliar-content skips preserve prior assessed concept status. Final complete unit-suite rerun pending.
 
+
+## BE pass (be-pass agent)
+
+Not started. The be-pass agent updates only this section. Task list: prompts/BACKEND-PROMPT.md.
+
+## FE pass (fe-pass agent)
+
+Not started. The fe-pass agent updates only this section. Task list: prompts/FRONTEND-PROMPT.md.
+
