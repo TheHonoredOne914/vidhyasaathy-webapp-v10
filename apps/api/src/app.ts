@@ -1,4 +1,5 @@
 import cookie from '@fastify/cookie';
+import { bootstrapDemo } from './db/demo-bootstrap.ts';
 import rateLimit from '@fastify/rate-limit';
 import { SchoolSchema } from '@vidhyasaathy/contracts';
 import Fastify, { type FastifyRequest } from 'fastify';
@@ -81,6 +82,7 @@ export async function buildApp(input: AppOptions) {
     now: input.now ?? Date.now,
   };
   const { db } = input.database;
+  await bootstrapDemo(input.database, options.now());
   const auth = createAuthService(db, options);
   app.addHook('onClose', async () => { input.database.close(); });
   app.decorateRequest('auth', null);

@@ -440,7 +440,7 @@ export async function ensureDemoStudents(db: Db, pin: string, now: number) {
 }
 
 const CANONICAL_PASSWORD = 'Saathy@2026!';
-const CANONICAL_PINS: Record<string, string> = { Aarav: '2468', Meera: '3579', Kabir: '4680', Priya: '5791', Rohan: '6802' };
+const CANONICAL_PINS: Record<string, string> = { Aarav: '2468', Meera: '2468', Kabir: '2468', Priya: '2468', Rohan: '2468' };
 
 /** CLI only. Tests keep the pin they pass into seedDemo. */
 export async function applyDemoAccess(db: Db) {
@@ -469,10 +469,10 @@ export function canonicalDemoLogins() {
     'examiner: examiner@demo.invalid',
     'Student PINs',
     'Aarav: 2468',
-    'Meera: 3579',
-    'Kabir: 4680',
-    'Priya: 5791',
-    'Rohan: 6802',
+      'Meera: 2468',
+      'Kabir: 2468',
+      'Priya: 2468',
+      'Rohan: 2468',
   ].join('\n');
 }
 
