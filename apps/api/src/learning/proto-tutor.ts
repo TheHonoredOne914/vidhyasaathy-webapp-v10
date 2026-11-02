@@ -22,9 +22,16 @@ export interface TutorInput {
   context: LearningContext; mode: TeachingMode; question: string; answer: string | null;
   lastWrongAttempt: { questionId: string; answer: string } | null; plan: LearningPlan | null;
   module: LearningModule;
+  relatedModules?: LearningModule[];
 }
 
 export async function tutorReply(input: TutorInput, generate: JsonModel): Promise<TutorResponse> {
+  const related = input.relatedModules ?? [input.module];
+  const concept = related.find((module) => module.type === 'concept') ?? input.module;
+  const example = related.find((module) => module.type === 'guided_example') ?? concept;
+  const repair = related.find((module) => module.type === 'repair') ?? concept;
+  const bank = related.flatMap((module) => module.questions ?? []);
+  const question = bank.find((row) => !input.context.recentAttempts.some((attempt) => attempt.questionId === row.id)) ?? bank[0];
   const system = `You are Saathy, a calm NCERT learning companion. Teach from the supplied module only; admit when it does not cover a question.
 Start directly, no robotic filler. Keep technical exam terms in English; use simple Hindi help when requested.
 Never shame, compare students, expose ranks/bands/numeric mastery levels, use emoji, audio, external links or invented facts.
@@ -38,23 +45,22 @@ Use only the supplied conceptId, plan module IDs and bank questions. Never retur
     result.conceptId = input.module.conceptId;
     if (result.nextModuleId && !input.plan?.steps.some((step) => step.moduleId === result.nextModuleId)) delete result.nextModuleId;
     if (result.practiceQuestion) {
-      const bank = input.module.questions?.find((question) => question.id === result.practiceQuestion?.id);
-      if (bank) result.practiceQuestion = bank;
+      const prepared = bank.find((question) => question.id === result.practiceQuestion?.id);
+      if (prepared) result.practiceQuestion = prepared;
       else delete result.practiceQuestion;
     }
     return result;
   } catch {
-    const question = input.module.questions?.[0];
     const explanations: Record<TeachingMode, string> = {
-      explain: input.module.content,
-      teach_from_zero: `This idea is new, so take it one step at a time. ${input.module.content}`,
-      simpler: input.module.content.split(/(?<=[.!?])\s+/).slice(0, 2).join(' '),
-      differently: `Try reading the guided example and tracing each step on paper. ${input.module.objective}`,
-      real_life_example: input.module.content,
+      explain: concept.content,
+      teach_from_zero: `This idea is new, so take it one step at a time. ${concept.content}`,
+      simpler: concept.content.split(/(?<=[.!?])\s+/).slice(0, 2).join(' '),
+      differently: `Trace this example one step at a time on paper. ${example.content}`,
+      real_life_example: example.content,
       visual: 'Open the explorer, label the axes and change one quantity at a time. Describe what moves and what stays the same.',
       hint: `Start with this goal: ${input.module.objective} Which quantity or axis should you identify first?`,
       test_me: question ? 'Try this question on your own. Submit your answer when ready.' : 'Open the chapter practice module for a prepared question.',
-      find_my_mistake: input.lastWrongAttempt ? `You tried: ${input.lastWrongAttempt.answer}. Check the first step against the guided example, then try again.` : 'Send your working so we can find the first step to revisit.',
+      find_my_mistake: input.lastWrongAttempt ? `You tried: ${input.lastWrongAttempt.answer}. ${repair.content} Try that step again.` : 'Send your working so we can find the first step to revisit.',
       practise: question ? 'Try the prepared question, then use the feedback to choose your next step.' : 'Read the concept first, then open the chapter practice module.',
       revise: `Recall the main idea, write one example, then check it against your notes. ${input.module.objective}`,
       plan_my_learning: 'Work through the concept, guided example, explorer and practice. Revisit the repair when needed and finish with recall.',

@@ -20,12 +20,12 @@ export function createLearningModel(env = learningEnvironment()): { provider: st
     const fallback = createLearningModel({ ...env, GEMINI_API_KEY: '' });
     return { provider: 'gemini', generate: async (system, input) => {
       try {
-      const response = await ai.models.generateContent({
-        model: env.GEMINI_MODEL || 'gemini-2.5-flash', contents: JSON.stringify(input),
-        config: { systemInstruction: system, responseMimeType: 'application/json',
-          maxOutputTokens: 4096, httpOptions: { timeout: 20000 } },
-      });
-      return JSON.parse(response.text ?? 'null') as unknown;
+        const response = await ai.models.generateContent({
+          model: env.GEMINI_MODEL || 'gemini-2.5-flash', contents: JSON.stringify(input),
+          config: { systemInstruction: system, responseMimeType: 'application/json',
+            maxOutputTokens: 4096, httpOptions: { timeout: 20000 } },
+        });
+        return JSON.parse(response.text ?? 'null') as unknown;
       } catch { return fallback.generate(system, input); }
     } };
   }

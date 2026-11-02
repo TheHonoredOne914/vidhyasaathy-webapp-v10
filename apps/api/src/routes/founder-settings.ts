@@ -24,7 +24,7 @@ export async function registerFounderSettings(app: FastifyInstance, database: Da
     const schoolId = requireAuth(request).school.id;
     const existing = learningSettings(database, schoolId);
     database.sqlite.prepare(`INSERT INTO proto_founder_settings VALUES (?,?,?,?)
-      ON CONFLICT(school_id) DO UPDATE SET gemini_key=excluded.gemini_key,gemini_model=excluded.gemini_model,updated_at=excluded.updated_at`)
+      ON CONFLICT(school_id) DO UPDATE SET gemini_key=excluded.gemini_key,gemini_model=excluded.gemini_model,updated_at=max(proto_founder_settings.updated_at+1,excluded.updated_at)`)
       .run(schoolId, input.geminiApiKey === undefined ? existing?.gemini_key ?? '' : input.geminiApiKey ?? '',
         input.geminiModel ?? existing?.gemini_model ?? '', now());
     return view(schoolId);

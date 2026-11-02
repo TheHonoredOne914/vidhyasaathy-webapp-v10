@@ -21,7 +21,7 @@ const motion: Topic[] = [
     repair: 'Divide distance by time, not time by distance. Use totals across a whole journey rather than averaging speeds without checking the times.',
     prompt: 'A runner travels 100 m in 20 s. What is the average speed?',
     options: ['5 m/s', '0.2 m/s', '2000 m/s', '80 m/s'], answer: '5 m/s' },
-  { match: /acceleration|equation/i, name: 'Acceleration',
+  { match: /acceleration/i, name: 'Acceleration',
     idea: 'Acceleration is the change in velocity per unit time: a = (v - u) / t. For uniform acceleration, v = u + at.',
     example: 'Velocity increases from 2 m/s to 10 m/s in 4 s. The change is 8 m/s and acceleration is 8 / 4 = 2 m/s squared.',
     explore: 'Plot velocity against time for (0 s, 2 m/s), (2 s, 6 m/s), (4 s, 10 m/s). Compare the change over each equal interval.',
@@ -35,6 +35,20 @@ const motion: Topic[] = [
     repair: 'The height of a distance-time graph is distance, not speed. Compare change in distance over change in time.',
     prompt: 'What does a horizontal segment on a distance-time graph show?',
     options: ['The object is at rest', 'The object accelerates', 'The object has zero distance from the origin', 'The object moves at increasing speed'], answer: 'The object is at rest' },
+  { match: /equation|uniform.*accelerat/i, name: 'Equations of uniformly accelerated motion',
+    idea: 'For motion along a straight line with uniform acceleration, v = u + at, s = ut + (1/2)at squared, and v squared - u squared = 2as. Here u is initial velocity, v is final velocity, a is acceleration, t is time, and s is displacement. The area under a velocity-time graph gives displacement.',
+    example: 'A bicycle starts from rest and accelerates uniformly at 2 m/s squared for 3 s. With u = 0, displacement s = 0 + (1/2) x 2 x 3 squared = 9 m. Its final velocity is 6 m/s.',
+    explore: 'Draw the velocity-time line from (0 s, 0 m/s) to (3 s, 6 m/s). Find the triangular area: (1/2) x 3 x 6 = 9 m. Compare it with the equation result.',
+    repair: 'Use these equations only for uniform acceleration. In s = ut + (1/2)at squared, square time before multiplying; final velocity multiplied by time does not give displacement when velocity changes.',
+    prompt: 'An object starts from rest with uniform acceleration 2 m/s squared. How far does it move in 3 s?',
+    options: ['9 m', '6 m', '18 m', '3 m'], answer: '9 m' },
+  { match: /circular/i, name: 'Uniform circular motion',
+    idea: 'In uniform circular motion, an object moves along a circular path at constant speed. Its direction changes continuously, so its velocity changes and the motion is accelerated. In one revolution it travels a distance equal to the circumference.',
+    example: 'A runner completes one lap of a circular track of circumference 200 m in 40 s at constant speed. Speed is 200 / 40 = 5 m/s. Displacement after the complete lap is zero.',
+    explore: 'Draw a circle and mark four equally spaced positions. At each point draw an arrow along the direction of travel. Compare the directions even when each arrow has the same length.',
+    repair: 'Constant speed does not always mean constant velocity. Velocity includes direction, which changes along a circular path.',
+    prompt: 'An object moves at constant speed around a circle. Which statement is correct?',
+    options: ['Its velocity changes because its direction changes', 'Its velocity is constant because its speed is constant', 'It has no acceleration', 'Its distance is zero after one complete lap'], answer: 'Its velocity changes because its direction changes' },
 ];
 const geometry: Topic[] = [
   { match: /axis|axes|cartesian|plane/i, name: 'Cartesian axes',
@@ -66,7 +80,7 @@ export function moduleBank(db: Db, schoolId: string, chapter: { id: string; subj
   const topics = /^motion$/i.test(chapter.title) ? motion : /coordinate geometry|cartesian/i.test(chapter.title) ? geometry : [];
   const keys: ModuleBank['keys'] = new Map();
   const modules: LearningModule[] = [];
-  const units = topics.length ? topics.map((topic) => ({ topic, row: rows.find((row) => topic.match.test(row.title)) ?? rows[0] }))
+  const units: { topic: Topic | undefined; row: typeof concepts.$inferSelect | undefined }[] = topics.length ? topics.map((topic) => ({ topic, row: rows.find((row) => topic.match.test(row.title)) ?? rows[0] }))
     : rows.map((row) => ({ topic: undefined, row }));
   if (!units.length) units.push({ topic: undefined, row: undefined });
   for (const [index, { topic, row }] of units.entries()) {

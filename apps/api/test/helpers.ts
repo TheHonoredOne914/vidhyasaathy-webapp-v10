@@ -3,6 +3,7 @@ import type { Role } from '@vidhyasaathy/contracts';
 import { generateClaimCode } from '@vidhyasaathy/core/claim';
 import { buildApp } from '../src/app.ts';
 import type { LlmProvider } from '../src/ai/provider.ts';
+import type { JsonModel } from '../src/learning/proto-model.ts';
 import { generateSessionToken, hashToken } from '../src/auth/security.ts';
 import { openDatabase } from '../src/db/index.ts';
 import { claimCodes, profiles, sessions, users } from '../src/db/schema.ts';
@@ -21,7 +22,7 @@ export function cookieFrom(headers: Record<string, string | string[] | number | 
   return cookie;
 }
 
-export async function createHarness(options: { rateLimitMax?: number; authRateLimitMax?: number; databasePath?: string; uploadsDirectory?: string; llmProvider?: LlmProvider; aiDailyTokenBudget?: number } = {}) {
+export async function createHarness(options: { rateLimitMax?: number; authRateLimitMax?: number; databasePath?: string; uploadsDirectory?: string; llmProvider?: LlmProvider; learningModel?: JsonModel; aiDailyTokenBudget?: number } = {}) {
   let currentTime = Date.UTC(2026, 9, 24, 12);
   const now = () => currentTime;
   const database = openDatabase(options.databasePath ?? ':memory:');
@@ -31,6 +32,7 @@ export async function createHarness(options: { rateLimitMax?: number; authRateLi
     aiJobPollMs: 0,
     aiDailyTokenBudget: options.aiDailyTokenBudget ?? 30000,
     ...(options.llmProvider ? { llmProvider: options.llmProvider } : {}),
+    ...(options.learningModel ? { learningModel: options.learningModel } : {}),
     ...(options.uploadsDirectory ? { uploadsDirectory: options.uploadsDirectory } : {}),
   });
 

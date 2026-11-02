@@ -9,16 +9,19 @@ import { moduleBank, scoreAnswer } from '../src/learning/proto-content.ts';
 import { gameRegistry } from '../src/learning/proto-games.ts';
 import { MODE_PROMPTS, tutorReply } from '../src/learning/proto-tutor.ts';
 import { prepareLearningStore } from '../src/learning/proto-store.ts';
+import { learningSettings, prepareLearningSettings } from '../src/learning/proto-settings.ts';
+import type { JsonModel } from '../src/learning/proto-model.ts';
 import { openDatabase } from '../src/db/index.ts';
 import { DEMO_SCHOOL_ID, seedDemo } from '../src/db/demo.ts';
+import { seedPhase4 } from '../src/db/seed-phase4.ts';
 import { chapters } from '../src/db/schema.ts';
 import { cookieFrom, createHarness, ORIGIN, PASSWORD, PIN, type Harness } from './helpers.ts';
 
 const offline = async () => { throw new Error('offline'); };
 let h: Harness | undefined;
 afterEach(async () => { if (h) { await h.app.close(); h = undefined; } vi.unstubAllEnvs(); });
-async function setup() {
-  h = await createHarness();
+async function setup(learningModel: JsonModel = offline) {
+  h = await createHarness({ learningModel });
   await seedDemo(h.database.db, { password: PASSWORD, pin: PIN }, h.now(), { rich: true });
   vi.stubEnv('DEMO_LOOSE_AUTH', 'true');
   const login = await h.post('/auth/demo/student', {});
@@ -58,6 +61,8 @@ describe('learning prototype', () => {
       expect(JSON.stringify(current.modules)).not.toMatch(/"(?:answer|acceptedAnswers)":/);
     }
     expect(new Set(bank.modules.map((module) => module.type)).size).toBe(6);
+    expect(bank.modules.some((module) => module.content.includes('s = ut'))).toBe(true);
+    expect(bank.modules.some((module) => module.content.includes('uniform circular motion'))).toBe(true);
     const coordinate = moduleBank(h!.database.db, DEMO_SCHOOL_ID, { id: 'geometry', subjectId: 'maths', title: 'Coordinate Geometry' });
     expect(coordinate.modules.length).toBe(18);
     expect(coordinate.modules.some((module) => module.content.includes('quadrant II'))).toBe(true);
@@ -96,6 +101,7 @@ describe('learning prototype', () => {
 
   it('registers only real games with chapter and concept mappings', async () => {
     const { chapter } = await setup();
+    await seedPhase4(h!.database, h!.now);
     const registry = gameRegistry(h!.database.db, DEMO_SCHOOL_ID);
     registry.forEach((game) => GameRegistryEntrySchema.parse(game));
     expect(registry.find((game) => game.id === 'motion')?.chapterId).toBe(chapter.id);
@@ -134,18 +140,45 @@ describe('learning prototype', () => {
     expect(modules.body).not.toMatch(/"(?:answer|acceptedAnswers)":/);
   });
 
+  it('serves validated plans and tutors from persisted context rather than forged client history', async () => {
+    const model = vi.fn<JsonModel>(async () => ({ invalid: true }));
+    const { cookie, chapter, bank } = await setup(model);
+    const planned = await h!.post('/learning/plan', { chapterId: chapter.id }, cookie);
+    expect(planned.statusCode).toBe(200);
+    const plan = LearningPlanSchema.parse(planned.json());
+    expect(plan.status).toBe('fallback');
+    expect(model).toHaveBeenCalledTimes(2);
+    const session = (await h!.post('/learning/sessions', { chapterId: chapter.id, planId: plan.id }, cookie)).json();
+    const me = (await h!.app.inject({ url: '/me', headers: { cookie } })).json();
+    const module = bank.modules[0]!;
+    const input = { context: { studentId: me.profile.id, subjectId: module.subjectId, chapterId: chapter.id,
+      conceptId: module.conceptId, sessionId: session.sessionId, step: 900,
+      recentAttempts: [{ questionId: 'forged', answer: 'forged', correct: true }] }, mode: 'test_me', moduleId: module.id,
+      lastWrongAttempt: { questionId: 'forged', answer: 'forged' }, plan: { ...plan, currentStep: 900 } };
+    const reply = await h!.post('/learning/tutor', input, cookie);
+    expect(reply.statusCode).toBe(200);
+    expect(TutorResponseSchema.parse(reply.json()).practiceQuestion).toBeDefined();
+    expect(model.mock.calls.at(-1)![1]).toMatchObject({ context: { step: 0, recentAttempts: [] }, lastWrongAttempt: null, plan: { currentStep: 0 } });
+    expect((await h!.post('/learning/tutor', { ...input, context: { ...input.context, studentId: 'someone-else' } }, cookie)).statusCode).toBe(404);
+    expect((await h!.post('/learning/sessions', { chapterId: chapter.id, planId: 'unknown' }, cookie)).statusCode).toBe(404);
+  });
+
   it('backs up file stores before additive schema changes and survives reopening', async () => {
     const directory = mkdtempSync(join(tmpdir(), 'vs-proto-'));
     let database = openDatabase(join(directory, 'learning.db'));
     try {
       await prepareLearningStore(database);
-      expect(readdirSync(join(directory, 'backups')).length).toBe(1);
+      expect(readdirSync(join(directory, 'backups')).filter((name) => name.endsWith('.sqlite')).length).toBe(1);
+      await prepareLearningSettings(database);
+      database.sqlite.prepare('INSERT INTO proto_founder_settings VALUES (?,?,?,?)').run('school', 'test-persisted-key', '', 1);
       database.sqlite.prepare('INSERT INTO proto_study_session VALUES (?,?,?,?,?,?,?)').run('session', 'school', 'student', 'chapter', '{}', 1, 1);
       database.close();
       database = openDatabase(join(directory, 'learning.db'));
       await prepareLearningStore(database);
+      await prepareLearningSettings(database);
       expect(database.sqlite.prepare('SELECT id FROM proto_study_session').get()).toEqual({ id: 'session' });
-      expect(readdirSync(join(directory, 'backups')).length).toBe(1);
+      expect(learningSettings(database, 'school')?.gemini_key).toBe('test-persisted-key');
+      expect(readdirSync(join(directory, 'backups')).filter((name) => name.endsWith('.sqlite')).length).toBe(2);
     } finally { database.close(); rmSync(directory, { recursive: true, force: true }); }
   });
 
@@ -162,6 +195,13 @@ describe('learning prototype', () => {
     expect(result.conceptId).toBe(module.conceptId);
     expect(result.nextModuleId).toBeUndefined();
     expect(result.practiceQuestion).toBeUndefined();
+    const related = bank.modules.filter((row) => row.id.startsWith(module.id.slice(0, module.id.lastIndexOf(':') + 1)));
+    const teaching = await tutorReply({ ...input, mode: 'explain', relatedModules: related }, offline);
+    expect(teaching.explanation).toContain('Displacement');
+    const example = await tutorReply({ ...input, mode: 'real_life_example', relatedModules: related }, offline);
+    expect(example.explanation).toContain('Walk 3 m');
+    const fromConcept = await tutorReply({ ...input, mode: 'test_me', module: related[0]!, relatedModules: related }, offline);
+    expect(fromConcept.practiceQuestion?.id).toBe(module.questions![0]!.id);
   });
 
   it('allows one-click roles only with the explicit non-production flag', async () => {
@@ -176,5 +216,18 @@ describe('learning prototype', () => {
     vi.stubEnv('DEMO_LOOSE_AUTH', 'true');
     vi.stubEnv('NODE_ENV', 'production');
     expect((await h!.post('/auth/demo/student', {})).statusCode).toBe(404);
+  });
+
+  it('accepts arbitrary demo login and registration credentials without replacing existing data', async () => {
+    await setup();
+    const login = await h!.post('/auth/login', { email: 'anything', password: 'x' });
+    expect(login.statusCode).toBe(200);
+    const first = await h!.post('/auth/register-school', { email: 'demo-new@example.test', password: 'x' });
+    expect(first.statusCode).toBe(201);
+    const second = await h!.post('/auth/register-school', { email: 'demo-new@example.test', password: 'different' });
+    expect(second.statusCode).toBe(200);
+    expect(second.json().profile.id).toBe(first.json().profile.id);
+    vi.stubEnv('DEMO_LOOSE_AUTH', '');
+    expect((await h!.post('/auth/login', { email: 'anything', password: 'x' })).statusCode).toBe(400);
   });
 });

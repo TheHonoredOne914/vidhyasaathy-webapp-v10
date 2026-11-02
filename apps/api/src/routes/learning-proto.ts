@@ -38,7 +38,7 @@ export async function registerLearningProtoRoutes(app: FastifyInstance, database
     return rows.map((row) => ({ id: row.id, sessionId: row.session_id, type: row.type, conceptId: row.concept_id, ts: row.ts, result: JSON.parse(row.result) as Record<string, unknown> }));
   }
   function sessionResponse(row: StudySession) { return { id: row.id, sessionId: row.id, chapterId: row.chapter_id, plan: sessionPlan(row), events: events(row.id) }; }
-  function append(sessionId: string, type: string, conceptId: string, result: Record<string, unknown>, id = randomUUID()) {
+  function append(sessionId: string, type: string, conceptId: string, result: Record<string, unknown>, id: string = randomUUID()) {
     sqlite.prepare('INSERT INTO proto_learning_event VALUES (?,?,?,?,?,?)').run(id, sessionId, type, conceptId, new Date(now()).toISOString(), JSON.stringify(result));
     sqlite.prepare('UPDATE proto_study_session SET updated_at=? WHERE id=?').run(now(), sessionId);
     return id;
@@ -153,8 +153,10 @@ export async function registerLearningProtoRoutes(app: FastifyInstance, database
     const module = bank.modules.find((module) => module.id === input.moduleId);
     if (!module || module.conceptId !== input.context.conceptId || module.subjectId !== input.context.subjectId) throw unavailable();
     const history = events(row.id).filter((event) => event.type === 'answer_submitted');
-    const lastWrong = history.filter((event) => event.result?.correct === false && event.result?.notTaught !== true).at(-1);
-    const result = await tutorReply({ ...input, module, plan: sessionPlan(row),
+    const topicPrefix = module.id.slice(0, module.id.lastIndexOf(':') + 1);
+    const lastWrong = history.filter((event) => String(event.result?.moduleId).startsWith(topicPrefix)
+      && event.result?.correct === false && event.result?.notTaught !== true).at(-1);
+    const result = await tutorReply({ ...input, module, relatedModules: bank.modules.filter((row) => row.id.startsWith(topicPrefix)), plan: sessionPlan(row),
       context: { ...input.context, step: sessionPlan(row).currentStep,
         recentAttempts: history.slice(-5).map((event) => ({ questionId: String(event.result?.questionId), answer: String(event.result?.answer), correct: event.result?.correct === true })) },
       lastWrongAttempt: lastWrong ? { questionId: String(lastWrong.result?.questionId), answer: String(lastWrong.result?.answer) } : null }, generateFor(request));

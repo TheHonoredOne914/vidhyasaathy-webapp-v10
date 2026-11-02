@@ -62,6 +62,10 @@ export function registerPasswordRoutes(app: FastifyInstance, db: Db, auth: AuthS
         password: (looseValue(request.body, 'password') || 'demo').padEnd(12, '0').slice(0, 128),
       })
       : parseInput(RegisterSchoolSchema, request.body);
+    if (looseAuth()) {
+      const existing = db.select().from(users).where(eq(users.email, input.email)).get();
+      if (existing) return auth.startSession(request, reply, 'auth.demo.register-existing', () => auth.identityForUser(existing.id));
+    }
     const passwordHash = await hashCredential(input.password);
     const result = auth.startSession(request, reply, 'auth.register-school', () => {
       if (input.city && !input.confirmDuplicate && db.select({ id: schools.id }).from(schools).where(and(

@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createLearningModel, schoolLearningModel } from '../src/learning/proto-model.ts';
 import { openDatabase } from '../src/db/index.ts';
 import { prepareLearningSettings } from '../src/learning/proto-settings.ts';
+import { founderProvider } from '../src/ai/founder-provider.ts';
+import { LocalStubProvider } from '../src/ai/provider.ts';
 
 const mocks = vi.hoisted(() => ({ generate: vi.fn(), keys: [] as string[] }));
 vi.mock('@google/genai', () => ({ GoogleGenAI: class {
@@ -46,6 +48,28 @@ describe('learning provider selection', () => {
       await generate();
       expect(mocks.keys).toEqual(['test-env', 'test-founder', 'test-replaced', 'test-env', 'test-env']);
       expect(mocks.generate.mock.calls[1]![0]).toMatchObject({ model: 'saved-model' });
+    } finally { database.close(); }
+  });
+
+  it('updates existing tutor entry points and keeps a grounded legacy fallback', async () => {
+    vi.stubEnv('GEMINI_API_KEY', '');
+    const database = openDatabase(':memory:');
+    try {
+      await prepareLearningSettings(database);
+      const fallback = new LocalStubProvider();
+      const provider = founderProvider(database, fallback);
+      const input = { schoolId: 'school', question: 'What is speed?', hintLevel: 3, socratic: false,
+        sources: [{ id: 1, noteId: 'note', title: 'Motion', position: 0, text: 'Speed is distance travelled per unit time.' }] };
+      database.sqlite.prepare('INSERT INTO proto_founder_settings VALUES (?,?,?,?)').run('school', 'test-founder', '', 1);
+      mocks.generate.mockResolvedValue({ text: JSON.stringify({ message: 'Use distance divided by time.', sources: [{ chunkId: 1, quote: 'Speed is distance travelled per unit time.' }] }) });
+      expect((await provider.ask(input))?.message).toContain('divided');
+      expect(mocks.keys).toEqual(['test-founder']);
+      mocks.generate.mockRejectedValue(new Error('unavailable'));
+      expect(await provider.ask(input)).toEqual(await fallback.ask(input));
+      database.sqlite.prepare('DELETE FROM proto_founder_settings').run();
+      mocks.generate.mockClear();
+      expect(await provider.ask(input)).toEqual(await fallback.ask(input));
+      expect(mocks.generate).not.toHaveBeenCalled();
     } finally { database.close(); }
   });
 });
