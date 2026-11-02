@@ -30,7 +30,7 @@ describe('learning API boundary', () => {
     await expect(learningApi.answer('session', module.id, 'q1', 'x', 'id')).rejects.toMatchObject({ code: 'INVALID_RESPONSE' });
   });
   it('restores the server plan and records module completion with its own action ID', async () => {
-    const fetch = vi.fn().mockResolvedValue(response(session));
+    const fetch = vi.fn().mockImplementation(async () => response(session));
     vi.stubGlobal('fetch', fetch);
     expect((await learningApi.session('session')).plan.currentStep).toBe(0);
     await learningApi.event('session', module.id, 'module_completed', 'completion-id');

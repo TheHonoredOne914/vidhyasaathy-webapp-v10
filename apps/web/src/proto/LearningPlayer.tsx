@@ -28,7 +28,7 @@ function SessionJourney({ sessionId }: { sessionId: string }) {
   const [showPlan, setShowPlan] = useState(true);
   const [game, setGame] = useState<GameRegistryEntry | null>(null);
   const [recommendation, setRecommendation] = useState<TutorResponse | null>(null);
-  const completion = useRef<{ moduleId: string; id: string } | null>(null);
+  const completion = useRef<{ moduleId: string; step: number; id: string } | null>(null);
   const lock = useRef(false);
   const chapter = useRemote(session ? `/chapters/${session.chapterId}` : null, ChapterSchema);
   useEffect(() => {
@@ -60,7 +60,7 @@ function SessionJourney({ sessionId }: { sessionId: string }) {
   async function complete() {
     if (!module || !session || lock.current) return;
     lock.current = true; setPending(true); setError('');
-    if (completion.current?.moduleId !== module.id) completion.current = { moduleId: module.id, id: crypto.randomUUID() };
+    if (completion.current?.moduleId !== module.id || completion.current.step !== session.plan.currentStep) completion.current = { moduleId: module.id, step: session.plan.currentStep, id: crypto.randomUUID() };
     try { setSession(await learningApi.event(sessionId, module.id, 'module_completed', completion.current.id)); }
     catch { setError('This step has not been confirmed. Retry Continue to save it safely.'); }
     finally { lock.current = false; setPending(false); }
