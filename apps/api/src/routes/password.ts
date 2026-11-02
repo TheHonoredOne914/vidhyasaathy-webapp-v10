@@ -32,6 +32,27 @@ function minimumLength(value: string, fallback: string, length: number): string 
 }
 
 export function registerPasswordRoutes(app: FastifyInstance, db: Db, auth: AuthService, dummyHash: string, now: () => number): void {
+  app.post('/auth/demo/:role', { config: { public: true } }, async (request, reply) => {
+    if (!looseAuth()) throw new ApiException(404, 'NOT_FOUND', 'Resource not found.');
+    const role = (request.params as { role: string }).role;
+    if (!['student', 'teacher', 'parent', 'admin'].includes(role)) throw new ApiException(400, 'INVALID_ROLE', 'Choose a demo role.');
+    const demo = db.select().from(profiles).where(and(eq(profiles.schoolId, DEMO_SCHOOL_ID), eq(profiles.role, role as 'student' | 'teacher' | 'parent' | 'admin'))).all();
+    let profile = demo.find((row) => row.name === 'Aarav') ?? demo[0];
+    if (!profile && role === 'admin') {
+      const school = db.select().from(schools).where(eq(schools.id, DEMO_SCHOOL_ID)).get();
+      if (school) {
+        const userId = randomUUID();
+        const id = randomUUID();
+        db.transaction(() => {
+          db.insert(users).values({ id: userId, createdAt: now() }).run();
+          db.insert(profiles).values({ id, userId, schoolId: school.id, name: 'Demo administrator', role: 'admin', createdAt: now() }).run();
+        });
+        profile = db.select().from(profiles).where(eq(profiles.id, id)).get();
+      }
+    }
+    if (!profile) throw new ApiException(503, 'DEMO_UNAVAILABLE', 'The demo profile is not available.');
+    return auth.startSession(request, reply, 'auth.demo', () => auth.identityForProfile(profile.id));
+  });
   app.post('/auth/register-school', { config: { public: true } }, async (request, reply) => {
     const input = looseAuth()
       ? RegisterSchoolSchema.parse({
@@ -41,6 +62,10 @@ export function registerPasswordRoutes(app: FastifyInstance, db: Db, auth: AuthS
         password: (looseValue(request.body, 'password') || 'demo').padEnd(12, '0').slice(0, 128),
       })
       : parseInput(RegisterSchoolSchema, request.body);
+    if (looseAuth()) {
+      const existing = db.select().from(users).where(eq(users.email, input.email)).get();
+      if (existing) return auth.startSession(request, reply, 'auth.demo.register-existing', () => auth.identityForUser(existing.id));
+    }
     const passwordHash = await hashCredential(input.password);
     const result = auth.startSession(request, reply, 'auth.register-school', () => {
       if (input.city && !input.confirmDuplicate && db.select({ id: schools.id }).from(schools).where(and(

@@ -37,6 +37,10 @@ import { registerDailyRoutes } from './routes/daily.ts';
 import { registerGamesRoutes } from './routes/games.ts';
 import { registerNotebookRoutes } from './routes/notebook.ts';
 import { registerAuthV9Routes } from './routes/auth-v9.ts';
+import { registerLearningProtoRoutes } from './routes/learning-proto.ts';
+import type { JsonModel } from './learning/proto-model.ts';
+import { registerFounderSettings } from './routes/founder-settings.ts';
+import { founderProvider } from './ai/founder-provider.ts';
 
 export interface AppOptions {
   database: Database;
@@ -57,6 +61,7 @@ export interface AppOptions {
   snapConfigured?: boolean;
   aiJobPollMs?: number;
   aiDailyTokenBudget?: number;
+  learningModel?: JsonModel;
 }
 
 export async function buildApp(input: AppOptions) {
@@ -141,8 +146,10 @@ export async function buildApp(input: AppOptions) {
     registerLearningSessionRoutes(app, db, auth, options.now);
     registerAssessmentRoutes(app, db, auth, options.now);
     registerSyncRoutes(app, db, options.now);
-    registerAiRoutes(app, input.database, auth, input.llmProvider ?? new LocalStubProvider(), options.now, input.aiJobPollMs ?? 1000);
-    registerAskRoutes(app, input.database, input.llmProvider ?? new LocalStubProvider(), options.now, input.aiDailyTokenBudget, input.snapConfigured);
+    await registerFounderSettings(app, input.database, options.now);
+    const provider = founderProvider(input.database, input.llmProvider ?? new LocalStubProvider());
+    registerAiRoutes(app, input.database, auth, provider, options.now, input.aiJobPollMs ?? 1000);
+    registerAskRoutes(app, input.database, provider, options.now, input.aiDailyTokenBudget, input.snapConfigured);
     registerAskEscalations(app, input.database, options.now);
     registerAskSnapRoutes(app, input.database, input.visionProvider ?? { async extractText() { return { status: 'not_configured' }; } }, options.now);
     registerRemediationRoutes(app, input.database, options.now);
@@ -153,6 +160,7 @@ export async function buildApp(input: AppOptions) {
     registerDailyRoutes(app, db, options.now);
     registerGamesRoutes(app, input.database, options.now);
     registerNotebookRoutes(app, db, options.now);
+    await registerLearningProtoRoutes(app, input.database, options.now, input.learningModel);
     app.post('/auth/logout', async (request, reply) => {
       auth.logout(request, reply);
       return reply.code(204).send();

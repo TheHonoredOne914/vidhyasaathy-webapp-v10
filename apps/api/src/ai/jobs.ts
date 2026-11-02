@@ -45,7 +45,7 @@ export async function runDraftJob(database: Database, provider: LlmProvider, now
     const note = found(db.select().from(notes).where(scope(notes, job.schoolId, job.noteId)).get());
     const source = draftSource(db, note);
     if (digest(source) !== job.sourceHash) throw new Error('Source changed.');
-    const draft = await provider.draft(source);
+    const draft = await provider.draft({ ...source, schoolId: job.schoolId });
     if (!draft) throw new Error('No grounded draft.');
     validateDraft(draft, source);
     const latest = found(db.select().from(notes).where(scope(notes, job.schoolId, job.noteId)).get());

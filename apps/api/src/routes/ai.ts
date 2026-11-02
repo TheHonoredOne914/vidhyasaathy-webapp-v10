@@ -60,13 +60,13 @@ export function registerAiRoutes(app: FastifyInstance, database: Database, auth:
     }
     if (sources.length && provider.configured) {
       requirePreviousHint();
-      const key = digest({ schoolId: school.id, profileId: profile.id, chapterId: input.chapterId, question, sources, provider: provider.id,
+      const key = digest({ schoolId: school.id, profileId: profile.id, chapterId: input.chapterId, question, sources, provider: provider.cacheKey ?? provider.id,
         hintLevel: input.hintLevel, socratic: input.socratic });
       const cached = db.select().from(aiCache).where(eq(aiCache.key, key)).get();
       if (cached) response = { ...cached.response, cached: true };
       else {
         try {
-          const answer = await provider.ask({ ...input, sources });
+          const answer = await provider.ask({ ...input, schoolId: school.id, sources });
           if (answer) {
             const valid = ProviderAnswerSchema.parse(answer);
             const citations = valid.sources.map((citation) => {

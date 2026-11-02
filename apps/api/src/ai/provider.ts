@@ -2,13 +2,15 @@ import { AiDraftSchema, type AiDraft } from '@vidhyasaathy/contracts';
 import { z } from 'zod';
 import type { loadConfig } from '../config.ts';
 import { extractAnswer } from './extract.ts';
+import { createLearningModel, type JsonModel } from '../learning/proto-model.ts';
 
 export interface SourceChunk { id: number; noteId: string; title: string; position: number; text: string }
 export interface GroundedQuestion {
+  schoolId?: string;
   question: string; hintLevel: number; socratic: boolean; sources: SourceChunk[];
   style?: 'hints' | 'explain'; mode?: 'learn' | 'homework'; system?: string; maxTokens?: number;
 }
-export interface DraftSource { noteId: string; title: string; body: string; concepts: { id: string; title: string }[] }
+export interface DraftSource { schoolId?: string; noteId: string; title: string; body: string; concepts: { id: string; title: string }[] }
 export interface ProviderAnswer { message: string; sources: { chunkId: number; quote: string }[] }
 export const ProviderAnswerSchema = z.object({
   message: z.string().trim().min(1).max(4000),
@@ -22,6 +24,7 @@ export interface LegacyLlmProvider {
   draft(input: DraftSource): Promise<AiDraft | null>;
 }
 export interface LlmProvider extends LegacyLlmProvider {
+  readonly cacheKey?: string;
   stream(input: GroundedQuestion, signal: AbortSignal): AsyncIterable<ProviderEvent>;
   health(): Promise<boolean>;
 }
@@ -209,8 +212,40 @@ export class OpenAiProvider extends HttpModelProvider {
   }
 }
 
-type AiConfig = Pick<ReturnType<typeof loadConfig>, 'AI_PROVIDER' | 'OPENAI_API_KEY' | 'OPENAI_MODEL' | 'OPENAI_API_URL' | 'AI_HTTP_URL' | 'AI_HTTP_TOKEN' | 'AI_HTTP_MODEL' | 'AI_TIMEOUT_MS' | 'AI_VISION_PROVIDER'>;
+export class GeminiProvider implements LlmProvider {
+  readonly id = 'gemini';
+  readonly configured = true;
+  constructor(private readonly generate: JsonModel, private readonly fallback: LlmProvider) {}
+  async ask(input: GroundedQuestion): Promise<ProviderAnswer | null> {
+    try {
+      const result = ProviderAnswerSchema.parse(await this.generate(`${SYSTEM}\n${input.system ?? ''}\nReturn JSON {message,sources:[{chunkId,quote}]}. Cite exact supplied source text only.`, input));
+      if (!result.sources.every((citation) => input.sources.some((source) => source.id === citation.chunkId && source.text.includes(citation.quote)))) throw new Error('Invalid grounding');
+      return result;
+    } catch { return this.fallback.ask(input); }
+  }
+  async draft(input: DraftSource): Promise<AiDraft | null> {
+    try { return AiDraftSchema.parse(await this.generate(DRAFT_SYSTEM, input)); }
+    catch { return this.fallback.draft(input); }
+  }
+  async *stream(input: GroundedQuestion, signal: AbortSignal): AsyncIterable<ProviderEvent> {
+    signal.throwIfAborted();
+    const answer = await this.ask(input);
+    signal.throwIfAborted();
+    if (answer) yield { type: 'token', text: `${answer.message} ${answer.sources.map((source) => `[chunk:${source.chunkId}]`).join(' ')}` };
+    else yield { type: 'token', text: "I'm not sure about this one. Ask your teacher to help you check it." };
+    yield { type: 'done' };
+  }
+  async health() { return true; }
+}
+
+type AiConfig = Pick<ReturnType<typeof loadConfig>, 'AI_PROVIDER' | 'OPENAI_API_KEY' | 'OPENAI_MODEL' | 'OPENAI_API_URL' | 'AI_HTTP_URL' | 'AI_HTTP_TOKEN' | 'AI_HTTP_MODEL' | 'AI_TIMEOUT_MS' | 'AI_VISION_PROVIDER'>
+  & Partial<Pick<ReturnType<typeof loadConfig>, 'GEMINI_API_KEY' | 'GEMINI_MODEL'>>;
 export function createProvider(config: AiConfig): LlmProvider {
+  if (config.AI_PROVIDER === 'gemini') {
+    const fallback = config.OPENAI_API_KEY ? new OpenAiProvider({ apiKey: config.OPENAI_API_KEY, model: config.OPENAI_MODEL, apiUrl: config.OPENAI_API_URL, timeoutMs: config.AI_TIMEOUT_MS }) : new LocalStubProvider();
+    if (!config.GEMINI_API_KEY) return fallback;
+    return new GeminiProvider(createLearningModel({ GEMINI_API_KEY: config.GEMINI_API_KEY, GEMINI_MODEL: config.GEMINI_MODEL ?? 'gemini-2.5-flash' }).generate, fallback);
+  }
   if (config.AI_PROVIDER === 'openai' && config.OPENAI_API_KEY) return new OpenAiProvider({ apiKey: config.OPENAI_API_KEY, model: config.OPENAI_MODEL, apiUrl: config.OPENAI_API_URL, timeoutMs: config.AI_TIMEOUT_MS });
   if (config.AI_PROVIDER === 'http' && config.AI_HTTP_URL) return new HttpModelProvider({ apiUrl: config.AI_HTTP_URL, token: config.AI_HTTP_TOKEN ?? '', model: config.AI_HTTP_MODEL, timeoutMs: config.AI_TIMEOUT_MS });
   if (config.AI_PROVIDER !== 'stub') throw new ProviderDownError();

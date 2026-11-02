@@ -19,10 +19,15 @@ export const LearningPlanSchema = z.object({
 export type LearningPlan = z.infer<typeof LearningPlanSchema>;
 // Public questions deliberately contain no answer keys.
 export const LearningQuestionSchema = z.object({ id: Ref, prompt: z.string(), options: z.array(z.string()).optional() });
+export const LearningSlideSchema = z.object({
+  id: Ref, title: z.string(), kicker: z.string(), bullets: z.array(z.string()).min(1), note: z.string().optional(),
+});
+export type LearningSlide = z.infer<typeof LearningSlideSchema>;
 export const LearningModuleSchema = z.object({
   id: Ref, subjectId: Ref, chapterId: Ref, conceptId: Ref,
   type: z.enum(['concept', 'guided_example', 'explorer', 'practice', 'repair', 'revision']),
   objective: z.string(), content: z.string(), questions: z.array(LearningQuestionSchema).optional(), activityId: Ref.optional(),
+  slides: z.array(LearningSlideSchema).optional(),
 });
 export type LearningModule = z.infer<typeof LearningModuleSchema>;
 export const LearningEventSchema = z.object({
