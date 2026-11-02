@@ -3,6 +3,7 @@ import { useRef, useState } from 'react';
 import { Card, MasteryChip } from '../student/notebook/ui';
 import { learningApi, type AnswerResult } from './adapter';
 import { restoredPractice } from './progress';
+import { MotionWidget } from '../ai/visuals/demo-widgets';
 
 export const MODULE_LABELS: Record<LearningModule['type'], string> = { concept: 'Learn', guided_example: 'Worked example', explorer: 'Explore', practice: 'Practise', repair: "Let's fix this", revision: 'Review' };
 export function phaseFor(type: LearningModule['type']) { return type === 'guided_example' || type === 'repair' ? 'Learn' : MODULE_LABELS[type]; }
@@ -37,6 +38,8 @@ export function ModuleView({ module, sessionId, onComplete, onEvidence, repair, 
   const [error, setError] = useState('');
   const [revealed, setRevealed] = useState(1);
   const [repairOpen, setRepairOpen] = useState(!!restored.result && !restored.result.correct);
+  const [flipped, setFlipped] = useState(false);
+  const [confidence, setConfidence] = useState('');
   const actionId = useRef<{ answer: string; id: string } | null>(null);
   const lock = useRef(false);
   const questions = module.questions ?? [];
@@ -54,19 +57,22 @@ export function ModuleView({ module, sessionId, onComplete, onEvidence, repair, 
   }
   function retryQuestion() { setResult(null); setAnswer(''); setRepairOpen(false); actionId.current = null; }
   return <Card title={MODULE_LABELS[module.type]} meta={module.objective} tape>
-    {module.type === 'guided_example' ? <><ol className="proto-copy">{steps.slice(0, revealed).map((step, index) => <li key={index}>{step}</li>)}</ol>{revealed < steps.length ? <button className="nb-btn nb-btn--ghost" onClick={() => setRevealed((value) => value + 1)}>Show next step</button> : null}</> : <p className="proto-copy">{module.content}</p>}
+    {module.type === 'guided_example' ? <><ol className="proto-copy">{steps.slice(0, revealed).map((step, index) => <li key={index}>{step}</li>)}</ol>{revealed < steps.length ? <button className="nb-btn nb-btn--ghost" onClick={() => setRevealed((value) => value + 1)}>Show next step</button> : null}</> : module.type === 'revision' ? <button className="proto-flashcard" aria-pressed={flipped} onClick={() => setFlipped(!flipped)}>{flipped ? module.content : `${module.objective} — What do you remember?`}<small>{flipped ? 'Show prompt' : 'Turn to check your recall'}</small></button> : <p className="proto-copy">{module.content}</p>}
+    {module.type === 'concept' && /distance|speed|velocity|motion/i.test(module.objective) ? <MotionWidget params={{}} /> : null}
+    {module.type === 'concept' && /coordinate|cartesian|quadrant/i.test(module.objective) ? <Explorer module={module} changed={() => undefined} /> : null}
     {module.type === 'explorer' ? <Explorer module={module} changed={() => { void learningApi.event(sessionId, module.id, 'explorer_changed', crypto.randomUUID()).catch(() => setError('The exploration could not be saved. Check your connection before continuing.')); }} /> : null}
     {question ? <form onSubmit={(event) => { event.preventDefault(); void submit(answer); }}>
       <fieldset disabled={busy || pending || !!result}><legend>{question.prompt}</legend>
         {question.options?.length ? question.options.map((option) => <label className="proto-choice" key={option}><input type="radio" name={`answer-${question.id}`} value={option} checked={answer === option} onChange={() => setAnswer(option)} />{option}</label>) : <label>Your answer<input type="text" maxLength={2000} value={answer} onChange={(event) => setAnswer(event.target.value)} /></label>}
       </fieldset>
+      <fieldset disabled={busy || pending || !!result}><legend>How does this feel? (for your own reflection)</legend>{['Still exploring', 'Nearly sure', 'Ready to explain'].map((label) => <button className="nb-chip" key={label} type="button" aria-pressed={confidence === label} onClick={() => setConfidence(label)}>{label}</button>)}</fieldset>
       {!result ? <div className="proto-actions"><button type="submit" className="nb-btn" disabled={!answer.trim() || busy || pending}>{busy ? 'Checking…' : 'Check my answer'}</button><button type="button" className="nb-btn nb-btn--ghost" disabled={busy || pending} onClick={() => { setAnswer("Haven't learned this yet"); void submit("Haven't learned this yet"); }}>Haven't learned this yet</button></div> : null}
     </form> : null}
     {result ? <div className="proto-feedback" role="status"><MasteryChip level={result.word} /><p>{result.feedback}</p></div> : null}
     {repairOpen ? <section aria-label="Repair this idea"><h3>{result?.notTaught ? 'Start with the idea' : "Let's fix this"}</h3><p className="proto-copy">{repair?.content ?? result?.feedback}</p><button className="nb-btn nb-btn--ghost" onClick={retryQuestion}>Try the question again</button></section> : null}
     {error ? <p role="alert">{error}</p> : null}
     {question && result?.correct && questionIndex < questions.length - 1 ? <button className="nb-btn" onClick={() => { setQuestionIndex((value) => value + 1); retryQuestion(); }}>Next question</button> : null}
-    <div className="proto-actions"><button className="nb-btn" onClick={onComplete} disabled={pending || busy || (!!question && !result?.correct) || (!!question && questionIndex < questions.length - 1) || (module.type === 'guided_example' && revealed < steps.length)}>{pending ? 'Saving your step…' : 'Continue'}</button></div>
+      <div className="proto-actions"><button className="nb-btn" onClick={onComplete} disabled={pending || busy || (!!question && !result?.correct) || (!!question && questionIndex < questions.length - 1) || (module.type === 'guided_example' && revealed < steps.length)}>{pending ? 'Saving your step…' : 'Next idea'}</button></div>
     {!question && module.type === 'practice' ? <p className="nb-note">There is no published question for this idea yet. Continue with your chapter material.</p> : null}
   </Card>;
 }

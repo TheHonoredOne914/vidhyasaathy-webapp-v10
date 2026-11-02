@@ -1,0 +1,7 @@
+.chapter-world { width: 100%; color: var(--nb-navy); font-family: 'Patrick Hand', cursive; }
+.chapter-world .proto-stack { display: grid; gap: var(--nb-s4); align-content: start; }
+.chapter-world__legend { display: flex; flex-wrap: wrap; gap: var(--nb-s2); margin: var(--nb-s4) 0; }
+.chapter-world__stops { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--nb-s4); margin-bottom: var(--nb-s5); }
+.chapter-world__body { display: grid; grid-template-columns: minmax(0, 2fr) minmax(16rem, 1fr); gap: var(--nb-s5); align-items: start; }
+.chapter-world__idea { display: flex; justify-content: space-between; gap: var(--nb-s3); align-items: center; padding: var(--nb-s3) 0; border-bottom: 1px solid var(--nb-border); }
+@media (max-width: 850px) { .chapter-world__body { grid-template-columns: 1fr; } .chapter-world__stops { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

@@ -48,7 +48,7 @@ function navFor(role: Role): Item[] {
       { to: '/student?panel=subjects', label: 'My subjects' },
       { to: '/student?panel=study', label: 'Study sessions' },
       { to: '/student?panel=homework', label: 'Homework' },
-      { to: '/student?panel=ask', label: 'Ask Saathy' },
+      { to: '/student/saathy', label: 'Ask Saathy' },
       { to: '/student/progress', label: 'My progress' },
       { to: '/student/notifications', label: 'Notifications' },
       { to: '/student/settings', label: 'Settings' },
@@ -158,7 +158,7 @@ export function Shell() {
     }
   }
 
-  const dialog = (
+  const dialog = open ? (
     <Dialog open={open} title="Sign out?" onClose={() => { setOpen(false); }}>
       <p>This ends the session on this browser.</p>
       {signOutError ? <p role="alert" className="mt-3">{signOutError}</p> : null}
@@ -167,7 +167,7 @@ export function Shell() {
         <Button variant="secondary" onClick={() => { setOpen(false); }}>Stay signed in</Button>
       </div>
     </Dialog>
-  );
+  ) : null;
 
   const skip = <a href="#content" className="no-print sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-40 focus:bg-ivory focus:px-3 focus:py-2">Skip to content</a>;
 
@@ -247,7 +247,7 @@ export function Shell() {
           <main id="content" className={`app-main ${me.profile.role === 'admin' || me.profile.role === 'teacher' ? 'staff-main' : ''} ${pathname === '/admin/setup' ? 'setup-main' : ''}`}>
             <OfflineBanner />
             <Outlet />
-            {me.profile.role === 'student' && !pathname.startsWith('/student/sessions/') && !pathname.startsWith('/student/saathy') && new URLSearchParams(search).get('panel') !== 'ask' ? <AskDock /> : null}
+            {me.profile.role === 'student' && !pathname.startsWith('/student/sessions/') && !pathname.startsWith('/student/learning/sessions/') && !pathname.startsWith('/student/saathy') && new URLSearchParams(search).get('panel') !== 'ask' ? <AskDock /> : null}
             <footer className="app-help no-print"><Link className="text-link" to="/recover">Help with your account</Link><Link className="text-link" to="/privacy">Privacy</Link></footer>
           </main>
           <nav className="app-bottom-tabs no-print" aria-label="Quick navigation">

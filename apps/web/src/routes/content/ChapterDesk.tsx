@@ -20,12 +20,18 @@ import { ConceptMap } from '../../ai/ConceptMap';
 import { DiagnosticPanel } from './DiagnosticPanel';
 import { LessonFrame } from './LessonFrame';
 import { ChapterPlaySteps } from '../../games/ChapterPlaySteps';
+import { ChapterWorld } from '../../student/chapter/ChapterWorld';
 
 function toggle(list: string[], id: string): string[] {
   return list.includes(id) ? list.filter((item) => item !== id) : [...list, id];
 }
 
 export function ChapterPage() {
+  const { pathname } = useLocation();
+  return audienceFrom(pathname) === 'student' ? <ChapterWorld /> : <ChapterCms />;
+}
+
+function ChapterCms() {
   const { pathname } = useLocation();
   const { chapterId = '' } = useParams();
   const audience = audienceFrom(pathname);

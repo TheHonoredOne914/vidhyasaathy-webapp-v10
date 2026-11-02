@@ -23,11 +23,11 @@ describe('student learning renderers', () => {
     const wrong = renderToStaticMarkup(createElement(ModuleView, { ...props, module: base, events: [answer(false)] }));
     expect(wrong).toContain('Repair this idea');
     expect(wrong).toContain('Try the question again');
-    expect(wrong).toMatch(/disabled="">Continue/);
+    expect(wrong).toMatch(/disabled="">Next idea/);
     const correct = renderToStaticMarkup(createElement(ModuleView, { ...props, module: base, events: [answer(true)] }));
     expect(correct).toContain('Mastered');
     expect(correct).not.toContain('Repair this idea');
-    expect(correct).not.toMatch(/disabled="">Continue/);
+    expect(correct).not.toMatch(/disabled="">Next idea/);
   });
   it('keeps unfamiliar material New and offers teaching before retry', () => {
     const html = renderToStaticMarkup(createElement(ModuleView, { ...props, module: base, events: [answer(false, true)] }));

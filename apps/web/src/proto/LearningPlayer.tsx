@@ -9,6 +9,7 @@ import { ContextualSaathy } from './ContextualSaathy';
 import { MODULE_LABELS, ModuleView, phaseFor } from './ModuleView';
 import './learning.css';
 import { planGameRoute } from './gameReturn';
+import { ApiClientError } from '../api/client';
 
 export function LearningPlayer() {
   const { sessionId = '' } = useParams();
@@ -27,6 +28,7 @@ function SessionJourney({ sessionId }: { sessionId: string }) {
   const [pending, setPending] = useState(false);
   const [intro, setIntro] = useState(true);
   const [showPlan, setShowPlan] = useState(true);
+  const [reviewStep, setReviewStep] = useState<number | null>(null);
   const [recommendation, setRecommendation] = useState<TutorResponse | null>(null);
   const completion = useRef<{ moduleId: string; step: number; id: string } | null>(null);
   const lock = useRef(false);
@@ -50,19 +52,21 @@ function SessionJourney({ sessionId }: { sessionId: string }) {
     void learningApi.summary(sessionId, controller.signal).then((result) => { if (!controller.signal.aborted) setSummary(result); }).catch(() => { if (!controller.signal.aborted) setError('The summary could not load. Retry to see your saved session evidence.'); });
     return () => controller.abort();
   }, [session?.plan.status, sessionId, attempt]);
-  const module = modules.find((row) => row.id === session?.plan.steps[session.plan.currentStep]?.moduleId);
+  const shownStep = reviewStep ?? session?.plan.currentStep ?? 0;
+  const reviewing = reviewStep !== null && reviewStep < (session?.plan.currentStep ?? 0);
+  const module = modules.find((row) => row.id === session?.plan.steps[shownStep]?.moduleId);
   useEffect(() => {
-    if (!module || intro) return;
+    if (!module || intro || reviewing) return;
     setRecommendation(null);
     const id = crypto.randomUUID();
     void learningApi.event(sessionId, module.id, 'module_opened', id).catch(() => setError('Could not record this step opening. Your last saved position is safe.'));
-  }, [module?.id, sessionId, intro]);
+  }, [module?.id, sessionId, intro, reviewing]);
   async function complete() {
     if (!module || !session || lock.current) return;
     lock.current = true; setPending(true); setError('');
     if (completion.current?.moduleId !== module.id || completion.current.step !== session.plan.currentStep) completion.current = { moduleId: module.id, step: session.plan.currentStep, id: crypto.randomUUID() };
     try { setSession(await learningApi.event(sessionId, module.id, 'module_completed', completion.current.id)); }
-    catch { setError('This step has not been confirmed. Retry Continue to save it safely.'); }
+    catch (cause) { setError(cause instanceof ApiClientError && cause.code === 'ANSWER_REQUIRED' ? 'Try the question before moving on. Saathy can help with a hint.' : cause instanceof ApiClientError && cause.code === 'STEP_ORDER' ? 'Finish your current saved step first. Reload to find your place.' : 'This step has not been confirmed. Retry Continue to save it safely.'); }
     finally { lock.current = false; setPending(false); }
   }
   async function refreshEvidence() {
@@ -82,12 +86,16 @@ function SessionJourney({ sessionId }: { sessionId: string }) {
     <nav aria-label="Session stages" className="proto-phases">{['Intro', 'Learn', 'Explore', 'Practise', 'Review', 'Complete'].map((item) => <span className="proto-phase" key={item} aria-current={phase === item ? 'step' : undefined}>{item}</span>)}</nav>
     <div className="proto-actions"><Link className="nb-link" to="/student?panel=study">Study sessions</Link><Link className="nb-link" to={`/student/chapters/${session.chapterId}/learn`}>Chapter overview</Link><button className="nb-btn nb-btn--ghost" aria-expanded={showPlan} onClick={() => setShowPlan((value) => !value)}>{showPlan ? 'Fold' : 'Open'} my plan</button></div>
     {errorView}
-    <div className="proto-columns"><div className="proto-stack">
-      {showPlan ? <Card title="Your learning plan"><ul>{session.plan.objectives.map((objective, i) => <li key={i}>{objective}</li>)}</ul><progress max={session.plan.steps.length} value={session.plan.currentStep} aria-label="Learning steps completed" style={{ width: '100%' }} /><ol className="proto-plan">{session.plan.steps.map((step, i) => { const item = modules.find((row) => row.id === step.moduleId); return <li key={`${step.moduleId}:${i}`} aria-current={i === session.plan.currentStep ? 'step' : undefined}>{item ? `${MODULE_LABELS[item.type]} · ${item.objective}` : 'Learning step'}{i < session.plan.currentStep ? ' · Finished' : ''}</li>; })}</ol></Card> : null}
+      <div className={`proto-player${showPlan ? '' : ' proto-player--folded'}`}>
+        {showPlan ? <aside aria-label="Your learning plan"><Card title="Your learning plan"><ul>{session.plan.objectives.map((objective, i) => <li key={i}>{objective}</li>)}</ul><progress max={session.plan.steps.length} value={session.plan.currentStep} aria-label="Learning steps completed" style={{ width: '100%' }} /><ol className="proto-plan">{session.plan.steps.map((step, i) => { const item = modules.find((row) => row.id === step.moduleId); return <li key={`${step.moduleId}:${i}`} aria-current={i === shownStep ? 'step' : undefined}><button className="nb-link" disabled={i > session.plan.currentStep || pending} onClick={() => { setIntro(false); setReviewStep(i < session.plan.currentStep ? i : null); }}>{item ? `${MODULE_LABELS[item.type]} · ${item.objective}` : 'Learning step'}{i < session.plan.currentStep ? ' · Finished' : ''}</button></li>; })}</ol></Card></aside> : null}
+      <div className="proto-stack">
+        {reviewing && module ? <Card title={`Revisit · ${MODULE_LABELS[module.type]}`}><h2>{module.objective}</h2><p className="proto-copy">{module.content}</p><p className="nb-note">A read-only look back. Your saved answers and current step stay unchanged.</p><button className="nb-btn" onClick={() => setReviewStep(null)}>Return to current step</button></Card> : <>
       {session.plan.status === 'completed' ? <Card title="Your learning, gathered together" tape>{summary ? <><p>You tried {summary.attempted} answers. {summary.correct} were correct. {summary.notTaught ? `${summary.notTaught} marked as not learned yet, with no penalty.` : ''}</p><ul>{summary.concepts.map((concept) => <li key={concept.conceptId}>{modules.find((row) => row.conceptId === concept.conceptId)?.objective ?? 'Chapter idea'} <MasteryChip level={concept.word} /></li>)}</ul><p className="nb-note">These words come from this session's saved evidence.</p><Link className="nb-btn" to={`/student/chapters/${session.chapterId}/learn`}>Revisit the chapter</Link></> : <p role="status">Gathering your saved learning evidence…</p>}</Card>
         : intro ? <Card title="A little plan for this chapter" tape><p className="proto-copy">Start with one idea. Follow a worked example, explore, practise, and return to anything that needs another look.</p><p>No rush. Each completed step is saved so you can come back later.</p><button className="nb-btn" onClick={() => setIntro(false)}>Begin learning</button></Card>
           : module ? <ModuleView key={`${module.id}:${session.plan.currentStep}`} module={module} sessionId={sessionId} events={session.events} repair={repair} pending={pending} onEvidence={() => { void refreshEvidence(); }} onComplete={() => { void complete(); }} />
             : <Card title="This step is unavailable"><p>Your plan references material that could not be loaded.</p><button className="nb-btn" onClick={() => setAttempt((value) => value + 1)}>Retry</button></Card>}
+        </>}
+        {!intro && shownStep > 0 ? <button className="nb-btn nb-btn--ghost" disabled={pending} onClick={() => setReviewStep(shownStep - 1)}>Back to previous idea</button> : null}
       {currentGame && module && session.plan.status !== 'completed' ? <Card title="Saathy suggests an exploration"><h3>{currentGame.title}</h3><p>{currentGame.description}</p><Link className="nb-btn nb-btn--ghost" to={planGameRoute(currentGame.route, sessionId, session.plan.currentStep, module.id, currentGame.id)}>Play {currentGame.title}</Link><p className="nb-note">Your plan stays at this step. Come back whenever you are ready.</p></Card> : null}
       {recommendation ? <Card title="A suggested next step"><p>{recommendation.suggestedAction}</p>{recommendation.nextModuleId ? <p className="nb-note">{modules.find((row) => row.id === recommendation.nextModuleId)?.objective ?? 'Continue your saved plan.'}</p> : null}</Card> : null}
     </div><aside className="proto-stack" aria-label="Contextual Saathy">{module && !intro && session.plan.status !== 'completed' ? <ContextualSaathy key={module.id} module={module} initialMode={mode.success ? mode.data : 'explain'} context={{ studentId: me.profile.id, subjectId: session.plan.subjectId, chapterId: session.chapterId, conceptId: module.conceptId, sessionId, step: session.plan.currentStep, recentAttempts: session.events.filter((event) => event.type === 'answer_submitted').slice(-5).map((event) => ({ questionId: String(event.result?.questionId ?? ''), answer: String(event.result?.answer ?? ''), correct: event.result?.correct === true })) }} onAction={setRecommendation} /> : <Card title="Your place is saved"><p className="nb-note">Open this session from Study sessions to continue. Your session link also works on your other signed-in devices.</p><Link className="nb-link" to={sessionPath(session.id)}>Session link</Link></Card>}</aside></div>

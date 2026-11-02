@@ -16,7 +16,8 @@ const STUDENT: Section[] = [
   { icon: 'bookmark', label: 'Homework', key: 'homework', to: '/student?panel=homework' },
   { section: 'Play' },
   { icon: 'game', label: 'Games', key: 'games', to: '/student?panel=games' },
-  { icon: 'chat', label: 'Ask Saathy', key: 'ask', to: '/student?panel=ask' },
+  { icon: 'bookmark', label: 'Revise', key: 'revise', to: '/student/revise' },
+  { icon: 'chat', label: 'Ask Saathy', key: 'ask', to: '/student/saathy' },
   { section: 'You' },
   { icon: 'chart', label: 'My progress', key: 'progress', to: '/student/progress' },
   { icon: 'bell', label: 'Notifications', key: 'notifications', to: '/student/notifications' },
@@ -48,8 +49,8 @@ const PARENT: Section[] = [
 const MNAV = [
   { icon: 'home', label: 'Home', key: 'home', to: '/student' },
   { icon: 'grid', label: 'Subjects', key: 'subjects', to: '/student?panel=subjects' },
-  { icon: 'game', label: 'Games', key: 'games', to: '/student?panel=games' },
-  { icon: 'chat', label: 'Saathy', key: 'ask', to: '/student?panel=ask' },
+  { icon: 'bookmark', label: 'Revise', key: 'revise', to: '/student/revise' },
+  { icon: 'chat', label: 'Saathy', key: 'ask', to: '/student/saathy' },
   { icon: 'chart', label: 'Me', key: 'progress', to: '/student/progress' },
 ];
 
@@ -76,6 +77,8 @@ function activeKey(role: Role, pathname: string, search: string, hash: string): 
     return 'home';
   }
   const panel = new URLSearchParams(search).get('panel') ?? '';
+    if (pathname.startsWith('/student/saathy')) return 'ask';
+    if (pathname.startsWith('/student/revise')) return 'revise';
   if (pathname.startsWith('/student/progress')) return 'progress';
   if (pathname.startsWith('/student/notifications')) return 'notifications';
   if (pathname.startsWith('/student/settings')) return 'settings';
