@@ -7,6 +7,7 @@ import { ApiClientError, apiFetch, errorFrom, getJson, postJson } from '../api/c
 import { ChapterListSchema } from '../content/schemas';
 import { SubjectListSchema } from '../setup/schemas';
 import { LearningStudio } from './LearningStudio';
+import { SaathyMarkdown } from './SaathyMarkdown';
 import { TEACHING_MODES } from '../proto/ContextualSaathy';
 import { useSession } from '../session';
 import { useRemote } from '../setup/useRemote';
@@ -268,7 +269,7 @@ export function AskPanel() {
             {isSaathy ? <Saathy mood={mood} size="3rem" /> : null}
             <div>
               <div className="meta">{isSaathy ? 'Saathy' : `You · ${new Date(row.createdAt).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' })}${row.fromLabel ? ` · ${row.fromLabel}` : ''}`}{isSaathy && !pending && !isError && row.text ? <span className="saathy-reply-tools"><button className="nb-link" onClick={() => { void navigator.clipboard.writeText(row.text).then(() => setNotice('Reply copied.')).catch(() => setNotice('Copy was unavailable. You can select the reply text.')); }}>Copy reply</button><button className="nb-link" onClick={() => { void saveReply(row.id); }}>Save reply</button></span> : null}</div>
-              <div className="b"><span className="ask-copy"><MathText text={row.text || (row.id === streamingId ? 'Saathy is thinking…' : '')} /></span>{row.citations.map((citation) => <div className="nb-meta" key={citation.chunkId}>{citation.noteTitle}{citation.page !== undefined ? ` · p. ${citation.page}` : ''}</div>)}{row.levelCheck ? <SaathyLevelCheck chapterId={row.levelCheck.chapterId} busy={pending} onContinue={() => { void send(messages.slice(0, messages.indexOf(row)).filter((message) => message.role === 'student').at(-1)?.text ?? 'Help me explore this chapter'); }} /> : null}{row.artifacts?.map((artifact, i) => <ArtifactCard key={i} artifact={artifact} />)}{row.quickTry && thread ? <QuickQuestion key={row.quickTry.itemId} item={row.quickTry} threadId={thread.id} /> : null}{isError && retry ? <button className="nb-btn nb-btn--ghost nb-btn--sm" disabled={pending} onClick={() => { void send(retry.text, undefined, retry); }}>Retry</button> : null}</div>
+              <div className="b"><SaathyMarkdown text={row.text || (row.id === streamingId ? 'Saathy is thinking…' : '')} />{row.citations.map((citation) => <div className="nb-meta" key={citation.chunkId}>{citation.noteTitle}{citation.page !== undefined ? ` · p. ${citation.page}` : ''}</div>)}{row.levelCheck ? <SaathyLevelCheck chapterId={row.levelCheck.chapterId} busy={pending} onContinue={() => { void send(messages.slice(0, messages.indexOf(row)).filter((message) => message.role === 'student').at(-1)?.text ?? 'Help me explore this chapter'); }} /> : null}{row.artifacts?.map((artifact, i) => <ArtifactCard key={i} artifact={artifact} />)}{row.quickTry && thread ? <QuickQuestion key={row.quickTry.itemId} item={row.quickTry} threadId={thread.id} /> : null}{isError && retry ? <button className="nb-btn nb-btn--ghost nb-btn--sm" disabled={pending} onClick={() => { void send(retry.text, undefined, retry); }}>Retry</button> : null}</div>
             </div>
             {row.role === 'student' ? <span className="nb-avatar">{me?.profile.name?.slice(0, 1)}</span> : null}
           </div>;

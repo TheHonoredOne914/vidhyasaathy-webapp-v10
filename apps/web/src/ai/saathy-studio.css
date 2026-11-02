@@ -19,5 +19,12 @@
 .studio-map button { max-width: 18rem; white-space: normal; }
 .studio-flow li { padding: 1rem; border-left: 2px dashed #517DAB; }
 .studio-flow summary { cursor: pointer; font-size: 1.3rem; }
+.saathy-visual-dialog { width: min(800px, 94vw); max-height: 92dvh; border: 1px solid #517DAB; border-radius: 1rem; background: #F9F6EE; padding: 1rem; color: #041D3D; }
+.saathy-visual-dialog::backdrop { background: #041D3D90; }
+.saathy-md { overflow-wrap: anywhere; }
+.saathy-md table { border-collapse: collapse; display: block; max-width: 100%; overflow-x: auto; }
+.saathy-md :is(th, td) { border: 1px solid #D6E2E6; padding: .4rem; }
+.saathy-md pre { overflow-x: auto; white-space: pre-wrap; }
+.saathy-md .katex-display { overflow-x: auto; overflow-y: hidden; }
 @media (max-width: 600px) { .saathy-studio { width: 100%; max-width: 100%; max-height: 100dvh; height: 100dvh; border-radius: 0; } .studio-header { flex-wrap: wrap; } .studio-paper { padding: 1.25rem; } }
 @media (prefers-reduced-motion: reduce) { .studio-flash { transition: none; } }

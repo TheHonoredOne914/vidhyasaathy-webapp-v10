@@ -3,6 +3,7 @@ import { useRef, useState } from 'react';
 import { Card } from '../student/notebook/ui';
 import { Saathy } from '../student/notebook/Saathy';
 import { learningApi, type AnswerResult } from './adapter';
+import { SaathyMarkdown } from '../ai/SaathyMarkdown';
 import { LearningStudio } from '../ai/LearningStudio';
 
 export const TEACHING_MODES: { id: TeachingMode; label: string }[] = [
@@ -61,7 +62,7 @@ export function ContextualSaathy({ context, module, initialMode, onAction }: { c
     <p className="nb-note">I am looking at: {module.objective}</p>
     <button type="button" className="nb-btn nb-btn--ghost" onClick={() => setStudioOpen(true)}>Learning modules</button>
     <div className="proto-modes" aria-label="Teaching modes">{TEACHING_MODES.map((item) => <button className={`nb-btn nb-btn--sm ${mode === item.id ? '' : 'nb-btn--ghost'}`} key={item.id} aria-pressed={mode === item.id} onClick={() => setMode(item.id)} disabled={busy}>{item.label}</button>)}</div>
-    <div className="proto-chat" role="log" aria-label="Conversation with Saathy" aria-live="polite">{messages.map((message, index) => <article key={index}><b>You · {message.mode}</b>{message.question ? <p>{message.question}</p> : null}<b>Saathy</b><p>{message.response.explanation}</p><p className="nb-note">{message.response.suggestedAction}</p>{message.response.practiceQuestion ? <TutorPractice module={module} sessionId={context.sessionId} questionId={message.response.practiceQuestion.id} /> : null}</article>)}</div>
+    <div className="proto-chat" role="log" aria-label="Conversation with Saathy" aria-live="polite">{messages.map((message, index) => <article key={index}><b>You · {message.mode}</b>{message.question ? <p>{message.question}</p> : null}<b>Saathy</b><SaathyMarkdown text={message.response.explanation} /><p className="nb-note">{message.response.suggestedAction}</p>{message.response.practiceQuestion ? <TutorPractice module={module} sessionId={context.sessionId} questionId={message.response.practiceQuestion.id} /> : null}</article>)}</div>
     <form onSubmit={(event) => { event.preventDefault(); void ask(); }}><label htmlFor="learning-saathy-question">Ask about this step<textarea id="learning-saathy-question" rows={3} maxLength={4000} value={text} onChange={(event) => setText(event.target.value)} placeholder="Where did I get stuck?" disabled={busy} /></label><button type="submit" className="nb-btn" disabled={busy}>{busy ? 'Saathy is thinking…' : `Ask Saathy · ${TEACHING_MODES.find((item) => item.id === mode)?.label}`}</button></form>
     {error ? <p role="alert">{error}</p> : null}
     {studioOpen ? <LearningStudio chapterId={context.chapterId} title={module.objective} onClose={() => setStudioOpen(false)} /> : null}
