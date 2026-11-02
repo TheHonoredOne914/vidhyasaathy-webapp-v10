@@ -14,6 +14,10 @@ const Claim = lazy(() => import('./routes/Claim').then((module) => ({ default: m
 const NotFound = lazy(() => import('./routes/NotFound').then((module) => ({ default: module.NotFound })));
 const Onboarding = lazy(() => import('./routes/Onboarding').then((module) => ({ default: module.Onboarding })));
 const PinSignIn = lazy(() => import('./routes/PinSignIn').then((module) => ({ default: module.PinSignIn })));
+const DemoLayout = lazy(() => import('./demo/DemoLayout').then((module) => ({ default: module.DemoLayout })));
+const ParentWorkspace = lazy(() => import('./demo/ParentWorkspace').then((module) => ({ default: module.ParentWorkspace })));
+const TeacherWorkspace = lazy(() => import('./demo/TeacherWorkspace').then((module) => ({ default: module.TeacherWorkspace })));
+const AdminWorkspace = lazy(() => import('./demo/AdminWorkspace').then((module) => ({ default: module.AdminWorkspace })));
 const Privacy = lazy(() => import('./routes/Privacy').then((module) => ({ default: module.Privacy })));
 const Recover = lazy(() => import('./routes/Recover').then((module) => ({ default: module.Recover })));
 const RegisterSchool = lazy(() => import('./routes/RegisterSchool').then((module) => ({ default: module.RegisterSchool })));
@@ -79,6 +83,12 @@ export function App() {
         <AttemptSyncProvider>
         <Suspense fallback={<RouteFallback />}>
           <Routes>
+            <Route path="/demo" element={<DemoLayout />}>
+              <Route index element={<Navigate to="/demo/parent" replace />} />
+              <Route path="parent" element={<ParentWorkspace />} />
+              <Route path="teacher" element={<TeacherWorkspace />} />
+              <Route path="admin" element={<AdminWorkspace />} />
+            </Route>
             <Route path="/student/games/atom" element={<RoleGuard role="student"><AtomForgeVideo /></RoleGuard>} />
             <Route path="/student/chapters/:chapterId/practice/engine/:gameId" element={<RoleGuard role="student"><ChapterEntryGate><EngineGamePage /></ChapterEntryGate></RoleGuard>} />
             <Route element={<Shell />}>
