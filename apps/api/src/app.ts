@@ -38,6 +38,7 @@ import { registerGamesRoutes } from './routes/games.ts';
 import { registerNotebookRoutes } from './routes/notebook.ts';
 import { registerAuthV9Routes } from './routes/auth-v9.ts';
 import { registerLearningProtoRoutes } from './routes/learning-proto.ts';
+import { registerTodayRoutes } from './routes/today.ts';
 import type { JsonModel } from './learning/proto-model.ts';
 import { registerFounderSettings } from './routes/founder-settings.ts';
 import { founderProvider } from './ai/founder-provider.ts';
@@ -161,6 +162,7 @@ export async function buildApp(input: AppOptions) {
     registerGamesRoutes(app, input.database, options.now);
     registerNotebookRoutes(app, db, options.now);
     await registerLearningProtoRoutes(app, input.database, options.now, input.learningModel);
+    registerTodayRoutes(app, input.database, options.now);
     app.post('/auth/logout', async (request, reply) => {
       auth.logout(request, reply);
       return reply.code(204).send();

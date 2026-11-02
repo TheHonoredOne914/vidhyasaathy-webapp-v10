@@ -271,8 +271,8 @@ export function studentHome(db: Db, request: FastifyRequest, now: number) {
     const concept = sessionFocus(world, open.id);
     candidates.push({
       id: open.id, kind: 'unfinished', title: concept?.title ?? open.title, conceptId: concept?.id ?? null,
-      conceptName: concept?.title ?? null, estMinutes: 14, href: `/student/sessions/${open.id}?step=${row.viewedSlides}`,
-      resumeState: `step=${row.viewedSlides}`, dueAt: null, resumeAt: Math.max(row.viewedSlides, 1), lateUntil: null, windowOpen: true,
+        conceptName: concept?.title ?? null, estMinutes: 14, href: `/student/sessions/${open.id}`,
+        resumeState: 'Continue where you left off', dueAt: null, resumeAt: Math.max(row.viewedSlides, 1), lateUntil: null, windowOpen: true,
     });
   }
   for (const draft of world.drafts) {
@@ -280,7 +280,7 @@ export function studentHome(db: Db, request: FastifyRequest, now: number) {
     if (!assignment) continue;
     candidates.push({
       id: `draft:${assignment.id}`, kind: 'unfinished', title: assignment.title, conceptId: null, conceptName: null,
-      estMinutes: 15, href: `/student/assignments/${assignment.id}`, resumeState: 'draft', dueAt: null,
+        estMinutes: 15, href: `/student/assignments/${assignment.id}`, resumeState: 'Your saved work is ready', dueAt: null,
       resumeAt: draft.updatedAt || 1, lateUntil: null, windowOpen: true,
     });
   }
