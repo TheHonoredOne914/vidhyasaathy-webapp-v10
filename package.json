@@ -12,7 +12,7 @@
   ],
   "scripts": {
     "start": "node scripts/preview.mjs",
-    "dev": "concurrently --kill-others --names web,api \"npm run dev -w apps/web\" \"npm run dev -w apps/api\"",
+    "dev": "node scripts/dev.mjs",
     "demo": "node scripts/demo.mjs",
     "test": "npm run test:unit && npm run test:e2e",
     "test:unit": "vitest run --workspace vitest.workspace.ts --configLoader native --pool threads --reporter dot",

@@ -1,0 +1,13 @@
+# Ask Saathy and original games integration
+
+Sources: `whodhruv7/Model` at `57d9e6674ebb6c012a4f285f532eaf6d15431e3c` and `TheHonoredOne914/chatgpt` at `2a39cba11a8186f4375d2970aee2ce9fe2bb445f`.
+
+Ask Saathy now adapts the Model repo's teaching directives inside the existing authenticated tutor. Its mathematics, science and social science textbook indexes feed chapter-scoped retrieval and citations. Recent owner-only conversation turns reach inference and support short follow-up retrieval. Both singular `artifact` metadata from Model and the app's `artifacts` array are accepted; model-generated quiz answer keys are discarded. Existing prerequisite diagnostics, server marking, quick checks, evidence, history and notebook UI remain in charge.
+
+The Model repository is an AI tutor application using an external inference provider, not a set of trained model weights. A GitHub PAT cannot enable inference. Configure a real `GEMINI_API_KEY` on the API server or in the existing administrator Founder settings; alternatively set `OPENAI_API_KEY`, `OPENAI_MODEL`, `OPENAI_API_URL` and `AI_PROVIDER=openai` to the OpenAI-compatible provider used by the original Model app. See `apps/api/.env.example`. No credentials were copied into source. Without an AI key, the student sees an explicit textbook-excerpt notice.
+
+The Games shelf has an additional **Your original games** section for the full Tinker, Maths War, Optics Lab and Quill & Blade sources. Original adventures open inside the app, alongside the existing assessed chapter games. They run in opaque-origin sandboxed frames with restricted network access and no access to app cookies. Browser saves are bridged to keys scoped by school, student and game. Original game scores do not award assessed mastery or server evidence. Quill & Blade has no original durable save; its new input bar and touch-to-mouse adapter support typing and touch controls. Audio is disabled in the embed.
+
+`npm run dev -- --host 0.0.0.0 --port 4173 --strictPort` now forwards Vite options correctly and aligns API/browser origins. The narrow `terminal.local` development host is allowed for the managed preview. `npm run demo` remains the existing explicit demo-data launcher. No production data was migrated, reset or reseeded.
+
+Validation: workspace typecheck; full unit suite; production web build; browser smoke checks of all four sandboxed originals, including Tinker start, Maths War arena entry, Optics free-play entry and a correct Quill & Blade answer triggering battle feedback. Browser game checks used a temporary standalone harness with the exact production embedding function; the signed-in game shelf/player flow and live upstream AI inference still need a configured deployment check.
