@@ -1,0 +1,8 @@
+.original-game { display:flex; flex-direction:column; gap:.75rem; min-height:80dvh; background:var(--nb-paper,#F9F6EE); padding:1rem; color:#041D3D; }
+.original-game__bar { display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+.original-game__bar h1 { font-size:1.5rem; flex:1; margin:0; }
+.original-game__frame { width:100%; min-height:70dvh; flex:1; border:1px solid #D6E2E6; border-radius:12px; background:#F9F6EE; }
+.original-game:fullscreen { overflow:auto; height:100dvh; }
+.original-game:fullscreen .original-game__frame { min-height:0; }
+.original-shelf { margin-top:1.5rem; }
+@media(max-width:600px) { .original-game{padding:.5rem;} .original-game__bar h1 { order:3; flex-basis:100%; } .original-game__frame{min-height:75dvh;} }

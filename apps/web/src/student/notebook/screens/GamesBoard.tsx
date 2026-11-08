@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { originalGames } from '../../../games/originals/catalog';
 import { Link } from 'react-router-dom';
 import { GamesSchema } from '../../../games/gameApi';
 import { useRemote } from '../../../setup/useRemote';
@@ -36,5 +37,6 @@ export function GamesBoard() {
       const today = !paused && !locked && game.state === 'today';
       return <article className={`nb-card gm${locked ? ' lock' : ''}${today ? ' today' : ''}`} key={game.gameId}><div className="art"><GameArt id={game.gameId} /></div><b>{game.title}</b><span className="nb-meta">{game.topic}</span><div className="foot">{paused ? <Chip tone="sand">Coming back soon</Chip> : locked ? <><span className="nb-meta">{game.opensAfter || 'Opens after its chapter'}</span>{game.chapterLabel ? <Chip dashed>{game.chapterLabel}</Chip> : null}</> : <><span className="nb-meta">{game.best?.label ?? (today ? 'Today' : game.state === 'new' ? 'New' : '')}</span>{playableGameHref(game.gameId, game.href) ? <Link className={`nb-btn nb-btn--${today ? 'primary' : 'ghost'} nb-btn--sm`} to={game.href}>{game.state === 'played' ? 'Again' : 'Play'}</Link> : null}</>}</div></article>;
     })}</div>{data && !games.length ? <p className="nb-note">No games for this subject yet.</p> : null}
+    <section className="original-shelf" aria-label="Original learning games"><h2 className="nb-h2">Your original games</h2><p className="nb-text">Full adventures and labs from VidhyaSaathy. Explore freely; assessed practice continues in your chapter games.</p><div className="gm-grid">{originalGames.filter((game) => tab === 'all' || game.subject === 'Across subjects' || data?.subjects.find((subject) => subject.id === tab)?.name.toLowerCase().includes(game.subject === 'Physics' ? 'science' : game.subject.toLowerCase().slice(0, 4))).map((game) => <article className="nb-card gm" key={game.id}><b>{game.title}</b><span className="nb-meta">{game.subject}</span><p>{game.description}</p><Link className="nb-btn nb-btn--ghost" to={`/student/games/original/${game.id}`}>Play original</Link></article>)}</div></section>
   </div>;
 }
