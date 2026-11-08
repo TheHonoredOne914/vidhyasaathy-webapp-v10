@@ -4,6 +4,7 @@ import { openDatabase } from '../src/db/index.ts';
 import { prepareLearningSettings } from '../src/learning/proto-settings.ts';
 import { founderProvider } from '../src/ai/founder-provider.ts';
 import { LocalStubProvider } from '../src/ai/provider.ts';
+import { createHarness } from './helpers.ts';
 
 const mocks = vi.hoisted(() => ({ generate: vi.fn(), keys: [] as string[] }));
 vi.mock('@google/genai', () => ({ GoogleGenAI: class {
@@ -13,6 +14,34 @@ vi.mock('@google/genai', () => ({ GoogleGenAI: class {
 afterEach(() => { vi.unstubAllEnvs(); vi.unstubAllGlobals(); mocks.generate.mockReset(); mocks.keys.length = 0; });
 
 describe('learning provider selection', () => {
+  it('limits the live connection check to administrators and reports missing configuration honestly', async () => {
+    vi.stubEnv('GEMINI_API_KEY', ''); vi.stubEnv('OPENAI_API_KEY', '');
+    const h = await createHarness();
+    try {
+      const schoolId = (await h.register()).json().school.id as string;
+      const admin = h.roleCookie(schoolId, 'admin').cookie;
+      const student = h.roleCookie(schoolId, 'student').cookie;
+      expect((await h.post('/founder/test-connection', {}, student)).statusCode).toBe(403);
+      expect((await h.post('/founder/test-connection', {}, admin)).json()).toMatchObject({ connected: false });
+      expect(mocks.generate).not.toHaveBeenCalled();
+    } finally { await h.app.close(); }
+  });
+
+  it('verifies a real provider response and keeps provider failure details private', async () => {
+    vi.stubEnv('GEMINI_API_KEY', ''); vi.stubEnv('OPENAI_API_KEY', '');
+    const h = await createHarness();
+    try {
+      const schoolId = (await h.register()).json().school.id as string;
+      const admin = h.roleCookie(schoolId, 'admin').cookie;
+      h.database.sqlite.prepare('INSERT INTO proto_founder_settings VALUES (?,?,?,?)').run(schoolId, 'test-private-key', 'test-model', h.now());
+      mocks.generate.mockResolvedValue({ text: '{"ok":true}' });
+      expect((await h.post('/founder/test-connection', {}, admin)).json()).toMatchObject({ connected: true });
+      mocks.generate.mockRejectedValue(new Error('test-private-key: upstream error'));
+      const response = await h.post('/founder/test-connection', {}, admin);
+      expect(response.json()).toMatchObject({ connected: false });
+      expect(response.body).not.toContain('test-private-key');
+    } finally { await h.app.close(); }
+  });
   it('uses Gemini JSON with the configurable model', async () => {
     mocks.generate.mockResolvedValue({ text: '{"explanation":"Grounded idea"}' });
     const model = createLearningModel({ GEMINI_API_KEY: 'test-gemini', GEMINI_MODEL: 'test-model' });
