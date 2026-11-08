@@ -77,6 +77,8 @@ function QuickQuestion({ item, threadId }: { item: QuickTry; threadId: string })
     {error ? <p className="nb-note">Your answer has not been confirmed. <button className="nb-btn nb-btn--ghost nb-btn--sm" onClick={() => { void answer(selected); }}>Retry</button></p> : null}</section>;
 }
 
+const AIStatusSchema = z.object({ configured: z.boolean(), provider: z.string() });
+
 const errors: Record<string, string> = {
   provider_down: "I can't reach my notes right now. Try again in a minute.", timeout: "I can't reach my notes right now. Try again in a minute.",
   budget: "That's enough questions for today. Your teacher can help, or try again tomorrow.", rate_limit: 'Slow down a little, then ask again.',
@@ -93,6 +95,7 @@ export function AskPanel() {
   const [params] = useSearchParams();
   const { me } = useSession();
   const home = useRemote('/student/home', StudentHomeSchema);
+  const aiStatus = usePrivateList('/ask/status', AIStatusSchema);
   const recent = usePrivateList('/ask/threads?limit=20', ThreadsSchema);
   const saved = usePrivateList('/ask/saved?limit=10', SavedSchema);
   const [thread, setThread] = useState<AskThread | null>(null);
@@ -221,6 +224,7 @@ export function AskPanel() {
         </div>
       </div>
       <div className="proto-actions saathy-tools"><button type="button" className="nb-btn nb-btn--ghost nb-btn--sm" disabled={pending || !chapterId} onClick={() => setStudioOpen(true)}>Learning modules</button><button type="button" className="nb-btn nb-btn--ghost nb-btn--sm" disabled={pending || !messages.length} onClick={downloadChat}>Download chat</button><Link className="nb-link" to={chapterId ? `/student/chapters/${chapterId}/learn` : '/student?panel=subjects'}>Plan my learning</Link>{focusId ? <button type="button" className="nb-chip nb-chip--sky" disabled={pending} onClick={() => { newChat(); setFocusId(''); }}>Clear focus: {focus.data?.title ?? 'current idea'}</button> : null}</div>
+      {aiStatus.data && !aiStatus.data.configured ? <p className="nb-note" role="status">Saathy is using textbook excerpts. An administrator can connect an AI provider in Founder settings for adaptive explanations.</p> : null}
       {notice ? <p role="status">{notice}</p> : null}
       <div className="proto-modes" aria-label="Teaching modes">{TEACHING_MODES.map((mode) => <button type="button" key={mode.id} className="nb-chip nb-chip--sky" disabled={pending || (locked && mode.id !== 'hint')} onClick={() => { if (mode.id === 'plan_my_learning') setStudioOpen(true); else void send(`${mode.label}: ${topicName}${text.trim() ? `. ${text.trim()}` : ''}`); }}>{mode.label}</button>)}</div>
 

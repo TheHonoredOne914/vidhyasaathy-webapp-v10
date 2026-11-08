@@ -3,13 +3,19 @@ import type { Me } from '@vidhyasaathy/contracts';
 import { eq } from 'drizzle-orm';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { academicYears, chapters, classes, concepts, notes, profiles, sections, subjects } from '../src/db/schema.ts';
+import { LocalStubProvider, type GroundedQuestion } from '../src/ai/provider.ts';
 import { createHarness, type Harness } from './helpers.ts';
 
 describe('Ask conversations', () => {
   let h: Harness;
+  let providerInputs: GroundedQuestion[];
   let schoolId: string, chapterId: string, conceptId: string, student: string, studentId: string;
   beforeEach(async () => {
-    h = await createHarness();
+    providerInputs = [];
+    const provider = new LocalStubProvider();
+    const stream = provider.stream.bind(provider);
+    provider.stream = async function* (input, signal) { providerInputs.push(input); yield* stream(input, signal); };
+    h = await createHarness({ llmProvider: provider });
     schoolId = (await h.register()).json<Me>().school.id;
     const db = h.database.db;
     const yearId = randomUUID(), classId = randomUUID(), sectionId = randomUUID(), subjectId = randomUUID();
@@ -26,6 +32,20 @@ describe('Ask conversations', () => {
   });
   afterEach(async () => { await h.app.close(); });
   const ask = (extra: Record<string, unknown> = {}) => h.post('/ask/stream', { clientEventId: randomUUID(), chapterId, conceptId, text: 'Explain speed distance time', ...extra }, student);
+
+  it('carries bounded owner-only history into short follow-ups', async () => {
+    await ask({ style: 'explain' });
+    const list = await h.app.inject({ url: '/ask/threads', headers: { cookie: student } });
+    const threadId = list.json().threads[0].id as string;
+    await ask({ threadId, text: 'Why?', style: 'explain' });
+    expect(providerInputs.at(-1)?.history?.map((turn) => turn.role)).toEqual(['user', 'assistant']);
+    expect(providerInputs.at(-1)?.history?.[0]?.content).toBe('Explain speed distance time');
+    expect(providerInputs.at(-1)?.sources.length).toBeGreaterThan(0);
+    const count = providerInputs.length;
+    const other = h.roleCookie(schoolId, 'student');
+    expect((await h.post('/ask/stream', { clientEventId: randomUUID(), threadId, chapterId, text: 'Why?' }, other.cookie)).statusCode).toBe(404);
+    expect(providerInputs.length).toBe(count);
+  });
 
   it('keeps the Ask allowance separate from ordinary notebook requests', async () => {
     for (let index = 0; index < 15; index++) {

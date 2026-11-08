@@ -10,7 +10,9 @@ export function parseSaathyArtifacts(output: string) {
   if (!block) return { text, artifacts: [] as SaathyArtifact[] };
   try {
     const meta: unknown = JSON.parse(block[1]!);
-    const candidates = meta && typeof meta === 'object' && 'artifacts' in meta ? meta.artifacts : [];
+    const candidates = meta && typeof meta === 'object'
+      ? 'artifacts' in meta ? meta.artifacts : 'artifact' in meta && meta.artifact ? [meta.artifact] : []
+      : [];
     const artifacts = Array.isArray(candidates) ? candidates.slice(0, 4).flatMap((value) => {
       const parsed = SaathyArtifactSchema.safeParse(value);
       return parsed.success ? [parsed.data] : [];
