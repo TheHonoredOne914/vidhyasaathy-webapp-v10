@@ -2,6 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { parseSaathyArtifacts } from '../src/ai/saathy-artifacts.ts';
 
 describe('Saathy artifact metadata', () => {
+  it('adapts the original Model singular artifact contract without leaking quiz answers', () => {
+    const result = parseSaathyArtifacts('Explore.```saathy ' + JSON.stringify({ artifact: { type: 'demo', title: 'Line', demo: { widget: 'linegraph', params: { m: 2, c: 1 } } }, quickcheck: { answer: 2 } }) + '```');
+    expect(result.artifacts).toEqual([{ type: 'demo', title: 'Line', demo: { widget: 'linegraph', params: { m: 2, c: 1 } } }]);
+    expect(JSON.stringify(result)).not.toContain('answer');
+  });
   it('keeps prose and validates supported cards without carrying answer keys', () => {
     const result = parseSaathyArtifacts('Think first.\n```saathy\n'+JSON.stringify({ artifacts: [{ type: 'notes', title: 'Remember', points: ['Distance has a unit.'], answer: 2 }, { type: 'html', title: 'Unsafe', body: '<script />' }] })+'\n```');
     expect(result.text).toBe('Think first.');

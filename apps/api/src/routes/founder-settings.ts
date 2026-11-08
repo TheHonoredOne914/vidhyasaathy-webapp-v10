@@ -4,7 +4,7 @@ import { requireAuth, requireRole } from '../auth/middleware.ts';
 import type { Database } from '../db/index.ts';
 import { parseInput } from '../errors.ts';
 import { learningSettings, prepareLearningSettings } from '../learning/proto-settings.ts';
-import { learningEnvironment } from '../learning/proto-model.ts';
+import { learningEnvironment, schoolLearningModel } from '../learning/proto-model.ts';
 
 export async function registerFounderSettings(app: FastifyInstance, database: Database, now: () => number) {
   await prepareLearningSettings(database);
@@ -18,6 +18,15 @@ export async function registerFounderSettings(app: FastifyInstance, database: Da
       source: settings?.gemini_key ? 'founder' : key ? 'environment' : 'fallback' };
   }
   app.get('/founder/settings', admin, async (request) => view(requireAuth(request).school.id));
+  app.post('/founder/test-connection', { ...admin, config: { rateLimit: { max: 3, timeWindow: '1 minute' } } }, async (request) => {
+    const model = schoolLearningModel(database, requireAuth(request).school.id);
+    if (model.provider === 'fallback') return { connected: false, message: 'Save a Gemini key or configure an AI provider on the server before testing.' };
+    try {
+      const result = await model.generate('Connection check. Return only the JSON object {"ok":true}.', { task: 'connection_check' });
+      if (!z.object({ ok: z.literal(true) }).safeParse(result).success) throw new Error('Invalid provider response');
+      return { connected: true, message: 'Connection verified. The AI provider returned a valid response.' };
+    } catch { return { connected: false, message: 'Connection failed. Check the saved key, model name and provider quota.' }; }
+  });
   app.put('/founder/settings', admin, async (request) => {
     const input = parseInput(z.object({ geminiApiKey: z.string().trim().max(512).nullable().optional(),
       geminiModel: z.string().trim().min(1).max(100).regex(/^[a-zA-Z0-9._/-]+$/).optional() }).strict(), request.body);

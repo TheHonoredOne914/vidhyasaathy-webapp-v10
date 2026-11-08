@@ -46,4 +46,17 @@ describe('AI provider registry', () => {
     const provider = new HttpModelProvider({ apiUrl: 'http://localhost/model', token: '', model: 'class9', timeoutMs: 10 });
     await expect(provider.ask(input)).rejects.toThrow('cannot connect');
   });
+
+  it('sends conversation turns to an OpenAI-compatible model without duplicating history', async () => {
+    const fetch = vi.fn(async () => new Response('data: {"choices":[{"delta":{"content":"Think about distance."}}]}\n\ndata: [DONE]\n\n', { headers: { 'content-type': 'text/event-stream' } }));
+    vi.stubGlobal('fetch', fetch);
+    const provider = new OpenAiProvider({ apiUrl: 'https://provider.test/v1/chat/completions', apiKey: 'test-key', model: 'tutor' });
+    const history = [{ role: 'user' as const, content: 'Explain speed' }, { role: 'assistant' as const, content: 'Distance per unit time.' }];
+    const events = [];
+    for await (const event of provider.stream({ ...input, question: 'Why?', history }, new AbortController().signal)) events.push(event);
+    const payload = JSON.parse((fetch.mock.calls[0] as unknown as [string, RequestInit])[1].body as string);
+    expect(payload.messages.slice(1, 3)).toEqual(history);
+    expect(JSON.parse(payload.messages[3].content)).not.toHaveProperty('history');
+    expect(events).toContainEqual({ type: 'token', text: 'Think about distance.' });
+  });
 });

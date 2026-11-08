@@ -1,0 +1,3115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>VidhyaSaathy Optics Lab — Light Ka Game!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═════════ VidhyaSaathy Optics Lab — Design System ═════════ */
+:root {
+  --navy-950: #05080f;
+  --navy-900: #090f1d;
+  --navy-850: #0d1526;
+  --navy-800: #111b31;
+  --navy-700: #1a2743;
+  --navy-600: #243456;
+  --panel: rgba(13, 21, 38, 0.86);
+  --panel-2: rgba(17, 27, 49, 0.92);
+  --gold: #f5b84a;
+  --gold-2: #ffd98a;
+  --gold-dim: rgba(245, 184, 74, 0.16);
+  --cyan: #6ee7ff;
+  --cyan-dim: rgba(110, 231, 255, 0.12);
+  --violet: #b44dff;
+  --text: #e9effc;
+  --muted: #8fa0c2;
+  --line: rgba(140, 165, 220, 0.14);
+  --green: #3dfc82;
+  --red: #ff6b6b;
+  --r-lg: 18px;
+  --r-md: 13px;
+  --r-sm: 9px;
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+  --font-display: 'Baloo 2', 'Poppins', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  font-family: var(--font-body);
+  color: var(--text);
+  background: radial-gradient(1200px 700px at 75% -10%, #12203c 0%, transparent 55%),
+              radial-gradient(900px 600px at -10% 110%, #14204a 0%, transparent 50%),
+              var(--navy-950);
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+button { font-family: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+#app { position: fixed; inset: 0; }
+
+/* ── Screens (smooth cross-fade, no chaos) ── */
+.screen {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  opacity: 0; visibility: hidden; transform: translateY(8px) scale(0.995);
+  transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s;
+  overflow: hidden;
+}
+.screen.active { opacity: 1; visibility: visible; transform: none; }
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 13px 26px; border-radius: 999px; font-weight: 700; font-size: 15.5px;
+  letter-spacing: 0.2px; transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s;
+  will-change: transform;
+}
+.btn:active { transform: scale(0.96); }
+.btn-primary {
+  background: linear-gradient(135deg, #ffd98a, #f0a93c); color: #241503;
+  box-shadow: 0 8px 26px rgba(240, 169, 60, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(240, 169, 60, 0.45); }
+.btn-ghost {
+  background: rgba(140, 165, 220, 0.08); color: var(--text);
+  border: 1px solid var(--line);
+}
+.btn-ghost:hover { background: rgba(140, 165, 220, 0.16); }
+.btn-gold-soft {
+  background: var(--gold-dim); color: var(--gold-2); border: 1px solid rgba(245, 184, 74, 0.35);
+}
+.icon-btn {
+  width: 42px; height: 42px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center;
+  background: rgba(140, 165, 220, 0.08); border: 1px solid var(--line); color: var(--muted);
+  transition: background 0.15s, color 0.15s, transform 0.15s;
+}
+.icon-btn:hover { background: rgba(140, 165, 220, 0.16); color: var(--text); }
+.icon-btn:active { transform: scale(0.92); }
+.icon-btn.on { background: var(--gold-dim); border-color: rgba(245, 184, 74, 0.4); color: var(--gold-2); }
+.icon-btn svg { width: 20px; height: 20px; }
+.icon-btn:disabled { opacity: 0.35; cursor: default; }
+
+/* ── HOME ── */
+#screen-home { align-items: center; justify-content: center; padding: 24px; }
+.orb { position: absolute; border-radius: 50%; filter: blur(70px); opacity: 0.5; pointer-events: none; animation: orbFloat 11s ease-in-out infinite alternate; }
+.orb-1 { width: 420px; height: 420px; left: -120px; top: -140px; background: radial-gradient(circle, rgba(110, 231, 255, 0.20), transparent 65%); }
+.orb-2 { width: 520px; height: 520px; right: -160px; bottom: -180px; background: radial-gradient(circle, rgba(180, 77, 255, 0.16), transparent 65%); animation-delay: -5s; }
+.orb-3 { width: 260px; height: 260px; right: 18%; top: 8%; background: radial-gradient(circle, rgba(245, 184, 74, 0.14), transparent 60%); animation-delay: -8s; }
+@keyframes orbFloat { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(26px, -20px, 0); } }
+
+.home-card {
+  position: relative; width: min(620px, 94vw); text-align: center;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 26px;
+  padding: 40px 34px 30px; box-shadow: var(--shadow); backdrop-filter: blur(14px);
+}
+.logo-badge {
+  width: 84px; height: 84px; margin: 0 auto 14px; border-radius: 22px;
+  background: linear-gradient(150deg, #ffe3ac, #f0a93c 55%, #c97f1d);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 10px 30px rgba(240, 169, 60, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.55);
+  animation: badgeIn 0.6s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+.logo-badge svg { width: 52px; height: 52px; }
+@keyframes badgeIn { from { opacity: 0; transform: scale(0.5) rotate(-14deg); } to { opacity: 1; transform: none; } }
+.brand-name { font-family: var(--font-display); font-size: 21px; font-weight: 800; letter-spacing: 0.4px; }
+.brand-name span { color: var(--gold-2); }
+.brand-tag { font-size: 12px; color: var(--muted); letter-spacing: 2.5px; text-transform: uppercase; margin-top: 2px; }
+.home-headline {
+  font-family: var(--font-display); font-weight: 800; font-size: clamp(26px, 4.6vw, 38px);
+  line-height: 1.18; margin: 18px 0 10px; white-space: pre-line;
+}
+.home-headline em {
+  font-style: normal;
+  background: linear-gradient(100deg, #ffd98a 10%, #6ee7ff 60%, #b44dff 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.home-sub { color: var(--muted); font-size: 14.5px; line-height: 1.65; max-width: 480px; margin: 0 auto 24px; }
+.cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.home-badges { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 22px; min-height: 34px; }
+.badge-chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 13px; border-radius: 999px;
+  background: var(--gold-dim); border: 1px solid rgba(245, 184, 74, 0.3); color: var(--gold-2);
+  font-size: 12px; font-weight: 600; animation: badgeIn 0.5s ease both;
+}
+.home-foot { margin-top: 22px; font-size: 11.5px; color: var(--muted); letter-spacing: 0.6px; }
+.home-links { margin-top: 10px; display: flex; gap: 14px; justify-content: center; }
+.home-links button { font-size: 12px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+.home-links button:hover { color: var(--text); }
+
+/* ── MAP ── */
+#screen-map { padding: 20px clamp(14px, 4vw, 44px); overflow-y: auto; }
+.map-head { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
+.map-title { font-family: var(--font-display); font-size: 24px; font-weight: 800; flex: 1; }
+.map-stars {
+  display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: 999px;
+  background: var(--gold-dim); border: 1px solid rgba(245, 184, 74, 0.3); color: var(--gold-2); font-weight: 700; font-size: 14px;
+}
+.lab-section { margin-bottom: 26px; }
+.lab-label {
+  display: flex; align-items: center; gap: 10px; font-family: var(--font-display);
+  font-size: 15px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; color: var(--muted); margin: 0 2px 12px;
+}
+.lab-label .dot { width: 10px; height: 10px; border-radius: 50%; }
+.lab-label.reflection .dot { background: var(--cyan); box-shadow: 0 0 12px var(--cyan); }
+.lab-label.refraction .dot { background: var(--violet); box-shadow: 0 0 12px var(--violet); }
+.lab-label.mixed .dot { background: var(--gold); box-shadow: 0 0 12px var(--gold); }
+.level-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 12px; }
+.level-card {
+  position: relative; text-align: left; padding: 15px 15px 13px; border-radius: var(--r-lg);
+  background: var(--panel-2); border: 1px solid var(--line);
+  transition: transform 0.2s ease, border-color 0.2s, box-shadow 0.2s; overflow: hidden;
+}
+.level-card:not(.locked):hover { transform: translateY(-3px); border-color: rgba(245, 184, 74, 0.45); box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35); }
+.level-card.locked { opacity: 0.45; cursor: default; filter: saturate(0.4); }
+.lc-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; }
+.lc-num {
+  width: 34px; height: 34px; border-radius: 11px; display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-weight: 800; font-size: 16px;
+  background: var(--cyan-dim); color: var(--cyan); border: 1px solid rgba(110, 231, 255, 0.3);
+}
+.level-card[data-lab="refraction"] .lc-num { background: rgba(180, 77, 255, 0.14); color: #cf9aff; border-color: rgba(180, 77, 255, 0.3); }
+.level-card[data-lab="mixed"] .lc-num, .level-card[data-lab="sandbox"] .lc-num { background: var(--gold-dim); color: var(--gold-2); border-color: rgba(245, 184, 74, 0.3); }
+.lc-lock { color: var(--muted); }
+.lc-stars { display: flex; gap: 3px; }
+.lc-stars svg { width: 15px; height: 15px; }
+.lc-title { font-weight: 700; font-size: 14.5px; margin-bottom: 3px; }
+.lc-badge { font-size: 11px; color: var(--muted); }
+.lc-done { position: absolute; right: 12px; top: 14px; color: var(--green); }
+.sandbox-card { grid-column: 1 / -1; display: flex; align-items: center; gap: 16px; padding: 16px 20px; }
+.sandbox-card .lc-title { font-size: 16px; }
+.sandbox-card .sb-icon { font-size: 26px; }
+
+/* ── GAME ── */
+#screen-game { padding: 10px clamp(8px, 1.6vw, 18px) 10px; }
+.game-top { display: flex; align-items: center; gap: 8px; padding: 4px 2px 10px; flex-wrap: wrap; }
+.gt-chip {
+  display: inline-flex; align-items: center; gap: 8px; padding: 9px 15px; border-radius: 12px;
+  background: var(--panel); border: 1px solid var(--line); font-size: 13.5px; font-weight: 700;
+}
+.gt-chip .lab-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); }
+.gt-objective {
+  flex: 1; min-width: 120px; padding: 9px 15px; border-radius: 12px; background: var(--panel);
+  border: 1px solid var(--line); color: var(--muted); font-size: 12.5px; line-height: 1.4;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.gt-spacer { flex: 1; }
+.gt-actions { display: flex; gap: 7px; }
+
+.game-stage { flex: 1; display: flex; gap: 12px; min-height: 0; }
+.canvas-wrap {
+  position: relative; flex: 1; display: flex; align-items: center; justify-content: center; min-width: 0; min-height: 0;
+}
+#game-canvas {
+  width: auto; height: auto; max-width: 100%; max-height: 100%;
+  aspect-ratio: 960 / 640; border-radius: 16px;
+  border: 1px solid rgba(140, 165, 220, 0.18);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(0, 0, 0, 0.4);
+  touch-action: none; cursor: crosshair;
+  background: var(--navy-950);
+}
+#game-canvas.grab { cursor: grab; }
+#game-canvas.grabbing { cursor: grabbing; }
+
+/* bottom dock */
+.game-dock { display: flex; flex-direction: column; gap: 9px; padding-top: 10px; }
+.dock-row { display: flex; gap: 9px; align-items: center; justify-content: center; flex-wrap: wrap; }
+.toolbelt { display: flex; gap: 8px; }
+.tool-btn {
+  position: relative; display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px;
+  border-radius: 13px; background: var(--panel-2); border: 1px solid var(--line);
+  font-weight: 700; font-size: 13px; color: var(--text); transition: transform 0.15s, border-color 0.15s, background 0.15s;
+}
+.tool-btn:hover:not(:disabled) { transform: translateY(-2px); }
+.tool-btn:disabled { opacity: 0.35; cursor: default; }
+.tool-btn.armed { border-color: var(--gold); background: var(--gold-dim); color: var(--gold-2); box-shadow: 0 0 0 3px rgba(245, 184, 74, 0.15); }
+.tool-btn.pulse { animation: toolPulse 1.1s ease-in-out infinite; }
+@keyframes toolPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(245, 184, 74, 0.5); } 50% { box-shadow: 0 0 0 8px rgba(245, 184, 74, 0); } }
+.tool-count {
+  min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
+  background: rgba(140, 165, 220, 0.15); font-size: 11px; font-weight: 800;
+}
+.tool-btn svg { width: 18px; height: 18px; }
+
+.control-bar {
+  display: none; align-items: center; gap: 10px; padding: 9px 14px;
+  background: var(--panel-2); border: 1px solid rgba(245, 184, 74, 0.35); border-radius: 14px;
+}
+.control-bar.show { display: flex; animation: riseIn 0.25s ease both; }
+@keyframes riseIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.cb-name { font-size: 12px; font-weight: 800; color: var(--gold-2); letter-spacing: 0.5px; text-transform: uppercase; }
+.cb-slider { width: min(230px, 38vw); accent-color: var(--gold); cursor: pointer; }
+.cb-angle { font-variant-numeric: tabular-nums; font-weight: 800; font-size: 14px; color: var(--cyan); min-width: 52px; text-align: center; }
+.cb-fine { display: flex; gap: 4px; }
+.cb-fine button {
+  width: 34px; height: 34px; border-radius: 9px; background: rgba(140, 165, 220, 0.1);
+  border: 1px solid var(--line); font-weight: 800; font-size: 12.5px; color: var(--text);
+}
+.cb-fine button:hover { background: rgba(140, 165, 220, 0.2); }
+.cb-hintline { font-size: 11px; color: var(--muted); }
+
+/* chips (normal/angles/n) */
+.mode-chips { display: flex; gap: 7px; }
+.mode-chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 13px; border-radius: 999px;
+  background: rgba(140, 165, 220, 0.07); border: 1px solid var(--line); color: var(--muted);
+  font-size: 12px; font-weight: 700; transition: all 0.15s;
+}
+.mode-chip.on { background: var(--cyan-dim); border-color: rgba(110, 231, 255, 0.4); color: var(--cyan); }
+
+/* ── Coach bubble ── */
+.coach {
+  position: absolute; left: 14px; bottom: 14px; z-index: 30;
+  display: none; align-items: flex-start; gap: 11px; width: min(430px, calc(100% - 28px));
+  background: var(--panel-2); border: 1px solid rgba(245, 184, 74, 0.4); border-radius: 16px;
+  padding: 13px 14px; box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
+  animation: coachIn 0.35s cubic-bezier(0.2, 1.2, 0.4, 1) both; backdrop-filter: blur(12px);
+}
+.coach.show { display: flex; }
+@keyframes coachIn { from { opacity: 0; transform: translateY(16px) scale(0.96); } to { opacity: 1; transform: none; } }
+.coach-avatar {
+  width: 40px; height: 40px; flex: 0 0 40px; border-radius: 13px;
+  background: linear-gradient(140deg, #ffe3ac, #f0a93c); display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-weight: 800; font-size: 19px; color: #241503;
+  box-shadow: 0 4px 14px rgba(240, 169, 60, 0.4);
+}
+.coach-body { flex: 1; min-width: 0; }
+.coach-text { font-size: 13.5px; line-height: 1.5; font-weight: 600; }
+.coach-tip { font-size: 11.5px; color: var(--gold-2); margin-top: 5px; line-height: 1.45; }
+.coach-foot { display: flex; align-items: center; gap: 8px; margin-top: 9px; }
+.coach-dots { display: flex; gap: 4px; flex: 1; }
+.coach-dots i { width: 6px; height: 6px; border-radius: 50%; background: rgba(140, 165, 220, 0.25); transition: background 0.2s; }
+.coach-dots i.done { background: rgba(245, 184, 74, 0.55); }
+.coach-dots i.now { background: var(--gold); box-shadow: 0 0 6px var(--gold); }
+.coach-btn {
+  padding: 7px 14px; border-radius: 999px; background: linear-gradient(135deg, #ffd98a, #f0a93c);
+  color: #241503; font-weight: 800; font-size: 12px; white-space: nowrap;
+}
+.coach-skip { font-size: 11px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+
+/* ── Modals ── */
+.modal-veil {
+  position: absolute; inset: 0; z-index: 60; display: none; align-items: center; justify-content: center;
+  background: rgba(4, 7, 14, 0.72); backdrop-filter: blur(6px); padding: 18px;
+}
+.modal-veil.show { display: flex; animation: veilIn 0.25s ease both; }
+@keyframes veilIn { from { opacity: 0; } to { opacity: 1; } }
+.modal-card {
+  width: min(560px, 96vw); max-height: 88vh; overflow-y: auto;
+  background: linear-gradient(170deg, var(--navy-800), var(--navy-850));
+  border: 1px solid rgba(245, 184, 74, 0.28); border-radius: 22px; padding: 28px 28px 24px;
+  box-shadow: var(--shadow); animation: modalIn 0.4s cubic-bezier(0.2, 1.25, 0.4, 1) both;
+}
+@keyframes modalIn { from { opacity: 0; transform: translateY(26px) scale(0.95); } to { opacity: 1; transform: none; } }
+.m-kicker { font-size: 11.5px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--gold); font-weight: 800; margin-bottom: 8px; }
+.m-title { font-family: var(--font-display); font-size: 24px; font-weight: 800; margin-bottom: 12px; line-height: 1.2; }
+.m-text { font-size: 14px; line-height: 1.75; color: #cdd8ef; margin-bottom: 14px; }
+.m-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; flex-wrap: wrap; }
+.m-dots { display: flex; gap: 6px; margin: 4px 0 16px; }
+.m-dots i { width: 22px; height: 5px; border-radius: 99px; background: rgba(140, 165, 220, 0.2); transition: background 0.25s; }
+.m-dots i.now { background: var(--gold); }
+.formula-chip {
+  display: inline-block; padding: 9px 18px; border-radius: 12px; margin: 2px 0 14px;
+  background: var(--cyan-dim); border: 1px solid rgba(110, 231, 255, 0.35); color: var(--cyan);
+  font-family: var(--font-display); font-weight: 700; font-size: 15.5px; letter-spacing: 0.4px;
+}
+.quiz-opt {
+  display: block; width: 100%; text-align: left; padding: 12px 16px; margin-bottom: 9px;
+  border-radius: 12px; background: rgba(140, 165, 220, 0.07); border: 1px solid var(--line);
+  font-size: 13.5px; font-weight: 600; line-height: 1.45; transition: all 0.15s;
+}
+.quiz-opt:hover:not(:disabled) { border-color: rgba(245, 184, 74, 0.5); background: var(--gold-dim); }
+.quiz-opt.right { border-color: var(--green); background: rgba(61, 252, 130, 0.1); color: #b8ffd4; }
+.quiz-opt.wrong { border-color: var(--red); background: rgba(255, 107, 107, 0.08); color: #ffc4c4; }
+.quiz-explain { font-size: 12.5px; color: var(--muted); line-height: 1.6; margin-top: 4px; }
+
+/* win modal */
+.win-stars { display: flex; gap: 10px; justify-content: center; margin: 6px 0 16px; }
+.win-stars svg { width: 46px; height: 46px; opacity: 0.18; transform: scale(0.6); }
+.win-stars svg.lit { animation: starPop 0.55s cubic-bezier(0.2, 1.6, 0.4, 1) both; }
+@keyframes starPop { from { opacity: 0.18; transform: scale(0.4) rotate(-30deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
+.win-badge {
+  display: flex; align-items: center; gap: 10px; padding: 11px 16px; border-radius: 14px; margin-bottom: 14px;
+  background: linear-gradient(120deg, rgba(245, 184, 74, 0.16), rgba(110, 231, 255, 0.08));
+  border: 1px solid rgba(245, 184, 74, 0.4);
+}
+.win-badge .wb-medal { font-size: 22px; }
+.win-badge b { color: var(--gold-2); font-size: 14px; }
+.win-badge span { display: block; font-size: 11.5px; color: var(--muted); }
+.win-score-row { display: flex; gap: 10px; margin: 12px 0 4px; }
+.win-score-box { flex: 1; text-align: center; padding: 11px 8px; border-radius: 13px; background: rgba(140, 165, 220, 0.07); border: 1px solid var(--line); }
+.win-score-box b { display: block; font-family: var(--font-display); font-size: 20px; color: var(--cyan); }
+.win-score-box span { font-size: 10.5px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+.seek-title { font-family: var(--font-display); font-size: 15px; color: var(--gold-2); margin: 14px 0 6px; display: flex; align-items: center; gap: 8px; }
+
+/* concepts modal grid */
+.concept-list { display: grid; gap: 12px; }
+.concept-item { padding: 15px 17px; border-radius: 15px; background: rgba(140, 165, 220, 0.06); border: 1px solid var(--line); }
+.concept-item h3 { font-family: var(--font-display); font-size: 15.5px; margin-bottom: 2px; }
+.concept-item .ci-tag { font-size: 11.5px; color: var(--muted); margin-bottom: 8px; }
+.concept-item p { font-size: 12.5px; line-height: 1.65; color: #c3cfe9; margin-bottom: 7px; }
+.concept-item .formula-chip { margin: 6px 0 0; font-size: 13px; padding: 7px 14px; }
+
+/* ── Teacher drawer ── */
+.teacher-drawer {
+  position: absolute; top: 0; right: 0; bottom: 0; width: min(360px, 92vw); z-index: 50;
+  background: linear-gradient(160deg, rgba(26, 24, 12, 0.97), rgba(13, 21, 38, 0.97));
+  border-left: 1px solid rgba(245, 184, 74, 0.35); box-shadow: -20px 0 60px rgba(0, 0, 0, 0.5);
+  transform: translateX(105%); transition: transform 0.35s cubic-bezier(0.25, 1, 0.4, 1);
+  padding: 20px; overflow-y: auto; backdrop-filter: blur(14px);
+}
+.teacher-drawer.open { transform: none; }
+.td-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.td-title { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--gold-2); flex: 1; }
+.td-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--line); }
+.td-row label { font-size: 13.5px; font-weight: 600; }
+.td-row .td-sub { display: block; font-size: 11px; color: var(--muted); font-weight: 400; margin-top: 2px; }
+.switch { position: relative; width: 44px; height: 25px; flex: 0 0 44px; }
+.switch input { opacity: 0; width: 100%; height: 100%; position: absolute; cursor: pointer; z-index: 2; margin: 0; }
+.switch i {
+  position: absolute; inset: 0; border-radius: 99px; background: rgba(140, 165, 220, 0.18); transition: background 0.2s;
+}
+.switch i::after {
+  content: ''; position: absolute; top: 3px; left: 3px; width: 19px; height: 19px; border-radius: 50%;
+  background: #fff; transition: transform 0.2s;
+}
+.switch input:checked + i { background: var(--gold); }
+.switch input:checked + i::after { transform: translateX(19px); }
+.td-notes { margin-top: 14px; padding: 13px; border-radius: 13px; background: rgba(245, 184, 74, 0.07); border: 1px solid rgba(245, 184, 74, 0.25); }
+.td-notes h4 { font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold); margin-bottom: 7px; }
+.td-notes p { font-size: 12.5px; line-height: 1.65; color: #d8dff0; }
+.td-live { margin-top: 12px; padding: 12px 13px; border-radius: 13px; background: var(--cyan-dim); border: 1px solid rgba(110, 231, 255, 0.3); font-size: 12.5px; line-height: 1.6; color: var(--cyan); min-height: 42px; font-variant-numeric: tabular-nums; }
+
+/* hints popover */
+.hint-pop {
+  position: absolute; bottom: 74px; left: 50%; transform: translateX(-50%); z-index: 40;
+  width: min(430px, calc(100% - 28px)); background: var(--panel-2); border: 1px solid rgba(245, 184, 74, 0.4);
+  border-radius: 16px; padding: 15px 16px; box-shadow: var(--shadow); display: none; backdrop-filter: blur(12px);
+}
+.hint-pop.show { display: block; animation: coachIn 0.3s ease both; }
+.hint-pop h4 { font-size: 13px; color: var(--gold-2); margin-bottom: 9px; display: flex; align-items: center; gap: 8px; }
+.hint-tier {
+  display: block; width: 100%; text-align: left; padding: 10px 13px; margin-bottom: 7px; border-radius: 11px;
+  background: rgba(140, 165, 220, 0.07); border: 1px solid var(--line); font-size: 12.5px; line-height: 1.55; transition: all 0.15s;
+}
+.hint-tier:hover:not(:disabled) { border-color: rgba(245, 184, 74, 0.5); }
+.hint-tier:disabled { opacity: 0.4; cursor: default; }
+.hint-tier.revealed { border-color: rgba(245, 184, 74, 0.45); background: var(--gold-dim); color: #ffe9c4; }
+.hint-warning { font-size: 11px; color: var(--muted); }
+
+/* toast */
+.toast {
+  position: absolute; top: 16px; left: 50%; transform: translate(-50%, -12px); z-index: 80;
+  background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px; padding: 10px 20px;
+  font-size: 13px; font-weight: 600; opacity: 0; pointer-events: none; transition: all 0.3s ease; max-width: 90vw; text-align: center;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* responsive */
+@media (max-width: 860px) {
+  .gt-objective { display: none; }
+  .game-stage { flex-direction: column; }
+  .coach { width: calc(100% - 20px); left: 10px; bottom: 10px; }
+  .game-dock { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+  .dock-row { gap: 7px; }
+}
+@media (max-width: 560px) {
+  .home-card { padding: 28px 20px 22px; }
+  .modal-card { padding: 20px 18px; }
+  .gt-chip { font-size: 12px; padding: 8px 11px; }
+  .tool-btn { padding: 9px 12px; font-size: 12px; }
+  .cb-slider { width: min(170px, 34vw); }
+  .win-stars svg { width: 38px; height: 38px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+/* ═══════════════ V2 — Learn → Do → Celebrate refinement ═══════════════ */
+
+/* act banner (SEEKHO / KARO / PARTY pill on canvas) */
+.act-banner {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 25;
+  display: none; align-items: center; gap: 8px; padding: 7px 16px 7px 8px; border-radius: 999px;
+  background: rgba(9, 15, 28, 0.8); border: 1px solid rgba(245, 184, 74, 0.45); color: var(--gold-2);
+  font-size: 11.5px; font-weight: 800; letter-spacing: 1.8px; text-transform: uppercase;
+  backdrop-filter: blur(8px); pointer-events: none;
+}
+.act-banner b {
+  display: inline-flex; width: 21px; height: 21px; border-radius: 50%;
+  background: linear-gradient(135deg, #ffd98a, #f0a93c); color: #241503;
+  align-items: center; justify-content: center; font-size: 11.5px; letter-spacing: 0;
+}
+
+/* mission strip (one small step at a time) */
+.mission {
+  display: none; align-items: center; gap: 11px; width: 100%; max-width: 920px; margin: 0 auto;
+  background: var(--panel-2); border: 1px solid rgba(245, 184, 74, 0.38); border-radius: 15px;
+  padding: 10px 14px; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+.mission.show { display: flex; animation: riseIn 0.3s ease both; }
+.mission.idle { border-color: var(--line); background: rgba(17, 27, 49, 0.72); }
+.ms-avatar {
+  width: 38px; height: 38px; flex: 0 0 38px; border-radius: 12px;
+  background: linear-gradient(140deg, #ffe3ac, #f0a93c); display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-weight: 800; font-size: 18px; color: #241503;
+  box-shadow: 0 4px 12px rgba(240, 169, 60, 0.35);
+}
+.mission.idle .ms-avatar { background: rgba(140, 165, 220, 0.15); color: var(--muted); box-shadow: none; }
+.ms-body { flex: 1; min-width: 0; }
+.ms-text { font-size: 13.5px; font-weight: 700; line-height: 1.4; }
+.mission.idle .ms-text { color: var(--muted); font-weight: 600; }
+.ms-tip { font-size: 11.5px; color: var(--gold-2); margin-top: 3px; line-height: 1.4; }
+.ms-dots { display: flex; gap: 4px; margin-left: 6px; flex: 0 0 auto; }
+.ms-dots i { width: 6px; height: 6px; border-radius: 50%; background: rgba(140, 165, 220, 0.25); transition: background 0.2s; }
+.ms-dots i.done { background: rgba(245, 184, 74, 0.55); }
+.ms-dots i.now { background: var(--gold); box-shadow: 0 0 6px var(--gold); }
+.ms-cta {
+  padding: 8px 15px; border-radius: 999px; background: linear-gradient(135deg, #ffd98a, #f0a93c);
+  color: #241503; font-weight: 800; font-size: 12.5px; white-space: nowrap; flex: 0 0 auto;
+}
+.ms-cta:active { transform: scale(0.95); }
+.ms-skip { font-size: 11px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; flex: 0 0 auto; }
+
+/* LEARN modal */
+#learn-canvas {
+  width: 100%; height: auto; display: block; border-radius: 14px;
+  border: 1px solid var(--line); background: #090f1c; margin-bottom: 6px;
+}
+.learn-lines { list-style: none; margin: 12px 0 2px; display: grid; gap: 8px; }
+.learn-lines li {
+  position: relative; padding: 10px 13px 10px 40px; border-radius: 12px;
+  background: rgba(140, 165, 220, 0.07); border: 1px solid var(--line);
+  font-size: 14.5px; font-weight: 600; line-height: 1.45;
+}
+.learn-lines li::before {
+  content: '\2726'; position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  color: var(--gold); font-size: 15px;
+}
+.learn-real {
+  display: flex; align-items: flex-start; gap: 9px; margin-top: 11px; padding: 11px 13px;
+  border-radius: 12px; background: rgba(61, 252, 130, 0.06); border: 1px solid rgba(61, 252, 130, 0.28);
+  color: #b8ffd4; font-size: 12.5px; line-height: 1.55;
+}
+.learn-real::before {
+  content: 'REAL LIFE'; flex: 0 0 auto; font-size: 9.5px; font-weight: 800; letter-spacing: 1.2px;
+  color: #3dfc82; background: rgba(61, 252, 130, 0.12); border: 1px solid rgba(61, 252, 130, 0.35);
+  border-radius: 6px; padding: 3px 7px; margin-top: 1px;
+}
+
+/* CELEBRATE — learnt chips */
+.learnt-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 8px; }
+.learnt-chip {
+  display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 999px;
+  background: rgba(61, 252, 130, 0.08); border: 1px solid rgba(61, 252, 130, 0.35);
+  color: #b8ffd4; font-size: 12.5px; font-weight: 700; animation: badgeIn 0.5s ease both;
+}
+.learnt-chip::before { content: '\2713'; color: #3dfc82; font-weight: 800; }
+
+/* sandbox extras */
+.sb-only { display: none !important; }
+#screen-game.sandbox .sb-only { display: inline-flex !important; }
+#screen-game.sandbox .sb-colors { display: flex !important; }
+.sb-colors { align-items: center; gap: 6px; padding: 8px 12px; border-radius: 12px; background: var(--panel-2); border: 1px solid var(--line); }
+.sb-color {
+  width: 25px; height: 25px; border-radius: 50%; cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.22); transition: transform 0.15s, box-shadow 0.15s;
+}
+.sb-color:hover { transform: scale(1.18); }
+.sb-color.on { border-color: #fff; box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.14); transform: scale(1.1); }
+.sb-btn {
+  align-items: center; gap: 7px; padding: 10px 15px; border-radius: 12px;
+  background: var(--panel-2); border: 1px solid var(--line); font-weight: 700; font-size: 12.5px;
+  color: var(--muted); transition: all 0.15s;
+}
+.sb-btn:hover { color: var(--text); border-color: rgba(245, 184, 74, 0.4); }
+.sb-ideas {
+  position: absolute; bottom: 16px; right: 16px; z-index: 40; width: min(340px, calc(100% - 32px));
+  display: none; grid-template-columns: 1fr 1fr; gap: 9px;
+  background: var(--panel-2); border: 1px solid rgba(245, 184, 74, 0.4); border-radius: 16px;
+  padding: 13px; box-shadow: var(--shadow); backdrop-filter: blur(12px);
+}
+.sb-ideas.show { display: grid; animation: coachIn 0.3s ease both; }
+.idea-card { padding: 11px 12px; border-radius: 12px; background: rgba(140, 165, 220, 0.07); border: 1px solid var(--line); cursor: pointer; text-align: left; transition: all 0.15s; }
+.idea-card:hover { border-color: rgba(245, 184, 74, 0.5); background: var(--gold-dim); }
+.idea-card b { display: block; font-size: 12.5px; color: var(--gold-2); margin-bottom: 3px; }
+.idea-card span { font-size: 11px; color: var(--muted); line-height: 1.45; display: block; }
+
+@media (max-width: 860px) {
+  .mission { gap: 9px; padding: 9px 11px; }
+  .ms-text { font-size: 12.5px; }
+  .ms-tip { font-size: 11px; }
+  .ms-cta { padding: 7px 12px; font-size: 11.5px; }
+  .act-banner { top: 8px; font-size: 10.5px; padding: 5px 13px 5px 6px; }
+  .sb-ideas { grid-template-columns: 1fr; bottom: 12px; right: 12px; }
+}
+
+/* learn modal compact fit (no scroll needed) */
+#modal-learn .modal-card { width: min(600px, 96vw); padding: 22px 24px 18px; }
+#modal-learn .m-title { margin-bottom: 10px; font-size: 22px; }
+#modal-learn #learn-canvas { margin-bottom: 2px; }
+#modal-learn .learn-lines { gap: 6px; margin-top: 10px; }
+#modal-learn .learn-lines li { padding: 8px 12px 8px 37px; font-size: 13.5px; }
+#modal-learn .learn-real { margin-top: 8px; padding: 9px 12px; font-size: 12px; }
+#modal-learn .formula-chip { margin-bottom: 6px; padding: 7px 15px; font-size: 14px; }
+#modal-learn .m-actions { margin-top: 12px; }
+#modal-learn .modal-card { max-height: 94vh; }
+@media (max-height: 780px) {
+  #modal-learn #learn-canvas { max-height: 198px; width: auto; max-width: 100%; margin: 0 auto 2px; }
+  #modal-learn .m-kicker { margin-bottom: 4px; }
+  #modal-learn .learn-lines { gap: 5px; }
+}
+.mission.idle .ms-skip { display: none; }
+
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 00-4 10.5c.8.7 1 1.5 1 2.5h6c0-1 .2-1.8 1-2.5A6 6 0 0012 3z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M4 10h11a5 5 0 015 5 5 5 0 01-5 5h-4M4 10l4-4M4 10l4 4" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M20 12a8 8 0 11-2.3-5.6M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-cap" viewBox="0 0 24 24"><path d="M12 4L2 9l10 5 10-5-10-5zM6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5M22 9v5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4zM16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-mirror" viewBox="0 0 24 24"><path d="M5 19L19 5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M7 3L3 7M21 17l-4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" opacity=".7"/></symbol>
+    <symbol id="i-prism" viewBox="0 0 24 24"><path d="M12 4L3 19h18L12 4z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M2 12.5h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".8"/></symbol>
+    <symbol id="i-glass" viewBox="0 0 24 24"><rect x="5" y="6" width="14" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M8 9l8 6" stroke="currentColor" stroke-width="1.4" opacity=".6"/></symbol>
+    <symbol id="i-water" viewBox="0 0 24 24"><path d="M12 3s6 6.5 6 11a6 6 0 01-12 0c0-4.5 6-11 6-11z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M9.5 14.5a2.6 2.6 0 002.5 2.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".7"/></symbol>
+    <symbol id="i-idea" viewBox="0 0 24 24"><path d="M12 2a7 7 0 00-4 12.7c.7.5 1 1.4 1 2.3h6c0-.9.3-1.8 1-2.3A7 7 0 0012 2z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M9.5 20.5h5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+  </defs>
+</svg>
+
+<div id="app">
+
+  <!-- ══════════ HOME ══════════ -->
+  <div class="screen active" id="screen-home">
+    <div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+    <div class="home-card">
+      <div class="logo-badge">
+        <svg viewBox="0 0 52 52" aria-label="VidhyaSaathy">
+          <path d="M7 9 L26 45 L45 9 L36.5 9 L26 29 L15.5 9 Z" fill="#12224a"/>
+          <path d="M26 45 L31 34 L21 34 Z" fill="#12224a" opacity=".75"/>
+          <circle cx="43.5" cy="6.5" r="2.6" fill="#12224a"/>
+        </svg>
+      </div>
+      <div class="brand-name">VidhyaSaathy <span>Optics Lab</span></div>
+      <div class="brand-tag">Learning, with you</div>
+      <h1 class="home-headline">Light Ko Sirf Padho Mat.
+<em>Uske Saath Experiment Karo!</em></h1>
+      <p class="home-sub">Har level mein pehle CONCEPT seekho (animation ke saath), phir khud experiment karo, aur jeet ke celebrate karo! Real physics, real fun — Reflection se lekar Rainbow tak.</p>
+      <div class="cta-row">
+        <button class="btn btn-primary" id="btn-start">Chal, Experiment Karte Hain!</button>
+        <button class="btn btn-ghost" id="btn-concepts">Concept Pehle Samjho</button>
+      </div>
+      <div class="home-badges" id="home-badges"></div>
+      <div class="home-links">
+        <button id="btn-home-map">Level Map</button>
+        <button id="btn-sandbox">Free Play Lab</button>
+        <button id="btn-reset-progress">Progress Reset</button>
+      </div>
+      <div class="home-foot">VidhyaSaathy Optics Lab &bull; Science + Hinglish + Fun &bull; Class 7&ndash;10</div>
+    </div>
+  </div>
+
+  <!-- ══════════ LEVEL MAP ══════════ -->
+  <div class="screen" id="screen-map">
+    <div class="map-head">
+      <button class="icon-btn" id="btn-map-home" title="Home"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg></button>
+      <div class="map-title">Level Map — Apna Safar Chuno</div>
+      <div class="map-stars">&#9733; <span id="map-stars">0 / 30</span></div>
+    </div>
+    <div id="map-body"></div>
+  </div>
+
+  <!-- ══════════ GAME ══════════ -->
+  <div class="screen" id="screen-game">
+    <div class="game-top">
+      <button class="icon-btn" id="btn-map" title="Level Map"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg></button>
+      <span class="gt-chip"><span class="lab-dot"></span><span id="gt-lab">Lab</span>&nbsp;·&nbsp;<span id="gt-name">Level</span></span>
+      <span class="gt-spacer"></span>
+      <span class="gt-chip" title="Targets" style="color:var(--cyan)">&#9678; <span id="hud-targets">0/0</span></span>
+      <span class="gt-actions">
+        <button class="icon-btn" id="btn-hint" title="Hints (3 tiers)"><svg viewBox="0 0 24 24"><use href="#i-bulb"/></svg></button>
+        <button class="icon-btn" id="btn-undo" title="Undo"><svg viewBox="0 0 24 24"><use href="#i-undo"/></svg></button>
+        <button class="icon-btn" id="btn-reset" title="Reset level"><svg viewBox="0 0 24 24"><use href="#i-reset"/></svg></button>
+        <button class="icon-btn" id="btn-teacher" title="Teacher Mode"><svg viewBox="0 0 24 24"><use href="#i-cap"/></svg></button>
+        <button class="icon-btn" id="btn-sound" title="Sound"><svg viewBox="0 0 24 24"><use href="#i-sound"/></svg></button>
+      </span>
+    </div>
+
+    <div class="game-stage">
+      <div class="canvas-wrap">
+        <canvas id="game-canvas" width="960" height="640"></canvas>
+
+        <!-- act banner: SEEKHO / KARO / PARTY -->
+        <div class="act-banner" id="act-banner"><b>2</b>&nbsp;KARO</div>
+
+        <!-- sandbox ideas popover -->
+        <div class="sb-ideas" id="sb-ideas"></div>
+
+        <!-- hints popover -->
+        <div class="hint-pop" id="hint-pop">
+          <h4><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f5b84a" stroke-width="2"><use href="#i-bulb"/></svg> Dhire-dhire hints — pehle khud try kiya?</h4>
+          <div id="hint-list"></div>
+        </div>
+
+        <!-- teacher drawer -->
+        <aside class="teacher-drawer" id="teacher-drawer">
+          <div class="td-head">
+            <div class="td-title">Teacher Mode</div>
+            <button class="icon-btn" id="td-close"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg></button>
+          </div>
+          <div class="td-row"><label>Normal lines<span class="td-sub">Mirror/refraction par 90° perpendicular</span></label><span class="switch"><input type="checkbox" id="td-normal"><i></i></span></div>
+          <div class="td-row"><label>Angle values<span class="td-sub">i, r, θ₁, θ₂ live degrees</span></label><span class="switch"><input type="checkbox" id="td-angles"><i></i></span></div>
+          <div class="td-row"><label>Refractive index (n)<span class="td-sub">Medium change par n values</span></label><span class="switch"><input type="checkbox" id="td-nvals"><i></i></span></div>
+          <div class="td-row"><label>Slow motion beam<span class="td-sub">Physics ko dheere dekho</span></label><span class="switch"><input type="checkbox" id="td-slow"><i></i></span></div>
+          <div class="td-row"><label>Student Challenge<span class="td-sub">Coach + hints band — khud solve karo</span></label><span class="switch"><input type="checkbox" id="td-challenge"><i></i></span></div>
+          <div class="td-live" id="td-live">Beam koi surface se takrai — tab yahan live physics dikhegi.</div>
+          <div class="td-notes"><h4>Level Ka Science</h4><p id="td-notes-text"></p></div>
+        </aside>
+      </div>
+    </div>
+
+    <div class="game-dock">
+      <div class="dock-row">
+        <!-- mission strip: EK chhota step ek baar mein -->
+        <div class="mission" id="mission">
+          <div class="ms-avatar">VS</div>
+          <div class="ms-body">
+            <div class="ms-text" id="ms-text"></div>
+            <div class="ms-tip" id="ms-tip"></div>
+          </div>
+          <div class="ms-dots" id="ms-dots"></div>
+          <button class="ms-skip" id="ms-skip">Skip</button>
+          <button class="ms-cta" id="ms-cta">Got it!</button>
+        </div>
+      </div>
+      <div class="dock-row">
+        <div class="control-bar" id="control-bar">
+          <span class="cb-name" id="cb-name">MIRROR</span>
+          <input type="range" class="cb-slider" id="cb-slider" min="0" max="359" step="1" value="0">
+          <span class="cb-angle" id="cb-angle">0°</span>
+          <span class="cb-fine">
+            <button data-d="-5">-5°</button><button data-d="-1">-1°</button>
+            <button data-d="1">+1°</button><button data-d="5">+5°</button>
+          </span>
+          <span class="cb-hintline">knob drag / slider / arrow keys</span>
+        </div>
+        <div class="sb-colors sb-only" id="sb-colors" title="Source beam color">
+          <span class="cb-hintline" style="margin-right:2px">BEAM</span>
+          <button class="sb-color on" data-c="white" style="background:#F5F8FF" title="White"></button>
+          <button class="sb-color" data-c="red" style="background:#FF4638" title="Red"></button>
+          <button class="sb-color" data-c="orange" style="background:#FF9C30" title="Orange"></button>
+          <button class="sb-color" data-c="yellow" style="background:#FFE24D" title="Yellow"></button>
+          <button class="sb-color" data-c="green" style="background:#3DFC82" title="Green"></button>
+          <button class="sb-color" data-c="blue" style="background:#3D9BFF" title="Blue"></button>
+          <button class="sb-color" data-c="violet" style="background:#B44DFF" title="Violet"></button>
+        </div>
+        <button class="sb-btn sb-only" id="btn-ideas"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-idea"/></svg> Ideas</button>
+        <button class="sb-btn sb-only" id="btn-sb-clear"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-reset"/></svg> Clear</button>
+        <div class="toolbelt" id="toolbelt"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ ACT 1 — LEARN MODAL (concept + live demo) ══════════ -->
+  <div class="modal-veil" id="modal-learn">
+    <div class="modal-card">
+      <div class="m-kicker" id="learn-kicker">STEP 1 · SEEKHO</div>
+      <div class="m-title" id="learn-title"></div>
+      <canvas id="learn-canvas" width="640" height="280"></canvas>
+      <ul class="learn-lines" id="learn-lines"></ul>
+      <div class="learn-real" id="learn-real"></div>
+      <div class="formula-chip" id="learn-formula"></div>
+      <div class="m-actions">
+        <button class="btn btn-ghost" id="learn-skip">Skip</button>
+        <button class="btn btn-primary" id="learn-next">Samajh gaya! Ab KARO &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ ACT 3 — PARTY / WIN MODAL ══════════ -->
+  <div class="modal-veil" id="modal-win">
+    <div class="modal-card">
+      <div class="m-kicker" id="win-kicker">STEP 3 · PARTY TIME!</div>
+      <div class="m-title" id="win-title">Level Complete!</div>
+      <div class="m-text" id="win-sub" style="margin-bottom:6px"></div>
+      <div class="win-stars" id="win-stars"></div>
+      <div class="win-badge" id="win-badge">
+        <span class="wb-medal"><svg width="24" height="24" viewBox="0 0 24 24" fill="#f5b84a"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17l-6.2 3.9 1.6-7L2 9.2l7.1-.6z"/></svg></span>
+        <span><b id="wb-name"></b><span id="wb-sub"></span></span>
+      </div>
+      <div class="seek-title">&#9733; Aaj Tune Ye Seekha</div>
+      <div class="learnt-row" id="win-learnt"></div>
+      <div class="seek-title">&#9733; Science Samajh</div>
+      <p class="m-text" id="win-science"></p>
+      <div id="win-quiz">
+        <div class="seek-title">&#9733; Mastery Check — Quick Sawal</div>
+        <p class="m-text" id="quiz-q" style="font-weight:700;color:var(--text)"></p>
+        <div id="quiz-opts"></div>
+        <p class="quiz-explain" id="quiz-explain"></p>
+      </div>
+      <div class="win-score-row">
+        <div class="win-score-box"><b id="win-score">0</b><span>Score</span></div>
+        <div class="win-score-box"><b id="win-moves">0</b><span>Moves</span></div>
+        <div class="win-score-box"><b id="win-time">0:00</b><span>Time</span></div>
+      </div>
+      <div class="m-actions">
+        <button class="btn btn-ghost" id="win-replay">Dobara Khelo</button>
+        <button class="btn btn-ghost" id="win-map">Level Map</button>
+        <button class="btn btn-primary" id="win-next">Next Level &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ CONCEPTS MODAL ══════════ -->
+  <div class="modal-veil" id="modal-concepts">
+    <div class="modal-card">
+      <div class="m-kicker">CONCEPT PEHLE SAMJHO</div>
+      <div class="m-title">Light Ka Science — Simple Bhasha Mein</div>
+      <div class="concept-list" id="concept-list"></div>
+      <div class="m-actions">
+        <button class="btn btn-primary" id="concepts-close">Samajh Gaya!</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+'use strict';
+/* ═══════════════════════════════════════════════════════════════════════════
+   VidhyaSaathy Optics Lab — CORE (physics + levels + teaching content)
+   Single-file build. No DOM here — pure logic, portable to Node for tests.
+   Science implemented:
+     • Law of reflection  : ∠i = ∠r (angles measured from the NORMAL)
+     • Snell's law        : n1·sinθ1 = n2·sinθ2
+     • Total internal refl: sinθ2 > 1  →  100% internal reflection
+     • Dispersion         : Cauchy n(λ) = A + B/λ²  (game prism)
+     • Frequency constant across boundary; speed & wavelength change.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+const VIRTUAL_W = 960, VIRTUAL_H = 640, FRAME_INSET = 26;
+const N_AIR = 1.0, N_WATER = 1.33, N_GLASS = 1.5;
+const PRISM_A = 1.52, PRISM_B = 0.055;
+
+const SPECTRUM = [
+  { name: 'red',    lambda: 0.65, hex: '#FF4638' },
+  { name: 'orange', lambda: 0.60, hex: '#FF9C30' },
+  { name: 'yellow', lambda: 0.57, hex: '#FFE24D' },
+  { name: 'green',  lambda: 0.53, hex: '#3DFC82' },
+  { name: 'blue',   lambda: 0.47, hex: '#3D9BFF' },
+  { name: 'indigo', lambda: 0.43, hex: '#6A62FF' },
+  { name: 'violet', lambda: 0.40, hex: '#B44DFF' },
+];
+const RAY_HEX = {
+  white: '#F5F8FF', red: '#FF4638', orange: '#FF9C30', yellow: '#FFE24D',
+  green: '#3DFC82', blue: '#3D9BFF', indigo: '#6A62FF', violet: '#B44DFF',
+};
+const RING_HEX = { blue: '#3D9BFF', green: '#3DFC82', orange: '#FF9C30' };
+const COLOR_GROUPS = {
+  orange: ['red', 'orange', 'yellow'],
+  green: ['green'],
+  blue: ['blue', 'indigo', 'violet'],
+};
+const T_EPS = 0.6, MAX_DEPTH = 40, MAX_RAYS = 500;
+
+/* ── vector helpers ── */
+const vpt = (x, y) => ({ x, y });
+const add = (a, b) => vpt(a.x + b.x, a.y + b.y);
+const sub = (a, b) => vpt(a.x - b.x, a.y - b.y);
+const mul = (a, s) => vpt(a.x * s, a.y * s);
+const dot = (a, b) => a.x * b.x + a.y * b.y;
+const len = (a) => Math.hypot(a.x, a.y);
+const norm = (a) => { const l = len(a) || 1; return vpt(a.x / l, a.y / l); };
+const perp = (a) => vpt(a.y, -a.x);
+const deg2rad = (d) => (d * Math.PI) / 180;
+const rad2deg = (r) => (r * 180) / Math.PI;
+const dirFromAngle = (deg) => vpt(Math.cos(deg2rad(deg)), Math.sin(deg2rad(deg)));
+const clamp01 = (x) => Math.max(0, Math.min(1, x));
+const norm360 = (d) => ((d % 360) + 360) % 360;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+
+const prismN = (lambdaUm) => PRISM_A + PRISM_B / (lambdaUm * lambdaUm);
+const lambdaOf = (c) => (SPECTRUM.find((s) => s.name === c) || { lambda: 0.55 }).lambda;
+function criticalAngle(n1, n2) { return n1 <= n2 ? NaN : rad2deg(Math.asin(n2 / n1)); }
+
+function reflectDir(d, n) {
+  const cosI = -dot(d, n);
+  return norm(vpt(d.x + 2 * cosI * n.x, d.y + 2 * cosI * n.y));
+}
+function refractDir(d, n, n1, n2) {
+  const cosI = -dot(d, n);
+  const eta = n1 / n2;
+  const sin2T = eta * eta * (1 - cosI * cosI);
+  if (sin2T > 1) return null;
+  const cosT = Math.sqrt(1 - sin2T);
+  return norm(vpt(eta * d.x + (eta * cosI - cosT) * n.x, eta * d.y + (eta * cosI - cosT) * n.y));
+}
+
+/* ── geometry ── */
+function prismVertices(pos, size, angleDeg, kind) {
+  let local;
+  if (kind === 'right') {
+    const s = size / 2;
+    local = [vpt(-s + s / 3, s + s / 3), vpt(-s + s / 3, -s + s / 3), vpt(s + s / 3, -s + s / 3)];
+  } else {
+    const R = size / Math.sqrt(3);
+    local = [vpt(0, -R), vpt(size / 2, R / 2), vpt(-size / 2, R / 2)];
+  }
+  const c = Math.cos(deg2rad(angleDeg)), s2 = Math.sin(deg2rad(angleDeg));
+  return local.map((p) => vpt(pos.x + p.x * c - p.y * s2, pos.y + p.x * s2 + p.y * c));
+}
+function rectCorners(pos, w, h, angleDeg) {
+  const c = Math.cos(deg2rad(angleDeg)), s = Math.sin(deg2rad(angleDeg));
+  const rot = (x, y) => vpt(x * c - y * s, x * s + y * c);
+  const hw = w / 2, hh = h / 2;
+  return [add(pos, rot(-hw, -hh)), add(pos, rot(hw, -hh)), add(pos, rot(hw, hh)), add(pos, rot(-hw, hh))];
+}
+function mirrorEnds(m) {
+  const d = dirFromAngle(m.angle), h = m.length / 2;
+  return [add(m.pos, mul(d, -h)), add(m.pos, mul(d, h))];
+}
+function raySegment(o, d, a, b) {
+  const e = sub(b, a);
+  const denom = d.x * e.y - d.y * e.x;
+  if (Math.abs(denom) < 1e-9) return null;
+  const ao = sub(a, o);
+  const t = (ao.x * e.y - ao.y * e.x) / denom;
+  if (t <= T_EPS) return null;
+  const s = (ao.x * d.y - ao.y * d.x) / denom;
+  if (s < 0 || s > 1) return null;
+  const point = add(o, mul(d, t));
+  let n = norm(perp(e));
+  if (dot(n, d) > 0) n = mul(n, -1);
+  return { t, point, normal: n };
+}
+function rayCircle(o, d, c, r) {
+  const oc = sub(o, c);
+  const b = 2 * dot(oc, d);
+  const cc = dot(oc, oc) - r * r;
+  const disc = b * b - 4 * cc;
+  if (disc < 0) return null;
+  const sq = Math.sqrt(disc);
+  let t = (-b - sq) / 2;
+  if (t <= T_EPS) t = (-b + sq) / 2;
+  if (t <= T_EPS) return null;
+  const point = add(o, mul(d, t));
+  let n = norm(sub(point, c));
+  if (dot(n, d) > 0) n = mul(n, -1);
+  return { t, point, normal: n };
+}
+function pointInPolygon(p, poly) {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const xi = poly[i].x, yi = poly[i].y, xj = poly[j].x, yj = poly[j].y;
+    const hit = (yi > p.y) !== (yj > p.y) && p.x < ((xj - xi) * (p.y - yi)) / (yj - yi) + xi;
+    if (hit) inside = !inside;
+  }
+  return inside;
+}
+
+/* ── the tracer ── */
+function buildSurfaces(scene) {
+  const surfaces = [];
+  for (const w of scene.walls) surfaces.push({ kind: 'wall', a: w.a, b: w.b, objectId: w.id });
+  for (const m of scene.mirrors) {
+    if (!m.placed) continue;
+    const [a, b] = mirrorEnds(m);
+    surfaces.push({ kind: 'mirror', a, b, objectId: m.id });
+  }
+  const polyEdges = (pts, id, n, dispersive) => {
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[i], b = pts[(i + 1) % pts.length];
+      surfaces.push({ kind: 'boundary', a, b, outward: norm(perp(sub(b, a))), n, dispersive, objectId: id });
+    }
+  };
+  for (const g of scene.glass) {
+    if (!g.placed) continue;
+    polyEdges(rectCorners(g.pos, g.w, g.h, g.angle), g.id, g.n, false);
+  }
+  for (const p of scene.prisms) {
+    if (!p.placed) continue;
+    polyEdges(prismVertices(p.pos, p.size, p.angle, p.prismKind), p.id, N_GLASS, true);
+  }
+  for (const wt of scene.water) polyEdges(rectCorners(wt.pos, wt.w, wt.h, 0), wt.id, wt.n, false);
+  const i = FRAME_INSET;
+  const frame = [
+    [vpt(i, i), vpt(VIRTUAL_W - i, i)],
+    [vpt(VIRTUAL_W - i, i), vpt(VIRTUAL_W - i, VIRTUAL_H - i)],
+    [vpt(VIRTUAL_W - i, VIRTUAL_H - i), vpt(i, VIRTUAL_H - i)],
+    [vpt(i, VIRTUAL_H - i), vpt(i, i)],
+  ];
+  frame.forEach(([a, b], idx) => surfaces.push({ kind: 'wall', a, b, objectId: 'frame-' + idx }));
+  return surfaces;
+}
+function mediumAt(scene, p) {
+  for (const wt of scene.water) {
+    if (pointInPolygon(p, rectCorners(wt.pos, wt.w, wt.h, 0))) return wt.n;
+  }
+  return N_AIR;
+}
+
+function traceScene(scene) {
+  const segments = [], events = [];
+  const hits = new Map();
+  const surfaces = buildSurfaces(scene);
+  const queue = [{
+    origin: scene.source.pos, dir: dirFromAngle(scene.source.angle),
+    color: scene.source.color, n: N_AIR, depth: 0,
+  }];
+  let spawned = 0;
+  while (queue.length > 0 && spawned < MAX_RAYS) {
+    const ray = queue.shift();
+    if (ray.depth > MAX_DEPTH) continue;
+    let best = null;
+    for (const s of surfaces) {
+      const h = raySegment(ray.origin, ray.dir, s.a, s.b);
+      if (h && (!best || h.t < best.hit.t)) best = { hit: h, surface: s };
+    }
+    for (const tg of scene.targets) {
+      const h = rayCircle(ray.origin, ray.dir, tg.pos, tg.radius);
+      if (h && (!best || h.t < best.hit.t)) best = { hit: h, targetId: tg.id };
+    }
+    if (!best) continue;
+    const { hit } = best;
+    segments.push({ a: ray.origin, b: hit.point, color: ray.color });
+    if (best.targetId) {
+      const set = hits.get(best.targetId) || new Set();
+      set.add(ray.color);
+      hits.set(best.targetId, set);
+      continue;
+    }
+    const surface = best.surface;
+    const d = ray.dir;
+    if (surface.kind === 'wall') continue;
+    if (surface.kind === 'mirror') {
+      const r = reflectDir(d, hit.normal);
+      events.push({
+        point: hit.point, normal: hit.normal, inDir: d, outDir: r, kind: 'reflect',
+        angleIn: rad2deg(Math.acos(clamp01(-dot(d, hit.normal)))),
+        angleOut: rad2deg(Math.acos(clamp01(dot(r, hit.normal)))),
+        color: ray.color,
+      });
+      queue.push({ origin: hit.point, dir: r, color: ray.color, n: ray.n, depth: ray.depth + 1 });
+      spawned++;
+      continue;
+    }
+    const outward = surface.outward;
+    const entering = dot(d, outward) < 0;
+    const n1 = ray.n;
+    let n2;
+    if (entering) {
+      n2 = surface.dispersive && ray.color !== 'white' ? prismN(lambdaOf(ray.color)) : surface.n;
+    } else {
+      n2 = mediumAt(scene, hit.point);
+    }
+    if (entering && surface.dispersive && ray.color === 'white') {
+      for (const spec of SPECTRUM) {
+        const r = refractDir(d, outward, n1, prismN(spec.lambda));
+        if (!r) continue;
+        queue.push({ origin: hit.point, dir: r, color: spec.name, n: prismN(spec.lambda), depth: ray.depth + 1 });
+        spawned++;
+      }
+      events.push({
+        point: hit.point, normal: mul(outward, -1), inDir: d, kind: 'refract',
+        angleIn: rad2deg(Math.acos(clamp01(-dot(d, outward)))),
+        n1, n2: prismN(0.55), color: 'white', dispersed: true,
+      });
+      continue;
+    }
+    const incidentNormal = entering ? outward : mul(outward, -1);
+    const angleIn = rad2deg(Math.acos(clamp01(-dot(d, incidentNormal))));
+    const r2 = refractDir(d, incidentNormal, n1, n2);
+    if (!r2) {
+      const r = reflectDir(d, incidentNormal);
+      events.push({
+        point: hit.point, normal: incidentNormal, inDir: d, outDir: r, kind: 'tir',
+        angleIn, angleOut: rad2deg(Math.acos(clamp01(dot(r, incidentNormal)))),
+        n1, n2, color: ray.color,
+      });
+      queue.push({ origin: hit.point, dir: r, color: ray.color, n: n1, depth: ray.depth + 1 });
+      spawned++;
+      continue;
+    }
+    events.push({
+      point: hit.point, normal: incidentNormal, inDir: d, outDir: r2, kind: 'refract',
+      angleIn, angleOut: rad2deg(Math.acos(clamp01(-dot(r2, incidentNormal)))),
+      n1, n2, color: ray.color,
+    });
+    queue.push({ origin: hit.point, dir: r2, color: ray.color, n: n2, depth: ray.depth + 1 });
+    spawned++;
+  }
+  const satisfied = new Set();
+  for (const tg of scene.targets) {
+    const set = hits.get(tg.id);
+    if (!set || set.size === 0) continue;
+    if (tg.accepts === 'any') satisfied.add(tg.id);
+    else {
+      const group = COLOR_GROUPS[tg.color] || [];
+      if (group.some((c) => set.has(c))) satisfied.add(tg.id);
+    }
+  }
+  return { segments, events, hits, satisfied };
+}
+
+/* ═══════════════════════ LEVELS (960×640 virtual space) ═══════════════════ */
+const LEVELS = [
+  {
+    id: 1, title: 'Light Kahan Jaayegi?', lab: 'reflection',
+    objective: 'Light source ko ghumakar target tak seedha beam pahunchao!',
+    badge: 'Straight Shooter',
+    source: { pos: { x: 110, y: 320 }, angle: 25, rotatable: true, movable: true, color: 'white' },
+    walls: [], mirrors: [], glass: [], prisms: [], water: [],
+    targets: [{ id: 't1', pos: { x: 790, y: 320 }, radius: 34, color: 'blue', accepts: 'any' }],
+    toolbelt: {}, showAngleGuides: false, conceptKey: 'straight',
+  },
+  {
+    id: 2, title: 'Mirror Magic', lab: 'reflection',
+    objective: 'Mirror ko beam ke raste par rakho aur sahi angle par ghumao!',
+    badge: 'Mirror Magic Initiate',
+    source: { pos: { x: 90, y: 500 }, angle: 0, rotatable: false, movable: false, color: 'white' },
+    walls: [{ id: 'w1', a: { x: 320, y: 340 }, b: { x: 680, y: 340 } }],
+    mirrors: [{ id: 'm1', pos: { x: 180, y: 500 }, angle: 0, length: 110, movable: true, rotatable: true, placed: true }],
+    glass: [], prisms: [], water: [],
+    targets: [{ id: 't1', pos: { x: 180, y: 130 }, radius: 30, color: 'green', accepts: 'any' }],
+    toolbelt: {}, showAngleGuides: false, conceptKey: 'reflection',
+  },
+  {
+    id: 3, title: 'Angle Ka Chakkar', lab: 'reflection',
+    objective: 'Mirror ko itna ghumao ki i = r ho aur beam upar target tak jaaye!',
+    badge: 'Angle Master',
+    source: { pos: { x: 90, y: 330 }, angle: 0, rotatable: false, movable: false, color: 'white' },
+    walls: [{ id: 'w1', a: { x: 640, y: 200 }, b: { x: 640, y: 460 } }],
+    mirrors: [{ id: 'm1', pos: { x: 480, y: 330 }, angle: 0, length: 130, movable: false, rotatable: true, placed: true }],
+    glass: [], prisms: [], water: [],
+    targets: [{ id: 't1', pos: { x: 480, y: 110 }, radius: 30, color: 'orange', accepts: 'any' }],
+    toolbelt: {}, showAngleGuides: true, conceptKey: 'angles',
+  },
+  {
+    id: 4, title: 'Double Reflection', lab: 'reflection',
+    objective: 'Do mirrors ka zig-zag path banao — beam ko deewar ke upar se udao!',
+    badge: 'Periscope Engineer',
+    source: { pos: { x: 90, y: 520 }, angle: 0, rotatable: false, movable: false, color: 'white' },
+    walls: [{ id: 'w1', a: { x: 480, y: 250 }, b: { x: 480, y: 614 } }],
+    mirrors: [
+      { id: 'm1', pos: { x: 280, y: 520 }, angle: 10, length: 110, movable: true, rotatable: true, placed: true },
+      { id: 'm2', pos: { x: 620, y: 200 }, angle: 80, length: 110, movable: true, rotatable: true, placed: true },
+    ],
+    glass: [], prisms: [], water: [],
+    targets: [{ id: 't1', pos: { x: 850, y: 200 }, radius: 30, color: 'blue', accepts: 'any' }],
+    toolbelt: {}, showAngleGuides: false, conceptKey: 'multiMirror',
+  },
+  {
+    id: 5, title: 'Light Maze', lab: 'reflection',
+    objective: 'Sirf 2 mirrors hain! Deewaron ke gaps se beam ko target tak pahunchao.',
+    badge: 'Maze Navigator',
+    source: { pos: { x: 90, y: 110 }, angle: 0, rotatable: false, movable: false, color: 'white' },
+    walls: [
+      { id: 'w1', a: { x: 270, y: 26 }, b: { x: 270, y: 420 } },
+      { id: 'w2', a: { x: 440, y: 26 }, b: { x: 440, y: 300 } },
+      { id: 'w3', a: { x: 610, y: 26 }, b: { x: 610, y: 420 } },
+    ],
+    mirrors: [], glass: [], prisms: [], water: [],
+    targets: [{ id: 't1', pos: { x: 830, y: 540 }, radius: 30, color: 'green', accepts: 'any' }],
+    toolbelt: { mirror: 2 }, showAngleGuides: false, conceptKey: 'maze',
+  },
+  {
+    id: 6, title: 'Air Se Glass', lab: 'refraction',
+    objective: 'Glass ke andar ray normal ki taraf bend hoti hai — tilt karke shift se target lagao!',
+    badge: 'Refraction Rookie',
+    source: { pos: { x: 480, y: 110 }, angle: 0, rotatable: true, movable: false, color: 'white' },
+    walls: [], mirrors: [],
+    glass: [{ id: 'g1', pos: { x: 480, y: 330 }, w: 260, h: 220, angle: 0, n: 1.5, movable: false, rotatable: false, placed: true }],
+    prisms: [], water: [],
+    targets: [{ id: 't1', pos: { x: 360, y: 565 }, radius: 32, color: 'blue', accepts: 'any' }],
+    toolbelt: {}, showAngleGuides: true, conceptKey: 'refraction',
+  },
+  {
+    id: 7, title: 'Water Aur Glass', lab: 'refraction',
+    objective: 'Paani (n=1.33) + glass (n=1.5) dono se guzaro — kaun zyada bend karta hai, dekho!',
+    badge: 'Density Detective',
+    source: { pos: { x: 300, y: 90 }, angle: 0, rotatable: true, movable: false, color: 'white' },
+    walls: [], mirrors: [],
+    glass: [{ id: 'g1', pos: { x: 300, y: 455 }, w: 240, h: 170, angle: 0, n: 1.5, movable: false, rotatable: false, placed: true }],
+    prisms: [],
+    water: [{ id: 'wt1', pos: { x: 300, y: 280 }, w: 240, h: 160, n: 1.33 }],
+    targets: [{ id: 't1', pos: { x: 400, y: 565 }, radius: 32, color: 'blue', accepts: 'any' }],
+    toolbelt: {}, showAngleGuides: true, conceptKey: 'mediumCompare',
+  },
+  {
+    id: 8, title: 'Prism Challenge', lab: 'refraction',
+    objective: 'White light ko prism se todho — 3 rangon ke rings ek saath jalao!',
+    badge: 'Rainbow Scientist',
+    source: { pos: { x: 90, y: 320 }, angle: 0, rotatable: false, movable: false, color: 'white' },
+    walls: [], mirrors: [], glass: [], prisms: [], water: [],
+    targets: [
+      { id: 't1', pos: { x: 752, y: 572 }, radius: 38, color: 'orange', accepts: 'match' },
+      { id: 't2', pos: { x: 648, y: 578 }, radius: 38, color: 'green', accepts: 'match' },
+      { id: 't3', pos: { x: 560, y: 578 }, radius: 38, color: 'blue', accepts: 'match' },
+    ],
+    toolbelt: { prism: 1 }, showAngleGuides: false, conceptKey: 'dispersion',
+  },
+  {
+    id: 9, title: 'Total Internal Reflection', lab: 'refraction',
+    objective: '45° > critical angle (41.8°)! Prism ke andar beam ko palat ke upar-right bhejo.',
+    badge: 'TIR Champion',
+    source: { pos: { x: 90, y: 330 }, angle: 0, rotatable: false, movable: false, color: 'white' },
+    walls: [{ id: 'w1', a: { x: 640, y: 380 }, b: { x: 640, y: 614 } }],
+    mirrors: [], glass: [], prisms: [], water: [],
+    targets: [{ id: 't1', pos: { x: 850, y: 110 }, radius: 30, color: 'green', accepts: 'any' }],
+    toolbelt: { prism: 1, prismKind: 'right' }, showAngleGuides: false, conceptKey: 'tir',
+  },
+  {
+    id: 10, title: 'Optics Master', lab: 'mixed',
+    objective: 'Mirror + Prism ka combo! Do rangon ke rings ek hi fan se jalao.',
+    badge: 'Optics Master',
+    source: { pos: { x: 90, y: 540 }, angle: 0, rotatable: false, movable: false, color: 'white' },
+    walls: [
+      { id: 'w1', a: { x: 320, y: 400 }, b: { x: 320, y: 614 } },
+      { id: 'w2', a: { x: 560, y: 26 }, b: { x: 560, y: 190 } },
+    ],
+    mirrors: [], glass: [], prisms: [], water: [],
+    targets: [
+      { id: 't1', pos: { x: 845, y: 330 }, radius: 32, color: 'orange', accepts: 'match' },
+      { id: 't2', pos: { x: 845, y: 465 }, radius: 32, color: 'blue', accepts: 'match' },
+    ],
+    toolbelt: { mirror: 1, prism: 1 }, showAngleGuides: false, conceptKey: 'master',
+  },
+];
+
+/* Sandbox — Free Play Lab: unlimited tools, zero pressure, pure experiment. */
+const SANDBOX_LEVEL = {
+  id: 0, title: 'Free Play Lab', lab: 'mixed', sandbox: true,
+  objective: 'Kuch bhi try karo — mirrors, prisms, glass. Physics teri mutthi mein!',
+  badge: 'Lab Explorer',
+  source: { pos: { x: 110, y: 320 }, angle: 0, rotatable: true, movable: true, color: 'white' },
+  walls: [], mirrors: [], glass: [], prisms: [], water: [],
+  targets: [
+    { id: 't1', pos: { x: 800, y: 140 }, radius: 32, color: 'blue', accepts: 'any' },
+    { id: 't2', pos: { x: 800, y: 320 }, radius: 32, color: 'green', accepts: 'any' },
+    { id: 't3', pos: { x: 800, y: 500 }, radius: 32, color: 'orange', accepts: 'any' },
+  ],
+  toolbelt: { mirror: 99, prism: 99, glass: 99, water: 99 }, showAngleGuides: false, conceptKey: 'sandbox',
+};
+
+function levelById(id) { return LEVELS.find((l) => l.id === id) || LEVELS[0]; }
+function cloneScene(s) { return JSON.parse(JSON.stringify(s)); }
+/* ═══════════════════ HINGLISH TEACHING ENGINE ═══════════════════ */
+const LEVEL_CONTENT = {
+  1: {
+    intro: 'Bhai, dekh! Ye hai hamari light beam — bilkul seedhi, jaise torch ki roshni. Aur wahan door ek target ring pada hai. Ek second... light source abhi neeche-neeche point kar raha hai, isliye beam target tak pahunch hi nahi rahi. Ek interesting sawaal: light kis path par chalti hai? Seedhi line mein, ya koi mast rounded curve banakar jaati hai?',
+    prediction: 'Pehle predict kar: agar tu source ko target ki taraf point kare, toh beam kaisi dikhegi? Seedhi? Soch ke phir rotate karna shuru kar!',
+    win: 'Ekdum solid! Tune dekha — light hamesha seedhi line mein chalti hai (jab tak koi medium change na ho). Isko bolte hain rectilinear propagation of light. Isi wajah se torch, laser pointer aur headlight sab seedhi beam dete hain. Aur jab beam target se takrai, toh uski energy target ko mil gayi — isliye ring jala! Chal, ab agla level — ab mirror ka magic dekhte hain!',
+    hints: [
+      'Hint 1: Light kabhi mudti nahi khud se — usko hume sahara dena padta hai. Abhi ke liye bas source ka angle badal.',
+      'Hint 2: Target source ke bilkul right side mein hai, same height par. Beam ko bilkul right direction (0°) mein point kar.',
+      'Hint 3: Angle ko 0° par le ja — slider ya rotate handle se. Beam seedhi target par lag jaayegi!',
+    ],
+    quiz: {
+      q: 'Light kisi ek medium (jaise hawa) mein kis path par chalti hai?',
+      options: ['Curved path (curve banakar)', 'Straight line (seedhi line)', 'Zig-zag path'],
+      answer: 1,
+      explain: 'Seedha answer: straight line! Light apne medium mein hamesha rectilinear path follow karti hai. Mudna sirf tab hota hai jab mirror se takray ya doosre medium mein jaaye.',
+    },
+    teacherNotes: 'Level 1 ka goal: rectilinear propagation establish karna. Bachche se pehle prediction likhwao, phir source rotate karne do. Jab beam target lag jaaye, toh poochho: "Beam ka path photo mein kaisa dikhega?" Prediction vs observation ka contrast strong banata hai.',
+  },
+  2: {
+    intro: 'Bhai, ab dekh — beam seedhi ja rahi hai, lekin target toh upar baithe aadmi jaisa hai aur raasta beech mein deewar se block ho raha hai! Light mudti nahi hai... lekin ruko, humhare paas ek jaadui cheez hai — MIRROR! Soch: agar mirror beam ke raste mein rakh dein, toh light ka kya hoga?',
+    prediction: 'Predict kar: mirror ko beam ke saamne rakho toh beam kis direction mein jaayegi? Random direction mein? Ya koi fixed rule hai? Phir experiment kar!',
+    win: 'Wah! Dekha? Light mirror se takrakar wapas bounce ho gayi — isi ko reflection of light bolte hain. Aur notice kar: light ne random direction nahi li, ek proper rule follow kiya. Jo rule ye hai: angle of incidence = angle of reflection — dono normal (perpendicular line) se measure hote hain. Tune mirror ko 45° par set kiya, isliye beam ne perfect 90° turn liya aur target par land hua. Samajh aaya? Chal agla!',
+    hints: [
+      'Hint 1: Reflection ka rule yaad kar — light mirror se takrakar bounce karti hai, aur incidence angle reflection angle ke barabar hota hai (dono normal se).',
+      'Hint 2: Beam upar jaani hai. Mirror ko beam ke raste mein rakho, phir use approx 315° (yaani −45°) par ghumao — tab beam 90° mudkar upar jaayegi.',
+      'Hint 3: Mirror ko target ke bilkul neeche wali position par lao (same x-line par) aur 315° set karo. Beam seedha upar target tak jaayegi!',
+    ],
+    quiz: {
+      q: 'Mirror par girne wali light ka kya hota hai?',
+      options: ['Light absorb ho jaati hai', 'Light reflect hokar bounce karti hai', 'Light gayab ho jaati hai'],
+      answer: 1,
+      explain: 'Mirror ka surface bahut smooth hota hai, isliye light ka major portion reflect ho jaata hai — wahi bounce. Isi principle par mirror, periscope aur solar cooker kaam karte hain.',
+    },
+    teacherNotes: 'Pehla hands-on reflection. Demo tip: pehle mirror ko beam se door rakhkar dikhao ki beam seedhi jaati hai, phir raste mein laao. "Agar mirror 0° par ho toh kya hoga?" — beam parallel aage badhegi. Normal line toggle zaroor on karo.',
+  },
+  3: {
+    intro: 'Bhai, ab aayega asli maza! Ye mirror fix hai apni jagah par — hum sirf uska GHUMA sakte hain. Aur upar target baitha hai. Ek second... abhi mirror horizontal hai, isliye beam wapas laut ke aa rahi hai (dekha? normal incidence par light apne raste se wapas mud jaati hai!). Ab sawaal ye: mirror ko kitna ghumana padega ki beam EXACT upar jaaye? Yahan koi guess-guess nahi — ek pakka rule hai!',
+    prediction: 'Predict kar: agar mirror ko 45° ghumayein, toh beam kitne degree mudti hogi? 45°? 90°? Pehle soch, phir slider kheench ke test kar!',
+    win: 'Bhai, kya baat! Ab formula samajh: mirror ki surface kitni bhi ghoome, reflection ka rule same rehta hai — angle of incidence = angle of reflection, dono NORMAL se measure hote hain, mirror surface se nahi! Tune mirror ko −45° ghumaya, toh normal bhi 45° mud gaya, incidence angle ban gaya 45°, toh reflection bhi 45° — total turn hua exactly 90°. Isliye beam seedhi upar gayi. Ye hi principle periscope mein use hota hai!',
+    hints: [
+      'Hint 1: Yaad kar — angles NORMAL se measure hote hain (normal = mirror par 90° perpendicular line). Normal line on karke dekh, concept clear ho jaayega.',
+      'Hint 2: Beam ko 90° turn karna hai (right se upar). Total turn = 2 × mirror rotation. Toh mirror ko kitna ghumana hoga? 45° — slider par 315°!',
+      'Hint 3: Slider ko 315° par set kar. Angle labels on karke dekh — incidence 45°, reflection 45°, dono barabar!',
+    ],
+    quiz: {
+      q: 'Angle of incidence kahan se measure hota hai?',
+      options: ['Mirror surface se', 'Normal (perpendicular) se', 'Beam ke original path se'],
+      answer: 1,
+      explain: 'Hamesha NORMAL se! Ye sabse common galti hai — log mirror surface se measure kar dete hain. Normal matlab mirror surface par 90° perpendicular line. Incidence aur reflection dono normal se hi measure hote hain.',
+    },
+    teacherNotes: 'Ye level angle vocabulary build karta hai. Sequence: (1) Normal on karo, (2) mirror 0° par normal incidence dikhao, (3) dheere-dheere rotate karke dono arcs ka barabar hona dikhao, (4) "-30° par kya hoga?" poochho. Formula: turn = 2 × mirror rotation.',
+  },
+  4: {
+    intro: 'Bhai, ab level thoda upar! Beam ko deewar ke UPAR se uddana hai — jaise Kho-Kho mein ek baar haath touch karke aage badhna. Do mirrors tere paas hain, dono drag + rotate ho sakte hain. Dekh, beam neeche ja rahi hai, deewar beech mein khadi hai, aur target upar right corner mein chhupa hai. Do bounce chahiye — ek mirror se nahi hoga!',
+    prediction: 'Soch: pehla mirror beam ko kis direction mein bhejega? Aur doosra mirror use target ki taraf kaise modega? Pehle plan bana, phir mirrors ko position karna shuru kar!',
+    win: 'Shabaash! Ye tha proper engineering! Do mirrors ne milkar ek zig-zag path banaya. Physics wahi thi — har bounce par i = r. Pehle mirror ne beam ko upar bheja, doosre mirror ne use horizontal karke target par pahunchaya. Ye technique real life mein periscope aur telescopes mein use hoti hai. Ab agla level aur bhi interesting hai — maze!',
+    hints: [
+      'Hint 1: Ek mirror beam ke raste mein rakhkar use upar-right bhejo itna ki wo deewar ke upar se nikle. Doosra mirror us beam ko pakadkar target ki taraf modega.',
+      'Hint 2: Pehla mirror approx 330° par rakho taaki beam −60° (upar-right) jaaye aur deewar ke upar se nikle. Doosre mirror ko us beam ke raste mein rakho.',
+      'Hint 3: Doosre mirror ko bhi approx 330° ke aaspaas ghumao — beam right direction mein target par pahunchegi!',
+    ],
+    teacherNotes: 'Multi-bounce planning skills sikhati hai. Bachcho ko pairs mein plan banane do: "Mirror 1 kahan, kitna angle?" Key insight: har mirror beam ki DIRECTION change karta hai, aur direction change = 2 × mirror rotation. Periscope connection zaroor batana.',
+  },
+  5: {
+    intro: 'Bhai, ye hai LIGHT MAZE! Deewaron ka jakkad — beam ko gaps se guzaar ke target tak pahunchana hai. Lekin ek catch hai... tere paas sirf DO mirrors hain, wo bhi toolbelt mein pade hain! Unhe canvas par drag karke rakhna padega. Har deewar beam ko rok degi. Soch — kaunsa rasta hai? Pehle poori maze ko aankh se scan kar, phir mirrors place kar!',
+    prediction: 'Predict kar: beam ka final rasta kaisa dikhega — kitne mudange? Pehle mirrors ko kahan rakhoge — beam ke raste mein! Yaad rakhna: mirror beam ke PATH par hi kaam karega.',
+    win: 'Bhai, maze master! Dekha tune? Kitni limited cheezein lekar bhi humne smart path banaya. Ye puzzle ne sikhaya: light ka path plan karna = geometrical optics. Real life mein ye skill optical fiber routing, laser shows aur light sensors mein use hoti hai. Ab ready? Ab light ko MUDNE ka time — refraction!',
+    hints: [
+      'Hint 1: Top wala raasta pehli deewar (x≈270) se blocked hai. Toh beam ko neeche bhejna padega. Pehla mirror beam ke raste mein rakh ke 45° ghumao — beam neeche giregi.',
+      'Hint 2: Neeche pahunchne ke baad beam ko RIGHT bhejna hai — kyunki saare gaps bottom side mein khule hain. Doosra mirror bhi 45° par kaam karega.',
+      'Hint 3: Mirror 1 ko (x≈200, y≈110) par rakho 45° par (beam down), Mirror 2 ko (x≈200, y≈540) par rakho 45° par (beam right). Ho gaya!',
+    ],
+    teacherNotes: 'Toolbelt mechanics introduce hota hai. Planning + spatial reasoning develop hoti hai. Bachche ko bolao maze ka "map" dimaag mein banaye. Multiple solutions valid hain — jo bhi physics-correct rasta ho, accept karo!',
+  },
+  6: {
+    intro: 'Bhai, ab naya chapter — REFRACTION! Ye dekho, glass slab ka block. Abhi beam seedhi neeche ja rahi hai aur glass ke andar se guzar rahi hai... Lekin dhyan se dekh — glass ke andar jaate hi ray apne raaste se HAT gayi! Kyun hua ye? Simple: glass mein light ki SPEED kam ho jaati hai. Aur jab speed change hoti hai, direction bhi change ho sakti hai — jaise tanga gaadi mein ek pehle pahiya dheema ho toh gaadi mud jaati hai!',
+    prediction: 'Predict kar: agar tu source ko left tilt kare, toh glass ke andar ray aur zyada mudegi ya kam? Aur glass se bahar nikalte hi kya hoga? Phir experiment kar — angle dheere-dheere badha!',
+    win: 'Bhai, ye tha proper observation! Formula yaad kar — Snell\u2019s Law: n\u2081 sin\u03b8\u2081 = n\u2082 sin\u03b8\u2082. Air ka n = 1, glass ka n = 1.5. Jab light air se glass mein jaati hai (dense medium), toh ray NORMAL ki taraf bend karti hai (andar ka angle chhota hota hai). Aur jab glass se bahar nikalti hai, toh NORMAL SE DOOR bend karti hai. Kyunki dono faces parallel the, exit ray incident ke PARALLEL wapas aa gayi — bas apni jagah se shift ho gayi. Isi ko lateral displacement bolte hain. Aur haan — frequency kabhi nahi badalti boundary cross karke, sirf speed aur wavelength badalte hain!',
+    hints: [
+      'Hint 1: Seedha neeche (90°) shoot karoge toh beam straight guzregi — koi bend nahi (normal incidence). Thoda tilt karo tabhi refraction dikhega!',
+      'Hint 2: Target LEFT side mein hai, toh beam ko thoda LEFT tilt karna padega — slider par approx 108° (90° + 18° left tilt). Glass ke andar ray normal ki taraf mudti hai!',
+      'Hint 3: Angle 108° ke aaspaas try kar (106-111 ke beech). Glass se exit hokar beam target par land hogi. Angle labels on karke i aur t ka difference dekh!',
+    ],
+    quiz: {
+      q: 'Light air se glass mein enter karti hai toh ray kis taraf bend karti hai?',
+      options: ['Normal se door', 'Normal ki taraf', 'Bilkul nahi mudti'],
+      answer: 1,
+      explain: 'Normal ki TARAF! Dense medium (glass) mein light slow hoti hai, isliye ray normal ke paas mud jaati hai. Snell\u2019s law ke hisaab se: n badha, toh sin\u03b8 ghatna padta hai — matlab angle chhota.',
+    },
+    teacherNotes: 'Snell\u2019s law ka pehla practical. (1) Pehle normal incidence dikhao — koi bend nahi. (2) Phir tilt karke refracted angle ka change dikhao. (3) Tangawala analogy use karo. (4) Bonus: "Diamond (n=2.4) hota toh bend zyada ya kam?" Lateral displacement highlight karo.',
+  },
+  7: {
+    intro: 'Bhai, ab double trouble! Ek hi setup mein do transparent cheezein hain — upar PAANI ka tank (n = 1.33) aur uske neeche GLASS ka block (n = 1.5). Beam dono se guzar ke target tak jaani hai. Sawaal ye hai: same incidence angle par, kaun zyada bend karega — paani ya glass? Optical density ka khel dekho!',
+    prediction: 'Predict kar: beam paani se guzarte waqt kitna mudti hai, aur glass mein utna hi ya zyada? Apna answer soch, phir angle badal ke dono ke andar ke angles compare kar!',
+    win: 'Kya observation tha! Dekha? Paani mein bend HUA, lekin glass mein AUR zyada hua. Reason simple hai: glass ka refractive index (1.5) paani ke (1.33) se zyada hai — glass zyada optically dense hai. Snell\u2019s law: n\u2081 sin\u03b8\u2081 = n\u2082 sin\u03b8\u2082 — jitna bada n\u2082, utna zyada bend towards normal. Ab tu jaanta hai ki optical density ka matlab real physics mein kya hota hai! Chal, ab aata hai asli hero — PRISM!',
+    hints: [
+      'Hint 1: Seedha neeche (90°) shoot karne par koi bend nahi hoga — dono mediums se normal incidence se guzar jaayega. Tilt karne se hi bend dikhega!',
+      'Hint 2: Target RIGHT side mein hai — beam ko RIGHT thoda tilt karo: slider par approx 76° (90° se thoda kam). Paani se guzarne ke baad glass mein aur bend hoga.',
+      'Hint 3: Angle 76° ke aaspaas rakho (73-80 ke beech). Paani ke andar bend 1, glass ke andar bend 2 — angle labels se dono compare kar. Target neeche right mein milega!',
+    ],
+    teacherNotes: 'Comparative refraction. Key point: bend ka amount n par depend karta hai. Demo: same angle, n values on, dono internal angles note karwao. Bonus: "Agar upar glass aur neeche paani hota toh?" — reversibility discuss karo. Frequency constant rehti hai — dohrao.',
+  },
+  8: {
+    intro: 'BHAI, YE HAI ASLI MAGIC! Ye dekh — white light. Lekin kya tu jaanta hai ki white light asal mein SAARE rangon ka mixture hai? Ye prism jo toolbelt mein pada hai — ye wo jaadui triangle hai jo white light ko tod kar poora RAINBOW bana deta hai. Right side par 3 rings hain — orange, green, blue. Har ring apna specific color maangti hai! Prism ko beam par place kar, phir rotate kar — aur dekh spectrum kaise phailta hai!',
+    prediction: 'Predict kar: prism ke andar kaunsa color SABSE KAM mudta hai aur kaunsa SABSE ZYADA? (Hint: red ka wavelength lamba hai, violet ka chhota...) Phir prism place kar ke dekh!',
+    win: 'BHAI, RAINBOW BAN GAYA! Ye phenomenon Dispersion kehlata hai. Kyun hota hai? Prism ka material har wavelength ke liye alag refractive index rakhta hai (Cauchy equation: n = A + B/\u03bb\u00b2). Red ka wavelength lamba (650nm) — kam bend. Violet ka chhota (400nm) — zyada bend. Isliye white light apne 7 rangon mein alag ho jaati hai — VIBGYOR! Yahi asli baarish ke baad rainbow mein hota hai — paani ki boondein chhote prisms ban jaati hain!',
+    hints: [
+      'Hint 1: Pehle prism ko beam ke raste mein place kar — toolbar se drag karke beam par chhod. Rotate karne se fan ghoomta hai. Prism ko STEEP angle par ghumana hai, tabhi rainbow phailega!',
+      'Hint 2: Prism ko approx beech (x≈490, y≈380) par rakho aur slider par ~272° ke aaspaas ghumao (268–278 ke beech). Fan neeche-right ki taraf pinkhega — jahan rings hain!',
+      'Hint 3: Dheere-dheere rotate kar (272° ke aaspaas) aur prism ko thoda aage-piche drag kar — jab fan ka spread teeno rings par girega, sab jal jaayenge. Red/orange upar, violet neeche!',
+    ],
+    quiz: {
+      q: 'Prism se guzarne par kaunsa color sabse ZYADA bend hota hai?',
+      options: ['Red (lambi wavelength)', 'Violet (chhoti wavelength)', 'Sab barabar bend hote hain'],
+      answer: 1,
+      explain: 'Violet! Chhoti wavelength ke liye prism ka refractive index zyada hota hai (n = A + B/\u03bb\u00b2 — \u03bb chhota toh n bada). Isliye violet sabse zyada aur red sabse kam bend karta hai. VIBGYOR ka order isi se banta hai.',
+    },
+    teacherNotes: 'Dispersion ka flagship level. (1) White beam dikhao — "ye ek color hai ya mixture?" (2) Prism place karo — split ka excitement lo. (3) n(\u03bb) = A + B/\u03bb\u00b2 explain karo. (4) Rainbow connect karo. (5) Newton ka 1666 experiment discuss karo.',
+  },
+  9: {
+    intro: 'Bhai, ab aayega physics ka sabse dhansu phenomenon — TOTAL INTERNAL REFLECTION! Ye special right-angle prism hai. Jab light DENSE medium (glass) se LESS dense (air) mein jaane ki koshish karti hai BADE angle par — toh wo bahar nahi nikal paati, poora poora andar reflect ho jaata hai! Critical angle hota hai 41.8° (glass-to-air ke liye). Hamara setup aisa hai ki beam hypotenuse se 45° par takraye — 45 > 41.8, matlab TIR pakka! Prism place kar aur dekh magic!',
+    prediction: 'Predict kar: agar beam hypotenuse se 30° par takray (critical se kam), toh kya hoga? Aur 45° par? Pehle soch — phir prism ko ghumakar dono cases dekh!',
+    win: 'BHAI, YE TOH PERISCOPE BAN GAYA! Dekha kya hua: beam glass ke andar gayi, hypotenuse se 45° par takrayi — 45° critical angle (41.8°) se BADA hai, isliye light bahar leak nahi hui — 100% andar hi reflect ho gayi! Isi ko Total Internal Reflection bolte hain. Ye hi cheez optical fiber mein hoti hai — internet ka data light ke roop mein fibers ke andar TIR karta hua travel karta hai! Binoculars, endoscope, fiber optics — sab TIR ke best friends hain. Ek level baaki — MASTER LEVEL!',
+    hints: [
+      'Hint 1: Right-angle prism aise design hua hai ki beam left face se normal (0°) par enter kare, hypotenuse se 45° par TIR kare, aur doosri face se exit kare — 90° turn.',
+      'Hint 2: Prism ko beam ke raste mein place karo (x≈480, y≈350 ke aaspaas). Slider par rotation ~24° rakho — beam prism ke andar TIR hokar upar-right mud jaayegi.',
+      'Hint 3: Prism (x≈480, y≈350) par rakho, rotation 20–28° ke beech adjust kar — TIR ke wajah se beam clean 90° turn lekar target (upar-right) par pahunchegi!',
+    ],
+    quiz: {
+      q: 'Total Internal Reflection kab hota hai?',
+      options: [
+        'Jab light dense se less dense medium mein jaye aur incidence angle critical angle se BADA ho',
+        'Jab light kabhi bhi glass se air mein jaaye',
+        'Jab incidence angle critical angle se CHHOTA ho',
+      ],
+      answer: 0,
+      explain: 'Option 1 sahi hai! Do conditions chahiye: (1) light dense → less dense medium mein jaa rahi ho (glass→air), (2) incidence angle > critical angle. Glass-to-air ke liye critical angle = arcsin(1/1.5) \u2248 41.8°.',
+    },
+    teacherNotes: 'TIR — advanced concept, lekin demo bahut strong hai. (1) Critical angle explain karo. (2) Small angle par light LEAK dikhao. (3) 45° par full TIR. (4) Fiber optics connect karo. (5) "Mirror vs TIR — kaunsa zyada efficient?" (TIR: 100% vs mirror ~95%).',
+  },
+  10: {
+    intro: 'BHAI, YE HAI FINAL BOSS — OPTICS MASTER! Reflection + Refraction + Dispersion — sab kuch ek saath! Beam ko pehle mirror se upar udna hai, phir deewar ke gaps se guzarna hai, phir prism se todna hai, aur do rangon ke rings jalane hain! Ye sab kuch combine karega jo tu ne abhi tak seekha. Soch strategy: pehla mirror kahan? Prism kahan? Kaunsa angle? Ready ho ja, master — poora Optics Lab tere naam!',
+    prediction: 'Poori planning pehle kar: kitne turns chahiye? Mirror kahan rahega? Prism kahan? Fan kis taraf jaayega? Apna mental map bana, phir execute kar!',
+    win: 'BHAI, TU AB OFFICIALLY OPTICS MASTER HAI! Dekha tune apna journey? Level 1 mein light seedhi chalti hai — Level 10 mein tune mirror, refraction, TIR aur dispersion sab use karke complex optical system design kiya. Ye hi toh engineering hai! Real life mein jo log cameras, fiber internet, laser surgery, spectacles design karte hain — yehi concepts roz use karte hain. Light ka game ab tere paas hai — kahin bhi, kabhi bhi, physics observe kar!',
+    hints: [
+      'Hint 1: Pehla mirror beam ke raste mein (x≈150, y≈540) rakhkar beam ko upar-right bhejo — slider par approx 335° (yaani −25°) — taaki wo dono deewaron ke gaps se nikle.',
+      'Hint 2: Prism ko us tilted beam ke raste mein place karo (approx x≈410, y≈265). Ab spectrum fan banega — prism rotation ~107° ke aaspaas ghumao.',
+      'Hint 3: Fan ko right side ke rings (845, 330 & 845, 465) par le aao — rotation 103–111° ke beech adjust kar aur thoda drag kar. Orange ring upar wale hisse se, blue ring neeche wale se jalegi!',
+    ],
+    teacherNotes: 'Capstone level — sab concepts integrate. Students ko apna solution explain karne bolo: "Tumhara mirror ne kya kiya? Prism ne kya?" Extension: "Agar mirror ki jagah doosra prism hota toh?" Certificate/badge ka excitement do.',
+  },
+  0: {
+    intro: 'Welcome to FREE PLAY LAB! Yahan koi rules nahi, koi pressure nahi — sirf tu aur light ka khel. Jo mana hai wo try kar: mirrors se bounce kar, prism se rainbow bana, glass mein bend dekh. Kuch bhi todega nahi, promise!',
+    prediction: 'Yahan predict karne ki zaroorat nahi — bas experiment karte ja. Har action kuch naya sikhayega!',
+    win: 'Free Play mein jeet nahi hoti — sirf seekh hoti hai. Aur tune aaj bahut kuch seekha!',
+    hints: ['Kuch bhi drag karo, ghumao, place karo. Source bhi ghum sakta hai!', 'Prism se rainbow banao, glass mein bend dekho, mirrors se circuit banao!', 'Target rings jalana easy hai — unke paas beam le ja!'],
+    teacherNotes: 'Sandbox mode: inquiry-based learning ke liye best. Bachcho se challenge lo: "Teen mirrors se triple bounce karo", "Rainbow ko upar mode", "Apna periscope bana".',
+  },
+};
+
+/* ── Concept cards ("Concept Pehle Samjho") ── */
+const CONCEPT_CARDS = [
+  {
+    key: 'reflection', title: 'Reflection — Light Ka Bounce', tagline: 'Mirror se takrati light wapas kaise mudi?',
+    paragraphs: [
+      'Bhai, simple si baat hai — jab light kisi smooth surface (jaise mirror) se takrati hai, toh wapas bounce karti hai. Isi ko reflection bolte hain. Lekin ye koi random bounce nahi hai — iska ek pakka rule hai jo hamesha follow hota hai.',
+      'Rule ye hai: angle of incidence = angle of reflection. Ab dhyan se — ye angles mirror surface se nahi, NORMAL se measure hote hain. Normal matlab mirror par 90° perpendicular khadi line. Agar beam normal se 30° par giri, toh wapas bhi 30° par hi mudti hai. Bas!',
+      'Isi principle par kaam karte hain: ghar ke mirrors, periscope (jisse bunker ke andar se bahar dikhte hain), solar cooker, aur telescope ke bade-bade mirrors.',
+    ],
+    formula: '\u2220i = \u2220r  (dono normal se)',
+  },
+  {
+    key: 'refraction', title: 'Refraction — Light Ka Bend', tagline: 'Glass ya paani mein light ka rasta kyun badalta hai?',
+    paragraphs: [
+      'Ab soch — light glass ya paani mein enter karti hai toh uski SPEED badal jaati hai. Glass mein light hawa se approx 1.5x slow chalti hai, paani mein 1.33x slow. Ab jab speed change hoti hai aur beam tilted hai, toh direction bhi change hoti hai — isi ko refraction bolte hain.',
+      'Iska rule hai Snell\u2019s Law: n\u2081 sin\u03b8\u2081 = n\u2082 sin\u03b8\u2082. Yahan n hai refractive index (kitna dense medium hai). Dense medium mein jaate waqt ray NORMAL ki taraf bend karti hai, aur kam dense mein jaate waqt normal se DOOR.',
+      'Ek mast fact: light ki FREQUENCY boundary cross karke kabhi nahi badalti — sirf speed aur wavelength change hote hain. Isliye color wahi rehta hai, bas rasta badal jaata hai. Straw glass mein tedi kyun dikhti hai? Ab tu jaanta hai — refraction!',
+    ],
+    formula: 'n\u2081 sin\u03b8\u2081 = n\u2082 sin\u03b8\u2082',
+  },
+  {
+    key: 'dispersion', title: 'Dispersion — Rainbow Ka Raaz', tagline: 'White light 7 rangon mein kaise tootti hai?',
+    paragraphs: [
+      'White light asal mein saare rangon ka MIXTURE hai — red, orange, yellow, green, blue, indigo, violet (VIBGYOR). Jab ye prism se guzarti hai, toh har color apne hisaab se bend hota hai — kyunki prism ka material har wavelength ke liye alag refractive index rakhta hai.',
+      'Cauchy ka equation: n = A + B/\u03bb\u00b2. Lambi wavelength (red) ka n kam — kam bend. Chhoti wavelength (violet) ka n zyada — zyada bend. Isliye white light fan ki tarah khul jaati hai aur rainbow ban jaata hai.',
+      'Asli rainbow bhi yahi hai — baarish ke baad hawa mein tairti paani ki boondein lakhon chhote-prism ban jaati hain aur sunlight ko disperse kar deti hain. Newton ne 1666 mein prism se ye secret reveal kiya tha!',
+    ],
+    formula: 'n(\u03bb) = A + B/\u03bb\u00b2',
+  },
+  {
+    key: 'tir', title: 'Total Internal Reflection — Light Ka Trap', tagline: 'Jab light bahar nikalne se mana kar deti hai!',
+    paragraphs: [
+      'Jab light DENSE medium (glass) se LESS dense (air) mein jaati hai, toh ek dramatic cheez ho sakti hai. Agar incidence angle critical angle se BADA hai, toh light bahar nikalne se INKAAR kar deti hai — 100% andar hi reflect ho jaati hai. Isi ko Total Internal Reflection (TIR) bolte hain.',
+      'Glass-to-air ke liye critical angle = arcsin(1/1.5) \u2248 41.8°. Isse bada angle poora reflect, isse chhota angle partial leak. Simple!',
+      'TIR teri life ko badal raha hai, sach mein! Optical fiber ke andar internet ka data light ban ke TIR karta hua travel karta hai. Endoscope se doctors ke andar dekhte hain, binoculars aur periscope mein prisms TIR karte hain. Mirror se bhi zyada efficient hai — 100% light wapas milti hai!',
+    ],
+    formula: '\u03b8c = arcsin(n\u2082/n\u2081)  \u2192  \u03b8c(glass\u2192air) \u2248 41.8°',
+  },
+];
+
+const UI_COPY = {
+  homeTitle: 'VidhyaSaathy Optics Lab',
+  homeTag: 'Light Ka Game!',
+  learnKicker: 'STEP 1 · SEEKHO',
+  doKicker: 'STEP 2 · KARO',
+  winKicker: 'STEP 3 · PARTY TIME!',
+  learntTitle: 'Aaj Tune Ye Seekha',
+  headline: 'Light Ko Sirf Padho Mat.\nUske Saath Experiment Karo!',
+  supportLine: 'Reflection aur Refraction ko samjho, mirrors ghumaao, prisms explore karo aur khud science discover karo.',
+  ctaPrimary: 'Chal, Experiment Karte Hain!',
+  ctaSecondary: 'Concept Pehle Samjho',
+  levelComplete: 'Level Complete!',
+  masterTitle: 'Optics Master',
+  masterMsg: 'Tu ab Optics Lab ka Master hai!',
+  teacherMode: 'Teacher Mode',
+};
+
+/* ── Concept-by-concept guided steps (mission strip) ──
+   Short, kid-friendly lines — ek baar mein EK hi chhota step. */
+const TUTORIALS = {
+  1: [
+    { text: 'Ye hai LIGHT SOURCE — digital torch!', tip: 'Door wali ring = TARGET. Usse jalana hai.', expect: 'tap', highlight: 'source', cta: 'Cool!' },
+    { text: 'Beam target tak kyun nahi pahunchi? Soch...', tip: 'Source galat side dekh raha hai!', expect: 'tap', highlight: 'target', cta: 'Pata hai mujhe!' },
+    { text: 'Source ko GHUMAO — golden knob drag karo ya slider kheencho.', tip: 'Light seedhi chalti hai — bas sahi direction do!', expect: 'source-rotate', highlight: 'source' },
+    { text: 'Beam ko target par le jaao — ring jale toh done!', tip: 'Dekha? Light SEEDHI line mein chalti hai.', expect: 'target-lit', highlight: 'target' },
+  ],
+  2: [
+    { text: 'MIRROR aa gaya! Light isse takra ke WAPAS mud jaati hai.', tip: 'Isko REFLECTION bolte hain.', expect: 'tap', highlight: 'mirror', cta: 'Interesting!' },
+    { text: 'Mirror ko drag karke beam ke RASTE mein rakho.', tip: 'Body se pakad ke drag = move.', expect: 'tap', highlight: 'mirror', cta: 'Ho gaya!' },
+    { text: 'Ab golden knob se mirror GHUMAO — beam mudne lagegi!', tip: 'Observe karo: beam kahan mud rahi hai?', expect: 'mirror-rotate', highlight: 'mirror' },
+    { text: 'Beam ko upar wali green ring tak pahunchao!', tip: 'Aaya angle = gaya angle. Ye hi reflection hai!', expect: 'target-lit', highlight: 'target' },
+  ],
+  3: [
+    { text: 'Golden dashed line = NORMAL (mirror par 90° khadi line).', tip: 'Angles NORMAL se naape jaate hain!', expect: 'tap', highlight: 'mirror', cta: 'Samajh gaya' },
+    { text: 'Mirror ghumao — angle labels dhyan se dekho.', tip: 'i aur r HAMESHA barabar rahenge!', expect: 'mirror-rotate', highlight: 'mirror' },
+    { text: 'Mirror ko aisa ghumao ki beam SEEDHI UPAR jaaye.', tip: 'Trick: turn = 2 × rotation. 90° chahiye? 45° ghumao!', expect: 'target-lit', highlight: 'target' },
+    { text: 'PROVED: ∠i = ∠r. Tumne Law of Reflection khud discover kiya!', tip: '', expect: 'tap', cta: 'Physics OP!' },
+  ],
+  4: [
+    { text: 'Do mirrors + ek deewar. Beam ko ZIG-ZAG karana hai!', tip: 'Plan: pehle UPAR bounce, phir RIGHT, target!', expect: 'tap', cta: 'Plan ready!' },
+    { text: 'Pehla mirror ghumao — beam ko UPAR bhejo.', tip: 'Chhota change = bada asar!', expect: 'mirror-rotate', highlight: 'mirror' },
+    { text: 'Dono mirrors set karo — beam deewar ke upar se jump kare.', tip: 'Do bounces = rule do baar lagta hai!', expect: 'target-lit', highlight: 'target' },
+    { text: 'ZIG-ZAG DONE! Periscope bhi aise hi kaam karta hai!', tip: '', expect: 'tap', cta: 'Mazaa aa gaya!' },
+  ],
+  5: [
+    { text: 'MAZE TIME! Neeche MIRROR button dabao.', tip: 'Sirf 2 mirrors hain — wisely use karo!', expect: 'tap', highlight: 'toolbelt-mirror', cta: 'Mirror ready!' },
+    { text: 'Canvas par tap karke mirror PLACE karo.', tip: 'Ghost preview dikh raha hai na? Wahi tap karo.', expect: 'place-mirror', highlight: null },
+    { text: 'Ek aur! Phir se MIRROR dabao aur place karo.', tip: 'Deewaron ke GAP dekho — beam wahin se jaayegi.', expect: 'place-mirror', accept: ['mirror-move', 'mirror-rotate'], highlight: 'toolbelt-mirror' },
+    { text: 'Dono mirrors ghumao — gaps se guzaar ke target tak pahunchao!', tip: 'Slow and steady jeetata hai!', expect: 'target-lit', highlight: 'target' },
+    { text: 'MAZE SOLVED! Tumne beam ka poora route plan kiya — laser scientist style!', tip: '', expect: 'tap', cta: 'Refraction Lab chalo!' },
+  ],
+  6: [
+    { text: 'REFRACTION LAB! Ye glass slab hai — light ismein GHUS ke MUD jaati hai.', tip: 'Glass mein light DHEEMI hoti hai — isliye bend!', expect: 'tap', highlight: 'glass', cta: 'Bend? Kaise?' },
+    { text: 'Source ko TILT karo — beam angle se glass par daalo.', tip: 'Slider par 106°–110° try karo.', expect: 'source-rotate', highlight: 'source' },
+    { text: 'Dekho! Andar beam NORMAL ki taraf mudi, bahar nikalte waqt SHIFT ho gayi.', tip: 'Isi shift se target lagana hai!', expect: 'tap', highlight: 'glass', cta: 'Shift clear!' },
+    { text: 'Angle tune karke beam ko neeche wali ring par lagao!', tip: 'Snell\u2019s Law: n\u2081 sin\u03b8\u2081 = n\u2082 sin\u03b8\u2082', expect: 'target-lit', highlight: 'target' },
+    { text: 'REFRACTION DONE! Straw paani mein tedi kyun dikhti hai — ab pata hai!', tip: '', expect: 'tap', cta: 'Aage!' },
+  ],
+  7: [
+    { text: 'CONTEST: Paani (n=1.33) vs Glass (n=1.5). Kaun zyada bend karega?', tip: 'Pehle predict karo!', expect: 'tap', cta: 'Mera guess hai' },
+    { text: 'Source tilt karo — beam dono tanks ke UPAR se guzaro.', tip: 'Upar paani hai, neeche glass.', expect: 'source-rotate', highlight: 'source' },
+    { text: 'GLASS ne zyada mora! Zyada dense = zyada bend.', tip: 'Pool ka paani bhi aise hi dhokha deta hai!', expect: 'tap', cta: 'Science rocks!' },
+    { text: 'Beam ko dono se guzaar ke neeche target tak le jaao!', tip: '', expect: 'target-lit', highlight: 'target' },
+    { text: 'Yaad rakho: speed aur wavelength badalti hain — frequency KABHI nahi!', tip: '', expect: 'tap', cta: 'Prism time!' },
+  ],
+  8: [
+    { text: 'THE PRISM! White light = 7 rangon ka mixture. Prism isse alag karega!', tip: 'Isko DISPERSION bolte hain.', expect: 'tap', highlight: 'toolbelt-prism', cta: 'Rainbow!' },
+    { text: 'Toolbelt se PRISM lo, beam ke raste mein place karo.', tip: 'Beam ke beech mein rakho.', expect: 'place-prism', highlight: 'toolbelt-prism' },
+    { text: 'Prism ko knob se ghumao — WHITE LIGHT RAINBOW mein tootegi!', tip: 'Violet sabse zyada bend, red sabse kam.', expect: 'prism-rotate', highlight: 'prism' },
+    { text: 'Teeno rings (orange, green, blue) ek saath jalao!', tip: 'Rotation dheere-dheere fine-tune karo.', expect: 'target-lit', highlight: 'prism' },
+    { text: 'FULL SPECTRUM! Aasman ka rainbow isi physics se banta hai!', tip: '', expect: 'tap', cta: 'Newton vibes!' },
+  ],
+  9: [
+    { text: 'SECRET MOVE: TIR! Bade angle par light bahar nikalne se MANA kar deti hai!', tip: 'Critical angle (glass\u2192air) = 41.8°. Usse bada = TIR!', expect: 'tap', cta: 'Wow! Kaise?' },
+    { text: 'Right-angle prism place karo beam ke raste mein.', tip: 'TIR ke liye perfect shape.', expect: 'place-prism', highlight: 'toolbelt-prism' },
+    { text: 'Prism ghumao — beam ANDAR hi palat jaayegi. "TIR!" label dhundo!', tip: 'Zero energy leak — mirror se bhi better!', expect: 'prism-rotate', highlight: 'prism' },
+    { text: 'Beam ab 90° mud gayi — target tak le jaao!', tip: 'Periscope, binoculars — sab TIR se!', expect: 'target-lit', highlight: 'target' },
+    { text: 'TIR MASTER! Internet optical fiber mein ISI se travel karta hai!', tip: '', expect: 'tap', cta: 'Final boss ready!' },
+  ],
+  10: [
+    { text: 'FINAL BOSS! Mirror + Prism — dono laws ek saath. All the best!', tip: 'Deep breath... GO!', expect: 'tap', cta: 'Let\u2019s GO!' },
+    { text: 'Step 1: MIRROR place karo — beam ko upar-right route do.', tip: 'i = r yaad hai na!', expect: 'place-mirror', highlight: 'toolbelt-mirror' },
+    { text: 'Step 2: PRISM place karo — rainbow fan banao.', tip: 'Do rings right side par hain.', expect: 'place-prism', accept: ['prism-rotate', 'target-lit'], highlight: 'toolbelt-prism' },
+    { text: 'Step 3: Dono angles fine-tune — dono rings jalao!', tip: 'Tu kar lega. Scientist trust!', expect: 'target-lit', accept: ['win'], highlight: 'prism' },
+    { text: 'OPTICS MASTER! Reflection, refraction, dispersion, TIR — sab tune khud kiya. Ab tu REAL scientist hai!', tip: '', expect: 'tap', cta: 'Chhoo lo aasman!' },
+  ],
+  0: [
+    { text: 'Free Play Lab! Koi level nahi, koi pressure nahi — sirf experiment.', tip: 'Sab tools UNLIMITED hain. Jo mann kare banao!', expect: 'tap', cta: 'Masti shuru!' },
+    { text: 'Source ka COLOR bhi badal sakte ho — dekho rang prism mein kya karte hain!', tip: 'Bore ho? Ideas button dabao.', expect: 'tap', cta: 'Chalo!' },
+  ],
+};
+
+/* ── LEARN act content — har level ka concept, kid-friendly, 3 chhoti lines ── */
+const LEARN_STEPS = {
+  1: { lines: ['Light hamesha SEEDHI line mein chalti hai', 'Jaise torch ki roshni — seedha aage, seedha jaati hai', 'Mudna hai toh use MODNA padega — mirror chahiye!'], real: 'Torch, laser pointer, car headlight — sab seedhi beam dete hain', formula: 'Light → Seedhi Line' },
+  2: { lines: ['Mirror se light TAKRA ke WAPAS mud jaati hai', 'Isi ko REFLECTION bolte hain', 'Aaane ka angle = Jaane ka angle — hamesha!'], real: 'Ghar ka mirror, periscope, solar cooker — sab reflection se kaam karte hain', formula: '∠i = ∠r (normal se)' },
+  3: { lines: ['Angles NORMAL se measure hote hain', 'Normal = mirror par 90° khadi line', '∠i = ∠r — ye rule kabhi nahi tootta'], real: 'Snooker ki ball bhi isi rule se bounce karti hai!', formula: 'Turn = 2 × mirror rotation' },
+  4: { lines: ['Ek mirror kam, do mirrors ZIG-ZAG', 'Har bounce par wahi rule: ∠i = ∠r', 'Do bounce se periscope ban jaata hai!'], real: 'Periscope — bunker ke andar se bahar dekhne ka jugaad', formula: '∠i = ∠r, har bounce par' },
+  5: { lines: ['Beam ke liye poora RASTA plan karo', 'Mirrors = light ke turning points', 'Pehle socho... phir place karo!'], real: 'Laser security systems aise hi paths banate hain', formula: 'Plan → Place → Rotate' },
+  6: { lines: ['Glass mein light DHEEMI ho jaati hai', 'Speed badli = rasta MUD gaya', 'Dense medium mein beam NORMAL ki taraf bend karti hai'], real: 'Paani mein straw tedi dikhti hai — wahi refraction!', formula: 'n₁ sinθ₁ = n₂ sinθ₂' },
+  7: { lines: ['Paani ka n = 1.33, Glass ka n = 1.5', 'Zyada n = zyada bend', 'Frequency kabhi nahi badalti — sirf speed'], real: 'Swimming pool gehra kam lagta hai — refraction ka dhokha!', formula: 'n₁ sinθ₁ = n₂ sinθ₂' },
+  8: { lines: ['White light = saare 7 rangon ka MIXTURE', 'Prism har rang ko ALAG bend karta hai', 'Violet sabse zyada bend, Red sabse kam'], real: 'Aasman ka rainbow = lakhon paani ki boondein = lakhon chhote prisms', formula: 'n(λ) = A + B/λ²' },
+  9: { lines: ['Bade angle par light bahar nikalne se INKAAR kar deti hai', '100% andar reflect = TIR (Total Internal Reflection)', 'Glass→air critical angle = 41.8°'], real: 'Optical fiber mein internet TIR se travel karta hai!', formula: 'θc = arcsin(n₂/n₁) ≈ 41.8°' },
+  10: { lines: ['Mirror se BOUNCE + Prism se BEND', 'Dono laws ek saath — master combo', 'Tu almost Optics Master hai!'], real: 'Binoculars, camera, projector — sab dono ko mix karte hain', formula: 'i=r + Snell + n(λ)' },
+  0: { lines: ['Ye teri apni LAB hai', 'Koi rule nahi, koi pressure nahi', 'Jo dimaag mein aaye, banao!'], real: 'Scientists bhi aise hi karte hain: try → dekho → seekho', formula: 'Free Play!' },
+};
+
+/* ── CELEBRATE act content — "Aaj Tune Ye Seekha" chips ── */
+const LEARNT = {
+  1: ['Light seedhi chalti hai', 'Direction sahi = target hit', 'Isko rectilinear propagation bolte hain'],
+  2: ['Mirror light ko modta hai', 'Aaya angle = gaya angle', 'Ye hai REFLECTION'],
+  3: ['Angles normal se nape jaate hain', '∠i = ∠r — hamesha', 'Mirror 45° = beam 90° turn'],
+  4: ['Har bounce par i = r', 'Zig-zag = planning ka khel', 'Periscope 2 mirrors se banta hai'],
+  5: ['Rasta pehle plan karo', 'Mirrors = turning points', 'Limited tools = smart jugalbandi'],
+  6: ['Glass mein light dheemi hoti hai', 'Speed badla = bend hua', 'Dense taraf normal bend'],
+  7: ['n zyada = bend zyada', 'Paani < Glass bending', 'Frequency kabhi nahi badalti'],
+  8: ['White = 7 rangon ka mix', 'Prism se DISPERSION hota hai', 'Violet zyada, red kam bend'],
+  9: ['TIR = 100% andar reflect', 'Critical angle 41.8°', 'Fiber optics isi se chalta hai'],
+  10: ['Reflection + Refraction combo', 'Laws har jagah same rehte hain', 'Tu hai OPTICS MASTER!'],
+};
+
+/* ── Sandbox experiment ideas ── */
+const SANDBOX_IDEAS = [
+  { title: 'Rainbow Factory', text: 'Prism lagao, white beam se 7 rangon ka fan banao', icon: 'prism' },
+  { title: 'Zig-Zag King', text: '3+ mirrors se beam ko bounce karao', icon: 'mirror' },
+  { title: 'Paani Test', text: 'Water tank + glass dono se beam guzaro — kaun zyada bend karta hai?', icon: 'water' },
+  { title: 'Color Switch', text: 'Source ka rang badlo — colors prism mein kaise behave karte hain?', icon: 'bulb' },
+];
+
+/* ── Audio (WebAudio, synthesized, mute-able) ── */
+const Sfx = (() => {
+  let ctx = null, muted = false;
+  function ac() {
+    if (typeof window === 'undefined') return null;
+    if (!ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      ctx = new AC();
+    }
+    if (ctx.state === 'suspended') ctx.resume();
+    return ctx;
+  }
+  function tone(o) {
+    if (muted) return;
+    const c = ac(); if (!c) return;
+    const { freq, dur = 0.12, type = 'sine', gain = 0.15, delay = 0, sweepTo } = o;
+    const t0 = c.currentTime + delay;
+    const osc = c.createOscillator(), g = c.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t0);
+    if (sweepTo) osc.frequency.exponentialRampToValueAtTime(Math.max(30, sweepTo), t0 + dur);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(gain, t0 + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(g).connect(c.destination);
+    osc.start(t0); osc.stop(t0 + dur + 0.05);
+  }
+  return {
+    setMuted(m) { muted = m; },
+    unlock() { ac(); },
+    click() { tone({ freq: 720, dur: 0.06, type: 'square', gain: 0.05 }); },
+    place() { tone({ freq: 420, dur: 0.14, type: 'sine', gain: 0.16, sweepTo: 640 }); },
+    rotate() { tone({ freq: 1150, dur: 0.045, type: 'triangle', gain: 0.045 }); },
+    tick() { tone({ freq: 1500, dur: 0.022, type: 'square', gain: 0.022 }); },
+    coach() { tone({ freq: 659.25, dur: 0.09, type: 'triangle', gain: 0.08 }); tone({ freq: 987.77, dur: 0.14, type: 'triangle', gain: 0.07, delay: 0.07 }); },
+    sweep() { tone({ freq: 880, dur: 0.1, type: 'sine', gain: 0.035, sweepTo: 1500 }); },
+    pick() { tone({ freq: 560, dur: 0.08, type: 'sine', gain: 0.09, sweepTo: 760 }); },
+    spark() { tone({ freq: 190, dur: 0.09, type: 'sawtooth', gain: 0.045, sweepTo: 120 }); },
+    targetHit() { tone({ freq: 660, dur: 0.12, type: 'sine', gain: 0.16 }); tone({ freq: 880, dur: 0.18, type: 'sine', gain: 0.12, delay: 0.08 }); },
+    win() {
+      [[523.25, 0], [659.25, 0.12], [783.99, 0.24], [1046.5, 0.36]].forEach(([f, d]) =>
+        tone({ freq: f, dur: 0.22, type: 'triangle', gain: 0.14, delay: d }));
+      tone({ freq: 130.81, dur: 0.5, type: 'sine', gain: 0.1, delay: 0.3 });
+    },
+    quizRight() { tone({ freq: 784, dur: 0.1, type: 'triangle', gain: 0.12 }); tone({ freq: 1046, dur: 0.2, type: 'triangle', gain: 0.12, delay: 0.1 }); },
+    quizWrong() { tone({ freq: 220, dur: 0.2, type: 'square', gain: 0.07, sweepTo: 160 }); },
+    hint() { tone({ freq: 500, dur: 0.15, type: 'sine', gain: 0.1, sweepTo: 700 }); },
+    star() { tone({ freq: 1200, dur: 0.12, type: 'triangle', gain: 0.1 }); },
+  };
+})();
+
+/* ── Progress (localStorage) ── */
+const Progress = (() => {
+  const KEY = 'vs-optics-lab-html-v1';
+  function defaults() { return { levels: {}, soundOn: true, badges: [] }; }
+  function load() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return defaults();
+      const p = JSON.parse(raw);
+      return Object.assign(defaults(), p);
+    } catch (e) { return defaults(); }
+  }
+  function save(d) { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {} }
+  function stars(hintsUsed) { return hintsUsed === 0 ? 3 : hintsUsed <= 2 ? 2 : 1; }
+  function score(hintsUsed, moves, quizBonus) {
+    const penalty = hintsUsed * 150 + Math.max(0, moves - 5) * 10;
+    return Math.max(100, 1000 - penalty) + quizBonus;
+  }
+  function unlocked(d, id) { return id <= 1 || Boolean(d.levels[id - 1] && d.levels[id - 1].completed); }
+  function nextPlayable(d) {
+    for (const l of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) if (!(d.levels[l] && d.levels[l].completed)) return l;
+    return 10;
+  }
+  return { load, save, stars, score, unlocked, nextPlayable, KEY };
+})();
+
+/* Node export for verification tests */
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    VIRTUAL_W, VIRTUAL_H, FRAME_INSET, N_AIR, N_WATER, N_GLASS, PRISM_A, PRISM_B,
+    SPECTRUM, RAY_HEX, RING_HEX, COLOR_GROUPS, T_EPS,
+    vpt, add, sub, mul, dot, len, norm, perp, deg2rad, rad2deg, dirFromAngle,
+    clamp01, norm360, clamp, prismN, lambdaOf, criticalAngle, reflectDir, refractDir,
+    prismVertices, rectCorners, mirrorEnds, raySegment, rayCircle, pointInPolygon,
+    traceScene, LEVELS, SANDBOX_LEVEL, LEVEL_CONTENT, CONCEPT_CARDS, UI_COPY, TUTORIALS,
+    LEARN_STEPS, LEARNT, SANDBOX_IDEAS,
+    levelById, cloneScene,
+  };
+}
+
+'use strict';
+/* ═══════════════ VidhyaSaathy Optics Lab — UI ENGINE (canvas + game flow) ═══ */
+(() => {
+
+/* ── tiny helpers ── */
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => Array.from(document.querySelectorAll(s));
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+function distToSeg(p, a, b) {
+  const e = { x: b.x - a.x, y: b.y - a.y };
+  const l2 = e.x * e.x + e.y * e.y || 1;
+  let t = ((p.x - a.x) * e.x + (p.y - a.y) * e.y) / l2;
+  t = Math.max(0, Math.min(1, t));
+  return dist(p, { x: a.x + t * e.x, y: a.y + t * e.y });
+}
+function expandPoly(poly, pad) {
+  let cx = 0, cy = 0;
+  poly.forEach((p) => { cx += p.x; cy += p.y; });
+  cx /= poly.length; cy /= poly.length;
+  return poly.map((p) => {
+    const dx = p.x - cx, dy = p.y - cy, l = Math.hypot(dx, dy) || 1;
+    return { x: p.x + (dx / l) * pad, y: p.y + (dy / l) * pad };
+  });
+}
+function fmtTime(s) { const m = Math.floor(s / 60), ss = Math.floor(s % 60); return m + ':' + String(ss).padStart(2, '0'); }
+const esc = (s) => String(s);
+
+/* ── global state ── */
+const st = {
+  screen: 'home',
+  progress: Progress.load(),
+  level: null, scene: null,
+  trace: { segments: [], events: [], satisfied: new Set() },
+  selected: null,          // {type, obj}
+  armed: null,             // 'mirror' | 'prism' | 'glass'
+  pointer: { x: 480, y: 320, onCanvas: false },
+  drag: null,              // {mode:'move'|'rotate', type, obj, startAngle, moved}
+  undo: [],
+  moves: 0, hintsUsed: 0, revealedHints: 0,
+  startTime: 0, elapsed: 0, playing: false,
+  won: false, winShown: false, quizBonus: 0,
+  teacher: { normal: true, angles: true, nvals: true, slow: false, challenge: false },
+  tut: { active: false, idx: 0 },
+  revealT: 1, revealDur: 0.9,
+  confetti: [],
+  lastSatisfied: 0,
+  time: 0,
+  changed: true,
+};
+
+/* ── canvas setup ── */
+const cv = $('#game-canvas');
+const ctx = cv.getContext('2d');
+const DPR = Math.min(window.devicePixelRatio || 1, 2);
+cv.width = 960 * DPR; cv.height = 640 * DPR;
+
+/* offscreen background (static) */
+const bg = document.createElement('canvas');
+bg.width = 960 * DPR; bg.height = 640 * DPR;
+(function paintBG() {
+  const b = bg.getContext('2d');
+  b.setTransform(DPR, 0, 0, DPR, 0, 0);
+  const g = b.createLinearGradient(0, 0, 0, 640);
+  g.addColorStop(0, '#0a1120'); g.addColorStop(0.55, '#070d18'); g.addColorStop(1, '#05080f');
+  b.fillStyle = g; b.fillRect(0, 0, 960, 640);
+  // soft vignette glow top-right
+  const rg = b.createRadialGradient(700, 60, 20, 700, 60, 500);
+  rg.addColorStop(0, 'rgba(110,231,255,0.06)'); rg.addColorStop(1, 'transparent');
+  b.fillStyle = rg; b.fillRect(0, 0, 960, 640);
+  // grid
+  b.strokeStyle = 'rgba(140,165,220,0.05)'; b.lineWidth = 1;
+  for (let x = 26; x <= 934; x += 46) { b.beginPath(); b.moveTo(x, 26); b.lineTo(x, 614); b.stroke(); }
+  for (let y = 26; y <= 614; y += 46) { b.beginPath(); b.moveTo(26, y); b.lineTo(934, y); b.stroke(); }
+  // stars
+  let sd = 7;
+  const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 70; i++) {
+    const x = 30 + rnd() * 900, y = 30 + rnd() * 580, r = rnd() * 1.3 + 0.3;
+    b.fillStyle = 'rgba(220,235,255,' + (0.12 + rnd() * 0.3).toFixed(2) + ')';
+    b.beginPath(); b.arc(x, y, r, 0, Math.PI * 2); b.fill();
+  }
+  // brick frame
+  const i0 = FRAME_INSET;
+  b.strokeStyle = 'rgba(245,184,74,0.20)'; b.lineWidth = 2;
+  b.strokeRect(i0, i0, 960 - i0 * 2, 640 - i0 * 2);
+  b.strokeStyle = 'rgba(140,165,220,0.10)'; b.lineWidth = 1;
+  for (let y = i0; y <= 640 - i0; y += 22) { b.beginPath(); b.moveTo(i0, y); b.lineTo(960 - i0, y); b.stroke(); }
+  for (let y = i0; y < 640 - i0; y += 22) {
+    const off = ((y - i0) / 22) % 2 === 0 ? 0 : 23;
+    for (let x = i0 + off; x <= 960 - i0; x += 46) {
+      b.beginPath(); b.moveTo(x, y); b.lineTo(x, Math.min(y + 22, 640 - i0)); b.stroke();
+    }
+  }
+})();
+
+/* ═══════════════ DRAWING ═══════════════ */
+function roundRectPath(c, x, y, w, h, r) {
+  c.beginPath();
+  c.moveTo(x + r, y);
+  c.arcTo(x + w, y, x + w, y + h, r);
+  c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r);
+  c.arcTo(x, y, x + w, y, r);
+  c.closePath();
+}
+
+function drawWall(w) {
+  ctx.save();
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = '#3a2a24'; ctx.lineWidth = 13;
+  ctx.beginPath(); ctx.moveTo(w.a.x, w.a.y); ctx.lineTo(w.b.x, w.b.y); ctx.stroke();
+  ctx.strokeStyle = '#a8623f'; ctx.lineWidth = 8;
+  ctx.beginPath(); ctx.moveTo(w.a.x, w.a.y); ctx.lineTo(w.b.x, w.b.y); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,214,170,0.35)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(w.a.x, w.a.y - 2.5); ctx.lineTo(w.b.x, w.b.y - 2.5); ctx.stroke();
+  ctx.restore();
+}
+
+function drawMirror(m) {
+  const [a, b] = mirrorEnds(m);
+  const sel = st.selected && st.selected.obj === m;
+  ctx.save();
+  ctx.lineCap = 'round';
+  // backing
+  ctx.strokeStyle = '#20344f'; ctx.lineWidth = 13;
+  ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+  // silver face
+  const g = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+  g.addColorStop(0, '#9db8d8'); g.addColorStop(0.5, '#eaf4ff'); g.addColorStop(1, '#9db8d8');
+  ctx.strokeStyle = g; ctx.lineWidth = 8;
+  ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+  // shine
+  ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 1.6;
+  ctx.beginPath(); ctx.moveTo(a.x, a.y - 1.5); ctx.lineTo(b.x, b.y - 1.5); ctx.stroke();
+  // pivot dot
+  ctx.fillStyle = '#0b1322';
+  ctx.beginPath(); ctx.arc(m.pos.x, m.pos.y, 4, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = 'rgba(245,184,74,0.8)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(m.pos.x, m.pos.y, 4, 0, Math.PI * 2); ctx.stroke();
+  if (sel) drawKnob(m, m.length / 2 + 26, 'mirror');
+  ctx.restore();
+}
+
+function drawGlass(g) {
+  const cs = rectCorners(g.pos, g.w, g.h, g.angle);
+  const sel = st.selected && st.selected.obj === g;
+  ctx.save();
+  ctx.beginPath();
+  cs.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(110,210,255,0.10)'; ctx.fill();
+  ctx.strokeStyle = 'rgba(150,225,255,0.55)'; ctx.lineWidth = 2.5; ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 1;
+  ctx.beginPath();
+  cs.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
+  ctx.closePath();
+  ctx.save(); ctx.clip();
+  ctx.globalAlpha = 0.35;
+  ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+  ctx.beginPath(); ctx.moveTo(cs[3].x, cs[3].y); ctx.lineTo(cs[0].x, cs[0].y); ctx.stroke();
+  ctx.restore();
+  // n label
+  ctx.fillStyle = 'rgba(170,225,255,0.85)';
+  ctx.font = '700 13px Poppins, sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('GLASS  n=' + g.n.toFixed(2), g.pos.x, g.pos.y);
+  if (sel) drawKnob(g, Math.max(g.w, g.h) / 2 + 26, 'glass');
+  ctx.restore();
+}
+
+function drawWater(wt) {
+  const cs = rectCorners(wt.pos, wt.w, wt.h, 0);
+  ctx.save();
+  ctx.beginPath();
+  cs.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(64,150,255,0.16)'; ctx.fill();
+  ctx.strokeStyle = 'rgba(120,195,255,0.6)'; ctx.lineWidth = 2.5; ctx.stroke();
+  // animated wave
+  ctx.strokeStyle = 'rgba(180,225,255,0.65)'; ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  const yTop = cs[0].y, xL = cs[0].x, xR = cs[1].x;
+  for (let x = xL; x <= xR; x += 6) {
+    const y = yTop + 3 + Math.sin(x / 16 + st.time * 2.2) * 2.2;
+    x === xL ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(180,225,255,0.9)';
+  ctx.font = '700 13px Poppins, sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('PAANI  n=' + wt.n.toFixed(2), wt.pos.x, wt.pos.y + 12);
+  ctx.restore();
+}
+
+function drawPrism(p) {
+  const vs = prismVertices(p.pos, p.size, p.angle, p.prismKind);
+  const sel = st.selected && st.selected.obj === p;
+  ctx.save();
+  ctx.beginPath();
+  vs.forEach((pt, i) => (i ? ctx.lineTo(pt.x, pt.y) : ctx.moveTo(pt.x, pt.y)));
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(190,150,255,0.11)'; ctx.fill();
+  const g = ctx.createLinearGradient(vs[0].x, vs[0].y, vs[2].x, vs[2].y);
+  g.addColorStop(0, 'rgba(255,180,140,0.75)'); g.addColorStop(0.5, 'rgba(255,255,255,0.8)'); g.addColorStop(1, 'rgba(150,180,255,0.75)');
+  ctx.strokeStyle = g; ctx.lineWidth = 2.6; ctx.stroke();
+  ctx.fillStyle = 'rgba(230,210,255,0.9)';
+  ctx.font = '700 12.5px Poppins, sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('PRISM', p.pos.x, p.pos.y + (p.prismKind === 'right' ? 8 : 14));
+  if (sel) drawKnob(p, p.size / 2 + 26, 'prism');
+  ctx.restore();
+}
+
+function drawSource(s) {
+  const sel = st.selected && st.selected.obj === s;
+  ctx.save();
+  ctx.translate(s.pos.x, s.pos.y);
+  ctx.rotate(deg2rad(s.angle));
+  // body
+  roundRectPath(ctx, -20, -13, 34, 26, 7);
+  const g = ctx.createLinearGradient(-20, 0, 14, 0);
+  g.addColorStop(0, '#233c63'); g.addColorStop(1, '#3d5c92');
+  ctx.fillStyle = g; ctx.fill();
+  ctx.strokeStyle = 'rgba(150,190,255,0.5)'; ctx.lineWidth = 1.6; ctx.stroke();
+  // emitter
+  ctx.fillStyle = '#0b1322';
+  ctx.beginPath(); ctx.arc(14, 0, 8, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = 'rgba(110,231,255,0.9)'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.fillStyle = '#d9f7ff';
+  ctx.beginPath(); ctx.arc(14, 0, 3.4 + Math.sin(st.time * 5) * 0.5, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+  if (sel) drawKnob(s, 58, 'source');
+}
+
+function drawKnob(obj, radius, kind) {
+  const a = obj.angle;
+  const k = { x: obj.pos.x + Math.cos(deg2rad(a)) * radius, y: obj.pos.y + Math.sin(deg2rad(a)) * radius };
+  ctx.save();
+  // connector
+  ctx.strokeStyle = 'rgba(245,184,74,0.55)'; ctx.lineWidth = 1.5;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(obj.pos.x + Math.cos(deg2rad(a)) * (radius * 0.45), obj.pos.y + Math.sin(deg2rad(a)) * (radius * 0.45));
+  ctx.lineTo(k.x, k.y); ctx.stroke();
+  ctx.setLineDash([]);
+  // knob
+  ctx.fillStyle = '#f5b84a';
+  ctx.shadowColor = 'rgba(245,184,74,0.8)'; ctx.shadowBlur = 12;
+  ctx.beginPath(); ctx.arc(k.x, k.y, 10, 0, Math.PI * 2); ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = '#241503';
+  ctx.font = '800 10px Poppins, sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('\u21BB', k.x, k.y + 0.5);
+  // angle label
+  ctx.fillStyle = 'rgba(255,222,160,0.95)';
+  ctx.font = '700 11px Poppins, sans-serif';
+  const lbl = Math.round(norm360(a)) + '\u00B0';
+  ctx.fillText(lbl, k.x + Math.cos(deg2rad(a)) * 24, k.y + Math.sin(deg2rad(a)) * 24);
+  ctx.restore();
+}
+
+function drawTargets() {
+  for (const t of st.scene.targets) {
+    const ok = st.trace.satisfied.has(t.id);
+    const hex = RING_HEX[t.color] || '#8fa0c2';
+    const pulse = Math.sin(st.time * 3 + t.pos.x) * 2.5;
+    ctx.save();
+    if (ok) {
+      ctx.shadowColor = hex; ctx.shadowBlur = 22;
+      ctx.strokeStyle = hex;
+    } else {
+      ctx.strokeStyle = hex; ctx.globalAlpha = 0.55;
+    }
+    ctx.lineWidth = 3.5;
+    ctx.beginPath(); ctx.arc(t.pos.x, t.pos.y, t.radius + (ok ? pulse : pulse * 0.5), 0, Math.PI * 2); ctx.stroke();
+    ctx.globalAlpha = ok ? 0.28 : 0.12;
+    ctx.fillStyle = hex;
+    ctx.beginPath(); ctx.arc(t.pos.x, t.pos.y, t.radius - 4, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1;
+    if (ok) {
+      ctx.fillStyle = hex;
+      ctx.font = '800 17px Poppins, sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('\u2713', t.pos.x, t.pos.y + 1);
+    }
+    ctx.restore();
+  }
+}
+
+/* beam with 3-pass glow + progressive reveal + photon flow */
+function drawBeam() {
+  const segs = st.trace.segments;
+  if (!segs.length) return;
+  const total = segs.reduce((a, s) => a + len(sub(s.b, s.a)), 0) || 1;
+  let acc = 0;
+  const reveal = st.revealT;
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < segs.length; i++) {
+    const s = segs[i];
+    const l = len(sub(s.b, s.a));
+    const frac0 = acc / total, acc2 = acc + l; acc = acc2;
+    const frac1 = acc / total;
+    if (frac0 > reveal) continue;
+    const clip = frac1 > reveal ? (reveal - frac0) / (frac1 - frac0) : 1;
+    const bx = s.a.x + (s.b.x - s.a.x) * clip, by = s.a.y + (s.b.y - s.a.y) * clip;
+    const hex = RAY_HEX[s.color] || '#fff';
+    // pass 1 — wide soft
+    ctx.strokeStyle = hex; ctx.globalAlpha = 0.10; ctx.lineWidth = 11;
+    ctx.beginPath(); ctx.moveTo(s.a.x, s.a.y); ctx.lineTo(bx, by); ctx.stroke();
+    // pass 2 — mid
+    ctx.globalAlpha = 0.28; ctx.lineWidth = 4.5;
+    ctx.beginPath(); ctx.moveTo(s.a.x, s.a.y); ctx.lineTo(bx, by); ctx.stroke();
+    // pass 3 — core
+    ctx.globalAlpha = 0.95; ctx.lineWidth = 1.8;
+    ctx.beginPath(); ctx.moveTo(s.a.x, s.a.y); ctx.lineTo(bx, by); ctx.stroke();
+    // photon flow dots
+    if (clip > 0.05) {
+      const flow = (st.time * 120) % Math.max(l, 60);
+      ctx.globalAlpha = 0.85;
+      ctx.fillStyle = hex;
+      for (let k = 0; k < 1; k++) {
+        let d = (flow + k * l / 2) % l;
+        if (d / l > clip) continue;
+        const px = s.a.x + (s.b.x - s.a.x) * (d / l);
+        const py = s.a.y + (s.b.y - s.a.y) * (d / l);
+        ctx.beginPath(); ctx.arc(px, py, 2.2, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+  }
+  ctx.restore();
+}
+
+function drawEvents() {
+  for (const e of st.trace.events) {
+    const hex = e.kind === 'tir' ? '#f5b84a' : e.kind === 'reflect' ? '#ffffff' : '#6ee7ff';
+    const r = 3.5 + Math.sin(st.time * 3 + e.point.x * 0.1) * 0.9;
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.strokeStyle = hex; ctx.globalAlpha = 0.5; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(e.point.x, e.point.y, r + 2, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = hex; ctx.globalAlpha = 0.6;
+    ctx.beginPath(); ctx.arc(e.point.x, e.point.y, 1.8, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    if (e.kind === 'tir') {
+      ctx.save();
+      ctx.fillStyle = '#ffd98a';
+      ctx.font = '800 12px Poppins, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('TIR!', e.point.x, e.point.y - 14);
+      ctx.restore();
+    }
+  }
+}
+
+function drawTeacherOverlays() {
+  const T = st.teacher;
+  for (const e of st.trace.events) {
+    if (T.normal) {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(245,184,74,0.75)'; ctx.lineWidth = 1.4;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.moveTo(e.point.x - e.normal.x * 52, e.point.y - e.normal.y * 52);
+      ctx.lineTo(e.point.x + e.normal.x * 52, e.point.y + e.normal.y * 52);
+      ctx.stroke();
+      ctx.restore();
+    }
+    if (T.angles) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(255,222,160,0.95)';
+      ctx.font = '700 11.5px Poppins, sans-serif';
+      ctx.textAlign = 'center';
+      const lx = e.point.x + e.normal.x * 34, ly = e.point.y + e.normal.y * 34;
+      if (e.kind === 'reflect') ctx.fillText('i=' + e.angleIn.toFixed(0) + '\u00B0 r=' + e.angleOut.toFixed(0) + '\u00B0', lx, ly);
+      else if (e.kind === 'refract') ctx.fillText('\u03B81=' + e.angleIn.toFixed(0) + '\u00B0 \u03B82=' + (e.angleOut != null ? e.angleOut.toFixed(0) : '?') + '\u00B0', lx, ly);
+      else if (e.kind === 'tir') ctx.fillText(e.angleIn.toFixed(0) + '\u00B0 > 41.8\u00B0', lx, ly);
+      ctx.restore();
+    }
+    if (T.nvals && e.kind === 'refract' && e.n1 != null && e.n2 != null && !e.dispersed) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(110,231,255,0.9)';
+      ctx.font = '600 11px Poppins, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('n ' + e.n1.toFixed(2) + ' \u2192 ' + e.n2.toFixed(2), e.point.x - e.normal.x * 26, e.point.y - e.normal.y * 26);
+      ctx.restore();
+    }
+  }
+}
+
+function drawHighlight() {
+  if (!st.tut.active) return;
+  const step = (TUTORIALS[st.level.id] || [])[st.tut.idx];
+  if (!step || !step.highlight) return;
+  let target = null, radius = 60;
+  const h = step.highlight;
+  if (h === 'source') { target = st.scene.source.pos; radius = 46; }
+  else if (h === 'target') { target = st.scene.targets[0].pos; radius = st.scene.targets[0].radius + 16; }
+  else if (h === 'mirror' && st.scene.mirrors.length) { target = st.scene.mirrors[0].pos; radius = st.scene.mirrors[0].length / 2 + 22; }
+  else if (h === 'glass' && st.scene.glass.length) { target = st.scene.glass[0].pos; radius = Math.max(st.scene.glass[0].w, st.scene.glass[0].h) / 2 + 18; }
+  else if (h === 'prism') {
+    const pr = st.scene.prisms.find((p) => p.placed);
+    if (pr) { target = pr.pos; radius = pr.size / 2 + 20; }
+  }
+  if (!target) return;
+  ctx.save();
+  const pulse = 1 + Math.sin(st.time * 3.4) * 0.06;
+  ctx.strokeStyle = 'rgba(245,184,74,0.9)';
+  ctx.lineWidth = 2.4;
+  ctx.setLineDash([9, 7]);
+  ctx.lineDashOffset = -st.time * 26;
+  ctx.beginPath(); ctx.arc(target.x, target.y, radius * pulse, 0, Math.PI * 2); ctx.stroke();
+  ctx.restore();
+}
+
+function drawGhost() {
+  if (!st.armed || !st.pointer.onCanvas) return;
+  ctx.save();
+  ctx.globalAlpha = 0.55;
+  const p = st.pointer;
+  if (st.armed === 'mirror') {
+    const [a, b] = mirrorEnds({ pos: p, angle: 45, length: 110 });
+    ctx.strokeStyle = 'rgba(234,244,255,0.9)'; ctx.lineWidth = 7; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+  } else if (st.armed === 'prism') {
+    const vs = prismVertices(p, 200, 0, st.level.toolbelt.prismKind || 'equilateral');
+    ctx.beginPath();
+    vs.forEach((pt, i) => (i ? ctx.lineTo(pt.x, pt.y) : ctx.moveTo(pt.x, pt.y)));
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(200,170,255,0.9)'; ctx.lineWidth = 2.4; ctx.stroke();
+  } else if (st.armed === 'glass') {
+    const cs = rectCorners(p, 190, 130, 0);
+    ctx.beginPath();
+    cs.forEach((pt, i) => (i ? ctx.lineTo(pt.x, pt.y) : ctx.moveTo(pt.x, pt.y)));
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(150,225,255,0.9)'; ctx.lineWidth = 2.2; ctx.stroke();
+  }
+  ctx.strokeStyle = 'rgba(245,184,74,0.8)';
+  ctx.setLineDash([6, 6]);
+  ctx.beginPath(); ctx.arc(p.x, p.y, 30, 0, Math.PI * 2); ctx.stroke();
+  ctx.restore();
+}
+
+function drawConfetti() {
+  if (!st.confetti.length) return;
+  ctx.save();
+  for (const c of st.confetti) {
+    ctx.globalAlpha = Math.max(0, Math.min(1, c.life));
+    ctx.translate(c.x, c.y); ctx.rotate(c.rot);
+    ctx.fillStyle = c.color;
+    ctx.fillRect(-c.s / 2, -c.s / 4, c.s, c.s / 2);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  ctx.restore();
+}
+
+function updateConfetti(dt) {
+  for (const c of st.confetti) {
+    c.vy += 320 * dt;
+    c.x += c.vx * dt; c.y += c.vy * dt;
+    c.rot += c.vr * dt;
+    c.life -= dt * 0.5;
+  }
+  st.confetti = st.confetti.filter((c) => c.life > 0 && c.y < 700);
+}
+function burstConfetti(n = 110) {
+  const colors = ['#f5b84a', '#6ee7ff', '#b44dff', '#3dfc82', '#ff9c30', '#ff5d6c'];
+  for (let i = 0; i < n; i++) {
+    st.confetti.push({
+      x: 480 + (Math.random() - 0.5) * 300, y: -10 - Math.random() * 60,
+      vx: (Math.random() - 0.5) * 240, vy: 60 + Math.random() * 160,
+      rot: Math.random() * Math.PI, vr: (Math.random() - 0.5) * 8,
+      s: 8 + Math.random() * 8, color: colors[(Math.random() * colors.length) | 0],
+      life: 1.6 + Math.random() * 1.2,
+    });
+  }
+}
+
+/* ═══════════════ TRACE + RENDER LOOP ═══════════════ */
+function retrace(instant = true) {
+  if (!st.scene) return;
+  st.trace = traceScene(st.scene);
+  st.revealT = instant ? 1 : 0;
+  st.revealDur = st.teacher.slow ? 2.8 : 1.1;
+  const sat = st.trace.satisfied.size;
+  if (sat > st.lastSatisfied) {
+    Sfx.targetHit();
+    emitAction('target-lit');
+  }
+  st.lastSatisfied = sat;
+  updateHudTargets();
+  updateTeacherLive();
+  if (!st.won && st.scene.targets.length && st.scene.targets.every((t) => st.trace.satisfied.has(t.id))) {
+    onWin();
+  }
+}
+
+let lastTs = 0;
+function loop(ts) {
+  const dt = Math.min(0.05, (ts - lastTs) / 1000 || 0.016);
+  lastTs = ts;
+  st.time += dt;
+  if (st.playing && !modalOpen()) st.elapsed = (Date.now() - st.startTime) / 1000;
+
+  if (st.revealT < 1) st.revealT = Math.min(1, st.revealT + dt / st.revealDur);
+  updateConfetti(dt);
+
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.clearRect(0, 0, 960, 640);
+  ctx.drawImage(bg, 0, 0, 960, 640);
+
+  if (st.scene && st.screen === 'game') {
+    for (const w of st.scene.walls) drawWall(w);
+    for (const wt of st.scene.water) drawWater(wt);
+    for (const g of st.scene.glass) if (g.placed) drawGlass(g);
+    for (const p of st.scene.prisms) if (p.placed) drawPrism(p);
+    drawTargets();
+    drawBeam();
+    drawEvents();
+    if (st.teacher.normal || st.teacher.angles || st.teacher.nvals) drawTeacherOverlays();
+    for (const m of st.scene.mirrors) if (m.placed) drawMirror(m);
+    drawSource(st.scene.source);
+    drawHighlight();
+    drawGhost();
+    drawConfetti();
+    updateHudClock();
+  }
+  requestAnimationFrame(loop);
+}
+
+/* ── HUD sync ── */
+let lastClock = '';
+function updateHudClock() {
+  const t = fmtTime(st.elapsed);
+  if (t !== lastClock) { lastClock = t; const el = $('#hud-time'); if (el) el.textContent = t; }
+}
+function updateHudTargets() {
+  const el = $('#hud-targets');
+  if (el && st.scene) el.textContent = st.trace.satisfied.size + '/' + st.scene.targets.length;
+}
+function updateHudMoves() {
+  const el = $('#hud-moves');
+  if (el) el.textContent = String(st.moves);
+}
+function updateTeacherLive() {
+  const el = $('#td-live');
+  if (!el) return;
+  const ev = st.trace.events[st.trace.events.length - 1];
+  if (!ev) { el.textContent = 'Beam koi surface se takrai — tab yahan live physics dikhegi.'; return; }
+  if (ev.kind === 'reflect') el.innerHTML = '<b>Reflection</b> \u2014 \u2220i = ' + ev.angleIn.toFixed(1) + '\u00B0, \u2220r = ' + ev.angleOut.toFixed(1) + '\u00B0 (dono normal se. i = r \u2713)';
+  else if (ev.kind === 'refract' && !ev.dispersed) el.innerHTML = '<b>Refraction</b> \u2014 \u03B81 = ' + ev.angleIn.toFixed(1) + '\u00B0 \u2192 \u03B82 = ' + (ev.angleOut != null ? ev.angleOut.toFixed(1) + '\u00B0' : '?') + '  (n ' + ev.n1.toFixed(2) + ' \u2192 ' + ev.n2.toFixed(2) + ')';
+  else if (ev.dispersed) el.innerHTML = '<b>Dispersion!</b> White light 7 rangon mein toot gayi \u2014 har wavelength ka apna n.';
+  else if (ev.kind === 'tir') el.innerHTML = '<b>TIR!</b> \u03B8 = ' + ev.angleIn.toFixed(1) + '\u00B0 > critical 41.8\u00B0 \u2014 100% andar reflect!';
+}
+/* ═══════════════ INPUT ═══════════════ */
+function canvasPos(e) {
+  const r = cv.getBoundingClientRect();
+  return { x: (e.clientX - r.left) * 960 / r.width, y: (e.clientY - r.top) * 640 / r.height };
+}
+function knobPos(obj) {
+  const kind = st.selected ? st.selected.type : 'mirror';
+  const radius = kind === 'mirror' ? obj.length / 2 + 26 : kind === 'prism' ? obj.size / 2 + 26 : kind === 'glass' ? Math.max(obj.w, obj.h) / 2 + 26 : 58;
+  return { x: obj.pos.x + Math.cos(deg2rad(obj.angle)) * radius, y: obj.pos.y + Math.sin(deg2rad(obj.angle)) * radius };
+}
+function pickAt(p) {
+  if (st.selected) {
+    const k = knobPos(st.selected.obj);
+    if (dist(p, k) < 26) return st.selected;
+  }
+  const s = st.scene.source;
+  if (s.rotatable && dist(p, s.pos) < 34) return { type: 'source', obj: s };
+  for (const m of st.scene.mirrors) {
+    if (!m.placed) continue;
+    const [a, b] = mirrorEnds(m);
+    if (distToSeg(p, a, b) < 19) return { type: 'mirror', obj: m };
+  }
+  for (const pr of st.scene.prisms) {
+    if (!pr.placed) continue;
+    if (pointInPolygon(p, expandPoly(prismVertices(pr.pos, pr.size, pr.angle, pr.prismKind), 10))) return { type: 'prism', obj: pr };
+  }
+  for (const g of st.scene.glass) {
+    if (!g.placed) continue;
+    if (pointInPolygon(p, expandPoly(rectCorners(g.pos, g.w, g.h, g.angle), 10))) return { type: 'glass', obj: g };
+  }
+  for (const wt of st.scene.water) {
+    if (pointInPolygon(p, rectCorners(wt.pos, wt.w, wt.h, 0))) return { type: 'water', obj: wt };
+  }
+  return null;
+}
+function pushUndo() {
+  st.undo.push(JSON.stringify({ m: st.scene.mirrors, p: st.scene.prisms, g: st.scene.glass, w: st.scene.water, s: st.scene.source }));
+  if (st.undo.length > 30) st.undo.shift();
+}
+function doUndo() {
+  const snap = st.undo.pop();
+  if (!snap) { toast('Undo ke liye kuch nahi hai'); return; }
+  const d = JSON.parse(snap);
+  st.scene.mirrors = d.m; st.scene.prisms = d.p; st.scene.glass = d.g; st.scene.water = d.w || []; st.scene.source = d.s;
+  if (st.selected && !objStillThere(st.selected.obj)) st.selected = null;
+  syncControlBar();
+  Sfx.click();
+  retrace(false);
+}
+function objStillThere(o) {
+  return st.scene.mirrors.includes(o) || st.scene.prisms.includes(o) || st.scene.glass.includes(o) || st.scene.water.includes(o) || o === st.scene.source;
+}
+
+cv.addEventListener('pointerdown', (e) => {
+  Sfx.unlock();
+  if (!st.scene || st.won) return;
+  const p = canvasPos(e);
+  cv.setPointerCapture(e.pointerId);
+  // armed placement
+  if (st.armed) { placeArmed(p); return; }
+  const hit = pickAt(p);
+  if (!hit) {
+    st.selected = null;
+    syncControlBar();
+    return;
+  }
+  const obj = hit.obj;
+  const rotatable = hit.type === 'source' ? st.scene.source.rotatable : obj.rotatable !== false;
+  const movable = hit.type === 'source' ? st.scene.source.movable : obj.movable === true;
+  const nearKnob = st.selected && st.selected.obj === obj;
+  let mode;
+  if (rotatable && (nearKnob || !movable)) mode = 'rotate';
+  else if (movable) mode = 'move';
+  else if (rotatable) mode = 'rotate';
+  else mode = null;
+  if (!mode) { st.selected = null; syncControlBar(); return; }
+  pushUndo();
+  st.selected = hit;
+  st.drag = { mode, type: hit.type, obj, startPointer: p, startAngle: obj.angle, startPos: { ...obj.pos }, moved: false };
+  syncControlBar();
+  cv.classList.add('grabbing');
+});
+
+cv.addEventListener('pointermove', (e) => {
+  const p = canvasPos(e);
+  st.pointer.x = p.x; st.pointer.y = p.y; st.pointer.onCanvas = true;
+  if (!st.drag) return;
+  const d = st.drag;
+  if (d.mode === 'rotate') {
+    const a = norm360(rad2deg(Math.atan2(p.y - d.obj.pos.y, p.x - d.obj.pos.x)));
+    if (Math.abs(a - d.obj.angle) > 0.4) {
+      d.obj.angle = a;
+      d.moved = true;
+      if (st.time - (st.lastTickT || 0) > 0.07) { st.lastTickT = st.time; Sfx.tick(); }
+      retrace();
+      syncControlBar();
+    }
+  } else if (d.mode === 'move') {
+    const nx = clamp(p.x, FRAME_INSET + 26, VIRTUAL_W - FRAME_INSET - 26);
+    const ny = clamp(p.y, FRAME_INSET + 26, VIRTUAL_H - FRAME_INSET - 26);
+    if (dist({ x: nx, y: ny }, d.obj.pos) > 1.5) {
+      d.obj.pos.x = nx; d.obj.pos.y = ny;
+      d.moved = true;
+      retrace();
+    }
+  }
+});
+
+function endDrag(e) {
+  if (!st.drag) return;
+  const d = st.drag;
+  cv.classList.remove('grabbing');
+  if (d.moved) {
+    st.moves++;
+    updateHudMoves();
+    Sfx.rotate();
+    const actionMap = { source: 'source-rotate', mirror: d.mode === 'move' ? 'mirror-move' : 'mirror-rotate', prism: d.mode === 'move' ? 'prism-move' : 'prism-rotate', glass: d.mode === 'move' ? 'glass-move' : 'glass-rotate', water: 'water-move' };
+    emitAction(actionMap[d.type]);
+  } else {
+    st.undo.pop(); // no change — drop snapshot
+  }
+  st.drag = null;
+}
+cv.addEventListener('pointerup', endDrag);
+cv.addEventListener('pointercancel', endDrag);
+cv.addEventListener('pointerleave', () => { st.pointer.onCanvas = false; });
+cv.addEventListener('contextmenu', (e) => e.preventDefault());
+
+/* keyboard */
+window.addEventListener('keydown', (e) => {
+  if (st.screen !== 'game' || !st.scene) return;
+  if (modalOpen() && e.key !== 'Escape') return;
+  if (e.key === 'Escape') {
+    if (st.armed) { st.armed = null; syncToolbelt(); }
+    else if (st.selected) { st.selected = null; syncControlBar(); }
+    return;
+  }
+  if (!st.selected) return;
+  const obj = st.selected.obj;
+  const step = e.shiftKey ? 5 : 1;
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+    e.preventDefault();
+    const rotatable = st.selected.type === 'source' ? st.scene.source.rotatable : obj.rotatable !== false;
+    if (!rotatable) return;
+    pushUndo();
+    obj.angle = norm360(obj.angle + (e.key === 'ArrowRight' ? step : -step));
+    st.moves++; updateHudMoves();
+    retrace(); syncControlBar();
+    const m = { source: 'source-rotate', mirror: 'mirror-rotate', prism: 'prism-rotate', glass: 'glass-rotate' };
+    emitAction(m[st.selected.type]);
+  } else if ('wasd'.includes(e.key.toLowerCase()) && st.selected.type !== 'source' && obj.movable === true) {
+    e.preventDefault();
+    pushUndo();
+    const dd = { w: [0, -8], s: [0, 8], a: [-8, 0], d: [8, 0] }[e.key.toLowerCase()];
+    obj.pos.x = clamp(obj.pos.x + dd[0], FRAME_INSET + 26, VIRTUAL_W - FRAME_INSET - 26);
+    obj.pos.y = clamp(obj.pos.y + dd[1], FRAME_INSET + 26, VIRTUAL_H - FRAME_INSET - 26);
+    st.moves++; updateHudMoves();
+    retrace();
+  }
+});
+
+/* control bar (slider + fine buttons) */
+function syncControlBar() {
+  const bar = $('#control-bar');
+  if (!st.selected) { bar.classList.remove('show'); return; }
+  bar.classList.add('show');
+  const names = { source: 'SOURCE', mirror: 'MIRROR', prism: 'PRISM', glass: 'GLASS' };
+  $('#cb-name').textContent = names[st.selected.type];
+  $('#cb-angle').textContent = Math.round(norm360(st.selected.obj.angle)) + '\u00B0';
+  $('#cb-slider').value = Math.round(norm360(st.selected.obj.angle));
+}
+$('#cb-slider').addEventListener('pointerdown', () => { if (st.selected) pushUndo(); });
+$('#cb-slider').addEventListener('input', (e) => {
+  if (!st.selected) return;
+  const obj = st.selected.obj;
+  const rotatable = st.selected.type === 'source' ? st.scene.source.rotatable : obj.rotatable !== false;
+  if (!rotatable) return;
+  obj.angle = Number(e.target.value);
+  st.changed = true;
+  retrace();
+  $('#cb-angle').textContent = Math.round(norm360(obj.angle)) + '\u00B0';
+});
+$('#cb-slider').addEventListener('change', () => {
+  if (!st.selected || !st.changed) return;
+  st.changed = false;
+  st.moves++; updateHudMoves(); Sfx.rotate();
+  const m = { source: 'source-rotate', mirror: 'mirror-rotate', prism: 'prism-rotate', glass: 'glass-rotate' };
+  emitAction(m[st.selected.type]);
+});
+$$('.cb-fine button').forEach((b) => {
+  b.addEventListener('click', () => {
+    if (!st.selected) return;
+    const obj = st.selected.obj;
+    const rotatable = st.selected.type === 'source' ? st.scene.source.rotatable : obj.rotatable !== false;
+    if (!rotatable) return;
+    pushUndo();
+    obj.angle = norm360(obj.angle + Number(b.dataset.d));
+    st.moves++; updateHudMoves(); Sfx.tick();
+    retrace(); syncControlBar();
+    const m = { source: 'source-rotate', mirror: 'mirror-rotate', prism: 'prism-rotate', glass: 'glass-rotate' };
+    emitAction(m[st.selected.type]);
+  });
+});
+
+/* ═══════════════ TOOLBELT ═══════════════ */
+function syncToolbelt() {
+  const tb = $('#toolbelt');
+  const t = st.level.toolbelt || {};
+  const defs = [
+    { key: 'mirror', label: 'Mirror', svg: '#i-mirror' },
+    { key: 'prism', label: 'Prism', svg: '#i-prism' },
+    { key: 'glass', label: 'Glass', svg: '#i-glass' },
+    { key: 'water', label: 'Paani', svg: '#i-water' },
+  ];
+  let html = '';
+  for (const d of defs) {
+    const count = t[d.key] || 0;
+    if (count <= 0) continue;
+    const armed = st.armed === d.key;
+    const pulse = st.tut.active && (TUTORIALS[st.level.id] || [])[st.tut.idx] && (TUTORIALS[st.level.id][st.tut.idx].highlight === 'toolbelt-' + d.key);
+    html += '<button class="tool-btn' + (armed ? ' armed' : '') + (pulse ? ' pulse' : '') + '" data-tool="' + d.key + '"' + (count <= 0 ? ' disabled' : '') + '>' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="' + d.svg + '"/></svg>' +
+      d.label + ' <span class="tool-count">' + (count >= 99 ? '\u221E' : count) + '</span></button>';
+  }
+  tb.innerHTML = html || '<span style="font-size:12px;color:var(--muted);padding:6px">Is level mein sab objects diye gaye hain — unhe select karke drag/rotate karo</span>';
+  $$('#toolbelt .tool-btn').forEach((b) => {
+    b.addEventListener('click', () => {
+      Sfx.click();
+      const key = b.dataset.tool;
+      st.armed = st.armed === key ? null : key;
+      syncToolbelt();
+      if (st.armed) emitAction('pick-' + key);
+    });
+  });
+}
+function placeArmed(p) {
+  const key = st.armed;
+  pushUndo();
+  const id = key[0] + Date.now().toString(36).slice(-4);
+  if (key === 'mirror') {
+    st.scene.mirrors.push({ id, pos: { ...p }, angle: 45, length: 110, movable: true, rotatable: true, placed: true });
+  } else if (key === 'prism') {
+    st.scene.prisms.push({ id, pos: { ...p }, size: 200, angle: 0, prismKind: st.level.toolbelt.prismKind || 'equilateral', movable: true, rotatable: true, placed: true });
+  } else if (key === 'glass') {
+    st.scene.glass.push({ id, pos: { ...p }, w: 190, h: 130, angle: 0, n: 1.5, movable: true, rotatable: true, placed: true });
+  } else if (key === 'water') {
+    st.scene.water.push({ id, kind: 'water', pos: { ...p }, w: 230, h: 150, n: 1.33, movable: true, rotatable: false });
+  }
+  if ((st.level.toolbelt[key] || 0) < 99) st.level.toolbelt[key]--;
+  st.armed = null;
+  st.moves++; updateHudMoves();
+  Sfx.place();
+  syncToolbelt();
+  retrace(false);
+  emitAction('place-' + key);
+}
+
+/* ═══════════════ MISSION STRIP — ek baar mein EK chhota step ═══════════════ */
+function missionIdle() {
+  if (!st.level) return;
+  const m = $('#mission');
+  m.classList.add('show', 'idle');
+  $('#ms-text').textContent = '\u2709 ' + st.level.objective;
+  $('#ms-tip').style.display = 'none';
+  $('#ms-dots').innerHTML = '';
+  $('#ms-cta').style.display = 'none';
+}
+function startTutorial() {
+  const steps = TUTORIALS[st.level.id];
+  if (!steps || st.teacher.challenge || (st.progress.levels[st.level.id] && st.progress.levels[st.level.id].tutDone)) {
+    st.tut.active = false;
+    missionIdle();
+    return;
+  }
+  st.tut = { active: true, idx: 0 };
+  showCoachStep();
+}
+function showCoachStep() {
+  const steps = TUTORIALS[st.level.id] || [];
+  const step = steps[st.tut.idx];
+  if (!step) { st.tut.active = false; missionIdle(); return; }
+  const m = $('#mission');
+  m.classList.add('show');
+  m.classList.remove('idle');
+  $('#ms-text').textContent = step.text;
+  $('#ms-tip').textContent = step.tip || '';
+  $('#ms-tip').style.display = step.tip ? '' : 'none';
+  $('#ms-dots').innerHTML = steps.map((_, i) => '<i class="' + (i < st.tut.idx ? 'done' : i === st.tut.idx ? 'now' : '') + '"></i>').join('');
+  const cta = $('#ms-cta');
+  if (step.expect === 'tap') { cta.style.display = ''; cta.textContent = step.cta || 'Got it!'; }
+  else cta.style.display = 'none';
+  Sfx.coach();
+}
+function advanceTutorial() {
+  const steps = TUTORIALS[st.level.id] || [];
+  st.tut.idx++;
+  if (st.tut.idx >= steps.length) {
+    st.tut.active = false;
+    missionIdle();
+    markTutDone();
+    return;
+  }
+  showCoachStep();
+}
+function markTutDone() {
+  const d = Progress.load();
+  d.levels = d.levels || {};
+  d.levels[st.level.id] = Object.assign({}, d.levels[st.level.id], { tutDone: true });
+  st.progress = d;
+  Progress.save(d);
+}
+function hideCoach() { $('#mission').classList.remove('show'); }
+function emitAction(name) {
+  if (!st.tut.active) return;
+  const step = (TUTORIALS[st.level.id] || [])[st.tut.idx];
+  if (!step || step.expect === 'tap') return;
+  if (step.expect === name || (step.accept || []).includes(name)) {
+    setTimeout(() => { if (st.tut.active) advanceTutorial(); }, 450);
+  }
+}
+$('#ms-cta').addEventListener('click', () => { Sfx.click(); advanceTutorial(); });
+$('#ms-skip').addEventListener('click', () => { st.tut.active = false; hideCoach(); missionIdle(); markTutDone(); Sfx.click(); });
+
+/* ═══════════════ HINTS ═══════════════ */
+$('#btn-hint').addEventListener('click', () => {
+  Sfx.click();
+  const pop = $('#hint-pop');
+  pop.classList.toggle('show');
+  renderHints();
+});
+function renderHints() {
+  const hints = (LEVEL_CONTENT[st.level.id] || {}).hints || [];
+  const el = $('#hint-list');
+  el.innerHTML = hints.map((h, i) => {
+    if (i < st.revealedHints) return '<button class="hint-tier revealed" disabled>' + esc(h) + '</button>';
+    if (i === st.revealedHints) return '<button class="hint-tier" data-tier="' + i + '">Hint ' + (i + 1) + ' kholo' + (i === 0 ? '' : ' (pehle wale kholne padenge)') + '</button>';
+    return '<button class="hint-tier" disabled>Hint ' + (i + 1) + ' — locked</button>';
+  }).join('') + '<div class="hint-warning">Hint lene par stars kam milenge — par seekhna zyada important hai!</div>';
+  $$('#hint-list .hint-tier[data-tier]').forEach((b) => {
+    b.addEventListener('click', () => {
+      st.hintsUsed++;
+      st.revealedHints++;
+      Sfx.hint();
+      renderHints();
+    });
+  });
+}
+
+/* ═══════════════ TOAST ═══════════════ */
+let toastTimer = null;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+/* ═══════════════ MODAL HELPERS ═══════════════ */
+function modalOpen() {
+  return $$('.modal-veil.show').length > 0;
+}
+function openModal(id) { $(id).classList.add('show'); }
+function closeModal(id) { $(id).classList.remove('show'); }
+
+/* ═══════════════ ACT 1 — LEARN (concept + live animated demo) ═══════════════ */
+function setAct(a) {
+  st.act = a;
+  const el = $('#act-banner');
+  if (!el) return;
+  const map = { learn: ['1', 'SEEKHO'], do: ['2', 'KARO'], party: ['3', 'PARTY!'] };
+  if (a) { el.style.display = 'flex'; el.innerHTML = '<b>' + map[a][0] + '</b>&nbsp;' + map[a][1]; }
+  else el.style.display = 'none';
+}
+
+const DemoEngine = (() => {
+  let raf = 0, c = null, x = null, key = null, t0 = 0;
+  const DPR2 = Math.min(window.devicePixelRatio || 1, 2);
+  function start(canvas, k) {
+    stop();
+    c = canvas; key = k;
+    c.width = 640 * DPR2; c.height = 280 * DPR2;
+    x = c.getContext('2d');
+    t0 = performance.now();
+    tick();
+  }
+  function stop() {
+    if (raf) cancelAnimationFrame(raf);
+    raf = 0;
+    if (x) { x.clearRect(0, 0, 640, 280); x = null; }
+  }
+  function tick() {
+    if (!x) return;
+    const t = (performance.now() - t0) / 1000;
+    x.setTransform(DPR2, 0, 0, DPR2, 0, 0);
+    x.clearRect(0, 0, 640, 280);
+    x.fillStyle = 'rgba(9,15,28,0.92)'; x.fillRect(0, 0, 640, 280);
+    x.strokeStyle = 'rgba(140,165,220,0.07)'; x.lineWidth = 1;
+    for (let gx = 20; gx < 640; gx += 40) { x.beginPath(); x.moveTo(gx, 0); x.lineTo(gx, 280); x.stroke(); }
+    for (let gy = 20; gy < 280; gy += 40) { x.beginPath(); x.moveTo(0, gy); x.lineTo(640, gy); x.stroke(); }
+    (DEMOS[key] || DEMOS.straight)(t);
+    raf = requestAnimationFrame(tick);
+  }
+  /* ── primitives ── */
+  function line(a, b, hex, w1) {
+    x.save();
+    x.globalCompositeOperation = 'lighter';
+    x.strokeStyle = hex; x.globalAlpha = 0.14; x.lineWidth = (w1 || 2) * 3.2;
+    x.beginPath(); x.moveTo(a.x, a.y); x.lineTo(b.x, b.y); x.stroke();
+    x.globalAlpha = 0.92; x.lineWidth = w1 || 2;
+    x.beginPath(); x.moveTo(a.x, a.y); x.lineTo(b.x, b.y); x.stroke();
+    x.restore();
+  }
+  function dot(p, hex, r) {
+    x.save(); x.fillStyle = hex; x.shadowColor = hex; x.shadowBlur = 10;
+    x.beginPath(); x.arc(p.x, p.y, r || 3, 0, Math.PI * 2); x.fill(); x.restore();
+  }
+  function ring(p, r, hex, lit) {
+    x.save(); x.strokeStyle = hex; x.globalAlpha = lit ? 0.95 : 0.4; x.lineWidth = 3;
+    if (lit) { x.shadowColor = hex; x.shadowBlur = 14; }
+    x.beginPath(); x.arc(p.x, p.y, r + (lit ? Math.sin(performance.now() / 300) * 2 : 0), 0, Math.PI * 2); x.stroke();
+    x.restore();
+  }
+  function seg(a, b, color, w1) {
+    x.save(); x.strokeStyle = color; x.lineWidth = w1 || 7; x.lineCap = 'round';
+    x.beginPath(); x.moveTo(a.x, a.y); x.lineTo(b.x, b.y); x.stroke(); x.restore();
+  }
+  function mirror(cx, cy, ang, ln) {
+    const d = { x: Math.cos(ang), y: Math.sin(ang) };
+    seg({ x: cx - d.x * ln, y: cy - d.y * ln }, { x: cx + d.x * ln, y: cy + d.y * ln }, '#8fa9cc', 6);
+    seg({ x: cx - d.x * ln, y: cy - d.y * ln - 1.5 }, { x: cx + d.x * ln, y: cy + d.y * ln - 1.5 }, 'rgba(255,255,255,0.75)', 1.4);
+  }
+  function normal(p, ang, ln) {
+    const n = { x: Math.cos(ang + Math.PI / 2), y: Math.sin(ang + Math.PI / 2) };
+    x.save(); x.strokeStyle = 'rgba(245,184,74,0.55)'; x.setLineDash([5, 5]); x.lineWidth = 1.4;
+    x.beginPath(); x.moveTo(p.x - n.x * ln, p.y - n.y * ln); x.lineTo(p.x + n.x * ln, p.y + n.y * ln); x.stroke(); x.restore();
+  }
+  function label(txt, p, hex) {
+    x.save(); x.fillStyle = hex || 'rgba(255,222,160,0.95)';
+    x.font = '700 13px Poppins, sans-serif'; x.textAlign = 'center'; x.fillText(txt, p.x, p.y); x.restore();
+  }
+  function slab(cx, cy, w, h, tint, name) {
+    x.save(); x.fillStyle = tint; x.fillRect(cx - w / 2, cy - h / 2, w, h);
+    x.strokeStyle = 'rgba(150,225,255,0.5)'; x.lineWidth = 2; x.strokeRect(cx - w / 2, cy - h / 2, w, h);
+    x.fillStyle = 'rgba(190,235,255,0.85)'; x.font = '700 12px Poppins, sans-serif'; x.textAlign = 'center';
+    x.fillText(name, cx, cy + 4); x.restore();
+  }
+  function poly3(a, b, cpt) {
+    x.save(); x.beginPath(); x.moveTo(a.x, a.y); x.lineTo(b.x, b.y); x.lineTo(cpt.x, cpt.y); x.closePath();
+    x.fillStyle = 'rgba(190,150,255,0.13)'; x.fill();
+    x.strokeStyle = 'rgba(230,210,255,0.8)'; x.lineWidth = 2.2; x.stroke(); x.restore();
+  }
+  function prism(cx, cy, size, ang) {
+    const R = size / Math.sqrt(3);
+    const raw = [{ x: 0, y: -R }, { x: size / 2, y: R / 2 }, { x: -size / 2, y: R / 2 }];
+    const c1 = Math.cos(ang), s1 = Math.sin(ang);
+    const pts = raw.map((p) => ({ x: cx + p.x * c1 - p.y * s1, y: cy + p.x * s1 + p.y * c1 }));
+    poly3(pts[0], pts[1], pts[2]);
+    return pts;
+  }
+  function srcBox(p, ang) {
+    x.save(); x.translate(p.x, p.y); x.rotate(ang);
+    x.fillStyle = '#2c4a78'; x.strokeStyle = 'rgba(150,190,255,0.7)'; x.lineWidth = 1.6;
+    x.beginPath();
+    if (x.roundRect) x.roundRect(-18, -11, 30, 22, 6); else x.rect(-18, -11, 30, 22);
+    x.fill(); x.stroke();
+    x.fillStyle = '#d9f7ff'; x.beginPath(); x.arc(10, 0, 3, 0, Math.PI * 2); x.fill();
+    x.restore();
+  }
+  function reveal(t, T, hold) { const cyc = t % T; return Math.min(1, cyc / (T - (hold || 0.6))); }
+  function along(pts, f) {
+    let total = 0; const L = [];
+    for (let i = 1; i < pts.length; i++) { const l = Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y); L.push(l); total += l; }
+    let d = Math.max(0, Math.min(1, f)) * total;
+    for (let i = 0; i < L.length; i++) {
+      if (d <= L[i] || i === L.length - 1) { const k = L[i] ? Math.min(1, d / L[i]) : 0; return { x: pts[i].x + (pts[i + 1].x - pts[i].x) * k, y: pts[i].y + (pts[i + 1].y - pts[i].y) * k }; }
+      d -= L[i];
+    }
+    return pts[pts.length - 1];
+  }
+  function walkLines(pts, f, hex, w1) {
+    let total = 0; const L = [];
+    for (let i = 1; i < pts.length; i++) { const l = Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y); L.push(l); total += l; }
+    let d = Math.max(0, Math.min(1, f)) * total;
+    for (let i = 0; i < L.length; i++) {
+      const k = Math.min(1, d / L[i]);
+      if (k > 0.001) line(pts[i], { x: pts[i].x + (pts[i + 1].x - pts[i].x) * k, y: pts[i].y + (pts[i + 1].y - pts[i].y) * k }, hex, w1);
+      d -= L[i];
+      if (d <= 0) break;
+    }
+  }
+  /* ── the concept demos (visually accurate vignettes) ── */
+  const DEMOS = {
+    straight(t) {
+      const s = { x: 80, y: 150 }, tg = { x: 560, y: 150 };
+      srcBox(s, 0); ring(tg, 26, '#3D9BFF', true);
+      const f = reveal(t, 2.4, 0.5);
+      walkLines([s, tg], f, '#F5F8FF', 2.2);
+      if (f < 1) dot(along([s, tg], f), '#F5F8FF');
+      label('seedhi line \u2014 no bend!', { x: 320, y: 116 }, 'rgba(170,200,255,0.75)');
+    },
+    reflection(t) {
+      const m = { x: 360, y: 212 }, s = { x: 80, y: 212 }, up = { x: 360, y: 52 };
+      mirror(m.x, m.y, -Math.PI / 4, 72); normal(m, -Math.PI / 4, 48);
+      ring(up, 22, '#3DFC82', true);
+      const pts = [s, m, up], f = reveal(t, 2.6, 0.5);
+      walkLines(pts, f, '#F5F8FF', 2.2); if (f < 1) dot(along(pts, f), '#F5F8FF');
+      label('i', { x: 316, y: 196 }, '#f5b84a'); label('r', { x: 404, y: 196 }, '#f5b84a');
+      label('i = r', { x: 470, y: 130 }, 'rgba(255,222,160,0.95)');
+    },
+    angles(t) {
+      const m = { x: 330, y: 190 };
+      const th = (-45 + 26 * Math.sin(t * 0.9)) * Math.PI / 180;
+      mirror(m.x, m.y, th, 78); normal(m, th, 52);
+      const s = { x: 80, y: 190 };
+      line(s, m, '#F5F8FF', 2.2);
+      const out = 2 * th, L2 = 215;
+      line(m, { x: m.x + Math.cos(out) * L2, y: m.y + Math.sin(out) * L2 }, '#F5F8FF', 2.2);
+      const topLit = Math.abs(out - (-Math.PI / 2)) < 0.13;
+      ring({ x: 330, y: 44 }, 22, '#FF9C30', topLit);
+      label('\u2220i = \u2220r', { x: 252, y: 162 }, 'rgba(255,222,160,0.95)');
+      if (topLit) label('90\u00B0 turn!', { x: 412, y: 74 }, '#7CFC9E');
+    },
+    multiMirror(t) {
+      const m1 = { x: 210, y: 228 }, m2 = { x: 210, y: 95 };
+      mirror(m1.x, m1.y, -Math.PI / 4, 55); mirror(m2.x, m2.y, -Math.PI / 4, 55);
+      const s = { x: 70, y: 228 }, ringP = { x: 480, y: 95 };
+      ring(ringP, 22, '#3D9BFF', true);
+      const pts = [s, m1, m2, ringP], f = reveal(t, 2.8, 0.6);
+      walkLines(pts, f, '#F5F8FF', 2.2); if (f < 1) dot(along(pts, f), '#F5F8FF');
+      label('bounce 1', { x: 128, y: 258 }, 'rgba(170,200,255,0.7)');
+      label('bounce 2', { x: 128, y: 66 }, 'rgba(170,200,255,0.7)');
+    },
+    maze(t) {
+      [[180, 40, 180, 150], [180, 200, 180, 250], [330, 40, 330, 120], [330, 170, 330, 250], [480, 40, 480, 100], [480, 150, 480, 250]]
+        .forEach(([x1, y1, x2, y2]) => seg({ x: x1, y: y1 }, { x: x2, y: y2 }, '#a8623f', 7));
+      const path = [{ x: 60, y: 250 }, { x: 180, y: 175 }, { x: 330, y: 145 }, { x: 480, y: 125 }, { x: 588, y: 220 }];
+      ring({ x: 588, y: 220 }, 22, '#3DFC82', true);
+      path.slice(1, -1).forEach((p) => mirror(p.x, p.y, -Math.PI / 4, 32));
+      const f = reveal(t, 3.0, 0.6);
+      walkLines(path, f, '#F5F8FF', 2.2); if (f < 1) dot(along(path, f), '#F5F8FF');
+    },
+    refraction(t) {
+      slab(330, 150, 230, 120, 'rgba(110,210,255,0.10)', 'GLASS n=1.5');
+      const S = { x: 110, y: 10 }, E = { x: 230, y: 90 }, X2 = { x: 310, y: 210 }, OUT = { x: 385, y: 262 };
+      x.save(); x.strokeStyle = 'rgba(255,255,255,0.22)'; x.setLineDash([6, 6]); x.lineWidth = 1.4;
+      x.beginPath(); x.moveTo(E.x, E.y);
+      x.lineTo(E.x + (260 - 90) / 0.555 * 0.832, E.y + (260 - 90) / 0.555 * 0.555);
+      x.stroke(); x.restore();
+      normal(E, 0, 46);
+      const pts = [S, E, X2, OUT], f = reveal(t, 3.0, 0.6);
+      walkLines(pts, f, '#F5F8FF', 2.2); if (f < 1) dot(along(pts, f), '#F5F8FF');
+      label('andar bend', { x: 268, y: 150 }, 'rgba(255,222,160,0.9)');
+      label('bahar lateral shift', { x: 470, y: 236 }, 'rgba(170,200,255,0.75)');
+      ring(OUT, 18, '#3D9BFF', true);
+    },
+    mediumCompare(t) {
+      slab(300, 105, 250, 85, 'rgba(64,150,255,0.16)', 'PAANI n=1.33');
+      slab(300, 195, 250, 85, 'rgba(110,210,255,0.10)', 'GLASS n=1.5');
+      const S = { x: 140, y: 15 }, E1 = { x: 210, y: 62 }, E2 = { x: 278, y: 148 }, E3 = { x: 338, y: 238 }, OUT = { x: 374, y: 264 };
+      const pts = [S, E1, E2, E3, OUT], f = reveal(t, 3.0, 0.6);
+      walkLines(pts, f, '#F5F8FF', 2.2); if (f < 1) dot(along(pts, f), '#F5F8FF');
+      label('glass = zyada bend', { x: 500, y: 175 }, 'rgba(255,222,160,0.95)');
+      ring(OUT, 18, '#3D9BFF', true);
+    },
+    dispersion(t) {
+      const wob = 0.05 * Math.sin(t * 0.7);
+      prism(300, 130, 140, wob);
+      const S = { x: 70, y: 95 }, E = { x: 256, y: 118 }, F = { x: 356, y: 152 };
+      line(S, E, '#F5F8FF', 2.2);
+      SPECTRUM.forEach((sp, i) => {
+        const a = (-0.26 + i * 0.105) + wob;
+        line(F, { x: F.x + Math.cos(a) * (205 - i * 6), y: F.y + Math.sin(a) * (205 - i * 6) }, sp.hex, 2);
+      });
+      label('white in', { x: 140, y: 72 }, 'rgba(170,200,255,0.75)');
+      label('7 colors out!', { x: 480, y: 226 }, 'rgba(255,222,160,0.9)');
+    },
+    tir(t) {
+      poly3({ x: 300, y: 120 }, { x: 180, y: 240 }, { x: 300, y: 240 });
+      normal({ x: 240, y: 180 }, -Math.PI / 4, 42);
+      const S = { x: 240, y: 272 }, P = { x: 240, y: 180 }, EX = { x: 300, y: 180 }, TG = { x: 440, y: 180 };
+      ring(TG, 22, '#3DFC82', true);
+      const pts = [S, P, EX, TG], f = reveal(t, 2.8, 0.6);
+      walkLines(pts, f, '#F5F8FF', 2.2); if (f < 1) dot(along(pts, f), '#F5F8FF');
+      label('TIR! 45\u00B0 > 41.8\u00B0', { x: 150, y: 168 }, '#ffd98a');
+      label('100% andar reflect', { x: 210, y: 258 }, 'rgba(170,200,255,0.75)');
+    },
+    master(t) {
+      const m1 = { x: 130, y: 235 };
+      mirror(m1.x, m1.y, -Math.PI / 4, 46);
+      prism(165, 90, 78, 0.03 * Math.sin(t * 0.8));
+      ring({ x: 500, y: 135 }, 20, '#FF9C30', true);
+      ring({ x: 500, y: 200 }, 20, '#3D9BFF', true);
+      const f = reveal(t, 3.2, 0.8);
+      walkLines([{ x: 45, y: 235 }, m1, { x: 130, y: 130 }], Math.min(1, f * 1.6), '#F5F8FF', 2.2);
+      const F = { x: 198, y: 100 };
+      SPECTRUM.slice(0, 5).forEach((sp, i) => {
+        const a = 0.12 + i * 0.125;
+        line(F, { x: F.x + Math.cos(a) * 240, y: F.y + Math.sin(a) * 240 }, sp.hex, 1.8);
+      });
+      label('mirror + prism = MASTER combo', { x: 320, y: 252 }, 'rgba(255,222,160,0.9)');
+    },
+    sandbox(t) {
+      const wob = 0.1 * Math.sin(t * 0.9);
+      prism(280, 140, 130, wob);
+      line({ x: 60, y: 110 }, { x: 235, y: 128 }, '#F5F8FF', 2.2);
+      SPECTRUM.forEach((sp, i) => {
+        const a = -0.2 + i * 0.11 + wob;
+        line({ x: 330, y: 158 }, { x: 330 + Math.cos(a) * 190, y: 158 + Math.sin(a) * 190 }, sp.hex, 1.8);
+      });
+      mirror(548, 66, Math.PI / 4, 42);
+      line({ x: 508, y: 102 }, { x: 548, y: 66 }, SPECTRUM[6].hex, 1.8);
+      line({ x: 548, y: 66 }, { x: 586, y: 104 }, SPECTRUM[6].hex, 1.8);
+      label('teri apni lab \u2014 kuch bhi try karo!', { x: 320, y: 254 }, 'rgba(170,200,255,0.8)');
+    },
+  };
+  return { start, stop };
+})();
+
+/* ── LEARN modal ── */
+function showLearn(level) {
+  const L = LEARN_STEPS[level.id] || LEARN_STEPS[1];
+  $('#learn-kicker').textContent = level.sandbox ? 'FREE PLAY LAB' : UI_COPY.learnKicker;
+  $('#learn-title').textContent = level.title;
+  $('#learn-lines').innerHTML = L.lines.map((l) => '<li>' + esc(l) + '</li>').join('');
+  $('#learn-real').textContent = L.real;
+  $('#learn-formula').textContent = L.formula;
+  $('#learn-skip').style.display = (st.progress.levels[level.id] && st.progress.levels[level.id].completed) ? '' : 'none';
+  setAct('learn');
+  openModal('#modal-learn');
+  Sfx.coach();
+  setTimeout(() => DemoEngine.start($('#learn-canvas'), level.conceptKey), 80);
+}
+function beginPlay() {
+  st.playing = true;
+  st.startTime = Date.now() - st.elapsed * 1000;
+  setAct('do');
+  retrace(false);
+  startTutorial();
+}
+$('#learn-next').addEventListener('click', () => { Sfx.click(); DemoEngine.stop(); closeModal('#modal-learn'); beginPlay(); });
+$('#learn-skip').addEventListener('click', () => { Sfx.click(); DemoEngine.stop(); closeModal('#modal-learn'); beginPlay(); });
+
+/* win flow */
+function onWin() {
+  st.won = true;
+  st.playing = false;
+  emitAction('win');
+  if (!st.level.sandbox) setAct('party');
+  if (st.level.sandbox) {
+    burstConfetti(70);
+    Sfx.targetHit();
+    toast('Ring jala! Mast experiment, bhai!');
+    setTimeout(() => { st.won = false; }, 1500);
+    return;
+  }
+  burstConfetti(130);
+  Sfx.win();
+  markTutDone();
+  saveWin();
+  setTimeout(showWinModal, 1000);
+}
+function saveWin() {
+  const d = Progress.load();
+  d.levels = d.levels || {};
+  const prev = d.levels[st.level.id] || { completed: false, stars: 0, bestScore: 0, tutDone: false };
+  const stars = Progress.stars(st.hintsUsed);
+  const score = Progress.score(st.hintsUsed, st.moves, st.quizBonus);
+  d.levels[st.level.id] = {
+    completed: true,
+    stars: Math.max(prev.stars || 0, stars),
+    bestScore: Math.max(prev.bestScore || 0, score),
+    tutDone: true,
+  };
+  const badge = st.level.badge;
+  if (badge && !(d.badges || []).includes(badge)) d.badges = [...(d.badges || []), badge];
+  st.progress = d;
+  Progress.save(d);
+}
+function showWinModal() {
+  const level = st.level;
+  const content = LEVEL_CONTENT[level.id] || { win: '' };
+  const stars = Progress.stars(st.hintsUsed);
+  const score = Progress.score(st.hintsUsed, st.moves, st.quizBonus);
+  $('#win-kicker').textContent = UI_COPY.winKicker;
+  $('#win-title').textContent = level.id === 10 ? UI_COPY.masterTitle + '!' : UI_COPY.levelComplete;
+  $('#win-learnt').innerHTML = (LEARNT[level.id] || []).map((l) => '<span class="learnt-chip">' + esc(l) + '</span>').join('');
+  $('#win-sub').textContent = level.id === 10 ? UI_COPY.masterMsg : 'Level ' + level.id + ' \u2014 ' + level.title;
+  const starSvg = (lit, delay) => '<svg class="' + (lit ? 'lit' : '') + '" style="animation-delay:' + delay + 's" viewBox="0 0 24 24" fill="#f5b84a"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17l-6.2 3.9 1.6-7L2 9.2l7.1-.6z"/></svg>';
+  $('#win-stars').innerHTML = starSvg(stars >= 1, 0) + starSvg(stars >= 2, 0.18) + starSvg(stars >= 3, 0.36);
+  if (stars >= 1) Sfx.star();
+  $('#win-badge').style.display = level.badge ? '' : 'none';
+  $('#wb-name').textContent = 'Badge mila: ' + (level.badge || '');
+  $('#wb-sub').textContent = 'Concept mastered — ye badge tumhari collection mein jud gaya!';
+  $('#win-science').textContent = content.win;
+  const q = content.quiz;
+  const qb = $('#win-quiz');
+  if (q) {
+    qb.style.display = '';
+    $('#quiz-q').textContent = q.q;
+    const opts = $('#quiz-opts');
+    opts.innerHTML = '';
+    $('#quiz-explain').textContent = '';
+    q.options.forEach((opt, i) => {
+      const b = document.createElement('button');
+      b.className = 'quiz-opt';
+      b.textContent = opt;
+      b.addEventListener('click', () => {
+        const right = i === q.answer;
+        $$('#quiz-opts .quiz-opt').forEach((x) => (x.disabled = true));
+        b.classList.add(right ? 'right' : 'wrong');
+        $$('#quiz-opts .quiz-opt')[q.answer].classList.add('right');
+        $('#quiz-explain').textContent = (right ? 'Sahi jawab! ' : 'Oops! Sahi jawab highlight hai. ') + q.explain;
+        if (right) {
+          st.quizBonus = 150;
+          Sfx.quizRight();
+          $('#win-score').textContent = Progress.score(st.hintsUsed, st.moves, st.quizBonus);
+        } else Sfx.quizWrong();
+      });
+      opts.appendChild(b);
+    });
+  } else qb.style.display = 'none';
+  $('#win-score').textContent = score;
+  $('#win-moves').textContent = st.moves;
+  $('#win-time').textContent = fmtTime(st.elapsed);
+  $('#win-next').textContent = level.id >= 10 ? 'Level Map' : 'Next Level \u2192';
+  openModal('#modal-win');
+}
+$('#win-replay').addEventListener('click', () => { Sfx.click(); closeModal('#modal-win'); loadLevel(st.level.id, true); });
+$('#win-map').addEventListener('click', () => { Sfx.click(); closeModal('#modal-win'); showScreen('map'); });
+$('#win-next').addEventListener('click', () => {
+  Sfx.click();
+  closeModal('#modal-win');
+  if (st.level.id >= 10) showScreen('map');
+  else loadLevel(st.level.id + 1, true);
+});
+
+/* concepts modal */
+$('#btn-concepts').addEventListener('click', () => { Sfx.click(); renderConcepts(); openModal('#modal-concepts'); });
+$('#concepts-close').addEventListener('click', () => { Sfx.click(); closeModal('#modal-concepts'); });
+function renderConcepts() {
+  $('#concept-list').innerHTML = CONCEPT_CARDS.map((c) =>
+    '<div class="concept-item"><h3>' + c.title + '</h3><div class="ci-tag">' + c.tagline + '</div>' +
+    c.paragraphs.map((p) => '<p>' + esc(p) + '</p>').join('') +
+    '<div class="formula-chip">' + c.formula + '</div></div>'
+  ).join('');
+}
+
+/* teacher drawer */
+$('#btn-teacher').addEventListener('click', () => { Sfx.click(); $('#teacher-drawer').classList.toggle('open'); $('#btn-teacher').classList.toggle('on'); });
+$('#td-close').addEventListener('click', () => { $('#teacher-drawer').classList.remove('open'); $('#btn-teacher').classList.remove('on'); });
+$('#td-notes-text').textContent = '';
+[['td-normal', 'normal'], ['td-angles', 'angles'], ['td-nvals', 'nvals'], ['td-slow', 'slow']].forEach(([id, key]) => {
+  $('#' + id).addEventListener('change', (e) => {
+    st.teacher[key] = e.target.checked;
+    retrace(true);
+  });
+});
+$('#td-challenge').addEventListener('change', (e) => {
+  st.teacher.challenge = e.target.checked;
+  if (st.teacher.challenge) { hideCoach(); st.revealedHints = 0; $('#hint-pop').classList.remove('show'); $('#btn-hint').disabled = true; toast('Student Challenge ON — coach band, khud try karo!'); }
+  else { $('#btn-hint').disabled = false; startTutorial(); }
+});
+function syncTeacherDrawer() {
+  $('#td-notes-text').textContent = (LEVEL_CONTENT[st.level.id] || {}).teacherNotes || '';
+}
+
+/* top-bar actions */
+$('#btn-map').addEventListener('click', () => { Sfx.click(); showScreen('map'); });
+$('#btn-undo').addEventListener('click', doUndo);
+$('#btn-reset').addEventListener('click', () => {
+  Sfx.click();
+  loadLevel(st.level.id, true);
+  toast('Level reset ho gaya — naya try!');
+});
+$('#btn-sound').addEventListener('click', () => {
+  const on = !st.progress.soundOn;
+  st.progress.soundOn = on;
+  Sfx.setMuted(!on);
+  Progress.save(st.progress);
+  $('#btn-sound').classList.toggle('on', on);
+  Sfx.click();
+});
+
+$('#btn-sandbox').addEventListener('click', () => { Sfx.unlock(); Sfx.click(); loadLevel(0, false); });
+$('#btn-ideas').addEventListener('click', () => { Sfx.click(); $('#sb-ideas').classList.toggle('show'); });
+$('#btn-sb-clear').addEventListener('click', () => {
+  Sfx.click();
+  if (!st.level || !st.level.sandbox) return;
+  st.scene.mirrors = []; st.scene.prisms = []; st.scene.glass = []; st.scene.water = [];
+  st.selected = null; st.armed = null; st.undo = [];
+  syncToolbelt(); syncControlBar(); retrace(false);
+  toast('Naya experiment shuru — canvas clear!');
+});
+$$('#sb-colors .sb-color').forEach((b) => {
+  b.addEventListener('click', () => {
+    if (!st.level || !st.level.sandbox) return;
+    st.scene.source.color = b.dataset.c;
+    Sfx.pick();
+    retrace();
+    $$('#sb-colors .sb-color').forEach((x) => x.classList.toggle('on', x === b));
+  });
+});
+
+function renderIdeas() {
+  const box = $('#sb-ideas');
+  if (!box) return;
+  box.innerHTML = SANDBOX_IDEAS.map((i, n) =>
+    '<button class="idea-card" data-i="' + n + '"><b>' + esc(i.title) + '</b><span>' + esc(i.text) + '</span></button>').join('');
+  $$('#sb-ideas .idea-card').forEach((b) => {
+    b.addEventListener('click', () => {
+      Sfx.hint();
+      $('#sb-ideas').classList.remove('show');
+      toast('\uD83D\uDCA1 ' + SANDBOX_IDEAS[Number(b.dataset.i)].title + ' — chalo try karte hain!');
+    });
+  });
+}
+renderIdeas();
+
+/* ═══════════════ SCREENS ═══════════════ */
+function showScreen(name) {
+  st.screen = name;
+  $$('.screen').forEach((s) => s.classList.remove('active'));
+  $('#screen-' + name).classList.add('active');
+  if (name === 'map') renderMap();
+  if (name === 'home') renderHome();
+  if (name === 'game') { syncToolbelt(); syncControlBar(); syncTeacherDrawer(); }
+}
+function starRow(n) {
+  const s = (on) => '<svg viewBox="0 0 24 24" fill="' + (on ? '#f5b84a' : 'rgba(140,165,220,0.25)') + '"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17l-6.2 3.9 1.6-7L2 9.2l7.1-.6z"/></svg>';
+  return '<span class="lc-stars">' + s(n >= 1) + s(n >= 2) + s(n >= 3) + '</span>';
+}
+function renderMap() {
+  const labs = [
+    { key: 'reflection', label: 'Reflection Lab — Mirror Ka Khel', ids: [1, 2, 3, 4, 5] },
+    { key: 'refraction', label: 'Refraction Lab — Light Ka Bend', ids: [6, 7, 8, 9, 10] },
+  ];
+  let html = '';
+  for (const lab of labs) {
+    html += '<div class="lab-section"><div class="lab-label ' + lab.key + '"><span class="dot"></span>' + lab.label + '</div><div class="level-grid">';
+    for (const id of lab.ids) {
+      const lv = levelById(id);
+      const unlocked = Progress.unlocked(st.progress, id);
+      const pr = st.progress.levels[id] || {};
+      html += '<button class="level-card' + (unlocked ? '' : ' locked') + '" data-level="' + id + '" data-lab="' + lab.key + '">' +
+        '<div class="lc-top"><span class="lc-num">' + id + '</span>' +
+        (pr.completed ? '<span class="lc-done">\u2713</span>' : unlocked ? '' : '<svg class="lc-lock" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>') +
+        '</div>' +
+        starRow(pr.stars || 0) +
+        '<div class="lc-title">' + lv.title + '</div>' +
+        '<div class="lc-badge">' + (pr.completed ? '\u2605 ' + lv.badge : lv.badge) + '</div></button>';
+    }
+    html += '</div></div>';
+  }
+  html += '<div class="lab-section"><div class="lab-label mixed"><span class="dot"></span>Free Play Lab — Apne Experiments</div><div class="level-grid">' +
+    '<button class="level-card sandbox-card" data-level="0"><span class="sb-icon"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#6ee7ff" stroke-width="1.8"><path d="M9 3h6M10 3v6l-5 9a2 2 0 002 3h10a2 2 0 002-3l-5-9V3"/></svg></span><span><span class="lc-title">Free Play Lab — Sandbox</span><br><span class="lc-badge">Unlimited mirrors, prisms, glass. Jo mann kare wo banao!</span></span></button>' +
+    '</div></div>';
+  $('#map-body').innerHTML = html;
+  $('#map-stars').textContent = totalStars() + ' / 30';
+  $$('#map-body .level-card').forEach((b) => {
+    b.addEventListener('click', () => {
+      const id = Number(b.dataset.level);
+      const unlocked = id === 0 || Progress.unlocked(st.progress, id);
+      if (!unlocked) { toast('Pehle pichhla level complete karo!'); Sfx.quizWrong(); return; }
+      Sfx.click();
+      loadLevel(id, false);
+    });
+  });
+}
+function totalStars() {
+  return Object.values(st.progress.levels || {}).reduce((a, l) => a + (l.stars || 0), 0);
+}
+function renderHome() {
+  const badges = st.progress.badges || [];
+  $('#home-badges').innerHTML = badges.length
+    ? badges.map((b) => '<span class="badge-chip">\u2605 ' + esc(b) + '</span>').join('')
+    : '<span style="font-size:12.5px;color:var(--muted)">Levels jeet ke concept badges collect karo — Reflection se lekar Optics Master tak!</span>';
+  const next = Progress.nextPlayable(st.progress);
+  $('#btn-start').textContent = totalStars() > 0 ? 'Continue — Level ' + next + ' \u2192' : UI_COPY.ctaPrimary;
+}
+$('#btn-start').addEventListener('click', () => { Sfx.unlock(); Sfx.click(); showScreen('map'); });
+$('#btn-map-home').addEventListener('click', () => { Sfx.click(); showScreen('home'); });
+$('#btn-home-map').addEventListener('click', () => { Sfx.click(); showScreen('map'); });
+$('#btn-reset-progress').addEventListener('click', () => {
+  if (confirm('Poori progress reset karni hai? (badges + stars)')) {
+    localStorage.removeItem(Progress.KEY);
+    st.progress = Progress.load();
+    renderHome();
+    toast('Progress reset ho gayi');
+  }
+});
+
+/* ═══════════════ LEVEL LOADING ═══════════════ */
+function loadLevel(id, isRetry) {
+  const level = id === 0 ? cloneScene(SANDBOX_LEVEL) : cloneScene(levelById(id));
+  st.level = level;
+  st.scene = level;
+  st.selected = null; st.armed = null; st.drag = null;
+  st.undo = []; st.moves = 0; st.hintsUsed = 0; st.revealedHints = 0; st.quizBonus = 0;
+  st.won = false; st.winShown = false;
+  st.elapsed = 0; st.startTime = Date.now(); st.playing = false;
+  st.lastSatisfied = 0;
+  st.confetti = [];
+  // per-level defaults
+  st.teacher.normal = false; st.teacher.angles = !!level.showAngleGuides; st.teacher.nvals = false;
+  $('#td-normal').checked = false; $('#td-angles').checked = st.teacher.angles; $('#td-nvals').checked = false;
+  $('#hint-pop').classList.remove('show');
+  $('#teacher-drawer').classList.remove('open');
+  $('#btn-teacher').classList.remove('on');
+  $('#btn-hint').disabled = false;
+  $('#gt-lab').textContent = level.sandbox ? 'Free Play' : (level.lab === 'reflection' ? 'Reflection Lab' : level.lab === 'refraction' ? 'Refraction Lab' : 'Master Lab');
+  $('#gt-name').textContent = (level.sandbox ? '' : 'L' + level.id + ' \u00B7 ') + level.title;
+  updateHudTargets();
+  $('#screen-game').classList.toggle('sandbox', !!level.sandbox);
+  showScreen('game');
+  retrace(true);
+  syncToolbelt();
+  syncControlBar();
+  syncTeacherDrawer();
+  hideCoach();
+  setAct(null);
+  if (!isRetry) showLearn(level);
+  else beginPlay();
+}
+
+/* ═══════════════ INIT ═══════════════ */
+Sfx.setMuted(!st.progress.soundOn);
+$('#btn-sound').classList.toggle('on', st.progress.soundOn);
+showScreen('home');
+window.__vs = st; // debug/test hook
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

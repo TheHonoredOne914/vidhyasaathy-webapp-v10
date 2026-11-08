@@ -8,6 +8,7 @@ export interface SourceChunk { id: number; noteId: string; title: string; positi
 export interface GroundedQuestion {
   schoolId?: string;
   question: string; hintLevel: number; socratic: boolean; sources: SourceChunk[];
+  history?: { role: 'user' | 'assistant'; content: string }[];
   style?: 'hints' | 'explain'; mode?: 'learn' | 'homework'; system?: string; maxTokens?: number;
 }
 export interface DraftSource { schoolId?: string; noteId: string; title: string; body: string; concepts: { id: string; title: string }[] }
@@ -126,7 +127,7 @@ export class HttpModelProvider implements LlmProvider {
   protected payload(input: GroundedQuestion, stream: boolean): unknown {
     return { model: this.options.model, system: `${SYSTEM}\n${input.system ?? ''}`, context: input.sources,
       question: input.question, style: input.style ?? (input.hintLevel < 3 ? 'hints' : 'explain'),
-      mode: input.mode ?? 'learn', maxTokens: input.maxTokens ?? 700, stream };
+      mode: input.mode ?? 'learn', history: input.history ?? [], maxTokens: input.maxTokens ?? 700, stream };
   }
   async ask(input: GroundedQuestion): Promise<ProviderAnswer | null> {
     try {
@@ -177,7 +178,7 @@ export class OpenAiProvider extends HttpModelProvider {
   }
   protected override payload(input: GroundedQuestion, stream: boolean): unknown {
     return { model: this.options.model, stream, max_completion_tokens: input.maxTokens ?? 700,
-      messages: [{ role: 'system', content: `${SYSTEM}\n${input.system ?? ''}` }, { role: 'user', content: JSON.stringify(input) }] };
+      messages: [{ role: 'system', content: `${SYSTEM}\n${input.system ?? ''}` }, ...(input.history ?? []), { role: 'user', content: JSON.stringify({ ...input, history: undefined }) }] };
   }
   private async generate(system: string, input: unknown): Promise<unknown> {
     try {

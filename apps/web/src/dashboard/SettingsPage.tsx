@@ -14,6 +14,7 @@ import { clockFromMinutes, minutesFromClock } from './format';
 import { RemoteBlock } from './RemoteBlock';
 import './dashboard.css';
 import { StudentSettings } from '../student/notebook/screens/polish3c/StudentSettings';
+import { SaathyProviderSettings } from './SaathyProviderSettings';
 
 export function SettingsPage() {
   const { me } = useSession();
@@ -96,6 +97,7 @@ function AccountSettings() {
           </form>
         )}
       </RemoteBlock>
+      {role === 'admin' ? <SaathyProviderSettings /> : null}
     </section>
   );
 }

@@ -54,6 +54,7 @@ const ExaminerHome = lazy(() => import('./examiner/ExaminerHome').then((module) 
 const PaperReview = lazy(() => import('./examiner/PaperReview').then((module) => ({ default: module.PaperReview })));
 const ModerationSummary = lazy(() => import('./examiner/ModerationSummary').then((module) => ({ default: module.ModerationSummary })));
 const RemediationPage = lazy(() => import('./ai/RemediationPage').then((module) => ({ default: module.RemediationPage })));
+const OriginalGamePage = lazy(() => import('./games/originals/OriginalGamePage').then((module) => ({ default: module.OriginalGamePage })));
 const AskPanel = lazy(() => import('./ai/AskPanel').then((module) => ({ default: module.AskPanel })));
 const DraftReviewPage = lazy(() => import('./ai/DraftReview').then((module) => ({ default: module.DraftReviewPage })));
 const AnnouncementsPage = lazy(() => import('./dashboard/AnnouncementsPage').then((module) => ({ default: module.AnnouncementsPage })));
@@ -91,6 +92,7 @@ export function App() {
               <Route path="teacher" element={<TeacherWorkspace />} />
               <Route path="admin" element={<AdminWorkspace />} />
             </Route>
+            <Route path="/student/games/original/:originalId" element={<RoleGuard role="student"><OriginalGamePage /></RoleGuard>} />
             <Route path="/student/games/atom" element={<RoleGuard role="student"><AtomForgeVideo /></RoleGuard>} />
             <Route path="/student/chapters/:chapterId/practice/engine/:gameId" element={<RoleGuard role="student"><ChapterEntryGate><EngineGamePage /></ChapterEntryGate></RoleGuard>} />
             <Route element={<Shell />}>
